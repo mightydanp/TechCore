@@ -1,31 +1,31 @@
 modLoader="javafml"
-loaderVersion="${loader_version_range}"
-issueTrackerURL="${mod_issue_tracker_url}"
-license="${mod_license}"
+loaderVersion="[2,)"
+issueTrackerURL="https://github.com/MightyDanp/TechCore/issues"
+license="AGPL-3.0 license"
 
 [[mods]]
-    modId="${mod_id}"
-#    logoFile="creativecore.png"
-    version="${mod_version}"
-    displayName="${mod_name}
-#    displayURL="https://modrinth.com/mod/creativecore"
-    authors="${mod_authors}"
-    description='''${mod_description}'''
+    modId="techcore"
+    logoFile="techcore.png"
+    version="0.0.0.1"
+    displayName="Tech Core"
+    displayURL=""
+    authors="MightyDanp"
+    description='''A simple but powerful coremod.'''
 
-[[dependencies.${mod_id}]]
+[[dependencies.techcore]]
     modId="neoforge"
     type="required"
-    versionRange="${neo_version_range}"
+    versionRange="[20.4,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.techcore]]
     modId="minecraft"
     type="required"
-    versionRange="${minecraft_version_range}"
+    versionRange="[1.20.4,1.21)"
     ordering="NONE"
     side="BOTH"
 
 [[mixins]]
-   config="${mod_mixins}"
+   config="techcore.mixins.json"
 

@@ -1,29 +1,17 @@
 package com.mightydanp.techcore.api.resources.assets.contents;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.*;
 import net.neoforged.neoforge.client.model.generators.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class BlockStateContent {
@@ -32,9 +20,14 @@ public class BlockStateContent {
     private final String modid;
     private IGeneratedBlockState blockState;
 
-    public BlockStateContent(String blockStateName, String modid) {
-        this.blockStateName = blockStateName;
+    public BlockStateContent(String modid, String blockStateName) {
         this.modid = modid;
+        this.blockStateName = blockStateName;
+    }
+
+    public BlockStateContent(ResourceLocation resourceLocation) {
+        this.modid = resourceLocation.getNamespace();
+        this.blockStateName = resourceLocation.getPath();
     }
 
     public VariantBlockStateBuilder getVariantBuilder(Block b) throws Exception {
@@ -76,13 +69,15 @@ public class BlockStateContent {
         return key(block).getPath();
     }
 
-    private ResourceLocation resourceLocation(Block block) {
-        return key(block);
+    private String modid(Block block) {
+        return key(block).getNamespace();
     }
 
     public ResourceLocation blockTexture(Block block) {
-        ResourceLocation name = key(block);
-        return new ResourceLocation(name.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + name.getPath());
+        String name = name(block);
+        String modid = modid(block);
+
+        return new ResourceLocation(modid, ModelProvider.BLOCK_FOLDER + "/" + name);
     }
 
     private ResourceLocation extend(ResourceLocation rl, String suffix) {
@@ -90,7 +85,7 @@ public class BlockStateContent {
     }
 
     public TCModelBuilder cubeAll(Block block) {
-        String blockName = name(block);
+        String blockName = key(block).getPath();
 
         ModelContent modelContent = new ModelContent(blockName, ModelContent.BLOCK_FOLDER, "");
         modelContent.cubeAll(blockTexture(block));
@@ -121,17 +116,15 @@ public class BlockStateContent {
     }
 
     public void simpleBlock(Block block, ConfiguredModel... models) throws Exception {
-        String blockName = resourceLocation(block).getPath();
-        String modid = resourceLocation(block).getNamespace();
+        String name = name(block);
+        String modid = modid(block);
 
-
-
-        VariantBlockStateBuilder variantBlockStateBuilder = getVariantBuilder(block).partialState().setModels(models);
-
-        AssetPackRegistries.blockStateContent.put(blockName, new BlockStateContent(blockName, modid).setBlockState(variantBlockStateBuilder));
+        VariantBlockStateBuilder builder = getVariantBuilder(block).partialState().setModels(models);
 
         getVariantBuilder(block)
                 .partialState().setModels(models);
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void axisBlock(RotatedPillarBlock block) throws Exception {
@@ -192,13 +185,18 @@ public class BlockStateContent {
     }
 
     public void axisBlock(RotatedPillarBlock block, ModelFile vertical, ModelFile horizontal) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.Y)
                 .modelForState().modelFile(vertical).addModel()
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.Z)
                 .modelForState().modelFile(horizontal).rotationX(90).addModel()
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.X)
                 .modelForState().modelFile(horizontal).rotationX(90).rotationY(90).addModel();
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     private static final int DEFAULT_ANGLE_OFFSET = 180;
@@ -224,11 +222,16 @@ public class BlockStateContent {
     }
 
     public void horizontalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
                         .modelFile(modelFunc.apply(state))
                         .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) % 360)
                         .build());
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void horizontalFaceBlock(Block block, ModelFile model) throws Exception {
@@ -244,12 +247,17 @@ public class BlockStateContent {
     }
 
     public void horizontalFaceBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
                         .modelFile(modelFunc.apply(state))
                         .rotationX(state.getValue(BlockStateProperties.ATTACH_FACE).ordinal() * 90)
                         .rotationY((((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) + (state.getValue(BlockStateProperties.ATTACH_FACE) == AttachFace.CEILING ? 180 : 0)) % 360)
                         .build());
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void directionalBlock(Block block, ModelFile model) throws Exception {
@@ -265,7 +273,10 @@ public class BlockStateContent {
     }
 
     public void directionalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> {
                     Direction dir = state.getValue(BlockStateProperties.FACING);
                     return ConfiguredModel.builder()
@@ -274,6 +285,8 @@ public class BlockStateContent {
                             .rotationY(dir.getAxis().isVertical() ? 0 : (((int) dir.toYRot()) + angleOffset) % 360)
                             .build();
                 });
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void stairsBlock(StairBlock block, ResourceLocation texture) throws Exception {
@@ -361,7 +374,10 @@ public class BlockStateContent {
     }
 
     public void stairsBlock(StairBlock block, ModelFile stairs, ModelFile stairsInner, ModelFile stairsOuter) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStatesExcept(state -> {
                     Direction facing = state.getValue(StairBlock.FACING);
                     Half half = state.getValue(StairBlock.HALF);
@@ -382,6 +398,8 @@ public class BlockStateContent {
                             .uvLock(uvlock)
                             .build();
                 }, StairBlock.WATERLOGGED);
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void slabBlock(SlabBlock block, ResourceLocation doubleSlab, ResourceLocation texture) throws Exception {
@@ -404,10 +422,17 @@ public class BlockStateContent {
     }
 
     public void slabBlock(SlabBlock block, ModelFile bottom, ModelFile top, ModelFile doubleslab) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+        
+        VariantBlockStateBuilder builder = getVariantBuilder(block);
+
+        builder
                 .partialState().with(SlabBlock.TYPE, SlabType.BOTTOM).addModels(new ConfiguredModel(bottom))
                 .partialState().with(SlabBlock.TYPE, SlabType.TOP).addModels(new ConfiguredModel(top))
                 .partialState().with(SlabBlock.TYPE, SlabType.DOUBLE).addModels(new ConfiguredModel(doubleslab));
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void buttonBlock(ButtonBlock block, ResourceLocation texture) throws Exception {
@@ -426,10 +451,10 @@ public class BlockStateContent {
     }
 
     public void buttonBlock(ButtonBlock block, ModelFile button, ModelFile buttonPressed) throws Exception {
-        String name = resourceLocation(block).getPath();
-        String modId = resourceLocation(block).getNamespace();
+        String name = key(block).getPath();
+        String modId = key(block).getNamespace();
 
-        VariantBlockStateBuilder variantBlockStateBuilder = getVariantBuilder(block).forAllStates(state -> {
+        VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStates(state -> {
             Direction facing = state.getValue(ButtonBlock.FACING);
             AttachFace face = state.getValue(ButtonBlock.FACE);
             boolean powered = state.getValue(ButtonBlock.POWERED);
@@ -442,7 +467,7 @@ public class BlockStateContent {
                     .build();
         });
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(name, modId).setBlockState(variantBlockStateBuilder));
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modId, name).setBlockState(builder));
     }
 
     public void pressurePlateBlock(PressurePlateBlock block, ResourceLocation texture) throws Exception {
@@ -461,9 +486,16 @@ public class BlockStateContent {
     }
 
     public void pressurePlateBlock(PressurePlateBlock block, ModelFile pressurePlate, ModelFile pressurePlateDown) throws Exception {
-        getVariantBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+        
+        VariantBlockStateBuilder builder = getVariantBuilder(block);
+
+        builder
                 .partialState().with(PressurePlateBlock.POWERED, true).addModels(new ConfiguredModel(pressurePlateDown))
                 .partialState().with(PressurePlateBlock.POWERED, false).addModels(new ConfiguredModel(pressurePlate));
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void signBlock(StandingSignBlock signBlock, WallSignBlock wallSignBlock, ResourceLocation texture) throws Exception {
@@ -482,9 +514,14 @@ public class BlockStateContent {
     }
 
     public void fourWayBlock(CrossCollisionBlock block, ModelFile post, ModelFile side) throws Exception {
-        MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
+        String name = name(block);
+        String modid = modid(block);
+        
+        MultiPartBlockStateBuilder multiPartBlockStateBuilder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
-        fourWayMultipart(builder, side);
+        fourWayMultipart(multiPartBlockStateBuilder, side);
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(multiPartBlockStateBuilder));
     }
 
     public void fourWayMultipart(MultiPartBlockStateBuilder builder, ModelFile side) {
@@ -611,15 +648,34 @@ public class BlockStateContent {
     }
 
     private void fenceGateBlockInternalWithRenderType(FenceGateBlock block, String baseName, ResourceLocation texture, ResourceLocation renderType) throws Exception {
-        ModelFile gate = models().fenceGate(baseName, texture).renderType(renderType);
-        ModelFile gateOpen = models().fenceGateOpen(baseName + "_open", texture).renderType(renderType);
-        ModelFile gateWall = models().fenceGateWall(baseName + "_wall", texture).renderType(renderType);
-        ModelFile gateWallOpen = models().fenceGateWallOpen(baseName + "_wall_open", texture).renderType(renderType);
-        fenceGateBlock(block, gate, gateOpen, gateWall, gateWallOpen);
+        ModelContent fenceGateModel = new ModelContent(baseName, ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder fenceGateBuilder = fenceGateModel.fenceGate(baseName, texture);
+
+        simpleBlockWithItem(block, fenceGateModel.getModel());
+
+        ModelContent fenceGateOpenModel = new ModelContent(baseName + "_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder fenceGateOpenBuilder = fenceGateOpenModel.fenceGateOpen(baseName + "_open", texture);
+
+        simpleBlockWithItem(block, fenceGateOpenModel.getModel());
+
+        ModelContent fenceGateWallModel = new ModelContent(baseName + "_wall", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder fenceGateWallBuilder = fenceGateWallModel.fenceGateWall(baseName + "_wall", texture);
+
+        simpleBlockWithItem(block, fenceGateWallModel.getModel());
+
+        ModelContent fenceGateWallOpenModel = new ModelContent(baseName + "_wall_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder fenceGateWallOpenBuilder = fenceGateWallOpenModel.fenceGateWallOpen(baseName + "_wall_open", texture);
+
+        simpleBlockWithItem(block, fenceGateWallOpenModel.getModel());
+
+        fenceGateBlock(block, fenceGateBuilder, fenceGateOpenBuilder, fenceGateWallBuilder, fenceGateWallOpenBuilder);
     }
 
     public void fenceGateBlock(FenceGateBlock block, ModelFile gate, ModelFile gateOpen, ModelFile gateWall, ModelFile gateWallOpen) throws Exception {
-        getVariantBuilder(block).forAllStatesExcept(state -> {
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             ModelFile model = gate;
             if (state.getValue(FenceGateBlock.IN_WALL)) {
                 model = gateWall;
@@ -633,42 +689,74 @@ public class BlockStateContent {
                     .uvLock(true)
                     .build();
         }, FenceGateBlock.POWERED);
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
-    public void wallBlock(WallBlock block, ResourceLocation texture) {
+    public void wallBlock(WallBlock block, ResourceLocation texture) throws Exception {
         wallBlockInternal(block, key(block).toString(), texture);
     }
 
-    public void wallBlock(WallBlock block, String name, ResourceLocation texture) {
+    public void wallBlock(WallBlock block, String name, ResourceLocation texture) throws Exception {
         wallBlockInternal(block, name + "_wall", texture);
     }
 
-    public void wallBlockWithRenderType(WallBlock block, ResourceLocation texture, String renderType) {
+    public void wallBlockWithRenderType(WallBlock block, ResourceLocation texture, String renderType) throws Exception {
         wallBlockInternalWithRenderType(block, key(block).toString(), texture, ResourceLocation.tryParse(renderType));
     }
 
-    public void wallBlockWithRenderType(WallBlock block, String name, ResourceLocation texture, String renderType) {
+    public void wallBlockWithRenderType(WallBlock block, String name, ResourceLocation texture, String renderType) throws Exception {
         wallBlockInternalWithRenderType(block, name + "_wall", texture, ResourceLocation.tryParse(renderType));
     }
 
-    public void wallBlockWithRenderType(WallBlock block, ResourceLocation texture, ResourceLocation renderType) {
+    public void wallBlockWithRenderType(WallBlock block, ResourceLocation texture, ResourceLocation renderType) throws Exception {
         wallBlockInternalWithRenderType(block, key(block).toString(), texture, renderType);
     }
 
-    public void wallBlockWithRenderType(WallBlock block, String name, ResourceLocation texture, ResourceLocation renderType) {
+    public void wallBlockWithRenderType(WallBlock block, String name, ResourceLocation texture, ResourceLocation renderType) throws Exception {
         wallBlockInternalWithRenderType(block, name + "_wall", texture, renderType);
     }
 
-    private void wallBlockInternal(WallBlock block, String baseName, ResourceLocation texture) {
-        wallBlock(block, models().wallPost(baseName + "_post", texture),
-                models().wallSide(baseName + "_side", texture),
-                models().wallSideTall(baseName + "_side_tall", texture));
+    private void wallBlockInternal(WallBlock block, String baseName, ResourceLocation texture) throws Exception {
+        String name = name(block);
+
+        ModelContent wallPostModel = new ModelContent(name + "_post", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallPostBuilder = wallPostModel.wallPost(texture);
+
+        simpleBlockWithItem(block, wallPostModel.getModel());
+
+        ModelContent wallSideModel = new ModelContent(name + "_side", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallSideBuilder = wallSideModel.wallSide(texture);
+
+        simpleBlockWithItem(block, wallSideModel.getModel());
+
+        ModelContent wallSideTallModel = new ModelContent(name + "_side_tall", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallSideTallBuilder = wallSideTallModel.wallSideTall(texture);
+
+        simpleBlockWithItem(block, wallSideTallModel.getModel());
+
+        wallBlock(block, wallPostBuilder, wallSideBuilder, wallSideTallBuilder);
     }
 
-    private void wallBlockInternalWithRenderType(WallBlock block, String baseName, ResourceLocation texture, ResourceLocation renderType) {
-        wallBlock(block, models().wallPost(baseName + "_post", texture).renderType(renderType),
-                models().wallSide(baseName + "_side", texture).renderType(renderType),
-                models().wallSideTall(baseName + "_side_tall", texture).renderType(renderType));
+    private void wallBlockInternalWithRenderType(WallBlock block, String baseName, ResourceLocation texture, ResourceLocation renderType) throws Exception {
+        String name = name(block);
+
+        ModelContent wallPostModel = new ModelContent(name + "_post", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallPostBuilder = wallPostModel.wallPost(texture).renderType(renderType);
+
+        simpleBlockWithItem(block, wallPostModel.getModel());
+
+        ModelContent wallSideModel = new ModelContent(name + "_side", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallSideBuilder = wallSideModel.wallSide(texture).renderType(renderType);
+
+        simpleBlockWithItem(block, wallSideModel.getModel());
+
+        ModelContent wallSideTallModel = new ModelContent(name + "_side_tall", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder wallSideTallBuilder = wallSideTallModel.wallSideTall(texture).renderType(renderType);
+
+        simpleBlockWithItem(block, wallSideTallModel.getModel());
+
+        wallBlock(block, wallPostBuilder, wallSideBuilder, wallSideTallBuilder);
     }
 
     public static final ImmutableMap<Direction, Property<WallSide>> WALL_PROPS = ImmutableMap.<Direction, Property<WallSide>>builder()
@@ -679,6 +767,9 @@ public class BlockStateContent {
             .build();
 
     public void wallBlock(WallBlock block, ModelFile post, ModelFile side, ModelFile sideTall) throws Exception {
+        String name = name(block);
+        String modid = modid(block);
+
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel()
                 .condition(WallBlock.UP, true).end();
@@ -688,6 +779,8 @@ public class BlockStateContent {
                     wallSidePart(builder, side, e, WallSide.LOW);
                     wallSidePart(builder, sideTall, e, WallSide.TALL);
                 });
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     private void wallSidePart(MultiPartBlockStateBuilder builder, ModelFile model, Map.Entry<Direction, Property<WallSide>> entry, WallSide height) {
@@ -724,24 +817,73 @@ public class BlockStateContent {
     }
 
     private void paneBlockInternal(IronBarsBlock block, String baseName, ResourceLocation pane, ResourceLocation edge) throws Exception {
-        ModelFile post = models().panePost(baseName + "_post", pane, edge);
-        ModelFile side = models().paneSide(baseName + "_side", pane, edge);
-        ModelFile sideAlt = models().paneSideAlt(baseName + "_side_alt", pane, edge);
-        ModelFile noSide = models().paneNoSide(baseName + "_noside", pane);
-        ModelFile noSideAlt = models().paneNoSideAlt(baseName + "_noside_alt", pane);
-        paneBlock(block, post, side, sideAlt, noSide, noSideAlt);
+        String name = name(block);
+
+        ModelContent panePostModel = new ModelContent(name + "_post", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder panePostBuilder = panePostModel.panePost(pane, edge);
+
+        simpleBlockWithItem(block, panePostModel.getModel());
+
+        ModelContent paneSideModel = new ModelContent(name + "_side", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneSideBuilder = paneSideModel.paneSide(pane, edge);
+
+        simpleBlockWithItem(block, paneSideModel.getModel());
+
+        ModelContent paneSideAltModel = new ModelContent(name + "_side_alt", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneSideAltBuilder = paneSideAltModel.paneSideAlt(pane, edge);
+
+        simpleBlockWithItem(block, paneSideAltModel.getModel());
+
+        ModelContent paneNoSideModel = new ModelContent(name + "_noside", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneNoSideBuilder = paneNoSideModel.paneNoSide(pane);
+
+        simpleBlockWithItem(block, paneNoSideModel.getModel());
+
+        ModelContent paneNoSideAltModel = new ModelContent(name + "_noside_alt", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneNoSideAltBuilder = paneNoSideAltModel.paneNoSideAlt(pane);
+
+        simpleBlockWithItem(block, paneNoSideAltModel.getModel());
+
+
+        paneBlock(block, panePostBuilder, paneSideBuilder, paneSideAltBuilder, paneNoSideBuilder, paneNoSideAltBuilder);
     }
 
     private void paneBlockInternalWithRenderType(IronBarsBlock block, String baseName, ResourceLocation pane, ResourceLocation edge, ResourceLocation renderType) throws Exception {
-        ModelFile post = models().panePost(baseName + "_post", pane, edge).renderType(renderType);
-        ModelFile side = models().paneSide(baseName + "_side", pane, edge).renderType(renderType);
-        ModelFile sideAlt = models().paneSideAlt(baseName + "_side_alt", pane, edge).renderType(renderType);
-        ModelFile noSide = models().paneNoSide(baseName + "_noside", pane).renderType(renderType);
-        ModelFile noSideAlt = models().paneNoSideAlt(baseName + "_noside_alt", pane).renderType(renderType);
-        paneBlock(block, post, side, sideAlt, noSide, noSideAlt);
+        String name = name(block);
+
+        ModelContent panePostModel = new ModelContent(name + "_post", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder panePostBuilder = panePostModel.panePost(pane, edge).renderType(renderType);
+
+        simpleBlockWithItem(block, panePostModel.getModel());
+
+        ModelContent paneSideModel = new ModelContent(name + "_side", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneSideBuilder = paneSideModel.paneSide(pane, edge).renderType(renderType);
+
+        simpleBlockWithItem(block, paneSideModel.getModel());
+
+        ModelContent paneSideAltModel = new ModelContent(name + "_side_alt", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneSideAltBuilder = paneSideAltModel.paneSideAlt(pane, edge).renderType(renderType);
+
+        simpleBlockWithItem(block, paneSideAltModel.getModel());
+
+        ModelContent paneNoSideModel = new ModelContent(name + "_noside", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneNoSideBuilder = paneNoSideModel.paneNoSide(pane).renderType(renderType);
+
+        simpleBlockWithItem(block, paneNoSideModel.getModel());
+
+        ModelContent paneNoSideAltModel = new ModelContent(name + "_noside_alt", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder paneNoSideAltBuilder = paneNoSideAltModel.paneNoSideAlt(pane).renderType(renderType);
+
+        simpleBlockWithItem(block, paneNoSideAltModel.getModel());
+
+
+        paneBlock(block, panePostBuilder, paneSideBuilder, paneSideAltBuilder, paneNoSideBuilder, paneNoSideAltBuilder);
     }
 
     public void paneBlock(IronBarsBlock block, ModelFile post, ModelFile side, ModelFile sideAlt, ModelFile noSide, ModelFile noSideAlt) throws Exception {
+        String name = name(block);
+        String modid = modid(block);
+
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
         PipeBlock.PROPERTY_BY_DIRECTION.forEach((dir, value) -> {
@@ -753,6 +895,8 @@ public class BlockStateContent {
                         .condition(value, false);
             }
         });
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void doorBlock(DoorBlock block, ResourceLocation bottom, ResourceLocation top) throws Exception {
@@ -780,31 +924,102 @@ public class BlockStateContent {
     }
 
     private void doorBlockInternal(DoorBlock block, String baseName, ResourceLocation bottom, ResourceLocation top) throws Exception {
-        ModelFile bottomLeft = models().doorBottomLeft(baseName + "_bottom_left", bottom, top);
-        ModelFile bottomLeftOpen = models().doorBottomLeftOpen(baseName + "_bottom_left_open", bottom, top);
-        ModelFile bottomRight = models().doorBottomRight(baseName + "_bottom_right", bottom, top);
-        ModelFile bottomRightOpen = models().doorBottomRightOpen(baseName + "_bottom_right_open", bottom, top);
-        ModelFile topLeft = models().doorTopLeft(baseName + "_top_left", bottom, top);
-        ModelFile topLeftOpen = models().doorTopLeftOpen(baseName + "_top_left_open", bottom, top);
-        ModelFile topRight = models().doorTopRight(baseName + "_top_right", bottom, top);
-        ModelFile topRightOpen = models().doorTopRightOpen(baseName + "_top_right_open", bottom, top);
-        doorBlock(block, bottomLeft, bottomLeftOpen, bottomRight, bottomRightOpen, topLeft, topLeftOpen, topRight, topRightOpen);
+        String name = name(block);
+
+        ModelContent bottomLeftModel = new ModelContent(name + "_bottom_left", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftBuilder = bottomLeftModel.doorBottomLeft(bottom, top);
+
+        simpleBlockWithItem(block, bottomLeftModel.getModel());
+
+        ModelContent bottomLeftOpenModel = new ModelContent(name + "_bottom_left_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.doorBottomLeftOpen(bottom, top);
+
+        simpleBlockWithItem(block, bottomLeftOpenModel.getModel());
+
+        ModelContent bottomRightModel = new ModelContent(name + "_bottom_right", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightBuilder = bottomRightModel.doorBottomRight(bottom, top);
+
+        simpleBlockWithItem(block, bottomRightModel.getModel());
+
+        ModelContent bottomRightOpenModel = new ModelContent(name + "_bottom_right_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.doorBottomRightOpen(bottom, top);
+
+        simpleBlockWithItem(block, bottomRightOpenModel.getModel());
+
+        ModelContent topLeftModel = new ModelContent(name + "_top_left", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftBuilder = topLeftModel.doorTopLeft(bottom, top);
+
+        simpleBlockWithItem(block, topLeftModel.getModel());
+
+        ModelContent topLeftOpenModel = new ModelContent(name + "_top_left_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.doorTopLeftOpen(bottom, top);
+
+        simpleBlockWithItem(block, topLeftOpenModel.getModel());
+
+        ModelContent topRightModel = new ModelContent(name + "_top_right", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightBuilder = topRightModel.doorTopRight(bottom, top);
+
+        simpleBlockWithItem(block, topRightModel.getModel());
+
+        ModelContent topRightOpenModel = new ModelContent(name + "_top_right_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightOpenBuilder = topRightOpenModel.doorTopRightOpen(bottom, top);
+
+        simpleBlockWithItem(block, topRightOpenModel.getModel());
+        
+        doorBlock(block, bottomLeftBuilder, bottomLeftOpenBuilder, bottomRightBuilder, bottomRightOpenBuilder, topLeftBuilder, topLeftOpenBuilder, topRightBuilder, topRightOpenBuilder);
     }
 
     private void doorBlockInternalWithRenderType(DoorBlock block, String baseName, ResourceLocation bottom, ResourceLocation top, ResourceLocation renderType) throws Exception {
-        ModelFile bottomLeft = models().doorBottomLeft(baseName + "_bottom_left", bottom, top).renderType(renderType);
-        ModelFile bottomLeftOpen = models().doorBottomLeftOpen(baseName + "_bottom_left_open", bottom, top).renderType(renderType);
-        ModelFile bottomRight = models().doorBottomRight(baseName + "_bottom_right", bottom, top).renderType(renderType);
-        ModelFile bottomRightOpen = models().doorBottomRightOpen(baseName + "_bottom_right_open", bottom, top).renderType(renderType);
-        ModelFile topLeft = models().doorTopLeft(baseName + "_top_left", bottom, top).renderType(renderType);
-        ModelFile topLeftOpen = models().doorTopLeftOpen(baseName + "_top_left_open", bottom, top).renderType(renderType);
-        ModelFile topRight = models().doorTopRight(baseName + "_top_right", bottom, top).renderType(renderType);
-        ModelFile topRightOpen = models().doorTopRightOpen(baseName + "_top_right_open", bottom, top).renderType(renderType);
-        doorBlock(block, bottomLeft, bottomLeftOpen, bottomRight, bottomRightOpen, topLeft, topLeftOpen, topRight, topRightOpen);
+        String name = name(block);
+
+        ModelContent bottomLeftModel = new ModelContent(name + "_bottom_left", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftBuilder = bottomLeftModel.doorBottomLeft(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, bottomLeftModel.getModel());
+
+        ModelContent bottomLeftOpenModel = new ModelContent(name + "_bottom_left_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.doorBottomLeftOpen(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, bottomLeftOpenModel.getModel());
+
+        ModelContent bottomRightModel = new ModelContent(name + "_bottom_right", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightBuilder = bottomRightModel.doorBottomRight(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, bottomRightModel.getModel());
+
+        ModelContent bottomRightOpenModel = new ModelContent(name + "_bottom_right_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.doorBottomRightOpen(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, bottomRightOpenModel.getModel());
+
+        ModelContent topLeftModel = new ModelContent(name + "_top_left", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftBuilder = topLeftModel.doorTopLeft(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, topLeftModel.getModel());
+
+        ModelContent topLeftOpenModel = new ModelContent(name + "_top_left_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.doorTopLeftOpen(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, topLeftOpenModel.getModel());
+
+        ModelContent topRightModel = new ModelContent(name + "_top_right", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightBuilder = topRightModel.doorTopRight(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, topRightModel.getModel());
+
+        ModelContent topRightOpenModel = new ModelContent(name + "_top_right_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightOpenBuilder = topRightOpenModel.doorTopRightOpen(bottom, top).renderType(renderType);
+
+        simpleBlockWithItem(block, topRightOpenModel.getModel());
+
+        doorBlock(block, bottomLeftBuilder, bottomLeftOpenBuilder, bottomRightBuilder, bottomRightOpenBuilder, topLeftBuilder, topLeftOpenBuilder, topRightBuilder, topRightOpenBuilder);
     }
 
     public void doorBlock(DoorBlock block, ModelFile bottomLeft, ModelFile bottomLeftOpen, ModelFile bottomRight, ModelFile bottomRightOpen, ModelFile topLeft, ModelFile topLeftOpen, ModelFile topRight, ModelFile topRightOpen) throws Exception {
-        getVariantBuilder(block).forAllStatesExcept(state -> {
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int yRot = ((int) state.getValue(DoorBlock.FACING).toYRot()) + 90;
             boolean right = state.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT;
             boolean open = state.getValue(DoorBlock.OPEN);
@@ -843,6 +1058,8 @@ public class BlockStateContent {
                     .rotationY(yRot)
                     .build();
         }, DoorBlock.POWERED);
+
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 
     public void trapdoorBlock(TrapDoorBlock block, ResourceLocation texture, boolean orientable) throws Exception {
@@ -870,21 +1087,86 @@ public class BlockStateContent {
     }
 
     private void trapdoorBlockInternal(TrapDoorBlock block, String baseName, ResourceLocation texture, boolean orientable) throws Exception {
-        ModelFile bottom = orientable ? models().trapdoorOrientableBottom(baseName + "_bottom", texture) : models().trapdoorBottom(baseName + "_bottom", texture);
-        ModelFile top = orientable ? models().trapdoorOrientableTop(baseName + "_top", texture) : models().trapdoorTop(baseName + "_top", texture);
-        ModelFile open = orientable ? models().trapdoorOrientableOpen(baseName + "_open", texture) : models().trapdoorOpen(baseName + "_open", texture);
+        ModelContent trapdoorOrientableBottomModel = new ModelContent(baseName + "_bottom", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableBottomBuilder = trapdoorOrientableBottomModel.trapdoorOrientableBottom(baseName + "_bottom", texture);
+
+        simpleBlockWithItem(block, trapdoorOrientableBottomModel.getModel());
+
+        ModelContent trapdoorBottomModel = new ModelContent(baseName + "_bottom", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorBottomBuilder = trapdoorBottomModel.trapdoorBottom(baseName + "_bottom", texture);
+
+        simpleBlockWithItem(block, trapdoorBottomModel.getModel());
+
+        ModelContent trapdoorOrientableTopModel = new ModelContent(baseName + "_top", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableTopBuilder = trapdoorOrientableTopModel.trapdoorOrientableTop(baseName + "_top", texture);
+
+        simpleBlockWithItem(block, trapdoorOrientableTopModel.getModel());
+
+        ModelContent trapdoorTopModel = new ModelContent(baseName + "_top", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorTopBuilder = trapdoorTopModel.trapdoorTop(baseName + "_top", texture);
+
+        simpleBlockWithItem(block, trapdoorTopModel.getModel());
+
+        ModelContent trapdoorOrientableOpenModel = new ModelContent(baseName + "_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableOpenBuilder = trapdoorOrientableOpenModel.trapdoorOrientableOpen(baseName + "_open", texture);
+
+        simpleBlockWithItem(block, trapdoorOrientableOpenModel.getModel());
+
+        ModelContent trapdoorOpenModel = new ModelContent(baseName + "_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOpenBuilder = trapdoorOpenModel.trapdoorOpen(baseName + "_open", texture);
+
+        simpleBlockWithItem(block, trapdoorOpenModel.getModel());
+
+        ModelFile bottom = orientable ? trapdoorOrientableBottomBuilder : trapdoorBottomBuilder;
+        ModelFile top = orientable ? trapdoorOrientableTopBuilder : trapdoorTopBuilder;
+        ModelFile open = orientable ? trapdoorOrientableOpenBuilder : trapdoorOpenBuilder;
+
         trapdoorBlock(block, bottom, top, open, orientable);
     }
 
     private void trapdoorBlockInternalWithRenderType(TrapDoorBlock block, String baseName, ResourceLocation texture, boolean orientable, ResourceLocation renderType) throws Exception {
-        ModelFile bottom = orientable ? models().trapdoorOrientableBottom(baseName + "_bottom", texture).renderType(renderType) : models().trapdoorBottom(baseName + "_bottom", texture).renderType(renderType);
-        ModelFile top = orientable ? models().trapdoorOrientableTop(baseName + "_top", texture).renderType(renderType) : models().trapdoorTop(baseName + "_top", texture).renderType(renderType);
-        ModelFile open = orientable ? models().trapdoorOrientableOpen(baseName + "_open", texture).renderType(renderType) : models().trapdoorOpen(baseName + "_open", texture).renderType(renderType);
+        ModelContent trapdoorOrientableBottomModel = new ModelContent(baseName + "_bottom", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableBottomBuilder = trapdoorOrientableBottomModel.trapdoorOrientableBottom(baseName + "_bottom", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorOrientableBottomModel.getModel());
+
+        ModelContent trapdoorBottomModel = new ModelContent(baseName + "_bottom", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorBottomBuilder = trapdoorBottomModel.trapdoorBottom(baseName + "_bottom", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorBottomModel.getModel());
+
+        ModelContent trapdoorOrientableTopModel = new ModelContent(baseName + "_top", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableTopBuilder = trapdoorOrientableTopModel.trapdoorOrientableTop(baseName + "_top", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorOrientableTopModel.getModel());
+
+        ModelContent trapdoorTopModel = new ModelContent(baseName + "_top", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorTopBuilder = trapdoorTopModel.trapdoorTop(baseName + "_top", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorTopModel.getModel());
+
+        ModelContent trapdoorOrientableOpenModel = new ModelContent(baseName + "_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOrientableOpenBuilder = trapdoorOrientableOpenModel.trapdoorOrientableOpen(baseName + "_open", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorOrientableOpenModel.getModel());
+
+        ModelContent trapdoorOpenModel = new ModelContent(baseName + "_open", ModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder trapdoorOpenBuilder = trapdoorOpenModel.trapdoorOpen(baseName + "_open", texture).renderType(renderType);
+
+        simpleBlockWithItem(block, trapdoorOpenModel.getModel());
+
+        ModelFile bottom = orientable ? trapdoorOrientableBottomBuilder : trapdoorBottomBuilder;
+        ModelFile top = orientable ? trapdoorOrientableTopBuilder : trapdoorTopBuilder;
+        ModelFile open = orientable ? trapdoorOrientableOpenBuilder : trapdoorOpenBuilder;
+
         trapdoorBlock(block, bottom, top, open, orientable);
     }
 
     public void trapdoorBlock(TrapDoorBlock block, ModelFile bottom, ModelFile top, ModelFile open, boolean orientable) throws Exception {
-        getVariantBuilder(block).forAllStatesExcept(state -> {
+        String name = name(block);
+        String modid = modid(block);
+
+        VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int xRot = 0;
             int yRot = ((int) state.getValue(TrapDoorBlock.FACING).toYRot()) + 180;
             boolean isOpen = state.getValue(TrapDoorBlock.OPEN);
@@ -901,51 +1183,7 @@ public class BlockStateContent {
                     .rotationY(yRot)
                     .build();
         }, TrapDoorBlock.POWERED, TrapDoorBlock.WATERLOGGED);
-    }
 
-    private CompletableFuture<?> saveBlockState(CachedOutput cache, JsonObject stateJson, Block owner) {
-        ResourceLocation blockName = Preconditions.checkNotNull(key(owner));
-        Path outputPath = this.output.getOutputFolder(PackOutput.Target.RESOURCE_PACK)
-                .resolve(blockName.getNamespace()).resolve("blockstates").resolve(blockName.getPath() + ".json");
-        return DataProvider.saveStable(cache, stateJson, outputPath);
-    }
-
-    @NotNull
-    @Override
-    public String getName() {
-        return "Block States: " + modid;
-    }
-
-    public static class ConfiguredModelList {
-        private final List<ConfiguredModel> models;
-
-        private ConfiguredModelList(List<ConfiguredModel> models) {
-            Preconditions.checkArgument(!models.isEmpty());
-            this.models = models;
-        }
-
-        public ConfiguredModelList(ConfiguredModel model) {
-            this(ImmutableList.of(model));
-        }
-
-        public ConfiguredModelList(ConfiguredModel... models) {
-            this(Arrays.asList(models));
-        }
-
-        public JsonElement toJSON() {
-            if (models.size() == 1) {
-                return models.get(0).toJSON(false);
-            } else {
-                JsonArray ret = new JsonArray();
-                for (ConfiguredModel m : models) {
-                    ret.add(m.toJSON(true));
-                }
-                return ret;
-            }
-        }
-
-        public BlockStateProvider.ConfiguredModelList append(ConfiguredModel... models) {
-            return new BlockStateProvider.ConfiguredModelList(ImmutableList.<ConfiguredModel>builder().addAll(this.models).add(models).build());
-        }
+        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
     }
 }

@@ -1063,4 +1063,30 @@ public class TCModelBuilder extends ModelFile{
             return array;
         }
     }
+
+
+
+    public enum ExistingBlockModels {
+        block(new TCModelBuilder(new ResourceLocation("block/block"))),
+        cube_all(new TCModelBuilder(new ResourceLocation("block/cube_all"))),
+        cube_column(new TCModelBuilder(new ResourceLocation("block/cube_column"))),
+        cube_column_horizontal(new TCModelBuilder(new ResourceLocation("block/cube_column_horizontal"))),
+        leaves(new TCModelBuilder(new ResourceLocation("block/leaves"))),
+        thin_block(new TCModelBuilder(new ResourceLocation("block/thin_block")))
+        ;
+
+        public final ModelFile model;
+        ExistingBlockModels(ModelFile model) {
+            this.model = model;
+        }
+    }
+
+    public enum ExistingItemModels {
+        item_generated(new TCModelBuilder(new ResourceLocation("item/generated")));
+        public final ModelFile model;
+
+        ExistingItemModels(ModelFile model) {
+            this.model = model;
+        }
+    }
 }

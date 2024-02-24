@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 
 @Mod(CoreRef.MOD_ID)
 public class TechCore {
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public TechCore(IEventBus bus){
         //IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus(), forge = NeoForge.EVENT_BUS;

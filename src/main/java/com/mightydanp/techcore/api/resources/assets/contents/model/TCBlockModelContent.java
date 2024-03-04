@@ -2733,7 +2733,202 @@ public class TCBlockModelContent extends ModelContent<TCBlockModelContent>{
     }
     //------------------------------------------------------------------------------------------------------------------
 
-    //to-do trap doors
+    public void tintTrapDoorBottom(int numberOfTints) {
+        model.parent(TCModelBuilder.ExistingBlockModels.thin_block.model);
+
+        model.texture("particle", "#particle");
+
+        for (int i = 0; i < numberOfTints; i++) {
+            model.element()
+                    .from(0, 0, 0)
+                    .to(16, 3, 16)
+                    .face(Direction.DOWN).uvs( 0,  0, 16, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.DOWN).end()
+                    .face(Direction.UP)   .uvs(0,  0, 16, 16).texture("#texture_" + i).tintindex(i).end()
+                    .face(Direction.NORTH).uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.NORTH).end()
+                    .face(Direction.SOUTH).uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.SOUTH).end()
+                    .face(Direction.WEST) .uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.WEST).end()
+                    .face(Direction.EAST) .uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.EAST).end();
+        }
+
+    }
+
+    public TCBlockModelContent tintTrapDoorBottomModel(String baseName, String category, int numberOfTints) {
+        String name = "tint_" + baseName + "_" + category;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        tintModel.tintTrapDoorBottom(numberOfTints);
+
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        return tintModel;
+    }
+
+    ////
+    public void tcTrapDoorBottom(ResourceLocation particle, Map<Integer, ResourceLocation> assetMap) {
+        String name = "tint_" + modelName;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/");
+        tintModel.tintTrapDoorBottom(assetMap.size());
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        model.parent(tintModel);
+        model.texture("particle", particle);
+
+        assetMap.forEach((integer, record) -> {
+            model.texture("texture_" + integer, record);
+        });
+    }
+
+    public TCBlockModelContent tcTrapDoorBottomModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        String name = baseName + "_" + category;
+
+        TCBlockModelContent tintModel = tintTrapDoorBottomModel(baseName, category, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+
+        modelContent.model().parent(tintModel);
+        modelContent.model().texture("particle", particle);
+
+        textureMap.forEach((integer, record) -> {
+            modelContent.model().texture("texture_" + integer, record);
+        });
+
+        AssetPackRegistries.saveBlockModelContent(name, modelContent, true);
+
+        return modelContent;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public void tintTrapDoorOpen(int numberOfTints) {
+        model.parent(TCModelBuilder.ExistingBlockModels.thin_block.model);
+
+        model.texture("particle", "#particle");
+
+        for (int i = 0; i < numberOfTints; i++) {
+            model.element()
+                    .from(0, 0, 13)
+                    .to(16, 16, 16)
+                    .face(Direction.DOWN).uvs(  0, 13, 16, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.DOWN).end()
+                    .face(Direction.UP)   .uvs( 0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.UP).end()
+                    .face(Direction.NORTH).uvs( 0,  0, 16, 16).texture("#texture_" + i).tintindex(i).end()
+                    .face(Direction.SOUTH).uvs( 0,  0, 16, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.SOUTH).end()
+                    .face(Direction.WEST) .uvs(16,  0, 13, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.WEST).end()
+                    .face(Direction.EAST) .uvs(13,  0, 16, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.EAST).end();
+        }
+
+    }
+
+    public TCBlockModelContent tintTrapDoorOpenModel(String baseName, String category, int numberOfTints) {
+        String name = "tint_" + baseName + "_" + category;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        tintModel.tintTrapDoorOpen(numberOfTints);
+
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        return tintModel;
+    }
+
+    ////
+    public void tcTrapDoorOpen(ResourceLocation particle, Map<Integer, ResourceLocation> assetMap) {
+        String name = "tint_" + modelName;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/");
+        tintModel.tintTrapDoorOpen(assetMap.size());
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        model.parent(tintModel);
+        model.texture("particle", particle);
+
+        assetMap.forEach((integer, record) -> {
+            model.texture("texture_" + integer, record);
+        });
+    }
+
+    public TCBlockModelContent tcTrapDoorOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        String name = baseName + "_" + category;
+
+        TCBlockModelContent tintModel = tintTrapDoorOpenModel(baseName, category, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+
+        modelContent.model().parent(tintModel);
+        modelContent.model().texture("particle", particle);
+
+        textureMap.forEach((integer, record) -> {
+            modelContent.model().texture("texture_" + integer, record);
+        });
+
+        AssetPackRegistries.saveBlockModelContent(name, modelContent, true);
+
+        return modelContent;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public void tintTrapDoorTop(int numberOfTints) {
+        model.parent(TCModelBuilder.ExistingBlockModels.thin_block.model);
+
+        model.texture("particle", "#particle");
+
+        for (int i = 0; i < numberOfTints; i++) {
+            model.element()
+                    .from(0, 13, 0)
+                    .to(16, 16, 16)
+                    .face(Direction.DOWN).uvs( 0,  0, 16, 16).texture("#texture_" + i).tintindex(i).end()
+                    .face(Direction.UP)   .uvs(0,  0, 16, 16).texture("#texture_" + i).tintindex(i).cullface(Direction.UP).end()
+                    .face(Direction.NORTH).uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.NORTH).end()
+                    .face(Direction.SOUTH).uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.SOUTH).end()
+                    .face(Direction.WEST) .uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.WEST).end()
+                    .face(Direction.EAST) .uvs(0, 16, 16, 13).texture("#texture_" + i).tintindex(i).cullface(Direction.EAST).end();
+        }
+
+    }
+
+    public TCBlockModelContent tintTrapDoorTopModel(String baseName, String category, int numberOfTints) {
+        String name = "tint_" + baseName + "_" + category;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        tintModel.tintTrapDoorTop(numberOfTints);
+
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        return tintModel;
+    }
+
+    ////
+    public void tcTrapDoorTop(ResourceLocation particle, Map<Integer, ResourceLocation> assetMap) {
+        String name = "tint_" + modelName;
+
+        TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/");
+        tintModel.tintTrapDoorTop(assetMap.size());
+        AssetPackRegistries.saveBlockModelContent(name, tintModel, true);
+
+        model.parent(tintModel);
+        model.texture("particle", particle);
+
+        assetMap.forEach((integer, record) -> {
+            model.texture("texture_" + integer, record);
+        });
+    }
+
+    public TCBlockModelContent tcTrapDoorTopModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        String name = baseName + "_" + category;
+
+        TCBlockModelContent tintModel = tintTrapDoorTopModel(baseName, category, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+
+        modelContent.model().parent(tintModel);
+        modelContent.model().texture("particle", particle);
+
+        textureMap.forEach((integer, record) -> {
+            modelContent.model().texture("texture_" + integer, record);
+        });
+
+        AssetPackRegistries.saveBlockModelContent(name, modelContent, true);
+
+        return modelContent;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     public void tcWood(ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> textureMap){
         tcColumnDefine(particle, textureMap);
@@ -2751,6 +2946,5 @@ public class TCBlockModelContent extends ModelContent<TCBlockModelContent>{
     public record LogAssetRecord(ResourceLocation side, ResourceLocation end) {}
 
     public record ColumnAssetRecord(ResourceLocation side, ResourceLocation end) {}
-
-
+    
 }

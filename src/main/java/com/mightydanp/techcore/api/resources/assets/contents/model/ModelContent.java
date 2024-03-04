@@ -47,7 +47,7 @@ public class ModelContent<T extends ModelContent<T>> {
         this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));
     }
 
-    public TCModelBuilder getModel() {
+    public TCModelBuilder model() {
         return model;
     }
 

@@ -88,7 +88,7 @@ public class TCModelBuilder extends ModelFile{
      */
     public TCModelBuilder parent(ModelContent modelContent) {
         Preconditions.checkNotNull(modelContent, "modelContent must not be null");
-        this.parent(modelContent.getModel());
+        this.parent(modelContent.model());
         return this;
     }
 

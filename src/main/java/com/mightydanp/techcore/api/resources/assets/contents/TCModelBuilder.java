@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mightydanp.techcore.api.resources.assets.contents.model.ModelContent;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.block.model.*;

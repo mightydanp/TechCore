@@ -11,8 +11,6 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import java.util.Map;
 
 public class ModelContent<T extends ModelContent<T>> {
-    public static final String ITEM_FOLDER = "item";
-
     public static final ExistingFileHelper.ResourceType TEXTURE = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".png", "textures");
     protected static final ExistingFileHelper.ResourceType MODEL = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".json", "models");
 

@@ -43,7 +43,7 @@ public class TCModelBuilder extends ModelFile{
     //protected CustomLoaderBuilder<T> customLoader = null;
     private final TCModelBuilder.RootTransformsBuilder rootTransforms = new TCModelBuilder.RootTransformsBuilder();
 
-    protected TCModelBuilder(ResourceLocation location) {
+    public TCModelBuilder(ResourceLocation location) {
         super(location);
     }
 

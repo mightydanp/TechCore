@@ -3,24 +3,20 @@ package com.mightydanp.techcore.api.resources.assets;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.BuiltInPackSource;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class AssetPackRegistry {
-    public static PackResources assetHolder = new AssetHolder();
+    public static AssetHolder assetHolder = new AssetHolder();
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event){
         PackType type = event.getPackType();

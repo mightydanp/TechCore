@@ -8,7 +8,7 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Objects;
 
-public class ItemModelContent extends ModelContent<ItemModelContent>{
+public class ItemModelContent extends ModelContent{
     public static final String ITEM_FOLDER = "item";
 
     public ItemModelContent(String modelName, String modelFolder, String parentFolder) {

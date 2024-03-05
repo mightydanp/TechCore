@@ -1,16 +1,12 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
 import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Map;
-import java.util.Objects;
 
-public class TCItemModelContent extends ModelContent<TCItemModelContent>{
+public class TCItemModelContent extends ModelContent{
     public static final String ITEM_FOLDER = "item";
 
     public TCItemModelContent(String modelName, String modelFolder, String parentFolder) {
@@ -31,11 +27,9 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
 
         model.model().parent(new ModelFile.UncheckedModelFile("item/generated"));
 
-        textureMap.forEach((integer, resourceLocation) -> {
-            model.model().texture("texture_" + integer, resourceLocation);
-        });
+        textureMap.forEach((integer, resourceLocation) -> model.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -46,7 +40,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
 
         model.model().parent(modelContent);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
         return model;
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -54,7 +48,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -67,7 +61,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -76,7 +70,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -93,7 +87,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -118,7 +112,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -127,7 +121,7 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModelContent(name, model, true);
+        AssetPackRegistries.saveItemModel(name, model, true);
 
         return model;
     }
@@ -138,6 +132,15 @@ public class TCItemModelContent extends ModelContent<TCItemModelContent>{
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcStairs(String baseName, String category, TCBlockModelContent modelContent){
         return tcBlockItem(baseName, category, modelContent);
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    public TCItemModelContent tcStick(String baseName, String category, Map<Integer, ResourceLocation> textureMap){
+        String name = baseName + "_" + category;
+        TCItemModelContent model = tcItem(baseName, category, textureMap);
+
+        AssetPackRegistries.saveItemModel(name, model, true);
+
+        return model;
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcTrapDoor(String baseName, String category, TCBlockModelContent modelContent){

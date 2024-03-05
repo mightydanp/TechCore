@@ -1,14 +1,11 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
-import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 
 import java.util.Map;
 
-public class BlockModelContent extends ModelContent<BlockModelContent>{
+public class BlockModelContent extends ModelContent{
     public static final String BLOCK_FOLDER = "block";
 
     public BlockModelContent(String modelName, String modelFolder, String parentFolder) {

@@ -1,7 +1,9 @@
-package com.mightydanp.techcore.api.resources.assets.contents;
+package com.mightydanp.techcore.api.resources.assets.contents.blockstate;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
+import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
+import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -125,7 +127,7 @@ public class BlockStateContent {
         getVariantBuilder(block)
                 .partialState().setModels(models);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void axisBlock(RotatedPillarBlock block) throws Exception {
@@ -197,7 +199,7 @@ public class BlockStateContent {
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.X)
                 .modelForState().modelFile(horizontal).rotationX(90).rotationY(90).addModel();
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     private static final int DEFAULT_ANGLE_OFFSET = 180;
@@ -205,7 +207,7 @@ public class BlockStateContent {
     public void horizontalBlock(Block block, ResourceLocation side, ResourceLocation front, ResourceLocation top) throws Exception {
         String name = name(block);
 
-        BlockBlockModelContent modelContent = new BlockBlockModelContent(name, BlockModelContent.BLOCK_FOLDER, "");
+        BlockModelContent modelContent = new BlockModelContent(name, BlockModelContent.BLOCK_FOLDER, "");
 
         horizontalBlock(block, modelContent.orientable(side, front, top));
     }
@@ -232,7 +234,7 @@ public class BlockStateContent {
                         .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) % 360)
                         .build());
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void horizontalFaceBlock(Block block, ModelFile model) throws Exception {
@@ -258,7 +260,7 @@ public class BlockStateContent {
                         .rotationY((((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) + (state.getValue(BlockStateProperties.ATTACH_FACE) == AttachFace.CEILING ? 180 : 0)) % 360)
                         .build());
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void directionalBlock(Block block, ModelFile model) throws Exception {
@@ -287,7 +289,7 @@ public class BlockStateContent {
                             .build();
                 });
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void stairsBlock(StairBlock block, ResourceLocation texture) throws Exception {
@@ -400,7 +402,7 @@ public class BlockStateContent {
                             .build();
                 }, StairBlock.WATERLOGGED);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void slabBlock(SlabBlock block, ResourceLocation doubleSlab, ResourceLocation texture) throws Exception {
@@ -433,7 +435,7 @@ public class BlockStateContent {
                 .partialState().with(SlabBlock.TYPE, SlabType.TOP).addModels(new ConfiguredModel(top))
                 .partialState().with(SlabBlock.TYPE, SlabType.DOUBLE).addModels(new ConfiguredModel(doubleslab));
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void buttonBlock(ButtonBlock block, ResourceLocation texture) throws Exception {
@@ -468,7 +470,7 @@ public class BlockStateContent {
                     .build();
         });
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modId, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modId, name).setBlockState(builder), true);
     }
 
     public void pressurePlateBlock(PressurePlateBlock block, ResourceLocation texture) throws Exception {
@@ -496,7 +498,7 @@ public class BlockStateContent {
                 .partialState().with(PressurePlateBlock.POWERED, true).addModels(new ConfiguredModel(pressurePlateDown))
                 .partialState().with(PressurePlateBlock.POWERED, false).addModels(new ConfiguredModel(pressurePlate));
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void signBlock(StandingSignBlock signBlock, WallSignBlock wallSignBlock, ResourceLocation texture) throws Exception {
@@ -522,7 +524,7 @@ public class BlockStateContent {
                 .part().modelFile(post).addModel().end();
         fourWayMultipart(multiPartBlockStateBuilder, side);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(multiPartBlockStateBuilder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(multiPartBlockStateBuilder), true);
     }
 
     public void fourWayMultipart(MultiPartBlockStateBuilder builder, ModelFile side) {
@@ -691,7 +693,7 @@ public class BlockStateContent {
                     .build();
         }, FenceGateBlock.POWERED);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void wallBlock(WallBlock block, ResourceLocation texture) throws Exception {
@@ -781,7 +783,7 @@ public class BlockStateContent {
                     wallSidePart(builder, sideTall, e, WallSide.TALL);
                 });
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     private void wallSidePart(MultiPartBlockStateBuilder builder, ModelFile model, Map.Entry<Direction, Property<WallSide>> entry, WallSide height) {
@@ -897,7 +899,7 @@ public class BlockStateContent {
             }
         });
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void doorBlock(DoorBlock block, ResourceLocation bottom, ResourceLocation top) throws Exception {
@@ -1060,7 +1062,7 @@ public class BlockStateContent {
                     .build();
         }, DoorBlock.POWERED);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void trapdoorBlock(TrapDoorBlock block, ResourceLocation texture, boolean orientable) throws Exception {
@@ -1185,6 +1187,6 @@ public class BlockStateContent {
                     .build();
         }, TrapDoorBlock.POWERED, TrapDoorBlock.WATERLOGGED);
 
-        AssetPackRegistries.blockStateContent.put(name, new BlockStateContent(modid, name).setBlockState(builder));
+        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 }

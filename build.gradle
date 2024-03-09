@@ -8,6 +8,12 @@ group= project.mod_group_id
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+minecraft {
+    accessTransformers {
+        file('src/main/resources/META-INF/accesstransformer.cfg')
+    }
+}
+
 java.sourceSets {
     main {
         java {

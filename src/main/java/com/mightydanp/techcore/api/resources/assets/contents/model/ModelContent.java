@@ -29,9 +29,9 @@ public class ModelContent {
         this.model = new TCModelBuilder(new ResourceLocation(CoreRef.MOD_ID, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));
     }
 
-    public ModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
-        this.modelName = modelName;
+    public ModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
         this.modid = modid;
+        this.modelName = modelName;
         this.modelFolder = modelFolder;
         this.parentFolder = parentFolder;
         this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));

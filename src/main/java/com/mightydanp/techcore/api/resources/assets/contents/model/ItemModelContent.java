@@ -11,11 +11,7 @@ import java.util.Objects;
 public class ItemModelContent extends ModelContent{
     public static final String ITEM_FOLDER = "item";
 
-    public ItemModelContent(String modelName, String modelFolder, String parentFolder) {
-        super(modelName, modelFolder, parentFolder);
-    }
-
-    public ItemModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
+    public ItemModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
         super(modelName, modid, modelFolder, parentFolder);
     }
 

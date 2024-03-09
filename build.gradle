@@ -1,38 +1,34 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
+    id 'maven-publish'
+    id "com.modrinth.minotaur" version "2.+"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
     id 'net.neoforged.gradle.userdev' version '7.0.+'
 }
 
-group= project.mod_group_id
+if (project.file('../gradletools.gradle').exists()) {
+    apply from: '../gradletools.gradle'
+} else {
+    apply from: 'https://raw.githubusercontent.com/McJtyMods/MultiWorkspace/1.20_tech/gradletools.gradle'
+}
 
+
+version = project.mod_version
+group = project.mod_group
+archivesBaseName = project.mod_id
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-minecraft {
-    accessTransformers {
-        file('src/main/resources/META-INF/accesstransformer.cfg')
-    }
-}
-
-java.sourceSets {
-    main {
-        java {
-            srcDirs = ["src/main/java", "src/forge/java"]
-        }
-        resources {
-            srcDirs = ["src/main/resources", "src/forge/resources"]
-        }
-
-        runs {
-            modIdentifier = project.mod_id
-        }
-    }
-}
+repos()
+at()
 
 runs {
     configureEach {
         workingDirectory project.file('run')
         systemProperty 'forge.logging.console.level', 'debug'
+        systemProperty 'mixin.env.remapRefMap', 'true'
+        systemProperty 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
         modSource project.sourceSets.main
     }
@@ -55,24 +51,31 @@ runs {
     }
 }
 
-repositories {
-    maven {
-        name = "Jared's maven"
-        url = "https://maven.blamejared.com/"
-    }
-    maven {
-        name = "ModMaven"
-        url = "https://modmaven.dev"
-    }
-}
+jars()
 
 dependencies {
-	implementation "net.neoforged:neoforge:${neo_version}"
-	
-	compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
-    compileOnly "mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"
-    runtimeOnly "mezz.jei:jei-${minecraft_version}-forge:${jei_version}"
+    mc()
+    jei()
 }
 
-modDependencies = []
-modMixins = ["techcore.mixins.json"]
+// Example configuration to allow publishing using the maven-publish task
+// we define a custom artifact that is sourced from the reobfJar output task
+// and then declare that to be published
+// Note you'll need to add a repository here
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile) {
+    type 'jar'
+    builtBy 'reobfJar'
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact reobfArtifact
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}

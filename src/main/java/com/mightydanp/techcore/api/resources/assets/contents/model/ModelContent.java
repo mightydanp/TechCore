@@ -2,7 +2,6 @@ package com.mightydanp.techcore.api.resources.assets.contents.model;
 
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
-import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
@@ -15,51 +14,48 @@ public class ModelContent {
     protected static final ExistingFileHelper.ResourceType MODEL = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".json", "models");
 
     protected static final ExistingFileHelper.ResourceType MODEL_WITH_EXTENSION = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, "", "models");
-    protected TCModelBuilder model;
-    protected final String modid;
-    protected final String modelFolder;
-    protected final String parentFolder;
-    public String modelName;
+    private final TCModelBuilder model;
 
-    public ModelContent(String modelName, String modelFolder, String parentFolder) {
-        this.modelName = modelName;
-        this.modid = CoreRef.MOD_ID;
-        this.modelFolder = modelFolder;
-        this.parentFolder = parentFolder;
-        this.model = new TCModelBuilder(new ResourceLocation(CoreRef.MOD_ID, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));
-    }
+    private final String modid;
 
-    public ModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
+    private final String name;
+    private final String modelType;
+    private final String organizationPath;
+
+    public ModelContent(String modid, String name, String modelType, String organizationPath) {
         this.modid = modid;
-        this.modelName = modelName;
-        this.modelFolder = modelFolder;
-        this.parentFolder = parentFolder;
-        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));
+        this.name = name;
+        this.modelType = modelType;
+        this.organizationPath = organizationPath;
+        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
     }
 
-    public ModelContent(ResourceLocation resourceLocation, String modelFolder, String parentFolder) {
-        this.modelName = resourceLocation.getPath();
+    public ModelContent(ResourceLocation resourceLocation, String modelType, String organizationPath) {
+        this.name = resourceLocation.getPath();
         this.modid = resourceLocation.getNamespace();
-        this.modelFolder = modelFolder;
-        this.parentFolder = parentFolder;
-        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelFolder + "/" + (parentFolder == null ? "" : parentFolder + "/") + modelName + ".json"));
+        this.modelType = modelType;
+        this.organizationPath = organizationPath;
+        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+    }
+
+    public String modid() {
+        return modid;
+    }
+
+    public String name() {
+        return name;
     }
 
     public TCModelBuilder model() {
         return model;
     }
 
-    public TCModelBuilder overrideModel(TCModelBuilder model) {
-        this.model = model;
-        return model;
+    public String getModelType() {
+        return modelType;
     }
 
-    public String getModelFolder() {
-        return modelFolder;
-    }
-
-    public String getParentFolder() {
-        return parentFolder;
+    public String getOrganizationPath() {
+        return organizationPath;
     }
 
     public JsonObject createJson() {
@@ -74,7 +70,7 @@ public class ModelContent {
         if (rl.getPath().contains("/")) {
             return rl;
         }
-        return new ResourceLocation(rl.getNamespace(), modelFolder + "/" + rl.getPath());
+        return new ResourceLocation(rl.getNamespace(), modelType + "/" + rl.getPath());
     }
 
     public ModelFile.UncheckedModelFile getFile(ResourceLocation path) {

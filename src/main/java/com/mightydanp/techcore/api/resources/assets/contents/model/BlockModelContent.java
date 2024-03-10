@@ -1,13 +1,14 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
+import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;
 
 public class BlockModelContent extends ModelContent{
     public static final String BLOCK_FOLDER = "block";
 
     public BlockModelContent(String modelName, String modelFolder, String parentFolder) {
-        super(modelName, modelFolder, parentFolder);
+        super(CoreRef.MOD_ID, modelName, modelFolder, parentFolder);
     }
 
     public BlockModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
@@ -131,7 +132,7 @@ public class BlockModelContent extends ModelContent{
     }
 
     public TCModelBuilder sign(String name, ResourceLocation texture) {
-        return model.texture("particle", texture);
+        return model().texture("particle", texture);
         //return getBuilder(name).texture("particle", texture);
     }
 
@@ -177,32 +178,6 @@ public class BlockModelContent extends ModelContent{
 
     public TCModelBuilder wallInventory(String name, ResourceLocation wall) {
         return singleTexture(BLOCK_FOLDER + "/wall_inventory", "wall", wall);
-    }
-
-    private TCModelBuilder pane(String parent, ResourceLocation pane, ResourceLocation edge) {
-        return withExistingParent(BLOCK_FOLDER + "/" + parent)
-                .texture("pane", pane)
-                .texture("edge", edge);
-    }
-
-    public TCModelBuilder panePost(ResourceLocation pane, ResourceLocation edge) {
-        return pane("template_glass_pane_post", pane, edge);
-    }
-
-    public TCModelBuilder paneSide(ResourceLocation pane, ResourceLocation edge) {
-        return pane("template_glass_pane_side", pane, edge);
-    }
-
-    public TCModelBuilder paneSideAlt(ResourceLocation pane, ResourceLocation edge) {
-        return pane("template_glass_pane_side_alt", pane, edge);
-    }
-
-    public TCModelBuilder paneNoSide(ResourceLocation pane) {
-        return singleTexture(BLOCK_FOLDER + "/template_glass_pane_noside", "pane", pane);
-    }
-
-    public TCModelBuilder paneNoSideAlt(ResourceLocation pane) {
-        return singleTexture(BLOCK_FOLDER + "/template_glass_pane_noside_alt", "pane", pane);
     }
 
     private TCModelBuilder door(String model, ResourceLocation bottom, ResourceLocation top) {

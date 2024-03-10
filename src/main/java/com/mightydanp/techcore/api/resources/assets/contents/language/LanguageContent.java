@@ -4,15 +4,32 @@ import com.google.gson.JsonObject;
 import com.mightydanp.techcore.TechCore;
 
 public class LanguageContent  {
-    public String language;
-    public JsonObject translations = new JsonObject();
+    private final String modid;
+    private final String name;
+    private final JsonObject translations = new JsonObject();
 
+    public LanguageContent(String modid, String name){
+        this.modid = modid;
+        this.name = name;
+    }
 
-    public LanguageContent addTranslation(String localizationIn, String translationIn) {
-        if (!translations.has(localizationIn)) {
-            translations.addProperty(localizationIn, translationIn);
+    public String modid() {
+        return modid;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public JsonObject translations() {
+        return translations;
+    }
+
+    public LanguageContent addTranslation(String name, String translation) {
+        if (!translations.has(name)) {
+            translations.addProperty(name, translation);
         } else {
-            TechCore.LOGGER.warn("Cannot add translation, [" + translationIn + "], because the localization, [" + localizationIn + "], already exist for " + language);
+            TechCore.LOGGER.warn("Cannot add translation, [" + translation + "], because the localization, [" + name + "], already exist for " + name);
         }
         return this;
     }

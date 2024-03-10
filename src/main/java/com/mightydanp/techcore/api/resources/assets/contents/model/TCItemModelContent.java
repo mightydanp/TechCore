@@ -6,7 +6,7 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Map;
 
-public class TCItemModelContent extends ModelContent{
+public class TCItemModelContent extends ItemModelContent{
     public static final String ITEM_FOLDER = "item";
 
     public TCItemModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
@@ -25,7 +25,7 @@ public class TCItemModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> model.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -36,7 +36,7 @@ public class TCItemModelContent extends ModelContent{
 
         model.model().parent(modelContent);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
         return model;
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -57,7 +57,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -66,7 +66,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -83,7 +83,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -108,7 +108,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -117,7 +117,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }
@@ -134,7 +134,7 @@ public class TCItemModelContent extends ModelContent{
         String name = baseName + "_" + category;
         TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
 
-        AssetPackRegistries.saveItemModel(name, model, true);
+        AssetPackRegistries.saveItemModel(model, false);
 
         return model;
     }

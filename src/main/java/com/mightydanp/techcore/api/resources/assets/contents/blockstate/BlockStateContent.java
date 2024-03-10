@@ -1,11 +1,9 @@
 package com.mightydanp.techcore.api.resources.assets.contents.blockstate;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,23 +14,21 @@ import net.minecraft.world.level.block.state.properties.*;
 import net.neoforged.neoforge.client.model.generators.*;
 
 import java.lang.reflect.Constructor;
-import java.util.Map;
 import java.util.function.Function;
 
 public class BlockStateContent {
-    public final String blockStateName;
-
     private final String modid;
+    private final String name;
     private IGeneratedBlockState blockState;
 
-    public BlockStateContent(String modid, String blockStateName) {
+    public BlockStateContent(String modid, String name) {
         this.modid = modid;
-        this.blockStateName = blockStateName;
+        this.name = name;
     }
 
     public BlockStateContent(ResourceLocation resourceLocation) {
         this.modid = resourceLocation.getNamespace();
-        this.blockStateName = resourceLocation.getPath();
+        this.name = resourceLocation.getPath();
     }
 
     public VariantBlockStateBuilder getVariantBuilder(Block b) throws Exception {
@@ -47,6 +43,18 @@ public class BlockStateContent {
         constructor.setAccessible(true);
 
         return constructor.newInstance(b);
+    }
+
+    public String modid() {
+        return modid;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public IGeneratedBlockState blockState() {
+        return blockState;
     }
 
     public ResourceLocation modLoc(String name) {
@@ -79,8 +87,8 @@ public class BlockStateContent {
     }
 
     public ResourceLocation blockTexture(Block block) {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         return new ResourceLocation(modid, ModelProvider.BLOCK_FOLDER + "/" + name);
     }
@@ -110,14 +118,14 @@ public class BlockStateContent {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
-    public void simpleBlockItem(Block block, TCModelBuilder model) throws Exception {
+    public void simpleBlockItem(Block block, TCModelBuilder model) {
         String modid = modid(block);
         String name = name(block);
 
         TCItemModelContent itemModel = new TCItemModelContent(modid, name, TCItemModelContent.ITEM_FOLDER, "");
         itemModel.model().parent(model);
 
-        AssetPackRegistries.saveItemModel(name, itemModel, true);
+        AssetPackRegistries.saveItemModel(itemModel, false);
     }
 
     public void simpleBlockWithItem(Block block, TCModelBuilder model) throws Exception {
@@ -126,15 +134,15 @@ public class BlockStateContent {
     }
 
     public void simpleBlock(Block block, ConfiguredModel... models) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         VariantBlockStateBuilder builder = getVariantBuilder(block).partialState().setModels(models);
 
         getVariantBuilder(block)
                 .partialState().setModels(models);
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void axisBlock(RotatedPillarBlock block) throws Exception {
@@ -185,8 +193,8 @@ public class BlockStateContent {
     }
 
     public void axisBlock(RotatedPillarBlock block, ModelFile vertical, ModelFile horizontal) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.Y)
@@ -196,7 +204,8 @@ public class BlockStateContent {
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.X)
                 .modelForState().modelFile(horizontal).rotationX(90).rotationY(90).addModel();
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(builder), true);
+
     }
 
     private static final int DEFAULT_ANGLE_OFFSET = 180;
@@ -222,8 +231,8 @@ public class BlockStateContent {
     }
 
     public void horizontalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
@@ -231,7 +240,7 @@ public class BlockStateContent {
                         .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) % 360)
                         .build());
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void horizontalFaceBlock(Block block, ModelFile model) throws Exception {
@@ -247,8 +256,8 @@ public class BlockStateContent {
     }
 
     public void horizontalFaceBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
@@ -257,7 +266,7 @@ public class BlockStateContent {
                         .rotationY((((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + angleOffset) + (state.getValue(BlockStateProperties.ATTACH_FACE) == AttachFace.CEILING ? 180 : 0)) % 360)
                         .build());
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void directionalBlock(Block block, ModelFile model) throws Exception {
@@ -273,8 +282,8 @@ public class BlockStateContent {
     }
 
     public void directionalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> {
@@ -286,18 +295,18 @@ public class BlockStateContent {
                             .build();
                 });
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(builder), true);
     }
 
     public void fourWayBlock(CrossCollisionBlock block, ModelFile post, ModelFile side) throws Exception {
-        String name = name(block);
         String modid = modid(block);
+        String name = name(block);
 
         MultiPartBlockStateBuilder multiPartBlockStateBuilder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
         fourWayMultipart(multiPartBlockStateBuilder, side);
 
-        AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(multiPartBlockStateBuilder), true);
+        AssetPackRegistries.saveBlockState(new BlockStateContent(modid, name).setBlockState(multiPartBlockStateBuilder), true);
     }
 
     public void fourWayMultipart(MultiPartBlockStateBuilder builder, ModelFile side) {

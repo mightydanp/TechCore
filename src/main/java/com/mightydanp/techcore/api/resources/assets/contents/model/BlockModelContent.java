@@ -3,8 +3,6 @@ package com.mightydanp.techcore.api.resources.assets.contents.model;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Map;
-
 public class BlockModelContent extends ModelContent{
     public static final String BLOCK_FOLDER = "block";
 
@@ -12,7 +10,7 @@ public class BlockModelContent extends ModelContent{
         super(modelName, modelFolder, parentFolder);
     }
 
-    public BlockModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
+    public BlockModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
         super(modelName, modid, modelFolder, parentFolder);
     }
 

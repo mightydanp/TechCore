@@ -119,7 +119,7 @@ public class DataHolder implements PackResources {
             return serializer.fromJson(object);
         }
 
-        return serializer.fromJson(new JsonObject());
+        return null;
     }
 
     @Override

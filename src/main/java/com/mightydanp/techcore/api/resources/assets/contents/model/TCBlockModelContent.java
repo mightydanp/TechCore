@@ -15,8 +15,8 @@ public class TCBlockModelContent extends ModelContent{
         super(modelName, modelFolder, parentFolder);
     }
 
-    public TCBlockModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
-        super(modelName, modid, modelFolder, parentFolder);
+    public TCBlockModelContent(String modid, String modelName, String modelFolder, String parentFolder) {
+        super(modid, modelName, modelFolder, parentFolder);
     }
 
     public TCBlockModelContent(ResourceLocation resourceLocation, String modelFolder, String parentFolder) {
@@ -39,8 +39,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintButtonModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintButtonModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
@@ -67,11 +67,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcButtonModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcButtonModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintButtonModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintButtonModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -79,7 +79,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -102,8 +102,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintButtonInventoryModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintButtonInventoryModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintButtonInventory(numberOfTints);
@@ -129,12 +129,10 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcButtonInventoryModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcButtonInventoryModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        TCBlockModelContent tintModel = tintButtonInventoryModel(baseName, textureMap.size());
 
-        TCBlockModelContent tintModel = tintButtonInventoryModel(baseName, category, textureMap.size());
-
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -142,7 +140,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -164,8 +162,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintButtonPressedModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintButtonPressedModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintButtonPressed(numberOfTints);
@@ -191,11 +189,10 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public void tcButtonPressedModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcButtonPressedModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
 
-        TCBlockModelContent tintModel = tintButtonPressedModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintButtonPressedModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -203,7 +200,9 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
+
+        return modelContent;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -223,8 +222,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorBottomLeftModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorBottomLeftModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorBottomLeft(numberOfTints);
@@ -250,11 +249,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("bottom_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorBottomLeftModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorBottomLeftModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorBottomLeftModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorBottomLeftModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -262,7 +261,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("bottom_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -284,8 +283,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorBottomLeftOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorBottomLeftOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorBottomLeftOpen(numberOfTints);
@@ -311,11 +310,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("bottom_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorBottomLeftOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorBottomLeftOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorBottomLeftOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorBottomLeftOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -323,7 +322,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("bottom_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -344,8 +343,8 @@ public class TCBlockModelContent extends ModelContent{
                     .face(Direction.EAST).uvs(0, 0, 16, 16).texture("#bottom_" + i).tintindex(i).end();
         }
     }
-    public TCBlockModelContent tintDoorBottomRightModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorBottomRightModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorBottomRight(numberOfTints);
@@ -371,11 +370,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("bottom_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorBottomRightModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorBottomRightModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorBottomRightModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorBottomRightModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -383,7 +382,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("bottom_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -406,8 +405,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorBottomRightOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorBottomRightOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorBottomRightOpen(numberOfTints);
@@ -432,11 +431,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("bottom_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorBottomRightOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorBottomRightOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorBottomRightOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorBottomRightOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -444,7 +443,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("bottom_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -467,8 +466,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorTopLeftModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorTopLeftModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorTopLeft(numberOfTints);
@@ -495,11 +494,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("top_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorTopLeftModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorTopLeftModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorTopLeftModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorTopLeftModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -507,7 +506,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("top_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -530,8 +529,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorTopLeftOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorTopLeftOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorTopLeftOpen(numberOfTints);
@@ -558,11 +557,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("top_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorTopLeftOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorTopLeftOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorTopLeftOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorTopLeftOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -570,7 +569,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("top_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -592,8 +591,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorTopRightModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorTopRightModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorTopRight(numberOfTints);
@@ -620,11 +619,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("top_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorTopRightModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorTopRightModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorTopRightModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorTopRightModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintDoorTopRight(textureMap.size());
 
         modelContent.model().parent(tintModel);
@@ -633,7 +632,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("top_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -656,8 +655,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintDoorTopRightOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintDoorTopRightOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
@@ -685,11 +684,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, record) -> model.texture("top_" + integer, record));
     }
 
-    public TCBlockModelContent tcDoorTopRightOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcDoorTopRightOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintDoorTopRightOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintDoorTopRightOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -697,7 +696,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("top_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -793,8 +792,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceGateModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceGateModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceGate(numberOfTints);
@@ -821,11 +820,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceGateModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceGateModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceGateModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceGateModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -833,7 +832,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -917,8 +916,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceGateOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceGateOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceGateOpen(numberOfTints);
@@ -944,11 +943,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceGateOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceGateOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceGateOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceGateOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -956,7 +955,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1042,8 +1041,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceGateWallModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceGateWallModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceGateWall(numberOfTints);
@@ -1070,11 +1069,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceGateWallModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceGateWallModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceGateWallModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceGateWallModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1082,7 +1081,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1179,8 +1178,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceGateWallOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceGateWallOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceGateWallOpen(numberOfTints);
@@ -1207,11 +1206,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceGateWallOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceGateWallOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceGateWallOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceGateWallOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1219,7 +1218,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1307,8 +1306,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceInventoryModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceInventoryModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceInventory(numberOfTints);
@@ -1334,11 +1333,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceInventoryModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceInventoryModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceInventoryModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceInventoryModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1346,7 +1345,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1368,8 +1367,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFencePostModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFencePostModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFencePost(numberOfTints);
@@ -1396,11 +1395,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFencePostModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFencePostModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFencePostModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFencePostModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1408,7 +1407,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1439,8 +1438,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintFenceSideModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintFenceSideModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintFenceSide(numberOfTints);
@@ -1466,11 +1465,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcFenceSideModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcFenceSideModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintFenceSideModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintFenceSideModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1478,7 +1477,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1490,14 +1489,14 @@ public class TCBlockModelContent extends ModelContent{
     }
 
     ////
-    public TCBlockModelContent tcHangingSignModel(String baseName, String category, ResourceLocation particle) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcHangingSignModel(String baseName, ResourceLocation particle) {
+        
 
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().texture("particle", particle);
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1528,8 +1527,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintLeavesModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintLeavesModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintLeaves(numberOfTints);
@@ -1555,11 +1554,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcLeavesModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcLeavesModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintLeavesModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintLeavesModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
 
@@ -1567,7 +1566,7 @@ public class TCBlockModelContent extends ModelContent{
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1590,8 +1589,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintCubeSeparateModel(String baseName, String category, int numberOfTints){
-        String name = "tint_" + baseName + "_" + category + "_cube";
+    public TCBlockModelContent tintCubeSeparateModel(String baseName, int numberOfTints){
+        String name = "tint_" + baseName + "_cube";
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintCubeSeparate(numberOfTints);
@@ -1621,7 +1620,7 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public void tcCubeSeparateDefine(String baseName, String category, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
+    public void tcCubeSeparateDefine(String baseName, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
         String name = modelName + "_cube";
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/");
@@ -1640,11 +1639,11 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcCubeSeparateModel(String baseName, String category, int numberOfTints){
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcCubeSeparateModel(String baseName, int numberOfTints){
+        
 
-        TCBlockModelContent tintModel = tintCubeSeparateModel(baseName, category, numberOfTints);
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintCubeSeparateModel(baseName, numberOfTints);
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", "#partical");
@@ -1658,16 +1657,16 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("east_" + i, "#east_" + i);
         }
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
 
-    public TCBlockModelContent tcCubeSeparateModelDefine(String baseName, String category, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcCubeSeparateModelDefine(String baseName, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
+        
 
-        TCBlockModelContent tintModel = tintCubeSeparateModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintCubeSeparateModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -1682,7 +1681,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("east_" + integer, resourceLocation.east);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1706,8 +1705,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintCubeTogetherModel(String baseName, String category, int numberOfTints){
-        String name = "tint_" + baseName + "_" + category + "_cube";
+    public TCBlockModelContent tintCubeTogetherModel(String baseName, int numberOfTints){
+        String name = "tint_" + baseName + "_cube";
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintCubeTogether(numberOfTints);
@@ -1732,7 +1731,7 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public void tcCubeTogetherDefine(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
+    public void tcCubeTogetherDefine(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
         String name = modelName + "_cube";
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/");
@@ -1744,11 +1743,11 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcCubeTogetherModel(String baseName, String category, int numberOfTints){
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcCubeTogetherModel(String baseName, int numberOfTints){
+        
 
-        TCBlockModelContent tintModel = tintCubeTogetherModel(baseName, category, numberOfTints);
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintCubeTogetherModel(baseName, numberOfTints);
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", "#particle");
@@ -1757,23 +1756,23 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("texture_" + i, "#texture_" + i);
         }
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
 
-    public TCBlockModelContent tcCubeTogetherModelDefine(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcCubeTogetherModelDefine(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
+        
 
-        TCBlockModelContent tintModel = tintCubeTogetherModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintCubeTogetherModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -1823,11 +1822,11 @@ public class TCBlockModelContent extends ModelContent{
 
     ////
 
-    public TCBlockModelContent tcColumnModel(String baseName, String category, int numberOfTints) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcColumnModel(String baseName, int numberOfTints) {
+        
 
-        TCBlockModelContent tintModel = tcCubeSeparateModel(baseName, category, numberOfTints);
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tcCubeSeparateModel(baseName, numberOfTints);
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         for (int i = 0; i < numberOfTints; i++){
             modelContent.model().texture("down_" + i, "#end_" + i);
@@ -1838,16 +1837,16 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("east_" + i, "#side_" + i);
         }
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, false);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, false);
 
         return modelContent;
     }
 
-    public TCBlockModelContent tcColumnModelDefine(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcColumnModelDefine(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tcCubeSeparateModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tcCubeSeparateModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         textureMap.forEach((integer, resourceLocation) ->{
             model.texture("down_" + integer, resourceLocation.end);
@@ -1858,7 +1857,7 @@ public class TCBlockModelContent extends ModelContent{
             model.texture("east_" + integer, resourceLocation.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, false);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, false);
 
         return modelContent;
     }
@@ -1880,8 +1879,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintColumnHorizontalModel(String baseName, String category, int numberOfTints){
-        String name = "tint_" + baseName + "_" + category + "_cube_column_horizontal";
+    public TCBlockModelContent tintColumnHorizontalModel(String baseName, int numberOfTints){
+        String name = "tint_" + baseName + "_cube_column_horizontal";
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintColumnHorizontal(numberOfTints);
@@ -1913,10 +1912,10 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tcColumnHorizontalModel(String baseName, String category, int numberOfTints) {
-        String name = baseName + "_" + category + "_cube_column_horizontal";
+    public TCBlockModelContent tcColumnHorizontalModel(String baseName, int numberOfTints) {
+        String name = baseName + "_cube_column_horizontal";
 
-        TCBlockModelContent tintModel = tintColumnHorizontalModel(baseName, category, numberOfTints);
+        TCBlockModelContent tintModel = tintColumnHorizontalModel(baseName, numberOfTints);
         TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
 
@@ -1955,11 +1954,11 @@ public class TCBlockModelContent extends ModelContent{
     }
 
     ////
-    public TCBlockModelContent tcLogModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.LogAssetRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcLogModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.LogAssetRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tcColumnModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tcColumnModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -1969,7 +1968,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("#end_" + integer, logAssetRecord.end);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
         //this.resourceTextureMap(tintModel.model.getUncheckedLocation(), resourceLocationMap);
@@ -1997,10 +1996,10 @@ public class TCBlockModelContent extends ModelContent{
     }
 
     ////
-    public TCBlockModelContent tcLogHorizontal(String baseName, String category, ResourceLocation particle,  Map<Integer, TCBlockModelContent.LogAssetRecord> textureMap) {
-        String name = baseName + "_" + category +  "_horizontal";
+    public TCBlockModelContent tcLogHorizontal(String baseName, ResourceLocation particle,  Map<Integer, TCBlockModelContent.LogAssetRecord> textureMap) {
+        String name = baseName +  "_horizontal";
 
-        TCBlockModelContent tintModel = tcColumnHorizontalModel(baseName, category, textureMap.size());
+        TCBlockModelContent tintModel = tcColumnHorizontalModel(baseName, textureMap.size());
         TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
@@ -2016,18 +2015,18 @@ public class TCBlockModelContent extends ModelContent{
         return modelContent;
     }
     //------------------------------------------------------------------------------------------------------------------
-    public void tcPlanksTogether(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
-        this.tcCubeTogetherDefine(baseName, category, particle, textureMap);
+    public void tcPlanksTogether(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
+        this.tcCubeTogetherDefine(baseName, particle, textureMap);
     }
-    public TCBlockModelContent tcPlanksTogetherModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
-        return tcCubeTogetherModelDefine(baseName, category, particle, textureMap);
+    public TCBlockModelContent tcPlanksTogetherModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
+        return tcCubeTogetherModelDefine(baseName, particle, textureMap);
     }
 
-    public void tcPlanksSeparate(String baseName, String category, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
-        this.tcCubeSeparateDefine(baseName, category, particle, textureMap);
+    public void tcPlanksSeparate(String baseName, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
+        this.tcCubeSeparateDefine(baseName, particle, textureMap);
     }
-    public TCBlockModelContent tcPlanksSeparateModel(String baseName, String category, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
-        return tcCubeSeparateModelDefine(baseName, category, particle, textureMap);
+    public TCBlockModelContent tcPlanksSeparateModel(String baseName, ResourceLocation particle, Map<Integer, CubeSeparateRecord> textureMap){
+        return tcCubeSeparateModelDefine(baseName, particle, textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -2048,8 +2047,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintPressurePlateUpModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintPressurePlateUpModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintPressurePlateUp(numberOfTints);
@@ -2074,18 +2073,18 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcPressurePlateUpModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcPressurePlateUpModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintPressurePlateUpModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintPressurePlateUpModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2107,8 +2106,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintPressurePlateDownModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintPressurePlateDownModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintPressurePlateDown(numberOfTints);
@@ -2134,13 +2133,13 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcPressurePlateDownModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcPressurePlateDownModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintPressurePlateDownModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintPressurePlateDownModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
-        AssetPackRegistries.saveBlockModel(name, tintModel, true);
+        AssetPackRegistries.saveBlockModel(baseName, tintModel, true);
 
         model.parent(tintModel);
         model.texture("particle", particle);
@@ -2176,8 +2175,8 @@ public class TCBlockModelContent extends ModelContent{
         }
     }
 
-    public TCBlockModelContent tintCrossModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintCrossModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintCross(numberOfTints);
@@ -2202,18 +2201,18 @@ public class TCBlockModelContent extends ModelContent{
         textureMap.forEach((integer, resourceLocation) -> model.texture("texture_" + integer, resourceLocation));
     }
 
-    public TCBlockModelContent tcCrossModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcCrossModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintCrossModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintCrossModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, resourceLocation) -> modelContent.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2222,8 +2221,8 @@ public class TCBlockModelContent extends ModelContent{
     public void tcSapling(ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
         tcCross(particle, textureMap);
     }
-    public TCBlockModelContent tcSaplingModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
-        return tcCrossModel(baseName, category, particle, textureMap);
+    public TCBlockModelContent tcSaplingModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap){
+        return tcCrossModel(baseName, particle, textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -2232,14 +2231,14 @@ public class TCBlockModelContent extends ModelContent{
     }
 
     ////
-    public TCBlockModelContent tcSignModel(String baseName, String category, ResourceLocation particle) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcSignModel(String baseName, ResourceLocation particle) {
+        
 
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().texture("particle", particle);
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2265,8 +2264,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintSlabModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintSlabModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintSlab(numberOfTints);
@@ -2294,11 +2293,11 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcTintSlabModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.SlabRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcTintSlabModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.SlabRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintSlabModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintSlabModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model.parent(tintModel);
         modelContent.model.texture("particle", particle);
@@ -2309,7 +2308,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model.texture("side_" + integer, record.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2333,8 +2332,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintTopTintSlabModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintTopTintSlabModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintTopTintSlab(numberOfTints);
@@ -2362,11 +2361,11 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcTopTintSlabModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.SlabRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcTopTintSlabModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.SlabRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintTopTintSlabModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintTopTintSlabModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -2377,7 +2376,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("side_" + integer, record.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2425,8 +2424,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintStairsModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintStairsModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintStairs(numberOfTints);
@@ -2455,11 +2454,11 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcStairsModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcStairsModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintStairsModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintStairsModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -2470,7 +2469,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("side_" + integer, record.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2511,8 +2510,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintInnerStairsModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintInnerStairsModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintInnerStairs(numberOfTints);
@@ -2540,11 +2539,11 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcInnerStairsModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcInnerStairsModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintInnerStairsModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintInnerStairsModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -2555,7 +2554,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("side_" + integer, record.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2588,8 +2587,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintOuterStairsModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintOuterStairsModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintOuterStairs(numberOfTints);
@@ -2618,13 +2617,13 @@ public class TCBlockModelContent extends ModelContent{
         });
     }
 
-    public TCBlockModelContent tcOuterStairsModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcOuterStairsModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintOuterStairsModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintOuterStairsModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
-        AssetPackRegistries.saveBlockModel(name, tintModel, true);
+        AssetPackRegistries.saveBlockModel(baseName, tintModel, true);
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
@@ -2635,7 +2634,7 @@ public class TCBlockModelContent extends ModelContent{
             modelContent.model().texture("side_" + integer, record.side);
         });
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2660,8 +2659,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintTrapDoorBottomModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintTrapDoorBottomModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintTrapDoorBottom(numberOfTints);
@@ -2685,18 +2684,18 @@ public class TCBlockModelContent extends ModelContent{
         assetMap.forEach((integer, record) -> model.texture("texture_" + integer, record));
     }
 
-    public TCBlockModelContent tcTrapDoorBottomModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcTrapDoorBottomModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintTrapDoorBottomModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintTrapDoorBottomModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("texture_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2722,8 +2721,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintTrapDoorOpenModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintTrapDoorOpenModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintTrapDoorOpen(numberOfTints);
@@ -2747,18 +2746,18 @@ public class TCBlockModelContent extends ModelContent{
         assetMap.forEach((integer, record) -> model.texture("texture_" + integer, record));
     }
 
-    public TCBlockModelContent tcTrapDoorOpenModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcTrapDoorOpenModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintTrapDoorOpenModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintTrapDoorOpenModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("texture_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2784,8 +2783,8 @@ public class TCBlockModelContent extends ModelContent{
 
     }
 
-    public TCBlockModelContent tintTrapDoorTopModel(String baseName, String category, int numberOfTints) {
-        String name = "tint_" + baseName + "_" + category;
+    public TCBlockModelContent tintTrapDoorTopModel(String baseName, int numberOfTints) {
+        String name = "tint_" + baseName;
 
         TCBlockModelContent tintModel = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
         tintModel.tintTrapDoorTop(numberOfTints);
@@ -2809,18 +2808,18 @@ public class TCBlockModelContent extends ModelContent{
         assetMap.forEach((integer, record) -> model.texture("texture_" + integer, record));
     }
 
-    public TCBlockModelContent tcTrapDoorTopModel(String baseName, String category, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
+    public TCBlockModelContent tcTrapDoorTopModel(String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) {
+        
 
-        TCBlockModelContent tintModel = tintTrapDoorTopModel(baseName, category, textureMap.size());
-        TCBlockModelContent modelContent = new TCBlockModelContent(name, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
+        TCBlockModelContent tintModel = tintTrapDoorTopModel(baseName, textureMap.size());
+        TCBlockModelContent modelContent = new TCBlockModelContent(baseName, BLOCK_FOLDER, "tree_icons/" + baseName + "/");
 
         modelContent.model().parent(tintModel);
         modelContent.model().texture("particle", particle);
 
         textureMap.forEach((integer, record) -> modelContent.model().texture("texture_" + integer, record));
 
-        AssetPackRegistries.saveBlockModel(name, modelContent, true);
+        AssetPackRegistries.saveBlockModel(baseName, modelContent, true);
 
         return modelContent;
     }
@@ -2830,8 +2829,8 @@ public class TCBlockModelContent extends ModelContent{
         tcColumnDefine(particle, textureMap);
     }
 
-    public TCBlockModelContent tcWoodModel(String baseName, String category, ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> textureMap){
-        return tcColumnModelDefine(baseName, category, particle, textureMap);
+    public TCBlockModelContent tcWoodModel(String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> textureMap){
+        return tcColumnModelDefine(baseName, particle, textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
     public record CubeSeparateRecord(ResourceLocation down, ResourceLocation up, ResourceLocation north, ResourceLocation south, ResourceLocation west, ResourceLocation east){}

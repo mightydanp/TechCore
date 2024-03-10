@@ -4,14 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
+import com.mightydanp.techcore.api.resources.assets.contents.model.TCBlockModelContent;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.*;
-import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
-import net.neoforged.neoforge.client.model.generators.VariantBlockStateBuilder;
+import net.neoforged.neoforge.client.model.generators.*;
 
 import java.util.Map;
 
@@ -25,18 +23,15 @@ public class TCBlockStateContent extends BlockStateContent {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void buttonBlock(ButtonBlock block, ResourceLocation texture) throws Exception {
+    public void buttonBlock(ButtonBlock block, ResourceLocation particle, Map<Integer, ResourceLocation> textureMap) throws Exception {
         String name = name(block);
 
-        BlockModelContent buttonModel = new BlockModelContent(name, BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder button = buttonModel.button(texture);
+        TCBlockModelContent buttonModel = new TCBlockModelContent(name, BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder button = buttonModel.tcButtonModel(name, particle, textureMap).model();
 
-        simpleBlockWithItem(block, buttonModel.model());
+        TCBlockModelContent buttonPressedModel = new TCBlockModelContent(name + "_pressed", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder buttonPressed = buttonPressedModel.tcButtonPressedModel(name + "_pressed", particle, textureMap).model();
 
-        BlockModelContent buttonPressedModel = new BlockModelContent(name + "_pressed", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder buttonPressed = buttonPressedModel.buttonPressed(name, texture);
-
-        simpleBlockWithItem(block, buttonPressedModel.model());
         buttonBlock(block, button, buttonPressed);
     }
 
@@ -61,118 +56,86 @@ public class TCBlockStateContent extends BlockStateContent {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void doorBlock(DoorBlock block, ResourceLocation bottom, ResourceLocation top) throws Exception {
-        doorBlockInternal(block, key(block).toString(), bottom, top);
+    public void doorBlock(DoorBlock block, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap) throws Exception {
+        doorBlockInternal(block, key(block).toString(), particle, bottomTextureMap, topTextureMap);
     }
 
-    public void doorBlock(DoorBlock block, String name, ResourceLocation bottom, ResourceLocation top) throws Exception {
-        doorBlockInternal(block, name + "_door", bottom, top);
+    public void doorBlock(DoorBlock block, String name, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap) throws Exception {
+        doorBlockInternal(block, name + "_door", particle, bottomTextureMap, topTextureMap);
     }
 
-    public void doorBlockWithRenderType(DoorBlock block, ResourceLocation bottom, ResourceLocation top, String renderType) throws Exception {
-        doorBlockInternalWithRenderType(block, key(block).toString(), bottom, top, ResourceLocation.tryParse(renderType));
+    public void doorBlockWithRenderType(DoorBlock block, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap, String renderType) throws Exception {
+        doorBlockInternalWithRenderType(block, key(block).toString(), particle, bottomTextureMap, topTextureMap, ResourceLocation.tryParse(renderType));
     }
 
-    public void doorBlockWithRenderType(DoorBlock block, String name, ResourceLocation bottom, ResourceLocation top, String renderType) throws Exception {
-        doorBlockInternalWithRenderType(block, name + "_door", bottom, top, ResourceLocation.tryParse(renderType));
+    public void doorBlockWithRenderType(DoorBlock block, String name, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap, String renderType) throws Exception {
+        doorBlockInternalWithRenderType(block, name + "_door", particle, bottomTextureMap, topTextureMap, ResourceLocation.tryParse(renderType));
     }
 
-    public void doorBlockWithRenderType(DoorBlock block, ResourceLocation bottom, ResourceLocation top, ResourceLocation renderType) throws Exception {
-        doorBlockInternalWithRenderType(block, key(block).toString(), bottom, top, renderType);
+    public void doorBlockWithRenderType(DoorBlock block, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap, ResourceLocation renderType) throws Exception {
+        doorBlockInternalWithRenderType(block, key(block).toString(), particle, bottomTextureMap, topTextureMap, renderType);
     }
 
-    public void doorBlockWithRenderType(DoorBlock block, String name, ResourceLocation bottom, ResourceLocation top, ResourceLocation renderType) throws Exception {
-        doorBlockInternalWithRenderType(block, name + "_door", bottom, top, renderType);
+    public void doorBlockWithRenderType(DoorBlock block, String name, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap, ResourceLocation renderType) throws Exception {
+        doorBlockInternalWithRenderType(block, name + "_door", particle, bottomTextureMap, topTextureMap, renderType);
     }
 
-    private void doorBlockInternal(DoorBlock block, String baseName, ResourceLocation bottom, ResourceLocation top) throws Exception {
-        String name = name(block);
+    private void doorBlockInternal(DoorBlock block, String name, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap) throws Exception {
+        String modid = modid(block);
 
-        BlockModelContent bottomLeftModel = new BlockModelContent(name + "_bottom_left", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomLeftBuilder = bottomLeftModel.doorBottomLeft(bottom, top);
+        TCBlockModelContent bottomLeftBlockModel = new TCBlockModelContent(modid, name + "_bottom_left", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftBuilder = bottomLeftBlockModel.tcDoorBottomLeftModel(name + "_bottom_left", particle, bottomTextureMap).model();
 
-        simpleBlockWithItem(block, bottomLeftModel.model());
+        TCBlockModelContent bottomLeftOpenModel = new TCBlockModelContent(modid, name + "_bottom_left_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.tcDoorBottomLeftOpenModel(name + "_bottom_left_open", particle, bottomTextureMap).model();
 
-        BlockModelContent bottomLeftOpenModel = new BlockModelContent(name + "_bottom_left_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.doorBottomLeftOpen(bottom, top);
+        TCBlockModelContent bottomRightModel = new TCBlockModelContent(modid, name + "_bottom_right", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightBuilder = bottomRightModel.tcDoorBottomRightModel(name + "_bottom_right", particle, bottomTextureMap).model();
 
-        simpleBlockWithItem(block, bottomLeftOpenModel.model());
+        TCBlockModelContent bottomRightOpenModel = new TCBlockModelContent(modid, name + "_bottom_right_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.tcDoorBottomRightOpenModel(name + "_bottom_right_open", particle, bottomTextureMap).model();
 
-        BlockModelContent bottomRightModel = new BlockModelContent(name + "_bottom_right", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomRightBuilder = bottomRightModel.doorBottomRight(bottom, top);
+        TCBlockModelContent topLeftModel = new TCBlockModelContent(modid, name + "_top_left", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftBuilder = topLeftModel.tcDoorTopLeftModel(name + "_top_left", particle, topTextureMap).model();
 
-        simpleBlockWithItem(block, bottomRightModel.model());
+        TCBlockModelContent topLeftOpenModel = new TCBlockModelContent(modid, name + "_top_left_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.tcDoorTopLeftOpenModel(name + "_top_left_open", particle, topTextureMap).model();
 
-        BlockModelContent bottomRightOpenModel = new BlockModelContent(name + "_bottom_right_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.doorBottomRightOpen(bottom, top);
+        TCBlockModelContent topRightModel = new TCBlockModelContent(modid, name + "_top_right", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightBuilder = topRightModel.tcDoorTopRightModel(name + "_top_right", particle, topTextureMap).model();
 
-        simpleBlockWithItem(block, bottomRightOpenModel.model());
-
-        BlockModelContent topLeftModel = new BlockModelContent(name + "_top_left", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topLeftBuilder = topLeftModel.doorTopLeft(bottom, top);
-
-        simpleBlockWithItem(block, topLeftModel.model());
-
-        BlockModelContent topLeftOpenModel = new BlockModelContent(name + "_top_left_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.doorTopLeftOpen(bottom, top);
-
-        simpleBlockWithItem(block, topLeftOpenModel.model());
-
-        BlockModelContent topRightModel = new BlockModelContent(name + "_top_right", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topRightBuilder = topRightModel.doorTopRight(bottom, top);
-
-        simpleBlockWithItem(block, topRightModel.model());
-
-        BlockModelContent topRightOpenModel = new BlockModelContent(name + "_top_right_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topRightOpenBuilder = topRightOpenModel.doorTopRightOpen(bottom, top);
-
-        simpleBlockWithItem(block, topRightOpenModel.model());
+        TCBlockModelContent topRightOpenModel = new TCBlockModelContent(modid, name + "_top_right_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightOpenBuilder = topRightOpenModel.tcDoorTopRightOpenModel(name + "_top_right_open", particle, topTextureMap).model();
 
         doorBlock(block, bottomLeftBuilder, bottomLeftOpenBuilder, bottomRightBuilder, bottomRightOpenBuilder, topLeftBuilder, topLeftOpenBuilder, topRightBuilder, topRightOpenBuilder);
     }
 
-    private void doorBlockInternalWithRenderType(DoorBlock block, String baseName, ResourceLocation bottom, ResourceLocation top, ResourceLocation renderType) throws Exception {
-        String name = name(block);
+    private void doorBlockInternalWithRenderType(DoorBlock block, String name, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextureMap, Map<Integer, ResourceLocation> topTextureMap, ResourceLocation renderType) throws Exception {
+        String modid = modid(block);
 
-        BlockModelContent bottomLeftModel = new BlockModelContent(name + "_bottom_left", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomLeftBuilder = bottomLeftModel.doorBottomLeft(bottom, top).renderType(renderType);
+        TCBlockModelContent bottomLeftBlockModel = new TCBlockModelContent(modid, name + "_bottom_left", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftBuilder = bottomLeftBlockModel.tcDoorBottomLeftModel(name + "_bottom_left", particle, bottomTextureMap).model().renderType(renderType);
 
-        simpleBlockWithItem(block, bottomLeftModel.model());
+        TCBlockModelContent bottomLeftOpenModel = new TCBlockModelContent(modid, name + "_bottom_left_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.tcDoorBottomLeftOpenModel(name + "_bottom_left_open", particle, bottomTextureMap).model().renderType(renderType);
 
-        BlockModelContent bottomLeftOpenModel = new BlockModelContent(name + "_bottom_left_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomLeftOpenBuilder = bottomLeftOpenModel.doorBottomLeftOpen(bottom, top).renderType(renderType);
+        TCBlockModelContent bottomRightModel = new TCBlockModelContent(modid, name + "_bottom_right", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightBuilder = bottomRightModel.tcDoorBottomRightModel(name + "_bottom_right", particle, bottomTextureMap).model().renderType(renderType);
 
-        simpleBlockWithItem(block, bottomLeftOpenModel.model());
+        TCBlockModelContent bottomRightOpenModel = new TCBlockModelContent(modid, name + "_bottom_right_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.tcDoorBottomRightOpenModel(name + "_bottom_right_open", particle, bottomTextureMap).model().renderType(renderType);
 
-        BlockModelContent bottomRightModel = new BlockModelContent(name + "_bottom_right", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomRightBuilder = bottomRightModel.doorBottomRight(bottom, top).renderType(renderType);
+        TCBlockModelContent topLeftModel = new TCBlockModelContent(modid, name + "_top_left", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftBuilder = topLeftModel.tcDoorTopLeftModel(name + "_top_left", particle, topTextureMap).model().renderType(renderType);
 
-        simpleBlockWithItem(block, bottomRightModel.model());
+        TCBlockModelContent topLeftOpenModel = new TCBlockModelContent(modid, name + "_top_left_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.tcDoorTopLeftOpenModel(name + "_top_left_open", particle, topTextureMap).model().renderType(renderType);
 
-        BlockModelContent bottomRightOpenModel = new BlockModelContent(name + "_bottom_right_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder bottomRightOpenBuilder = bottomRightOpenModel.doorBottomRightOpen(bottom, top).renderType(renderType);
+        TCBlockModelContent topRightModel = new TCBlockModelContent(modid, name + "_top_right", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightBuilder = topRightModel.tcDoorTopRightModel(name + "_top_right", particle, topTextureMap).model().renderType(renderType);
 
-        simpleBlockWithItem(block, bottomRightOpenModel.model());
-
-        BlockModelContent topLeftModel = new BlockModelContent(name + "_top_left", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topLeftBuilder = topLeftModel.doorTopLeft(bottom, top).renderType(renderType);
-
-        simpleBlockWithItem(block, topLeftModel.model());
-
-        BlockModelContent topLeftOpenModel = new BlockModelContent(name + "_top_left_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topLeftOpenBuilder = topLeftOpenModel.doorTopLeftOpen(bottom, top).renderType(renderType);
-
-        simpleBlockWithItem(block, topLeftOpenModel.model());
-
-        BlockModelContent topRightModel = new BlockModelContent(name + "_top_right", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topRightBuilder = topRightModel.doorTopRight(bottom, top).renderType(renderType);
-
-        simpleBlockWithItem(block, topRightModel.model());
-
-        BlockModelContent topRightOpenModel = new BlockModelContent(name + "_top_right_open", BlockModelContent.BLOCK_FOLDER, "");
-        TCModelBuilder topRightOpenBuilder = topRightOpenModel.doorTopRightOpen(bottom, top).renderType(renderType);
-
-        simpleBlockWithItem(block, topRightOpenModel.model());
+        TCBlockModelContent topRightOpenModel = new TCBlockModelContent(modid, name + "_top_right_open", BlockModelContent.BLOCK_FOLDER, "");
+        TCModelBuilder topRightOpenBuilder = topRightOpenModel.tcDoorTopRightOpenModel(name + "_top_right_open", particle, topTextureMap).model().renderType(renderType);
 
         doorBlock(block, bottomLeftBuilder, bottomLeftOpenBuilder, bottomRightBuilder, bottomRightOpenBuilder, topLeftBuilder, topLeftOpenBuilder, topRightBuilder, topRightOpenBuilder);
     }
@@ -693,14 +656,7 @@ public class TCBlockStateContent extends BlockStateContent {
                     Direction facing = state.getValue(StairBlock.FACING);
                     Half half = state.getValue(StairBlock.HALF);
                     StairsShape shape = state.getValue(StairBlock.SHAPE);
-                    int yRot = (int) facing.getClockWise().toYRot(); // Stairs model is rotated 90 degrees clockwise for some reason
-                    if (shape == StairsShape.INNER_LEFT || shape == StairsShape.OUTER_LEFT) {
-                        yRot += 270; // Left facing stairs are rotated 90 degrees clockwise
-                    }
-                    if (shape != StairsShape.STRAIGHT && half == Half.TOP) {
-                        yRot += 90; // Top stairs are rotated 90 degrees clockwise
-                    }
-                    yRot %= 360;
+                    int yRot = getyRot(facing, shape, half);
                     boolean uvlock = yRot != 0 || half == Half.TOP; // Don't set uvlock for states that have no rotation
                     return ConfiguredModel.builder()
                             .modelFile(shape == StairsShape.STRAIGHT ? stairs : shape == StairsShape.INNER_LEFT || shape == StairsShape.INNER_RIGHT ? stairsInner : stairsOuter)
@@ -712,6 +668,19 @@ public class TCBlockStateContent extends BlockStateContent {
 
         AssetPackRegistries.saveBlockState(name, new BlockStateContent(modid, name).setBlockState(builder), true);
     }
+
+    private static int getyRot(Direction facing, StairsShape shape, Half half) {
+        int yRot = (int) facing.getClockWise().toYRot(); // Stairs model is rotated 90 degrees clockwise for some reason
+        if (shape == StairsShape.INNER_LEFT || shape == StairsShape.OUTER_LEFT) {
+            yRot += 270; // Left facing stairs are rotated 90 degrees clockwise
+        }
+        if (shape != StairsShape.STRAIGHT && half == Half.TOP) {
+            yRot += 90; // Top stairs are rotated 90 degrees clockwise
+        }
+        yRot %= 360;
+        return yRot;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     public void trapdoorBlock(TrapDoorBlock block, ResourceLocation texture, boolean orientable) throws Exception {
         trapdoorBlockInternal(block, key(block).toString(), texture, orientable);

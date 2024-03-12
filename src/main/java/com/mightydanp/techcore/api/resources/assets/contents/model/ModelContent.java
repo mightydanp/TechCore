@@ -9,12 +9,12 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.Map;
 
-public class ModelContent {
+public class ModelContent<A>{
     public static final ExistingFileHelper.ResourceType TEXTURE = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".png", "textures");
     protected static final ExistingFileHelper.ResourceType MODEL = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".json", "models");
 
     protected static final ExistingFileHelper.ResourceType MODEL_WITH_EXTENSION = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, "", "models");
-    private final TCModelBuilder model;
+    private final TCModelBuilder<A> model;
 
     private final String modid;
 
@@ -27,7 +27,7 @@ public class ModelContent {
         this.name = name;
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
     }
 
     public ModelContent(ResourceLocation resourceLocation, String modelType, String organizationPath) {
@@ -35,7 +35,7 @@ public class ModelContent {
         this.modid = resourceLocation.getNamespace();
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
     }
 
     public String modid() {
@@ -46,7 +46,7 @@ public class ModelContent {
         return name;
     }
 
-    public TCModelBuilder model() {
+    public TCModelBuilder<A> model() {
         return model;
     }
 
@@ -83,33 +83,33 @@ public class ModelContent {
         return new ResourceLocation(modid, name);
     }
 
-    public TCModelBuilder withExistingParent(String parent) {
+    public TCModelBuilder<A> withExistingParent(String parent) {
         return withExistingParent(mcLoc(parent));
     }
 
-    public TCModelBuilder withExistingParent(ResourceLocation parent) {
+    public TCModelBuilder<A> withExistingParent(ResourceLocation parent) {
         return model.parent(getFile(parent));
     }
 
-    public TCModelBuilder singleTexture(String parent, ResourceLocation texture) {
+    public TCModelBuilder<A> singleTexture(String parent, ResourceLocation texture) {
         return singleTexture(mcLoc(parent), texture);
     }
 
-    public TCModelBuilder singleTexture(ResourceLocation parent, ResourceLocation texture) {
+    public TCModelBuilder<A> singleTexture(ResourceLocation parent, ResourceLocation texture) {
         return singleTexture(parent, "texture", texture);
     }
 
-    public TCModelBuilder singleTexture(String parent, String textureKey, ResourceLocation texture) {
+    public TCModelBuilder<A> singleTexture(String parent, String textureKey, ResourceLocation texture) {
         return singleTexture(mcLoc(parent), textureKey, texture);
     }
 
-    public TCModelBuilder singleTexture(ResourceLocation parent, String textureKey, ResourceLocation texture) {
+    public TCModelBuilder<A> singleTexture(ResourceLocation parent, String textureKey, ResourceLocation texture) {
         return withExistingParent(parent)
                 .texture(textureKey, texture);
     }
 
-    public TCModelBuilder singleTextureMap(ResourceLocation parent, Map<String, String> map) {
-        TCModelBuilder model = withExistingParent(parent);
+    public TCModelBuilder<A> singleTextureMap(ResourceLocation parent, Map<String, String> map) {
+        TCModelBuilder<A> model = withExistingParent(parent);
 
         map.forEach(model::texture);
 

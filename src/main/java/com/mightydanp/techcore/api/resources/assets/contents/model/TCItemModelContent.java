@@ -1,150 +1,108 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
-import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Map;
 
-public class TCItemModelContent extends ItemModelContent{
+public class TCItemModelContent extends ItemModelContent<TCItemModelContent>{
     public static final String ITEM_FOLDER = "item";
 
-    public TCItemModelContent(String modelName, String modid, String modelFolder, String parentFolder) {
-        super(modelName, modid, modelFolder, parentFolder);
+    public TCItemModelContent(String modelName, String modid, String parentFolder) {
+        super(modid, modelName, parentFolder);
     }
 
-    public TCItemModelContent(ResourceLocation resourceLocation, String modelFolder, String parentFolder) {
-        super(resourceLocation, modelFolder, parentFolder);
+    public TCItemModelContent(ResourceLocation resourceLocation, String parentFolder) {
+        super(resourceLocation, parentFolder);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcItem(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap) {
-        String name = baseName + "_" + category;
-        TCItemModelContent model = new TCItemModelContent(modid, name, ITEM_FOLDER, "");
-
-        model.model().parent(new ModelFile.UncheckedModelFile("item/generated"));
+    public TCItemModelContent tcItem(Map<Integer, ResourceLocation> textureMap) {
+        ItemModelContent<TCItemModelContent> model = new TCItemModelContent(modid(), name(), "")
+                .model().parent(new ModelFile.UncheckedModelFile("item/generated")).end();
 
         textureMap.forEach((integer, resourceLocation) -> model.model().texture("texture_" + integer, resourceLocation));
 
-        AssetPackRegistries.saveItemModel(model, false);
+        return model.save(false);
 
-        return model;
-    }
-    //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcBlockItem(String modid, String baseName, String category, TCBlockModelContent modelContent) {
-        String name = baseName + "_" + category;
-        TCItemModelContent model = new TCItemModelContent(modid, name, ITEM_FOLDER, "");
 
-        model.model().parent(modelContent);
-
-        AssetPackRegistries.saveItemModel(model, false);
-        return model;
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcBoat(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcBlockItem(TCItemModelContent modelContent) {
+        return new TCItemModelContent(modid(), name(), "")
+                .model().parent(modelContent).end()
+                .save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcButton(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcBoat(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcChestBoat(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcButton(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcDoor(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcChestBoat(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFence(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcDoor(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFenceGate(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcFence(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcHangingSign(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcFenceGate(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLeaves(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcHangingSign(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLog(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcLeaves(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPlanks(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcLog(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPressurePlate(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcPlanks(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSapling(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcPressurePlate(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSign(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcSapling(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSlab(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcSign(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcStairs(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcSlab(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcStick(String modid, String baseName, String category, Map<Integer, ResourceLocation> textureMap){
-        String name = baseName + "_" + category;
-        TCItemModelContent model = tcItem(modid, baseName, category, textureMap);
-
-        AssetPackRegistries.saveItemModel(model, false);
-
-        return model;
+    public TCItemModelContent tcStairs(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcTrapDoor(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcStick(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap).save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcWood(String modid, String baseName, String category, TCBlockModelContent modelContent){
-        return tcBlockItem(modid, baseName, category, modelContent);
+    public TCItemModelContent tcTrapDoor(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    public TCItemModelContent tcWood(TCItemModelContent modelContent){
+        return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
 

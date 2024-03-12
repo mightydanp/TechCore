@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AssetPackRegistries {
-    public static Map<ResourceLocation, BlockStateContent> blockState = new HashMap<>();
-    public static Map<ResourceLocation, BlockModelContent> blockModel = new HashMap<>();
-    public static Map<ResourceLocation, ItemModelContent> itemModel = new HashMap<>();
+    public static Map<ResourceLocation, BlockStateContent<?>> blockState = new HashMap<>();
+    public static Map<ResourceLocation, BlockModelContent<?>> blockModel = new HashMap<>();
+    public static Map<ResourceLocation, ItemModelContent<?>> itemModel = new HashMap<>();
     public static Map<ResourceLocation, LanguageContent> language = new HashMap<>();
 
     public static void init() {
@@ -23,7 +23,7 @@ public class AssetPackRegistries {
         language.forEach((r, b) -> AssetPackRegistry.assetHolder.addToResources(new ResourceLocation(r.getNamespace(), "lang/" + r + ".json"), b.translations()));
     }
 
-    public static boolean saveBlockState(BlockStateContent blockState, boolean override) {
+    public static boolean saveBlockState(BlockStateContent<?> blockState, boolean override) {
         ResourceLocation resourceLocation = toResourceLocation(blockState);
 
         if(!override && AssetPackRegistries.blockState.containsKey(resourceLocation)){
@@ -35,7 +35,7 @@ public class AssetPackRegistries {
         return true;
     }
 
-    public static boolean saveBlockModel(BlockModelContent blockModel, boolean override) {
+    public static boolean saveBlockModel(BlockModelContent<?> blockModel, boolean override) {
         ResourceLocation resourceLocation = toResourceLocation(blockModel);
 
         if(!override && AssetPackRegistries.blockModel.containsKey(resourceLocation)){
@@ -46,7 +46,7 @@ public class AssetPackRegistries {
         return true;
     }
 
-    public static boolean saveItemModel(ItemModelContent itemModel, boolean override) {
+    public static boolean saveItemModel(ItemModelContent<?> itemModel, boolean override) {
         ResourceLocation resourceLocation = toResourceLocation(itemModel);
 
         if(!override && AssetPackRegistries.itemModel.containsKey(resourceLocation)){
@@ -69,15 +69,15 @@ public class AssetPackRegistries {
     }
 
     public static ResourceLocation toResourceLocation(Object asset){
-        if (asset instanceof BlockStateContent Content) {
+        if (asset instanceof BlockStateContent<?> Content) {
             return new ResourceLocation(Content.modid(), Content.name());
         }
 
-        if (asset instanceof BlockModelContent Content) {
+        if (asset instanceof BlockModelContent<?> Content) {
             return new ResourceLocation(Content.modid(), Content.name());
         }
 
-        if (asset instanceof ItemModelContent Content) {
+        if (asset instanceof ItemModelContent<?> Content) {
             return new ResourceLocation(Content.modid(), Content.name());
         }
 

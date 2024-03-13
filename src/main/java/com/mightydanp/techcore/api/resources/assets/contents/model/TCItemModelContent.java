@@ -27,81 +27,89 @@ public class TCItemModelContent extends ItemModelContent<TCItemModelContent>{
 
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcBlockItem(TCItemModelContent modelContent) {
+    public TCItemModelContent tcBlockItem(TCBlockModelContent modelContent) {
         return new TCItemModelContent(modid(), name(), "")
-                .model().parent(modelContent).end()
+                .model().parent(modelContent.model()).end()
                 .save(false);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcBoat(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcButton(TCItemModelContent modelContent){
+    public TCItemModelContent tcButton(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcChestBoat(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcDoor(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFence(TCItemModelContent modelContent){
+    public TCItemModelContent tcFence(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFenceGate(TCItemModelContent modelContent){
+    public TCItemModelContent tcFenceGate(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcHangingSign(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLeaves(TCItemModelContent modelContent){
+    public TCItemModelContent tcLeaves(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLog(TCItemModelContent modelContent){
+    public TCItemModelContent tcLog(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPlanks(TCItemModelContent modelContent){
+    public TCItemModelContent tcPane(Map<Integer, ResourceLocation> textureMap){
+        return tcItem(textureMap);
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    public TCItemModelContent tcPlanks(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPressurePlate(TCItemModelContent modelContent){
+    public TCItemModelContent tcPressurePlate(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcSapling(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcSign(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSlab(TCItemModelContent modelContent){
+    public TCItemModelContent tcSlab(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcStairs(TCItemModelContent modelContent){
+    public TCItemModelContent tcStairs(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
     public TCItemModelContent tcStick(Map<Integer, ResourceLocation> textureMap){
-        return tcItem(textureMap).save(false);
+        return tcItem(textureMap);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcTrapDoor(TCItemModelContent modelContent){
+    public TCItemModelContent tcTrapDoor(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcWood(TCItemModelContent modelContent){
+    public TCItemModelContent tcWall(TCBlockModelContent modelContent){
+        return tcBlockItem(modelContent);
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    public TCItemModelContent tcWood(TCBlockModelContent modelContent){
         return tcBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------

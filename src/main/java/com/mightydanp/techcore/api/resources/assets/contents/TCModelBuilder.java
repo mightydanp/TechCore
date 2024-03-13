@@ -27,7 +27,9 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class TCModelBuilder<A> extends ModelFile{
-    //To Self ModelBuilder has Custom Loader that I am to lazy to figure out.
+    //To-do Self ModelBuilder has Custom Loader that I am to lazy to figure out.
+    //also this might not need the <A> I do not know.
+
     @Nullable
     protected ModelFile parent;
     protected final Map<String, String> textures = new LinkedHashMap<>();

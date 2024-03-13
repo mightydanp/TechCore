@@ -122,6 +122,10 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
+    public void simpleBlock(Block block, ModelFile model) throws Exception {
+        simpleBlock(block, new ConfiguredModel(model));
+    }
+
     public void simpleBlockItem(Block block, TCModelBuilder<?> model) {
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
         itemModel.model().parent(model).end();

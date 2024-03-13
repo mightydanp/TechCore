@@ -104,10 +104,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public TCModelBuilder<? extends BlockModelContent<?>> cubeAll(Block block) {
-        String modid = modid(block);
-        String name = name(block);
-
-        BlockModelContent<?> modelContent = new BlockModelContent<>(modid, name, "");
+        BlockModelContent<?> modelContent = new BlockModelContent<>(modid(), name(), "");
         modelContent.cubeAll(blockTexture(block));
 
         return modelContent.model();
@@ -126,10 +123,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void simpleBlockItem(Block block, TCModelBuilder<?> model) {
-        String modid = modid(block);
-        String name = name(block);
-
-        TCItemModelContent itemModel = new TCItemModelContent(modid, name, "");
+        TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
         itemModel.model().parent(model).end();
     }
 
@@ -139,9 +133,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void simpleBlock(Block block, ConfiguredModel... models) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block).partialState().setModels(models);
 
         getVariantBuilder(block)
@@ -161,8 +152,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void axisBlock(RotatedPillarBlock block, ResourceLocation side, ResourceLocation end) throws Exception {
-        String blockName = name(block);
-        BlockModelContent<?> modeContent = new BlockModelContent<>(blockName + "_horizontal", BlockModelContent.BLOCK_FOLDER, "");
+        BlockModelContent<?> modeContent = new BlockModelContent<>(name() + "_horizontal", BlockModelContent.BLOCK_FOLDER, "");
 
         axisBlock(block, modeContent.cubeColumn(side, end), modeContent.cubeColumnHorizontal(side, end));
     }
@@ -176,8 +166,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void axisBlockWithRenderType(RotatedPillarBlock block, ResourceLocation side, ResourceLocation end, String renderType) throws Exception {
-        String blockName = name(block);
-        BlockModelContent<?> modeContent = new BlockModelContent<>(blockName, BlockModelContent.BLOCK_FOLDER, "");
+        BlockModelContent<?> modeContent = new BlockModelContent<>(name(), BlockModelContent.BLOCK_FOLDER, "");
 
         axisBlock(block, modeContent.cubeColumn(side, end), modeContent.cubeColumnHorizontal(side, end).renderType(renderType));
     }
@@ -191,16 +180,12 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void axisBlockWithRenderType(RotatedPillarBlock block, ResourceLocation side, ResourceLocation end, ResourceLocation renderType) throws Exception {
-        String blockName = name(block);
-        BlockModelContent<?> modeContent = new BlockModelContent<>(blockName, BlockModelContent.BLOCK_FOLDER, "");
+        BlockModelContent<?> modeContent = new BlockModelContent<>(name(), BlockModelContent.BLOCK_FOLDER, "");
 
         axisBlock(block, modeContent.cubeColumn(side, end), modeContent.cubeColumnHorizontal(side, end).renderType(renderType));
     }
 
     public void axisBlock(RotatedPillarBlock block, ModelFile vertical, ModelFile horizontal) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.Y)
                 .modelForState().modelFile(vertical).addModel()
@@ -215,9 +200,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     private static final int DEFAULT_ANGLE_OFFSET = 180;
 
     public void horizontalBlock(Block block, ResourceLocation side, ResourceLocation front, ResourceLocation top) throws Exception {
-        String name = name(block);
-
-        BlockModelContent<?> modelContent = new BlockModelContent<>(name, BlockModelContent.BLOCK_FOLDER, "");
+        BlockModelContent<?> modelContent = new BlockModelContent<>(modid(), name(), "");
 
         horizontalBlock(block, modelContent.orientable(side, front, top));
     }
@@ -235,9 +218,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void horizontalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
                         .modelFile(modelFunc.apply(state))
@@ -260,9 +240,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void horizontalFaceBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> ConfiguredModel.builder()
                         .modelFile(modelFunc.apply(state))
@@ -286,9 +263,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public void directionalBlock(Block block, Function<BlockState, ModelFile> modelFunc, int angleOffset) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStates(state -> {
                     Direction dir = state.getValue(BlockStateProperties.FACING);
@@ -299,13 +273,10 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
                             .build();
                 });
 
-        AssetPackRegistries.saveBlockState(this.setBlockState(builder), true);
+        this.setBlockState(builder).save(false);
     }
 
     public void fourWayBlock(CrossCollisionBlock block, ModelFile post, ModelFile side) throws Exception {
-        String modid = modid(block);
-        String name = name(block);
-
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
         fourWayMultipart(builder, side);

@@ -23,10 +23,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
     //------------------------------------------------------------------------------------------------------------------
     public void axisBlock(RotatedPillarBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.ColumnAssetRecord> columnTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent columnModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent columnHorizontalModel = new TCBlockModelContent(base, "");
+        TCBlockModelContent columnModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent columnHorizontalModel = new TCBlockModelContent(modid(), name(), "");
 
         if(renderType != null){
             columnModel.model().renderType(renderType);
@@ -41,10 +39,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     //------------------------------------------------------------------------------------------------------------------
 
     public void buttonBlock(ButtonBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent buttonModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent buttonPressedModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_pressed"), "");
+        TCBlockModelContent buttonModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent buttonPressedModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_pressed"), "");
 
         if(renderType != null){
             buttonModel.model().renderType(renderType);
@@ -58,9 +54,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void buttonBlock(ButtonBlock block, ModelFile button, ModelFile buttonPressed) throws Exception {
-        String name = key(block).getPath();
-        String modId = key(block).getNamespace();
-
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStates(state -> {
             Direction facing = state.getValue(ButtonBlock.FACING);
             AttachFace face = state.getValue(ButtonBlock.FACE);
@@ -80,16 +73,14 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     //------------------------------------------------------------------------------------------------------------------
 
     private void doorBlockInternal(DoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> bottomTextures, Map<Integer, ResourceLocation> topTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent bottomLeftBlockModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom_left"), "");
-        TCBlockModelContent bottomLeftOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom_left_open"), "");
-        TCBlockModelContent bottomRightModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom_right"), "");
-        TCBlockModelContent bottomRightOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom_right_open"), "");
-        TCBlockModelContent topLeftModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top_left"), "");
-        TCBlockModelContent topLeftOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top_left_open"), "");
-        TCBlockModelContent topRightModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top_right"), "");
-        TCBlockModelContent topRightOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top_right_open"), "");
+        TCBlockModelContent bottomLeftBlockModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom_left"), "");
+        TCBlockModelContent bottomLeftOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom_left_open"), "");
+        TCBlockModelContent bottomRightModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom_right"), "");
+        TCBlockModelContent bottomRightOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom_right_open"), "");
+        TCBlockModelContent topLeftModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top_left"), "");
+        TCBlockModelContent topLeftOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top_left_open"), "");
+        TCBlockModelContent topRightModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top_right"), "");
+        TCBlockModelContent topRightOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top_right_open"), "");
 
         if(renderType != null){
             bottomLeftBlockModel.model().renderType(renderType);
@@ -115,9 +106,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void doorBlock(DoorBlock block, ModelFile bottomLeft, ModelFile bottomLeftOpen, ModelFile bottomRight, ModelFile bottomRightOpen, ModelFile topLeft, ModelFile topLeftOpen, ModelFile topRight, ModelFile topRightOpen) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int yRot = ((int) state.getValue(DoorBlock.FACING).toYRot()) + 90;
             boolean right = state.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT;
@@ -163,10 +151,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
     //------------------------------------------------------------------------------------------------------------------
     public void fenceBlockInternal(FenceBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> postTextures, Map<Integer, ResourceLocation> sideTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent fencePostModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_post"), "");
-        TCBlockModelContent fenceSideModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_side"), "");
+        TCBlockModelContent fencePostModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_post"), "");
+        TCBlockModelContent fenceSideModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_side"), "");
 
         if(renderType != null){
             fencePostModel.model().renderType(renderType);
@@ -180,10 +166,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void fenceBlock(FenceBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> fencePostTextures, Map<Integer, ResourceLocation> fenceSideTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent fencePostModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_fence_post"), "");
-        TCBlockModelContent fenceSideModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_fence_side"), "");
+        TCBlockModelContent fencePostModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_fence_post"), "");
+        TCBlockModelContent fenceSideModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_fence_side"), "");
 
         if(renderType != null){
             fencePostModel.model().renderType(renderType);
@@ -199,12 +183,10 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 //----------------------------------------------------------------------------------------------------------------------
 
     private void fenceGateBlockInternal(FenceGateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, Map<Integer, ResourceLocation> openTextures, Map<Integer, ResourceLocation> wallTextures, Map<Integer, ResourceLocation> wallOpenTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent fenceGateModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent fenceGateOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_open"), "");
-        TCBlockModelContent fenceGateWallModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_wall"), "");
-        TCBlockModelContent fenceGateWallOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_wall_open"), "");
+        TCBlockModelContent fenceGateModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent fenceGateOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_open"), "");
+        TCBlockModelContent fenceGateWallModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_wall"), "");
+        TCBlockModelContent fenceGateWallOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_wall_open"), "");
 
         if(renderType != null){
             fenceGateModel.model().renderType(renderType);
@@ -222,9 +204,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void fenceGateBlock(FenceGateBlock block, ModelFile gate, ModelFile gateOpen, ModelFile gateWall, ModelFile gateWallOpen) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             ModelFile model = gate;
             if (state.getValue(FenceGateBlock.IN_WALL)) {
@@ -245,9 +224,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
     //------------------------------------------------------------------------------------------------------------------
     public void hangingSignBlockInternal(Block block, String baseName, ResourceLocation particle, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent hangingSignModel = new TCBlockModelContent(base, "");
+        TCBlockModelContent hangingSignModel = new TCBlockModelContent(modid(), name(), "");
 
         if(renderType != null){
             hangingSignModel.model().renderType(renderType);
@@ -263,9 +240,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     public void leavesInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent leavesModel = new TCBlockModelContent(base, "");
+        TCBlockModelContent leavesModel = new TCBlockModelContent(modid(), name(), "");
 
         if(renderType != null){
             leavesModel.model().renderType(renderType);
@@ -281,10 +256,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     public void logBlockInternal(RotatedPillarBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.LogAssetRecord> logTextures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent logsModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent logsHorizontalModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_horizontal"), "");
+        TCBlockModelContent logsModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent logsHorizontalModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_horizontal"), "");
 
         if(renderType != null){
             logsModel.model().renderType(renderType);
@@ -303,13 +276,11 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     private void paneBlockInternal(IronBarsBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.PaneSideAltRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent panePostModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_post"), "");
-        TCBlockModelContent paneSideModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_side"), "");
-        TCBlockModelContent paneSideAltModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_side_alt"), "");
-        TCBlockModelContent paneNoSideModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_noside"), "");
-        TCBlockModelContent paneNoSideAltModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_noside_alt"), "");
+        TCBlockModelContent panePostModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_post"), "");
+        TCBlockModelContent paneSideModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_side"), "");
+        TCBlockModelContent paneSideAltModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_side_alt"), "");
+        TCBlockModelContent paneNoSideModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_noside"), "");
+        TCBlockModelContent paneNoSideAltModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_noside_alt"), "");
 
         if(renderType != null){
             panePostModel.model().renderType(renderType);
@@ -332,9 +303,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void paneBlock(IronBarsBlock block, ModelFile post, ModelFile side, ModelFile sideAlt, ModelFile noSide, ModelFile noSideAlt) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
         PipeBlock.PROPERTY_BY_DIRECTION.forEach((dir, value) -> {
@@ -351,9 +319,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     public void planksBlockSeparateInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.CubeSeparateRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent planksModel = new TCBlockModelContent(base, "");
+        TCBlockModelContent planksModel = new TCBlockModelContent(modid(), name(), "");
 
         if(renderType != null){
             planksModel.model().renderType(renderType);
@@ -365,9 +331,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void planksBlockTogetherInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent planksModel = new TCBlockModelContent(base, "");
+        TCBlockModelContent planksModel = new TCBlockModelContent(modid(), name(), "");
 
         if(renderType != null){
             planksModel.model().renderType(renderType);
@@ -383,10 +347,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     public void pressurePlateBlock(PressurePlateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent pressurePlateModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent pressurePlateDownModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_down"), "");
+        TCBlockModelContent pressurePlateModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent pressurePlateDownModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_down"), "");
 
         if(renderType != null){
             pressurePlateModel.model().renderType(renderType);
@@ -400,9 +362,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void pressurePlateBlock(PressurePlateBlock block, ModelFile pressurePlate, ModelFile pressurePlateDown) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block);
 
         builder
@@ -451,10 +410,8 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     //------------------------------------------------------------------------------------------------------------------
 
     public void slabBlockInternal(SlabBlock block, String baseName, ResourceLocation particle, ResourceLocation doubleSlab, Map<Integer, TCBlockModelContent.SlabRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent slabModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent slabTopModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top"), "");
+        TCBlockModelContent slabModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent slabTopModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top"), "");
 
         if(renderType != null){
             slabModel.model().renderType(renderType);
@@ -482,11 +439,9 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
     //------------------------------------------------------------------------------------------------------------------
     private void stairsBlockInternal(StairBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent stairsModel = new TCBlockModelContent(base, "");
-        TCBlockModelContent stairsInnerModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_inner"), "");
-        TCBlockModelContent stairsOuterModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_outer"), "");
+        TCBlockModelContent stairsModel = new TCBlockModelContent(modid(), name(), "");
+        TCBlockModelContent stairsInnerModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_inner"), "");
+        TCBlockModelContent stairsOuterModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_outer"), "");
 
         if(renderType != null){
             stairsModel.model().renderType(renderType);
@@ -502,9 +457,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void stairsBlock(StairBlock block, ModelFile stairs, ModelFile stairsInner, ModelFile stairsOuter) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStatesExcept(state -> {
                     Direction facing = state.getValue(StairBlock.FACING);
@@ -538,12 +490,10 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     //------------------------------------------------------------------------------------------------------------------
 
     private void trapdoorBlockInternal(TrapDoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, boolean orientable) throws Exception {
-        ResourceLocation base = key(block);
-
         if(orientable){
-            TCBlockModelContent trapdoorOrientableBottomModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom"), "");
-            TCBlockModelContent trapdoorOrientableTopModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top"), "");
-            TCBlockModelContent trapdoorOrientableOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_open"), "");
+            TCBlockModelContent trapdoorOrientableBottomModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom"), "");
+            TCBlockModelContent trapdoorOrientableTopModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top"), "");
+            TCBlockModelContent trapdoorOrientableOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_open"), "");
 
             if(renderType != null){
                 trapdoorOrientableBottomModel.model().renderType(renderType);
@@ -557,9 +507,9 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
             trapdoorBlock(block, trapdoorOrientableBottom, trapdoorOrientableTop, trapdoorOrientableOpen, true);
         }else{
-            TCBlockModelContent trapdoorBottomModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_bottom"), "");
-            TCBlockModelContent trapdoorTopModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_top"), "");
-            TCBlockModelContent trapdoorOpenModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_open"), "");
+            TCBlockModelContent trapdoorBottomModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_bottom"), "");
+            TCBlockModelContent trapdoorTopModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_top"), "");
+            TCBlockModelContent trapdoorOpenModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_open"), "");
 
             if(renderType != null){
                 trapdoorBottomModel.model().renderType(renderType);
@@ -576,9 +526,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     }
 
     public void trapdoorBlock(TrapDoorBlock block, ModelFile bottom, ModelFile top, ModelFile open, boolean orientable) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int xRot = 0;
             int yRot = ((int) state.getValue(TrapDoorBlock.FACING).toYRot()) + 180;
@@ -602,11 +549,9 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
     //------------------------------------------------------------------------------------------------------------------
     private void wallBlockInternal(WallBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
-        ResourceLocation base = key(block);
-
-        TCBlockModelContent wallPostModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_post"), "");
-        TCBlockModelContent wallSideModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_side"), "");
-        TCBlockModelContent wallSideTallModel = new TCBlockModelContent(new ResourceLocation(base.getNamespace(), base.getPath() + "_side_tall"), "");
+        TCBlockModelContent wallPostModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_post"), "");
+        TCBlockModelContent wallSideModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_side"), "");
+        TCBlockModelContent wallSideTallModel = new TCBlockModelContent(new ResourceLocation(modid(), name() + "_side_tall"), "");
 
         if(renderType != null){
             wallPostModel.model().renderType(renderType);
@@ -629,9 +574,6 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
             .build();
 
     public void wallBlock(WallBlock block, ModelFile post, ModelFile side, ModelFile sideTall) throws Exception {
-        String name = name(block);
-        String modid = modid(block);
-
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel()
                 .condition(WallBlock.UP, true).end();

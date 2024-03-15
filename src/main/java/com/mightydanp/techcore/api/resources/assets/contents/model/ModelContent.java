@@ -58,7 +58,7 @@ public class ModelContent<A>{
         return organizationPath;
     }
 
-    public JsonObject createJson() {
+    public JsonObject json() {
         return model.toJson();
     }
 

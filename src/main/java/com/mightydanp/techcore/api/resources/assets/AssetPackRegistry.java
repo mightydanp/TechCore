@@ -28,13 +28,6 @@ public class AssetPackRegistry {
 
                 Pack pack = readMetaAndCreatePack(CoreRef.MOD_ID, desc, true, resourcesSupplier, PackType.CLIENT_RESOURCES, Pack.Position.TOP, PackSource.DEFAULT);
 
-                //Pack pack = Pack.create(CoreRef.MOD_ID, desc, true, resourcesSupplier, new Pack.Info(
-                //        desc,
-                //        PackCompatibility.COMPATIBLE,
-                //        FeatureFlagSet.of(),
-                //        List.of(),
-                //        true
-                //), Pack.Position.TOP, false, PackSource.DEFAULT);
                 packConsumer.accept(pack);
             });
         }

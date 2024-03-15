@@ -1,6 +1,6 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
-import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;

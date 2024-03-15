@@ -15,7 +15,7 @@ import net.neoforged.neoforge.event.AddPackFindersEvent;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.DEDICATED_SERVER, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataPackRegistry {
     public static DataHolder dataHolder = new DataHolder();
     @SubscribeEvent
@@ -29,13 +29,6 @@ public class DataPackRegistry {
 
                 Pack pack = readMetaAndCreatePack(CoreRef.MOD_ID, desc, true, resourcesSupplier, PackType.SERVER_DATA, Pack.Position.TOP, PackSource.DEFAULT);
 
-                //Pack pack = Pack.create(CoreRef.MOD_ID, desc, true, resourcesSupplier, new Pack.Info(
-                //        desc,
-                //        PackCompatibility.COMPATIBLE,
-                 //       FeatureFlagSet.of(),
-                //        List.of(),
-                 //       true
-                //), Pack.Position.TOP, false, PackSource.DEFAULT);
                 packConsumer.accept(pack);
             });
         }

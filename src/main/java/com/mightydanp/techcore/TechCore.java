@@ -1,10 +1,18 @@
 package com.mightydanp.techcore;
 
-import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
+import com.mightydanp.techcore.api.resources.data.DataPackRegistries;
+import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
+import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,8 +24,6 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
-
-import java.util.Map;
 
 @Mod(CoreRef.MOD_ID)
 public class TechCore {
@@ -37,11 +43,12 @@ public class TechCore {
     private void commonSetup(final FMLCommonSetupEvent event){
         LOGGER.info("Tech Core common setup is starting");
 
-        TCItemModelContent model = new TCItemModelContent(CoreRef.MOD_ID, "item1", "");
+        TagContent<Block> tag = DataPackRegistries.getBlockTag(CoreRef.MOD_ID, "test");
 
-        model.tcItem(Map.of(1, new ResourceLocation("block/cobblestone")));
+        tag.add(Blocks.ACACIA_BUTTON);
+        tag.replace(true);
 
-        model.save(true);
+        tag.json();
     }
 
     @SubscribeEvent

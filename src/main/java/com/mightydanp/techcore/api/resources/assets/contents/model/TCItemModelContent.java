@@ -8,7 +8,7 @@ import java.util.Map;
 public class TCItemModelContent extends ItemModelContent<TCItemModelContent>{
     public static final String ITEM_FOLDER = "item";
 
-    public TCItemModelContent(String modelName, String modid, String parentFolder) {
+    public TCItemModelContent(String modid, String modelName, String parentFolder) {
         super(modid, modelName, parentFolder);
     }
 

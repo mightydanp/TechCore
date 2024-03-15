@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.api.resources.assets.contents.blockstate;
 
 import com.google.gson.JsonObject;
-import com.mightydanp.techcore.api.resources.assets.contents.AssetPackRegistries;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
@@ -80,7 +80,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         return this;
     }
 
-    public JsonObject createJson(){
+    public JsonObject json(){
         return blockState.toJson();
     }
 

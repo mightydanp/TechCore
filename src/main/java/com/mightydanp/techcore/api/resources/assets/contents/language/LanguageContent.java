@@ -2,11 +2,17 @@ package com.mightydanp.techcore.api.resources.assets.contents.language;
 
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.TechCore;
+import net.minecraft.resources.ResourceLocation;
 
 public class LanguageContent  {
     private final String modid;
     private final String name;
     private final JsonObject translations = new JsonObject();
+
+    public LanguageContent(ResourceLocation resourceLocation){
+        this.modid = resourceLocation.getNamespace();
+        this.name = resourceLocation.getPath();
+    }
 
     public LanguageContent(String modid, String name){
         this.modid = modid;
@@ -21,7 +27,7 @@ public class LanguageContent  {
         return name;
     }
 
-    public JsonObject translations() {
+    public JsonObject json() {
         return translations;
     }
 

@@ -1,19 +1,10 @@
 package com.mightydanp.techcore;
 
-import com.mightydanp.techcore.api.resources.data.DataPackRegistries;
-import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
-import com.mightydanp.techcore.api.resources.data.tag.TagContent;
+import com.mightydanp.techcore.api.configs.ConfigRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.neoforged.api.distmarker.Dist;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -31,39 +22,31 @@ public class TechCore {
 
     public TechCore(IEventBus bus){
         //IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus(), forge = NeoForge.EVENT_BUS;
-        bus.addListener(this::commonSetup);
-
         RegistriesHandler.init(bus);
 
+        bus.addListener(this::onCommonSetup);
+        bus.addListener(this::onClientSetup);
         NeoForge.EVENT_BUS.register(this);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        ResourceLocation resourceLocation = new ResourceLocation(CoreRef.MOD_ID, "test");
+
+        ConfigRegistries.saveBlockTrait(resourceLocation, ConfigRegistries.getBlockTrait(resourceLocation), false);
+
+        ConfigRegistries.registerConfigs();
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event){
+    private void onCommonSetup(final FMLCommonSetupEvent event){
         LOGGER.info("Tech Core common setup is starting");
+    }
 
-        TagContent<Block> tag = DataPackRegistries.getBlockTag(CoreRef.MOD_ID, "test");
-
-        tag.add(Blocks.ACACIA_BUTTON);
-        tag.replace(true);
-
-        tag.json();
+    private void onClientSetup(FMLClientSetupEvent event)
+    {
+        LOGGER.info("Tech Core client setup is starting");
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("Tech Core server is starting.");
-    }
-
-    @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            LOGGER.info("Tech Core client setup is starting");
-        }
     }
 }

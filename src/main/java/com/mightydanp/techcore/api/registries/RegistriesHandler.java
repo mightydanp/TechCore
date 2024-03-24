@@ -17,10 +17,16 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RegistriesHandler {
+    private static final Map<ResourceLocation, registryHolder> additionalRegistries = new HashMap<>();
+    private static final Map<ResourceLocation, finalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
+
+
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, CoreRef.MOD_ID);
     public static final DeferredRegister<Item> BLOCK_ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
@@ -33,20 +39,49 @@ public class RegistriesHandler {
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, CoreRef.MOD_ID);
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
+    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(new ResourceLocation("wood_type"));
+    public static final DeferredRegister<WoodType> WOOD_TYPE = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
 
-    public static final ResourceKey<Registry<WoodType>> CREATIVE_MODE_TAB = ResourceKey.createRegistryKey(new ResourceLocation("wood_type"));
+    public static void init(IEventBus bus) {
+        ITEMS.register(bus);
+        BLOCKS.register(bus);
+        BLOCK_ITEMS.register(bus);
+        BLOCK_ENTITIES.register(bus);
+        FLUIDS.register(bus);
+        MENU_TYPES.register(bus);
+        ENTITY_TYPES.register(bus);
+        FEATURES.register(bus);
+        RECIPE_TYPES.register(bus);
+        RECIPE_SERIALIZERS.register(bus);
+        CREATIVE_MODE_TABS.register(bus);
+        WOOD_TYPE.register(bus);
 
-    public static void init(IEventBus IEventBus) {
-        ITEMS.register(IEventBus);
-        BLOCKS.register(IEventBus);
-        BLOCK_ITEMS.register(IEventBus);
-        BLOCK_ENTITIES.register(IEventBus);
-        FLUIDS.register(IEventBus);
-        MENU_TYPES.register(IEventBus);
-        ENTITY_TYPES.register(IEventBus);
-        FEATURES.register(IEventBus);
-        RECIPE_TYPES.register(IEventBus);
-        RECIPE_SERIALIZERS.register(IEventBus);
-        CREATIVE_MODE_TABS.register(IEventBus);
+        additionalRegistries.forEach((resourceLocation, registryHolder) -> {
+            additionalRegistries.remove(resourceLocation);
+
+            ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(resourceLocation);
+            DeferredRegister<?> register = DeferredRegister.create(registryHolder.key(), resourceLocation.getNamespace());
+
+            register.register(bus);
+            finalizedDeferredRegister.put(resourceLocation, new finalizedRegistryHolder(key, register));
+        });
     }
+
+    public void addDeferredRegister(ResourceLocation name, registryHolder holder){
+        additionalRegistries.put(name, holder);
+    }
+
+    public finalizedRegistryHolder getDeferredRegister(ResourceLocation name){
+        if(!additionalRegistries.containsKey(name)){
+            return finalizedDeferredRegister.get(name);
+        }
+
+        throw new Error("DeferredRegister : " + name.toString() + " : was not registered!");
+    }
+
+
+
+    public record registryHolder(Registry<?> key){}
+
+    public record finalizedRegistryHolder(ResourceKey<Registry<Object>> resourceKey, DeferredRegister<?> registry){}
 }

@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.api.configs;
 
 import com.mightydanp.techcore.TechCore;
-import com.mightydanp.techcore.api.configs.trait.block.BlockTraitConfig;
+import com.mightydanp.techcore.client.trait.block.BlockTraitConfig;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;

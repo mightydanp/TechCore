@@ -7,19 +7,21 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.BuiltInPackSource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 
 import javax.annotation.Nullable;
 
-@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class AssetPackRegistry {
     public static AssetHolder assetHolder = new AssetHolder();
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event){
         PackType type = event.getPackType();
+
+        AssetPackRegistries.init();
+
         if (type == PackType.CLIENT_RESOURCES){
             event.addRepositorySource((packConsumer) -> {
                 Component desc = Component.literal(CoreRef.MOD_ID + ":assets");

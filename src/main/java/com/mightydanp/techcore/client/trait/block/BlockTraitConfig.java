@@ -1,7 +1,6 @@
-package com.mightydanp.techcore.api.configs.trait.block;
+package com.mightydanp.techcore.client.trait.block;
 
 import com.mightydanp.techcore.api.configs.IConfig;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class BlockTraitConfig implements IConfig {

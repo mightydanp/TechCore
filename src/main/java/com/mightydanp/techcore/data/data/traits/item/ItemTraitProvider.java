@@ -1,6 +1,6 @@
-package com.mightydanp.techcore.api.data.traits.item;
+package com.mightydanp.techcore.data.data.traits.item;
 
-import com.mightydanp.techcore.api.data.traits.TraitProvider;
+import com.mightydanp.techcore.data.data.traits.TraitProvider;
 import com.mightydanp.techcore.api.traits.item.ItemTrait;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;

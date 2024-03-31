@@ -3,13 +3,11 @@ package com.mightydanp.techcore;
 import com.mightydanp.techcore.api.configs.ConfigRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
+import com.mightydanp.techcore.data.data.DataGen;
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -28,9 +26,7 @@ public class TechCore {
         bus.addListener(this::onClientSetup);
         NeoForge.EVENT_BUS.register(this);
 
-        ResourceLocation resourceLocation = new ResourceLocation(CoreRef.MOD_ID, "test");
-
-        ConfigRegistries.saveBlockTrait(resourceLocation, ConfigRegistries.getBlockTrait(resourceLocation), false);
+        NeoForge.EVENT_BUS.addListener(DataGen::addListeners);
 
         ConfigRegistries.registerConfigs();
     }
@@ -45,7 +41,7 @@ public class TechCore {
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
+    private void onServerStarting(ServerStartingEvent event)
     {
         LOGGER.info("Tech Core server is starting.");
     }

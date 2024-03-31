@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mightydanp.techcore.api.data.DataGen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.Util;
@@ -29,7 +28,6 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
     public Trait(ResourceKey<? extends Registry<?>> resourceKey) {
         super(GSON, getDir(resourceKey));
         this.registryKey = resourceKey;
-        DataGen.listeners.add(this);
     }
 
     public Codec<A> codec(){

@@ -8,6 +8,7 @@
     "InventoryMixin"
   ],
   "client": [
+    "CreativeModeInventoryScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

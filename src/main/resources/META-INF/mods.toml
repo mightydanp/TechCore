@@ -29,3 +29,5 @@ license="AGPL-3.0 license"
 [[mixins]]
    config="techcore.mixins.json"
 
+[[accessTransformers]]
+   file="accesstransformer.cfg"

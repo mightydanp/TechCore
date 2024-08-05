@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +35,7 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
 
     @Override
     protected void apply(@NotNull Map<ResourceLocation, JsonElement> resourceLocationJsonElementMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
-        resourceLocationJsonElementMap.forEach((resourceLocation, jsonElement) -> traits.put(resourceLocation, Util.getOrThrow(codec().decode(JsonOps.INSTANCE, jsonElement), IllegalStateException::new).getFirst()));
+        resourceLocationJsonElementMap.forEach((resourceLocation, jsonElement) -> traits.put(resourceLocation, codec().decode(JsonOps.INSTANCE, jsonElement).getOrThrow(IllegalStateException::new).getFirst()));
     }
 
     public A getTrait(ResourceLocation resourceLocation) {
@@ -48,11 +47,11 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
     }
 
     public JsonObject json(Codec<A> codec, A builder){
-        return Util.getOrThrow(codec.encodeStart(JsonOps.INSTANCE, builder), IllegalStateException::new).getAsJsonObject();
+        return codec.encodeStart(JsonOps.INSTANCE, builder).getOrThrow(IllegalStateException::new).getAsJsonObject();
     }
 
     public A trait(Codec<A> codec, JsonObject jsonObject){
-        return Util.getOrThrow(codec.decode(JsonOps.INSTANCE, jsonObject), IllegalStateException::new).getFirst();
+        return codec.decode(JsonOps.INSTANCE, jsonObject).getOrThrow(IllegalStateException::new).getFirst();
     }
 
     public static String getDir(ResourceKey<? extends Registry<?>> resourceKey) {

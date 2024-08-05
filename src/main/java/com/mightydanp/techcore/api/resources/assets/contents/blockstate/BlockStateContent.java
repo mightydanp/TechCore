@@ -64,11 +64,11 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public ResourceLocation modLoc(String name) {
-        return new ResourceLocation(modid, name);
+        return ResourceLocation.fromNamespaceAndPath(modid, name);
     }
 
     public ResourceLocation mcLoc(String name) {
-        return new ResourceLocation(name);
+        return ResourceLocation.withDefaultNamespace(name);
     }
 
     ResourceLocation key(Block block) {
@@ -96,11 +96,11 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         String modid = modid(block);
         String name = name(block);
 
-        return new ResourceLocation(modid, ModelProvider.BLOCK_FOLDER + "/" + name);
+        return ResourceLocation.fromNamespaceAndPath(modid, ModelProvider.BLOCK_FOLDER + "/" + name);
     }
 
     public ResourceLocation extend(ResourceLocation rl, String suffix) {
-        return new ResourceLocation(rl.getNamespace(), rl.getPath() + suffix);
+        return ResourceLocation.fromNamespaceAndPath(rl.getNamespace(), rl.getPath() + suffix);
     }
 
     public TCModelBuilder<? extends BlockModelContent<?>> cubeAll(Block block) {

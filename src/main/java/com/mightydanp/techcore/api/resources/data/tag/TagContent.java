@@ -2,7 +2,6 @@ package com.mightydanp.techcore.api.resources.data.tag;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +32,7 @@ public class TagContent<A> {
     public TagContent(String modid, String name, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry){
         this.modid = modid;
         this.name = name;
-        tagKey = TagKey.create(ResourceKey, new ResourceLocation(modid, name));
+        tagKey = TagKey.create(ResourceKey, ResourceLocation.fromNamespaceAndPath(modid, name));
         this.registry = registry;
         this.resourceKey = ResourceKey;
     }
@@ -97,6 +96,6 @@ public class TagContent<A> {
     }
 
     public JsonObject json(){
-        return Util.getOrThrow(TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), builder.isReplace(), builder.getRemoveEntries().toList())), IllegalStateException::new).getAsJsonObject();
+        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), builder.isReplace(), builder.getRemoveEntries().toList())).getOrThrow(IllegalStateException::new).getAsJsonObject();
     }
 }

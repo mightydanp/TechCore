@@ -2,11 +2,18 @@ package com.mightydanp.techcore.api.resources.assets;
 
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.TechCore;
-import com.mightydanp.techcore.client.ref.CoreRef;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.repository.BuiltInPackSource;
+import net.minecraft.server.packs.repository.KnownPack;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,18 +23,34 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class AssetHolder implements PackResources {
-
+public class AssetPack implements PackResources {
     public Map<ResourceLocation, IoSupplier<InputStream>> ASSET_HOLDER = new HashMap<>();
 
-    private static final int PACK_VERSION = 8;
+    public final int version = 8;
+    public final PackType type = PackType.CLIENT_RESOURCES;
+    public final PackSource source = PackSource.DEFAULT;
+
+    public String namespace;
+    public String name;
+
+    public boolean required;
+    public Pack.Position defaultPosition;
+    public boolean fixedPosition;
+
+    public AssetPack(String namespace, String name, boolean required, Pack.Position defaultPosition, boolean fixedPosition){
+        this.namespace = namespace;
+        this.name = name;
+        this.required = required;
+        this.defaultPosition = defaultPosition;
+        this.fixedPosition = fixedPosition;
+    }
 
     public void addToResources(ResourceLocation location, JsonObject jsonObject){
         if (!ASSET_HOLDER.containsKey(location)) {
             InputStream inputStream = new ByteArrayInputStream(jsonObject.toString().getBytes());
             ASSET_HOLDER.put(location, ()-> inputStream);
         }else{
-            TechCore.LOGGER.warn("[" + location + "] already exists in assets.");
+            TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
         }
     }
 
@@ -35,7 +58,7 @@ public class AssetHolder implements PackResources {
         if (ASSET_HOLDER.containsKey(location)) {
             ASSET_HOLDER.remove(location);
         }else{
-            TechCore.LOGGER.warn("[" + location + "] does not already exists in assets.");
+            TechCore.LOGGER.warn("[{}] does not already exists in resource assets: ", location);
         }
     }
 
@@ -65,7 +88,7 @@ public class AssetHolder implements PackResources {
             return null;
         });
          */
-        if (packType == PackType.CLIENT_RESOURCES) {
+        if (packType == type) {
             if (ASSET_HOLDER.containsKey(location)) {
                 IoSupplier<java.io.InputStream> resource = ASSET_HOLDER.get(location);
                 try {
@@ -75,12 +98,12 @@ public class AssetHolder implements PackResources {
             }
         }
 
-        throw new RuntimeException(new Throwable("Could not find resource in generated resources: " + location));
+        throw new RuntimeException(new Throwable("Could not find resource in generated resource assets: " + location));
     }
 
     @Override
     public void listResources(@NotNull PackType packType, @NotNull String namespace, @NotNull String path, @NotNull ResourceOutput resourceOutput) {
-        if (packType == PackType.CLIENT_RESOURCES){
+        if (packType == type){
             Map<String, IoSupplier<InputStream>> filteredMap = new HashMap<>();
 
             ASSET_HOLDER.forEach((resource, stream) -> {
@@ -90,7 +113,7 @@ public class AssetHolder implements PackResources {
             });
 
             if(filteredMap.isEmpty()){
-                TechCore.LOGGER.error("Invalid path + " + path);
+                TechCore.LOGGER.error("Invalid path + {}", path);
             }
         }
     }
@@ -98,7 +121,7 @@ public class AssetHolder implements PackResources {
     @Override
     public @NotNull Set<String> getNamespaces(@NotNull PackType packType) {
         Set<String> namespaces = new HashSet<>();
-        if (packType == PackType.CLIENT_RESOURCES) {
+        if (packType == type) {
             for (ResourceLocation resource : ASSET_HOLDER.keySet()) {
                 namespaces.add(resource.getNamespace());
             }
@@ -111,8 +134,8 @@ public class AssetHolder implements PackResources {
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         if(serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
-            object.addProperty("pack_format", PACK_VERSION);
-            object.addProperty("description", "dynamically generated assets");
+            object.addProperty("pack_format", version);
+            object.addProperty("description", "dynamically generated resource assets");
             return serializer.fromJson(object);
         }
 
@@ -120,8 +143,18 @@ public class AssetHolder implements PackResources {
     }
 
     @Override
+    public @NotNull Optional<KnownPack> knownPackInfo() {
+        return Optional.of(new KnownPack(namespace, name, SharedConstants.getCurrentVersion().getId()));
+    }
+
+    @Override
+    public @NotNull PackLocationInfo location() {
+        return new PackLocationInfo(this.packId(), Component.literal(packId()), source, knownPackInfo());
+    }
+
+    @Override
     public @NotNull String packId() {
-        return CoreRef.MOD_ID + ":assets";
+        return namespace + ":" + name;
     }
 
     @Override
@@ -129,8 +162,14 @@ public class AssetHolder implements PackResources {
 
     }
 
-    @Override
-    public boolean isBuiltin() {
-        return true;
+    public PackSelectionConfig packSelectionConfig(){
+        return new PackSelectionConfig(required, defaultPosition, fixedPosition);
+    }
+
+    @Nullable
+    public Pack createPack() {
+        Pack.ResourcesSupplier resourcesSupplier = BuiltInPackSource.fixedResources(this);
+
+        return Pack.readMetaAndCreate(this.location(), resourcesSupplier, this.type, this.packSelectionConfig());
     }
 }

@@ -6,21 +6,21 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ConfigRegistries {
     private static final Map<ResourceLocation, BlockTraitConfig> blockTrait = new HashMap<>();
 
     public static void registerConfigs(){
         TechCore.LOGGER.info("Tech Core config registry is starting.");
 
-        blockTrait.forEach((resourceLocation, config) -> ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, config.build(), CoreRef.MOD_ID + "/blockTrait/" + resourceLocation.getPath() + ".toml"));
+        blockTrait.forEach((resourceLocation, config) -> ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, config.build(), CoreRef.MOD_ID + "/blockTrait/" + resourceLocation.getPath() + ".toml"));
 
         TechCore.LOGGER.info("Tech Core config registry has completed.");
     }

@@ -27,7 +27,7 @@ public class ModelContent<A>{
         this.name = name;
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
     }
 
     public ModelContent(ResourceLocation resourceLocation, String modelType, String organizationPath) {
@@ -35,7 +35,7 @@ public class ModelContent<A>{
         this.modid = resourceLocation.getNamespace();
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(new ResourceLocation(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
     }
 
     public String modid() {
@@ -63,14 +63,14 @@ public class ModelContent<A>{
     }
 
     public ResourceLocation mcLoc(String name) {
-        return new ResourceLocation(name);
+        return ResourceLocation.withDefaultNamespace(name);
     }
 
     public ResourceLocation extendWithFolder(ResourceLocation rl) {
         if (rl.getPath().contains("/")) {
             return rl;
         }
-        return new ResourceLocation(rl.getNamespace(), modelType + "/" + rl.getPath());
+        return ResourceLocation.fromNamespaceAndPath(rl.getNamespace(), modelType + "/" + rl.getPath());
     }
 
     public ModelFile.UncheckedModelFile getFile(ResourceLocation path) {
@@ -80,7 +80,7 @@ public class ModelContent<A>{
     }
 
     public ResourceLocation modLoc(String name) {
-        return new ResourceLocation(modid, name);
+        return ResourceLocation.fromNamespaceAndPath(modid, name);
     }
 
     public TCModelBuilder<A> withExistingParent(String parent) {

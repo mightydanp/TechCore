@@ -1,7 +1,9 @@
 package com.mightydanp.techcore.world.inventory;
 
+import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.registries.MenuRegistries;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public class TCPlayerInventoryMenu extends AbstractContainerMenu {
-
+    public static final Component translation = Component.translatable("menu.title." + CoreRef.MOD_ID + ".inventory");
     public static final int CONTAINER_ID = 0;
     public static final int RESULT_SLOT = 0;
     public static final int CRAFT_SLOT_START = 1;
@@ -43,13 +45,11 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     //public final boolean active;
     private final Player owner;
 
-    public TCPlayerInventoryMenu(int windowId, Inventory playerInventory, Player player) {
-        super(MenuRegistries.TC_PLAYER_INVENTORY.get(), windowId);
-        this.owner = player;
-
+    public TCPlayerInventoryMenu(int windowId, Inventory playerInventory) {
+        super(MenuRegistries.TC_PLAYER_INVENTORY_MENU.get(), windowId);
+        this.owner = playerInventory.player;
         int i1;
         int j1;
-
         for(i1 = 0; i1 < 4; ++i1) {
             EquipmentSlot equipmentslot = SLOT_IDS[i1];
             ResourceLocation resourcelocation = TEXTURE_EMPTY_SLOTS.get(equipmentslot);

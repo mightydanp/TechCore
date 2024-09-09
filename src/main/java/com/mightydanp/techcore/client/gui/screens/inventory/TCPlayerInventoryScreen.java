@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.client.gui.screens;
+package com.mightydanp.techcore.client.gui.screens.inventory;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.world.inventory.TCPlayerInventoryMenu;
@@ -32,8 +32,8 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     private boolean widthTooNarrow;
     private boolean buttonClicked;
 
-    public TCPlayerInventoryScreen(TCPlayerInventoryMenu container, Inventory inventory, Component title) {
-        super(container, inventory, title);
+    public TCPlayerInventoryScreen(TCPlayerInventoryMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
         this.inventoryLabelY = this.imageHeight - 110;
     }
 
@@ -58,14 +58,15 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         this.xMouse = (float)mouseX;
         this.yMouse = (float)mouseY;
+        this.renderBg(guiGraphics, partialTick, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        int i = this.leftPos;
-        int j = this.topPos;
-        guiGraphics.blit(INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
-        renderEntityInInventoryFollowsMouse(guiGraphics, i + 26, j + 8, i + 75, j + 78, 30, 0.0625F, this.xMouse, this.yMouse, Objects.requireNonNull(this.minecraft).player);
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight)/ 2;
+        guiGraphics.blit(GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        renderEntityInInventoryFollowsMouse(guiGraphics, x + 26, y + 8, x + 75, y + 78, 30, 0.0625F, this.xMouse, this.yMouse, Objects.requireNonNull(this.minecraft).player);
     }
 
     public static void renderEntityInInventoryFollowsMouse(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int scale, float yOffset, float mouseX, float mouseY, LivingEntity entity) {

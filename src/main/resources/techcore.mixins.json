@@ -2,8 +2,9 @@
   "required": true,
   "package": "com.mightydanp.techcore.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "mixins.techcore.refmap.json",
+  "refmap": "techcore.mixins.refmap.json",
   "mixins": [
+    "InventoryMixin"
   ],
   "client": [
   ],

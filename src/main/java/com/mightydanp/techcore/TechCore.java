@@ -4,6 +4,7 @@ import com.mightydanp.techcore.api.configs.ConfigRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.data.data.DataGen;
+import com.mightydanp.techcore.data.event.TCInventoryEvent;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,25 +20,12 @@ public class TechCore {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public TechCore(IEventBus bus){
-        //IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus(), forge = NeoForge.EVENT_BUS;
         RegistriesHandler.init(bus);
 
-        bus.addListener(this::onCommonSetup);
-        bus.addListener(this::onClientSetup);
         NeoForge.EVENT_BUS.register(this);
-
-        NeoForge.EVENT_BUS.addListener(DataGen::addListeners);
+        NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onTick);
 
         ConfigRegistries.registerConfigs();
-    }
-
-    private void onCommonSetup(final FMLCommonSetupEvent event){
-        LOGGER.info("Tech Core common setup is starting");
-    }
-
-    private void onClientSetup(FMLClientSetupEvent event)
-    {
-        LOGGER.info("Tech Core client setup is starting");
     }
 
     @SubscribeEvent

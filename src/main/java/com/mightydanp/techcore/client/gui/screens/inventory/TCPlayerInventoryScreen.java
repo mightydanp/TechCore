@@ -45,6 +45,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     protected void init() {
+        super.init();
         if (Objects.requireNonNull(Objects.requireNonNull(this.minecraft).gameMode).hasInfiniteItems()) {
             this.minecraft.setScreen(new CreativeModeInventoryScreen(Objects.requireNonNull(this.minecraft.player), this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
         }
@@ -55,16 +56,19 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
         this.xMouse = (float)mouseX;
         this.yMouse = (float)mouseY;
-        this.renderBg(guiGraphics, partialTick, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight)/ 2;
+        int x = this.leftPos;
+        int y = this.topPos;
+        //int x = (this.width - this.imageWidth) / 2;
+        //int y = (this.height - this.imageHeight)/ 2;
         guiGraphics.blit(GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
         renderEntityInInventoryFollowsMouse(guiGraphics, x + 26, y + 8, x + 75, y + 78, 30, 0.0625F, this.xMouse, this.yMouse, Objects.requireNonNull(this.minecraft).player);
     }
@@ -135,6 +139,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+
         return !this.widthTooNarrow && super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -153,6 +158,14 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
 
     protected void slotClicked(@NotNull Slot slot, int slotId, int mouseButton, @NotNull ClickType type) {
         super.slotClicked(slot, slotId, mouseButton, type);
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
     }
 
 }

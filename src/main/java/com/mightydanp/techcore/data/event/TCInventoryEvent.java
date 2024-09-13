@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
@@ -35,18 +37,25 @@ public class TCInventoryEvent {
         while (tcInventoryKey.consumeClick()) {
             MenuProvider menu = new SimpleMenuProvider((windowID, inventory, player) -> new TCPlayerInventoryMenu(windowID, inventory), TCPlayerInventoryMenu.translation);
 
-            event.getEntity().openMenu(menu);
+            if(event.getEntity() instanceof ServerPlayer player){
+                event.getEntity().openMenu(menu);
+            }
         }
     }
 
     public static void onPlayerOpenInventory(ScreenEvent.Opening event){
-        TechCore.LOGGER.info(event.getScreen().toString());
+        //TechCore.LOGGER.info(event.getScreen().toString());
         if(event.getScreen() instanceof InventoryScreen screen){
             event.setCanceled(true);
-            //MenuProvider menu = new SimpleMenuProvider((windowID, inventory, player) -> new TCPlayerInventoryMenu(windowID, inventory), TCPlayerInventoryMenu.translation);
-            //InventoryScreen
-            //event.setNewScreen(new TCPlayerInventoryScreen(menu, ));
         }
-
     }
+
+    public static void onRightClick(PlayerInteractEvent.RightClickItem event) {
+            MenuProvider menu = new SimpleMenuProvider((windowID, inventory, player) -> new TCPlayerInventoryMenu(windowID, inventory), TCPlayerInventoryMenu.translation);
+
+                if(event.getEntity().getMainHandItem().getItem() == Items.STICK){
+                    event.getEntity().openMenu(menu);
+            }
+    }
+
 }

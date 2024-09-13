@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.world.inventory;
 
+import com.mightydanp.techcore.TechCore;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.registries.MenuRegistries;
 import com.mojang.datafixers.util.Pair;
@@ -16,7 +17,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.*;
 
 public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public static final Component translation = Component.translatable("menu.title." + CoreRef.MOD_ID + ".inventory");
@@ -38,44 +39,56 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public static final ResourceLocation EMPTY_ARMOR_SLOT_CHESTPLATE = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_chestplate");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_LEGGINGS = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_leggings");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_BOOTS = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_boots");
-    public static final ResourceLocation EMPTY_ARMOR_SLOT_OFF_HAND = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_shield");
+    public static final ResourceLocation EMPTY_HAND_SLOT_LEFT = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "item/empty_hand_slot_left");
+    public static final ResourceLocation EMPTY_HAND_SLOT_RIGHT = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "item/empty_hand_slot_right");
     private static final Map<EquipmentSlot, ResourceLocation> TEXTURE_EMPTY_SLOTS;
     private static final EquipmentSlot[] SLOT_IDS;
     private final ResultContainer resultSlots = new ResultContainer();
     //public final boolean active;
     private final Player owner;
 
+    private List<String> inventorySecretary = new ArrayList<>();
+
     public TCPlayerInventoryMenu(int windowId, Inventory playerInventory) {
         super(MenuRegistries.TC_PLAYER_INVENTORY_MENU.get(), windowId);
         this.owner = playerInventory.player;
         int i1;
         int j1;
+
+        this.addSlot("result", new Slot(playerInventory, 0, 152, 62));
+
         for(i1 = 0; i1 < 4; ++i1) {
             EquipmentSlot equipmentslot = SLOT_IDS[i1];
             ResourceLocation resourcelocation = TEXTURE_EMPTY_SLOTS.get(equipmentslot);
-            this.addSlot(new TCArmorSlot(playerInventory, owner, equipmentslot, 39 - i1, 8, 8 + i1 * 18, resourcelocation));
+            this.addSlot(equipmentslot.getName(), new TCArmorSlot(playerInventory, owner, equipmentslot, 39 - i1, 8, 8 + i1 * 18, resourcelocation));
         }
 
         for(i1 = 0; i1 < 3; ++i1) {
             for(j1 = 0; j1 < 9; ++j1) {
-                this.addSlot(new Slot(playerInventory, j1 + (i1 + 1) * 9, 8 + j1 * 18, 84 + i1 * 18));
+                this.addSlot("inventory", new Slot(playerInventory, j1 + (i1 + 1) * 9, 8 + j1 * 18, 84 + i1 * 18));
             }
         }
 
         for(i1 = 0; i1 < 9; ++i1) {
-            this.addSlot(new Slot(playerInventory, i1, 8 + i1 * 18, 142));
+            this.addSlot("hotbar", new Slot(playerInventory, i1, 8 + i1 * 18, 142));
         }
 
-        this.addSlot(new Slot(playerInventory, 40, 77, 62) {
+        this.addSlot("off_hand", new Slot(playerInventory, 40, 98, 62) {
             public void setByPlayer(@NotNull ItemStack newItem, @NotNull ItemStack oldItem) {
                 owner.onEquipItem(EquipmentSlot.OFFHAND, oldItem, newItem);
                 super.setByPlayer(newItem, oldItem);
             }
 
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-                return Pair.of(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
+                return Pair.of(TCPlayerInventoryMenu.BLOCK_ATLAS, TCPlayerInventoryMenu.EMPTY_HAND_SLOT_LEFT);
             }
         });
+    }
+
+    protected @NotNull Slot addSlot(String name, @NotNull Slot slot) {
+        inventorySecretary.add(slot.getSlotIndex() + " : " + name);
+        Collections.sort(inventorySecretary);
+        return super.addSlot(slot);
     }
 
     public static boolean isHotbarSlot(int index) {
@@ -116,42 +129,39 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
+        TechCore.LOGGER.info(String.valueOf(index));
         if (slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
             EquipmentSlot equipmentslot = player.getEquipmentSlotForItem(itemstack);
             if (index == 0) {
-                if (!this.moveItemStackTo(itemstack1, 9, 45, true)) {
+                if (!this.moveItemStackTo(itemstack1, 5, 40, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            } else if (index >= 1 && index < 5) {
-                if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
+            }  else if (index >= 1 && index < 4) {
+                if (!this.moveItemStackTo(itemstack1, 5, 40, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 5 && index < 9) {
-                if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !this.slots.get(8 - equipmentslot.getIndex()).hasItem()) {
-                int i = 8 - equipmentslot.getIndex();
+            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !((Slot)this.slots.get(4 - equipmentslot.getIndex())).hasItem()) {
+                int i = 4 - equipmentslot.getIndex();
                 if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot == EquipmentSlot.OFFHAND && !this.slots.get(45).hasItem()) {
-                if (!this.moveItemStackTo(itemstack1, 45, 46, false)) {
+            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(41)).hasItem()) {
+                if (!this.moveItemStackTo(itemstack1, 41, 42, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 9 && index < 36) {
-                if (!this.moveItemStackTo(itemstack1, 36, 45, false)) {
+            } else if (index >= 5 && index < 32) {
+                if (!this.moveItemStackTo(itemstack1, 32, 41, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 36 && index < 45) {
-                if (!this.moveItemStackTo(itemstack1, 9, 36, false)) {
+            } else if (index >= 32 && index < 41) {
+                if (!this.moveItemStackTo(itemstack1, 5, 32, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 5, 41, false)) {
                 return ItemStack.EMPTY;
             }
 

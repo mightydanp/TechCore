@@ -13,7 +13,7 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 import java.util.function.Supplier;
 
-@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class MenuRegistries {
     public static final Supplier<MenuType<TCPlayerInventoryMenu>> TC_PLAYER_INVENTORY_MENU = RegistriesHandler.MENU_TYPES.register("tc_player_inventory",
             () -> IMenuTypeExtension.create((windowId, inv, data) -> new TCPlayerInventoryMenu(windowId, inv)));

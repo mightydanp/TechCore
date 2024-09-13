@@ -24,6 +24,7 @@ public class TechCore {
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onTick);
+        NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onRightClick);
 
         ConfigRegistries.registerConfigs();
     }

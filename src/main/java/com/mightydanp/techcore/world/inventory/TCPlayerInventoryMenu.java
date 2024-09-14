@@ -45,22 +45,20 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     private static final EquipmentSlot[] SLOT_IDS;
     private final ResultContainer resultSlots = new ResultContainer();
     //public final boolean active;
-    private final Player owner;
+    private final Player player;
 
     private List<String> inventorySecretary = new ArrayList<>();
 
     public TCPlayerInventoryMenu(int windowId, Inventory playerInventory) {
         super(MenuRegistries.TC_PLAYER_INVENTORY_MENU.get(), windowId);
-        this.owner = playerInventory.player;
+        this.player = playerInventory.player;
         int i1;
         int j1;
-
-        this.addSlot("result", new Slot(playerInventory, 0, 152, 62));
 
         for(i1 = 0; i1 < 4; ++i1) {
             EquipmentSlot equipmentslot = SLOT_IDS[i1];
             ResourceLocation resourcelocation = TEXTURE_EMPTY_SLOTS.get(equipmentslot);
-            this.addSlot(equipmentslot.getName(), new TCArmorSlot(playerInventory, owner, equipmentslot, 39 - i1, 8, 8 + i1 * 18, resourcelocation));
+            this.addSlot(equipmentslot.getName(), new TCArmorSlot(playerInventory, player, equipmentslot, 39 - i1, 8, 8 + i1 * 18, resourcelocation));
         }
 
         for(i1 = 0; i1 < 3; ++i1) {
@@ -73,16 +71,34 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
             this.addSlot("hotbar", new Slot(playerInventory, i1, 8 + i1 * 18, 142));
         }
 
-        this.addSlot("off_hand", new Slot(playerInventory, 40, 98, 62) {
+        String mainArm = player.getMainArm().getSerializedName();
+
+        int leftX = (mainArm.equals("right") ? 98 : 116);
+        int rightX = (mainArm.equals("right") ? 116 : 98);
+
+        this.addSlot("off_hand", new Slot(playerInventory, 40, leftX, 62) {
             public void setByPlayer(@NotNull ItemStack newItem, @NotNull ItemStack oldItem) {
-                owner.onEquipItem(EquipmentSlot.OFFHAND, oldItem, newItem);
+                player.onEquipItem(mainArm.equals("right") ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND, oldItem, newItem);
                 super.setByPlayer(newItem, oldItem);
             }
 
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-                return Pair.of(TCPlayerInventoryMenu.BLOCK_ATLAS, TCPlayerInventoryMenu.EMPTY_HAND_SLOT_LEFT);
+                return Pair.of(TCPlayerInventoryMenu.BLOCK_ATLAS, mainArm.equals("right") ? TCPlayerInventoryMenu.EMPTY_HAND_SLOT_LEFT : TCPlayerInventoryMenu.EMPTY_HAND_SLOT_RIGHT);
             }
         });
+
+        this.addSlot("main_hand", new TCMainHandSlot(playerInventory.player, 41, rightX, 62) {
+            public void setByPlayer(@NotNull ItemStack newItem, @NotNull ItemStack oldItem) {
+                player.onEquipItem(mainArm.equals("right") ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND, oldItem, newItem);
+                super.setByPlayer(newItem, oldItem);
+            }
+
+            public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+                return Pair.of(TCPlayerInventoryMenu.BLOCK_ATLAS, mainArm.equals("right") ? TCPlayerInventoryMenu.EMPTY_HAND_SLOT_RIGHT : TCPlayerInventoryMenu.EMPTY_HAND_SLOT_LEFT);
+            }
+        });
+
+        this.addSlot("result", new TCInventoryResultSlot(playerInventory.player, 42, 152, 62));
     }
 
     protected @NotNull Slot addSlot(String name, @NotNull Slot slot) {
@@ -135,33 +151,33 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
             itemstack = itemstack1.copy();
             EquipmentSlot equipmentslot = player.getEquipmentSlotForItem(itemstack);
             if (index == 0) {
-                if (!this.moveItemStackTo(itemstack1, 5, 40, true)) {
+                if (!this.moveItemStackTo(itemstack1, 4, 39, true)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            }  else if (index >= 1 && index < 4) {
-                if (!this.moveItemStackTo(itemstack1, 5, 40, false)) {
+            }  else if (index >= 0 && index < 3) {
+                if (!this.moveItemStackTo(itemstack1, 4, 39, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !((Slot)this.slots.get(4 - equipmentslot.getIndex())).hasItem()) {
-                int i = 4 - equipmentslot.getIndex();
+            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !((Slot)this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
+                int i = 3 - equipmentslot.getIndex();
                 if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(41)).hasItem()) {
-                if (!this.moveItemStackTo(itemstack1, 41, 42, false)) {
+            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(40)).hasItem()) {
+                if (!this.moveItemStackTo(itemstack1, 40, 41, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 5 && index < 32) {
-                if (!this.moveItemStackTo(itemstack1, 32, 41, false)) {
+            } else if (index >= 4 && index < 31) {
+                if (!this.moveItemStackTo(itemstack1, 31, 40, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 32 && index < 41) {
-                if (!this.moveItemStackTo(itemstack1, 5, 32, false)) {
+            } else if (index >= 31 && index < 40) {
+                if (!this.moveItemStackTo(itemstack1, 4, 31, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.moveItemStackTo(itemstack1, 5, 41, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 4, 40, false)) {
                 return ItemStack.EMPTY;
             }
 

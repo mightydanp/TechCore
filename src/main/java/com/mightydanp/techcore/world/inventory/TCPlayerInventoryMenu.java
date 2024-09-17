@@ -2,6 +2,7 @@ package com.mightydanp.techcore.world.inventory;
 
 import com.mightydanp.techcore.TechCore;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.mixin.InventoryMixin;
 import com.mightydanp.techcore.registries.MenuRegistries;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.chat.Component;
@@ -21,19 +22,20 @@ import java.util.*;
 
 public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public static final Component translation = Component.translatable("menu.title." + CoreRef.MOD_ID + ".inventory");
-    public static final int CONTAINER_ID = 0;
-    public static final int RESULT_SLOT = 0;
-    public static final int CRAFT_SLOT_START = 1;
-    public static final int CRAFT_SLOT_COUNT = 4;
-    public static final int CRAFT_SLOT_END = 5;
-    public static final int ARMOR_SLOT_START = 5;
+    public static final int ARMOR_SLOT_START = 0;
     public static final int ARMOR_SLOT_COUNT = 4;
-    public static final int ARMOR_SLOT_END = 9;
-    public static final int INV_SLOT_START = 9;
-    public static final int INV_SLOT_END = 36;
-    public static final int USE_ROW_SLOT_START = 36;
-    public static final int USE_ROW_SLOT_END = 45;
-    public static final int SHIELD_SLOT = 45;
+    public static final int ARMOR_SLOT_END = 3;
+    public static final int EXTRA_1 = 4;
+    public static final int BACK = 5;
+    public static final int EXTRA_3 = 6;
+    public static final int EXTRA_4 = 7;
+    public static final int INV_SLOT_START = 3;
+    public static final int INV_SLOT_END = 30;
+    public static final int USE_ROW_SLOT_START = 30;
+    public static final int USE_ROW_SLOT_END = 39;
+    public static final int OFF_HAND_SLOT = 40;
+    public static final int MAIN_HAND_SLOT = 41;
+    public static final int RESULT_SLOT = 42;
     public static final ResourceLocation BLOCK_ATLAS = ResourceLocation.withDefaultNamespace("textures/atlas/blocks.png");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_HELMET = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_helmet");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_CHESTPLATE = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_chestplate");
@@ -87,7 +89,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
             }
         });
 
-        this.addSlot("main_hand", new TCMainHandSlot(playerInventory.player, 41, rightX, 62) {
+        this.addSlot("main_hand", new TCMainHandSlot(playerInventory.player, 42, rightX, 62) {
             public void setByPlayer(@NotNull ItemStack newItem, @NotNull ItemStack oldItem) {
                 player.onEquipItem(mainArm.equals("right") ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND, oldItem, newItem);
                 super.setByPlayer(newItem, oldItem);
@@ -98,7 +100,12 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
             }
         });
 
-        this.addSlot("result", new TCInventoryResultSlot(playerInventory.player, 42, 152, 62));
+        this.addSlot("extra_1", new NullSlot(playerInventory.player, 41, 24, 8));
+        this.addSlot("back", new BackSlotButton(playerInventory.player, 42, 24, 8));
+        this.addSlot("extra_3", new NullSlot(playerInventory.player, 43, 24, 8));
+        this.addSlot("extra_4", new NullSlot(playerInventory.player, 44, 24, 8));
+
+        this.addSlot("result", new TCInventoryResultSlot(playerInventory.player, 45, 152, 8));
     }
 
     protected @NotNull Slot addSlot(String name, @NotNull Slot slot) {

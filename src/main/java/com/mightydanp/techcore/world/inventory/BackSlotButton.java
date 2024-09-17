@@ -1,13 +1,17 @@
 package com.mightydanp.techcore.world.inventory;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class BackSlotButton extends Slot {
-    public BackSlotButton(Container container, int slot, int x, int y) {
-        super(container, slot, x, y);
+    public final Player player;
+
+    public BackSlotButton(Player player, int slot, int x, int y) {
+        super(player.getInventory(), slot, x, y);
+        this.player = player;
     }
 
     @Override

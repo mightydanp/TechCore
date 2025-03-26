@@ -3,7 +3,6 @@ package com.mightydanp.techcore.data.data.traits;
 import com.google.gson.JsonElement;
 import com.mightydanp.techcore.api.traits.Trait;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
@@ -46,7 +45,8 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
             this.generate(p_255484_, this.fileHelper);
             this.builders.forEach((quest, builder) -> {
                 Path path = this.provider.json(quest);
-                JsonElement jsonelement = Util.getOrThrow(builder.codec().encodeStart(JsonOps.INSTANCE, builder), IllegalStateException::new);
+                JsonElement jsonelement = builder.codec().encodeStart(JsonOps.INSTANCE, builder).getOrThrow(IllegalStateException::new);
+
                 list.add(DataProvider.saveStable(output, jsonelement, path));
             });
             return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));

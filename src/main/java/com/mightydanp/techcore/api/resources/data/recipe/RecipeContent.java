@@ -2,7 +2,6 @@ package com.mightydanp.techcore.api.resources.data.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -91,10 +90,10 @@ public class RecipeContent {
         RecipeOutput recipeOutput = new RecipeOutput() {
             @Override
             public void accept(@NotNull ResourceLocation resourceLocation, @NotNull Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder, ICondition @NotNull ... conditions) {
-                recipeJson = Util.getOrThrow(Recipe.CONDITIONAL_CODEC.encodeStart(JsonOps.INSTANCE, Optional.of(new WithConditions<>(recipe, conditions))), IllegalStateException::new).getAsJsonObject();
+                recipeJson = Recipe.CONDITIONAL_CODEC.encodeStart(JsonOps.INSTANCE, Optional.of(new WithConditions<>(recipe, conditions))).getOrThrow(IllegalStateException::new).getAsJsonObject();
 
                 if (advancementHolder != null) {
-                    advancementJson = Util.getOrThrow(Advancement.CONDITIONAL_CODEC.encodeStart(JsonOps.INSTANCE, Optional.of(new WithConditions<>(advancementHolder.value(), conditions))), IllegalStateException::new).getAsJsonObject();
+                    advancementJson = Advancement.CONDITIONAL_CODEC.encodeStart(JsonOps.INSTANCE, Optional.of(new WithConditions<>(advancementHolder.value(), conditions))).getOrThrow(IllegalStateException::new).getAsJsonObject();
                 }
             }
 
@@ -110,7 +109,7 @@ public class RecipeContent {
             }else if(optional instanceof ResourceLocation resourceLocation) {
                 shapeless.save(recipeOutput, resourceLocation);
             }else{
-                shapeless.save(recipeOutput, new ResourceLocation(modid(), name()));
+                shapeless.save(recipeOutput, ResourceLocation.fromNamespaceAndPath(modid(), name()));
             }
         }
 
@@ -120,7 +119,7 @@ public class RecipeContent {
             }else if(optional instanceof ResourceLocation resourceLocation) {
                 shaped.save(recipeOutput, resourceLocation);
             }else{
-                shaped.save(recipeOutput, new ResourceLocation(modid(), name()));
+                shaped.save(recipeOutput, ResourceLocation.fromNamespaceAndPath(modid(), name()));
             }
         }
 

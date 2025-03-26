@@ -2,7 +2,6 @@ package com.mightydanp.techcore.api.resources.data.loottable;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -44,7 +43,7 @@ public class LootTableContent {
 
     public JsonObject json(){
         //LootTableProvider
-        return Util.getOrThrow(LootTable.CODEC.encodeStart(JsonOps.INSTANCE, lootTable), IllegalStateException::new).getAsJsonObject();
+        return LootTable.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, lootTable).getOrThrow(IllegalStateException::new).getAsJsonObject();
 
     }
 

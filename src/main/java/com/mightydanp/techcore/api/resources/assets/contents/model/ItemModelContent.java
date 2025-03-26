@@ -34,6 +34,6 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
     public TCModelBuilder<A> basicItem(ResourceLocation item) {
         return (TCModelBuilder<A>) new TCModelBuilder(item)
                 .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                .texture("layer0", new ResourceLocation(item.getNamespace(), "item/" + item.getPath()));
+                .texture("layer0", ResourceLocation.fromNamespaceAndPath(item.getNamespace(), "item/" + item.getPath()));
     }
 }

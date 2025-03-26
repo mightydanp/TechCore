@@ -2,11 +2,18 @@ package com.mightydanp.techcore.api.resources.data;
 
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.TechCore;
-import com.mightydanp.techcore.client.ref.CoreRef;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.repository.BuiltInPackSource;
+import net.minecraft.server.packs.repository.KnownPack;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,31 +21,44 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class DataHolder implements PackResources {
+public class DataPack implements PackResources {
+    public Map<ResourceLocation, IoSupplier<InputStream>> DATA_HOLDER = new HashMap<>();
 
-    public Map<ResourceLocation, IoSupplier<InputStream>> ASSET_HOLDER = new HashMap<>();
+    public final int version = 8;
+    public final PackType type = PackType.SERVER_DATA;
+    public final PackSource source = PackSource.DEFAULT;
 
-    private static final int PACK_VERSION = 8;
+    public String namespace;
+    public String name;
+
+    public boolean required;
+    public Pack.Position defaultPosition;
+    public boolean fixedPosition;
+
+    public DataPack(String namespace, String name, boolean required, Pack.Position defaultPosition, boolean fixedPosition){
+        this.namespace = namespace;
+        this.name = name;
+        this.required = required;
+        this.defaultPosition = defaultPosition;
+        this.fixedPosition = fixedPosition;
+    }
 
     public void addToResources(ResourceLocation location, JsonObject jsonObject){
-        if (!ASSET_HOLDER.containsKey(location)) {
+        if (!DATA_HOLDER.containsKey(location)) {
             InputStream inputStream = new ByteArrayInputStream(jsonObject.toString().getBytes());
-            ASSET_HOLDER.put(location, ()-> inputStream);
+            DATA_HOLDER.put(location, ()-> inputStream);
         }else{
-            TechCore.LOGGER.warn("[" + location + "] already exists in data.");
+            TechCore.LOGGER.warn("[{}] already exists in resource data: ", location);
         }
     }
 
     public void removeToResources(ResourceLocation location){
-        if (ASSET_HOLDER.containsKey(location)) {
-            ASSET_HOLDER.remove(location);
+        if (DATA_HOLDER.containsKey(location)) {
+            DATA_HOLDER.remove(location);
         }else{
-            TechCore.LOGGER.warn("[" + location + "] does not already exists in data.");
+            TechCore.LOGGER.warn("[{}] does not already exists in resource data: ", location);
         }
     }
 
@@ -68,9 +88,9 @@ public class DataHolder implements PackResources {
             return null;
         });
          */
-        if (packType == PackType.SERVER_DATA) {
-            if (ASSET_HOLDER.containsKey(location)) {
-                IoSupplier<InputStream> resource = ASSET_HOLDER.get(location);
+        if (packType == type) {
+            if (DATA_HOLDER.containsKey(location)) {
+                IoSupplier<java.io.InputStream> resource = DATA_HOLDER.get(location);
                 try {
                     resource.get();
                     return resource;
@@ -78,22 +98,22 @@ public class DataHolder implements PackResources {
             }
         }
 
-        throw new RuntimeException(new Throwable("Could not find resource in generated data: " + location));
+        throw new RuntimeException(new Throwable("Could not find resource in generated resource data: " + location));
     }
 
     @Override
     public void listResources(@NotNull PackType packType, @NotNull String namespace, @NotNull String path, @NotNull ResourceOutput resourceOutput) {
-        if (packType == PackType.SERVER_DATA){
+        if (packType == type){
             Map<String, IoSupplier<InputStream>> filteredMap = new HashMap<>();
 
-            ASSET_HOLDER.forEach((resource, stream) -> {
+            DATA_HOLDER.forEach((resource, stream) -> {
                 if(resource.getNamespace().equals(namespace)){
                     filteredMap.put(resource.getPath(), stream);
                 }
             });
 
             if(filteredMap.isEmpty()){
-                TechCore.LOGGER.error("Invalid path + " + path);
+                TechCore.LOGGER.error("Invalid path + {}", path);
             }
         }
     }
@@ -101,8 +121,8 @@ public class DataHolder implements PackResources {
     @Override
     public @NotNull Set<String> getNamespaces(@NotNull PackType packType) {
         Set<String> namespaces = new HashSet<>();
-        if (packType == PackType.SERVER_DATA) {
-            for (ResourceLocation resource : ASSET_HOLDER.keySet()) {
+        if (packType == type) {
+            for (ResourceLocation resource : DATA_HOLDER.keySet()) {
                 namespaces.add(resource.getNamespace());
             }
         }
@@ -114,8 +134,8 @@ public class DataHolder implements PackResources {
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         if(serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
-            object.addProperty("pack_format", PACK_VERSION);
-            object.addProperty("description", "dynamically generated data");
+            object.addProperty("pack_format", version);
+            object.addProperty("description", "dynamically generated resource data");
             return serializer.fromJson(object);
         }
 
@@ -123,8 +143,18 @@ public class DataHolder implements PackResources {
     }
 
     @Override
+    public @NotNull Optional<KnownPack> knownPackInfo() {
+        return Optional.of(new KnownPack(namespace, name, SharedConstants.getCurrentVersion().getId()));
+    }
+
+    @Override
+    public @NotNull PackLocationInfo location() {
+        return new PackLocationInfo(this.packId(), Component.literal(packId()), source, knownPackInfo());
+    }
+
+    @Override
     public @NotNull String packId() {
-        return CoreRef.MOD_ID + ":assets";
+        return namespace + ":" + name;
     }
 
     @Override
@@ -132,8 +162,14 @@ public class DataHolder implements PackResources {
 
     }
 
-    @Override
-    public boolean isBuiltin() {
-        return true;
+    public PackSelectionConfig packSelectionConfig(){
+        return new PackSelectionConfig(required, defaultPosition, fixedPosition);
+    }
+
+    @Nullable
+    public Pack createPack() {
+        Pack.ResourcesSupplier resourcesSupplier = BuiltInPackSource.fixedResources(this);
+
+        return Pack.readMetaAndCreate(this.location(), resourcesSupplier, this.type, this.packSelectionConfig());
     }
 }

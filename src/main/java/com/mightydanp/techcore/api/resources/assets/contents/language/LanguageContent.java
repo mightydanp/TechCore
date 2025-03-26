@@ -35,7 +35,7 @@ public class LanguageContent  {
         if (!translations.has(name)) {
             translations.addProperty(name, translation);
         } else {
-            TechCore.LOGGER.warn("Cannot add translation, [" + translation + "], because the localization, [" + name + "], already exist for " + name);
+            TechCore.LOGGER.warn("Cannot add translation, [{}], because the localization, [{}], already exist for {}", translation, name, name);
         }
         return this;
     }

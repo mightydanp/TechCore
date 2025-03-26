@@ -17,6 +17,7 @@ import net.neoforged.neoforge.client.event.RegisterNamedRenderTypesEvent;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.util.TransformationHelper;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.joml.Quaternionf;
@@ -119,9 +120,9 @@ public class TCModelBuilder<A> extends ModelFile{
         } else {
             ResourceLocation asLoc;
             if (texture.contains(":")) {
-                asLoc = new ResourceLocation(texture);
+                asLoc = ResourceLocation.withDefaultNamespace(texture);
             } else {
-                asLoc = new ResourceLocation(getLocation().getNamespace(), texture);
+                asLoc = ResourceLocation.fromNamespaceAndPath(getLocation().getNamespace(), texture);
             }
             return texture(key, asLoc);
         }
@@ -156,7 +157,7 @@ public class TCModelBuilder<A> extends ModelFile{
      */
     public TCModelBuilder<A> renderType(String renderType) {
         Preconditions.checkNotNull(renderType, "Render type must not be null");
-        return renderType(new ResourceLocation(renderType));
+        return renderType(ResourceLocation.withDefaultNamespace(renderType));
     }
 
     /**
@@ -321,21 +322,21 @@ public class TCModelBuilder<A> extends ModelFile{
                     if (face == null) continue;
 
                     JsonObject faceObj = new JsonObject();
-                    faceObj.addProperty("texture", serializeLocOrKey(face.texture));
-                    if (!Arrays.equals(face.uv.uvs, part.uvsByFace(dir))) {
-                        faceObj.add("uv", new Gson().toJsonTree(face.uv.uvs));
+                    faceObj.addProperty("texture", serializeLocOrKey(face.texture()));
+                    if (!Arrays.equals(face.uv().uvs, part.uvsByFace(dir))) {
+                        faceObj.add("uv", new Gson().toJsonTree(face.uv().uvs));
                     }
-                    if (face.cullForDirection != null) {
-                        faceObj.addProperty("cullface", face.cullForDirection.getSerializedName());
+                    if (face.cullForDirection() != null) {
+                        faceObj.addProperty("cullface", face.cullForDirection().getSerializedName());
                     }
-                    if (face.uv.rotation != 0) {
-                        faceObj.addProperty("rotation", face.uv.rotation);
+                    if (face.uv().rotation != 0) {
+                        faceObj.addProperty("rotation", face.uv().rotation);
                     }
-                    if (face.tintIndex != -1) {
-                        faceObj.addProperty("tintindex", face.tintIndex);
+                    if (face.tintIndex() != -1) {
+                        faceObj.addProperty("tintindex", face.tintIndex());
                     }
-                    if (!face.getFaceData().equals(ExtraFaceData.DEFAULT)) {
-                        faceObj.add("neoforge_data", ExtraFaceData.CODEC.encodeStart(JsonOps.INSTANCE, face.getFaceData()).result().get());
+                    if (!face.faceData().equals(ExtraFaceData.DEFAULT)) {
+                        faceObj.add("neoforge_data", ExtraFaceData.CODEC.encodeStart(JsonOps.INSTANCE, face.faceData()).result().get());
                     }
                     faces.add(dir.getSerializedName(), faceObj);
                 }
@@ -363,7 +364,7 @@ public class TCModelBuilder<A> extends ModelFile{
         if (tex.charAt(0) == '#') {
             return tex;
         }
-        return new ResourceLocation(tex).toString();
+        return ResourceLocation.withDefaultNamespace(tex).toString();
     }
 
     private JsonArray serializeVector3f(Vector3f vec) {
@@ -655,7 +656,7 @@ public class TCModelBuilder<A> extends ModelFile{
                 if (this.texture == null) {
                     throw new IllegalStateException("A model face must have a texture");
                 }
-                return new BlockElementFace(cullface, tintindex, texture, new BlockFaceUV(uvs, rotation.rotation), new ExtraFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion));
+                return new BlockElementFace(cullface, tintindex, texture, new BlockFaceUV(uvs, rotation.rotation), new ExtraFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion), new MutableObject<>());
             }
 
             public TCModelBuilder.ElementBuilder end() {
@@ -1074,12 +1075,12 @@ public class TCModelBuilder<A> extends ModelFile{
 
 
     public enum ExistingBlockModels {
-        block(new TCModelBuilder<>(new ResourceLocation("block/block"))),
-        cube_all(new TCModelBuilder<>(new ResourceLocation("block/cube_all"))),
-        cube_column(new TCModelBuilder<>(new ResourceLocation("block/cube_column"))),
-        cube_column_horizontal(new TCModelBuilder<>(new ResourceLocation("block/cube_column_horizontal"))),
-        leaves(new TCModelBuilder<>(new ResourceLocation("block/leaves"))),
-        thin_block(new TCModelBuilder<>(new ResourceLocation("block/thin_block")))
+        block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/block"))),
+        cube_all(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_all"))),
+        cube_column(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column"))),
+        cube_column_horizontal(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column_horizontal"))),
+        leaves(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/leaves"))),
+        thin_block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/thin_block")))
         ;
 
         public final ModelFile model;
@@ -1089,7 +1090,7 @@ public class TCModelBuilder<A> extends ModelFile{
     }
 
     public enum ExistingItemModels {
-        item_generated(new TCModelBuilder<>(new ResourceLocation("item/generated")));
+        item_generated(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("item/generated")));
         public final ModelFile model;
 
         ExistingItemModels(ModelFile model) {

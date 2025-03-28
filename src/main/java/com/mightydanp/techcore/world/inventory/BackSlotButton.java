@@ -16,6 +16,11 @@ public class BackSlotButton extends Slot {
 
     @Override
     public boolean mayPlace(@NotNull ItemStack itemStack) {
-        return true;
+        return false;
+    }
+
+    @Override
+    public boolean mayPickup(@NotNull Player player) {
+        return false;
     }
 }

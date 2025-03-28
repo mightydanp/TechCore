@@ -87,7 +87,7 @@ public class TCInventoryEvent {
     public static void addSlotClientSide(ScreenEvent.Opening event) {
         Screen screen = Minecraft.getInstance().screen;
 
-        if (screen instanceof TCPlayerInventoryScreen && Minecraft.getInstance() != null && screen != null && screen.getMinecraft().player != null) {
+        if (screen instanceof TCPlayerInventoryScreen && screen.getMinecraft().player != null) {
             LocalPlayer player = screen.getMinecraft().player;
             IItemHandler itemHandler = player.getData(tcInventorySlots);
 

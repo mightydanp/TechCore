@@ -131,13 +131,11 @@ public class TCInventoryEvent {
         while(tcInventoryKey.consumeClick()) {
             MenuProvider menu = new SimpleMenuProvider((windowID, inventory, player) -> new TCPlayerInventoryMenu(windowID, inventory), TCPlayerInventoryMenu.translation);
 
-            if(event.getEntity() instanceof ServerPlayer player){
-                if(player.containerMenu instanceof TCPlayerInventoryMenu){
-                    event.getEntity().openMenu(null);
-                }else {
-                     event.getEntity().openMenu(menu);
-                }
-            }
+            //if(event.getEntity() instanceof ServerPlayer playerServer){
+            event.getEntity().openMenu(menu);
+            //}else if(event.getEntity() instanceof LocalPlayer playerLocal){
+                //Minecraft.getInstance().setScreen(new TCPlayerInventoryScreen((TCPlayerInventoryMenu) menu, playerLocal.getInventory(), TCPlayerInventoryMenu.translation));
+            //}
         }
     }
 

@@ -26,7 +26,7 @@ public class TechCore {
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onTick);
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onRightClick);
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::addSlotServerSide);
-        NeoForge.EVENT_BUS.addListener(TCInventoryEvent::addSlotClientSide);
+        NeoForge.EVENT_BUS.addListener(TCInventoryEvent::addTabsToInventoryScreen);
 
         ConfigRegistries.registerConfigs();
     }

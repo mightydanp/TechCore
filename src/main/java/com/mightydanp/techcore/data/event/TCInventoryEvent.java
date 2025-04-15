@@ -7,6 +7,8 @@ import com.mightydanp.techcore.world.inventory.TCPlayerInventoryMenu;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -84,14 +86,53 @@ public class TCInventoryEvent {
         }
     }
 
-    public static void addSlotClientSide(ScreenEvent.Opening event) {
-        Screen screen = Minecraft.getInstance().screen;
+    private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_4"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_5"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_6"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_7")
+    };
+    private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_3"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_4"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_5"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_6"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_7")
+    };
+    private static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_1"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_2"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_3"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_4"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_5"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_6"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_7")
+    };
+    private static final ResourceLocation[] SELECTED_BOTTOM_TABS = new ResourceLocation[]{
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_1"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_2"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_3"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_4"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_5"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_6"),
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_7")
+    };
 
-        if (screen instanceof TCPlayerInventoryScreen && screen.getMinecraft().player != null) {
+
+
+    public static void addTabsToInventoryScreen(ScreenEvent.Init.Pre event) {
+        Screen screen = event.getScreen();
+
+        if (screen instanceof InventoryScreen inventoryScreen && screen.getMinecraft().player != null) {
             LocalPlayer player = screen.getMinecraft().player;
-            IItemHandler itemHandler = player.getData(tcInventorySlots);
 
-            //addSlotToPlayerContainer(((InventoryScreen) screen), itemHandler, SLOT_CREATOR);
+
+
         }
     }
 

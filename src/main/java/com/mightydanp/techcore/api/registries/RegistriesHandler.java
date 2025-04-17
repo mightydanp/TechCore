@@ -17,13 +17,19 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 
+
+@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class RegistriesHandler {
     private static final Map<ResourceLocation, registryHolder> additionalRegistries = new HashMap<>();
     private static final Map<ResourceLocation, finalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
@@ -43,8 +49,11 @@ public class RegistriesHandler {
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
 
-    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("wood_type"));
-    public static final DeferredRegister<WoodType> WOOD_TYPE = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
+    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
+    public static final Registry<WoodType> WOOD_TYPE_REGISTRY = new RegistryBuilder<>(WOOD_TYPE_KEY).sync(true).defaultKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type")).create();
+    public static final DeferredRegister<WoodType> WOOD_TYPE = DeferredRegister.create(WOOD_TYPE_REGISTRY, CoreRef.MOD_ID);
+
+
 
     public static void init(IEventBus bus) {
         ITEMS.register(bus);
@@ -72,6 +81,11 @@ public class RegistriesHandler {
         });
     }
 
+    @SubscribeEvent
+    public static void registerRegistries(NewRegistryEvent event) {
+        event.register(WOOD_TYPE_REGISTRY);
+    }
+
     public void addDeferredRegister(ResourceLocation name, registryHolder holder){
         additionalRegistries.put(name, holder);
     }
@@ -83,8 +97,6 @@ public class RegistriesHandler {
 
         throw new Error("DeferredRegister : " + name.toString() + " : was not registered!");
     }
-
-
 
     public record registryHolder(Registry<?> key){}
 

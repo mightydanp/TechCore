@@ -16,6 +16,5 @@ public class ClientSetup {
     @SubscribeEvent
     private static void onClientSetup(FMLClientSetupEvent event){
         LOGGER.info("Tech Core client setup is starting");
-        NeoForge.EVENT_BUS.addListener(TCInventoryEvent::onPlayerOpenInventory);
     }
 }

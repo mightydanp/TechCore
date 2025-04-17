@@ -14,6 +14,9 @@ import net.minecraft.world.item.ItemStack;
 public class GuiTab implements GuiTabBase {
     public String name;
 
+    public int width;
+    public int height;
+
     public int priorityNumber = -1;
 
     public float red = 0;
@@ -28,8 +31,10 @@ public class GuiTab implements GuiTabBase {
     public Component narration = CommonComponents.EMPTY;
     public Tooltip tooltip = null;
 
-    public GuiTab(String name){
+    public GuiTab(String name, int width, int height){
         this.name = name;
+        this.width = width;
+        this.height = height;
     }
 
     public GuiTab setPriorityNumber(int priorityNumber) {

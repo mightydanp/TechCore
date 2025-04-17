@@ -11,7 +11,7 @@ public class InventoryGuiTab extends GuiTab {
     public Player player;
 
     public InventoryGuiTab(String name){
-        super(name);
+        super(name, 176, 166);
     }
 
     @Override
@@ -24,6 +24,7 @@ public class InventoryGuiTab extends GuiTab {
     public boolean isCurrentlyUsed(Screen currentScreen) {
         return currentScreen instanceof InventoryScreen;
     }
+
 
 
 }

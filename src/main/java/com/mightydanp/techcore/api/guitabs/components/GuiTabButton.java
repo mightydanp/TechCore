@@ -72,8 +72,7 @@ public class GuiTabButton extends Button {
     };
 
     public static GuiTabButton create(int registryButtonNumber, GuiTab guiTab, Player player, Screen screen, int x, int y){
-        int height = screen.height;
-        int width = screen.width;
+
         return new GuiTabButton(registryButtonNumber, guiTab, player, screen, x, y);
     }
 
@@ -147,7 +146,7 @@ public class GuiTabButton extends Button {
         }
 
         if(item != null){
-            guiGraphics.renderFakeItem(item, this.getX(), this.getY());
+            guiGraphics.renderFakeItem(item, this.getX() + 5, this.getY() + 9);
         }
 
         guiGraphics.pose().pushPose();

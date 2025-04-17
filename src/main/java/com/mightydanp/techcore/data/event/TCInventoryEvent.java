@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.data.event;
 
+import com.mightydanp.techcore.api.guitabs.components.GuiTabBase;
 import com.mightydanp.techcore.api.guitabs.components.GuiTabButton;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.guitabs.GuiTab;
@@ -7,6 +8,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -28,7 +31,11 @@ public class TCInventoryEvent {
     public static void addTabsToInventoryScreen(ScreenEvent.Init.Pre event) {
         Screen screen = event.getScreen();
 
-        if (screen.getMinecraft().player != null) {
+        if(screen instanceof CreativeModeInventoryScreen){
+            return;
+        }
+
+        if (screen instanceof AbstractContainerScreen<?> containerScreen && screen.getMinecraft().player != null) {
             Map<Class<? extends Screen>, GuiTab> orderedGuiTabs = new LinkedHashMap<>();
 
             // First, sort and add priority entries
@@ -52,12 +59,30 @@ public class TCInventoryEvent {
                 int buttonNumber = count.getAndIncrement();
                 int pageNumber = (buttonNumber - 1) / 14;
 
+                int group = (buttonNumber - 1) / 7;
+                int indexInGroup = (buttonNumber - 1) % 7;
+                boolean isTop = group % 2 == 0;
+
                 System.out.println("Screen: " + screenClass.getSimpleName()
                         + ", Tab: " + guiTab.name
                         + ", Button #: " + buttonNumber
                         + ", Page #: " + pageNumber);
 
-                GuiTabButton tabButton = GuiTabButton.create(buttonNumber, guiTab, Minecraft.getInstance().player, screen, 0, 0);
+                int screenWidth = screen.width;
+                int screenHeight = screen.height;
+
+                int guiWidth = containerScreen.getXSize();
+                int guiHeight = containerScreen.getYSize();
+
+                // Calculate GUI top-left corner (centered)
+                int guiX = (screenWidth - guiWidth) / 2;
+                int guiY = (screenHeight - guiHeight) / 2;
+
+                // Tab's position: aligned to top-left of GUI, but moved down by 4 pixels
+                int X = guiX + (GuiTabBase.TAB_WIDTH * indexInGroup);
+                int Y = guiY - GuiTabBase.TAB_HEIGHT + (isTop? 4 : guiHeight - 4);
+
+                GuiTabButton tabButton = GuiTabButton.create(buttonNumber, guiTab, Minecraft.getInstance().player, screen, X, Y);
                 pageButtonMap.computeIfAbsent(pageNumber, k -> new ArrayList<>()).add(tabButton);
             });
 

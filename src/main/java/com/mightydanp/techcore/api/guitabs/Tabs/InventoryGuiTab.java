@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 public class InventoryGuiTab extends GuiTab {
     public Player player;
 
-    public InventoryGuiTab(String name){
+    public InventoryGuiTab(Component name){
         super(name, 176, 166);
     }
 

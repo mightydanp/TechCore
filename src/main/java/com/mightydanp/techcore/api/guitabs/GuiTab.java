@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class GuiTab implements GuiTabBase {
-    public String name;
+    public Component name;
 
     public int width;
     public int height;
@@ -31,7 +31,7 @@ public class GuiTab implements GuiTabBase {
     public Component narration = CommonComponents.EMPTY;
     public Tooltip tooltip = null;
 
-    public GuiTab(String name, int width, int height){
+    public GuiTab(Component name, int width, int height){
         this.name = name;
         this.width = width;
         this.height = height;

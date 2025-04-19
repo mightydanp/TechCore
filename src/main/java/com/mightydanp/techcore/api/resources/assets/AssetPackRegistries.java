@@ -19,7 +19,7 @@ public class AssetPackRegistries {
         blockState.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "blockstates/" + r.getPath() + ".json"), b.json()));
         blockModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(),    "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/")  + r.getPath() + ".json"), b.json()));
         itemModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/")  + (r.getPath().contains(":") ? r.getPath().split(":")[1] : r.getPath()) + ".json"), b.json()));
-        language.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "lang/" + r + ".json"), b.json()));
+        language.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "lang/" + r.getPath() + ".json"), b.json()));
     }
 
     public static boolean saveBlockState(BlockStateContent<?> content, boolean override) {

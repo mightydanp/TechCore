@@ -3,7 +3,7 @@ package com.mightydanp.techcore;
 import com.mightydanp.techcore.api.configs.ConfigRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
-import com.mightydanp.techcore.data.event.TCInventoryEvent;
+import com.mightydanp.techcore.api.guitabs.event.TCInventoryEvent;
 import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;

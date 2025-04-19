@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -22,10 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries.guiTabs;
 
-@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class TCInventoryEvent {
     public static KeyMapping tcInventoryKey = new KeyMapping("key."+ CoreRef.MOD_ID +".inventory", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_E, KeyMapping.CATEGORY_INVENTORY);
 
+    //saved for later
     public static int currentPage = 0;
 
     public static void addTabsToInventoryScreen(ScreenEvent.Init.Pre event) {
@@ -91,12 +93,4 @@ public class TCInventoryEvent {
             buttonsToShow.forEach(event::addListener);
         }
     }
-
-    @SubscribeEvent
-    public static void registerBindings(RegisterKeyMappingsEvent event) {
-        // Key binding stuff
-        //event.register(tcInventoryKey);
-        //NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) -> onClientTick(e));
-    }
-
 }

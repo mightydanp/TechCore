@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -173,7 +174,7 @@ public class GuiTabButton extends Button {
 
         // Render tooltip (without any tinting applied)
         if (guiTab != null && this.isMouseOver(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(Minecraft.getInstance().font, guiTab.name, mouseX, mouseY);
+            guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.translatable("tab." + guiTab.modId + "."+ guiTab.name), mouseX, mouseY);
         }
 
 

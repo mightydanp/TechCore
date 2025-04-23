@@ -26,7 +26,7 @@ import java.util.*;
 public class DataPack implements PackResources {
     public Map<ResourceLocation, IoSupplier<InputStream>> DATA_HOLDER = new HashMap<>();
 
-    public final int version = 8;
+    public final int version = 15;
     public final PackType type = PackType.SERVER_DATA;
     public final PackSource source = PackSource.DEFAULT;
 
@@ -97,8 +97,8 @@ public class DataPack implements PackResources {
                 } catch (IOException ignored){}
             }
         }
-
-        throw new RuntimeException(new Throwable("Could not find resource in generated resource data: " + location));
+        return null;
+        //throw new RuntimeException(new Throwable("Could not find resource in generated resource data: " + location));
     }
 
     @Override

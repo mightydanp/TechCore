@@ -1,7 +1,9 @@
 package com.mightydanp.techcore.api.guitabs;
 
 import com.mightydanp.techcore.api.guitabs.components.GuiTabBase;
+import com.mightydanp.techcore.api.guitabs.libs.GuiTabRef;
 import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
@@ -12,7 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class GuiTab implements GuiTabBase {
-    public Component name;
+    public String modId;
+    public String name;
 
     public int width;
     public int height;
@@ -31,7 +34,8 @@ public class GuiTab implements GuiTabBase {
     public Component narration = CommonComponents.EMPTY;
     public Tooltip tooltip = null;
 
-    public GuiTab(Component name, int width, int height){
+    public GuiTab(String modId, String name, int width, int height){
+        this.modId = modId;
         this.name = name;
         this.width = width;
         this.height = height;

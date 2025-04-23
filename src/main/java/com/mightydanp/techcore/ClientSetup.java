@@ -1,6 +1,7 @@
 package com.mightydanp.techcore;
 
 import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,7 +16,7 @@ public class ClientSetup {
     @SubscribeEvent
     private static void onClientSetup(FMLClientSetupEvent event){
         LOGGER.info("Tech Core client setup is starting");
-        GuiTabRegistries.initResource();
+
         LOGGER.info("Tech Core client setup has finished");
     }
 }

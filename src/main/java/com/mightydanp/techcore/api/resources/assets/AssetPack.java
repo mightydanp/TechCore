@@ -26,7 +26,8 @@ import java.util.*;
 public class AssetPack implements PackResources {
     public Map<ResourceLocation, IoSupplier<InputStream>> ASSET_HOLDER = new HashMap<>();
 
-    public final int version = 8;
+    static boolean firstLoad = false;
+    public final int version = 15;
     public final PackType type = PackType.CLIENT_RESOURCES;
     public final PackSource source = PackSource.DEFAULT;
 
@@ -49,8 +50,10 @@ public class AssetPack implements PackResources {
         if (!ASSET_HOLDER.containsKey(location)) {
             InputStream inputStream = new ByteArrayInputStream(jsonObject.toString().getBytes());
             ASSET_HOLDER.put(location, ()-> inputStream);
+            firstLoad = true;
         }else{
-            TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
+            if(!firstLoad)
+                TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
         }
     }
 
@@ -98,7 +101,8 @@ public class AssetPack implements PackResources {
             }
         }
 
-        throw new RuntimeException(new Throwable("Could not find resource in generated resource assets: " + location));
+        return null;
+        //throw new RuntimeException(new Throwable("Could not find resource in generated resource assets: " + location));
     }
 
     @Override

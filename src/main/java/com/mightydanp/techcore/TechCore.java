@@ -1,6 +1,7 @@
 package com.mightydanp.techcore;
 
 import com.mightydanp.techcore.api.configs.ConfigRegistries;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.guitabs.event.TCInventoryEvent;
@@ -21,6 +22,7 @@ public class TechCore {
         RegistriesHandler.init(bus);
 
         GuiTabRegistries.init();
+        AssetPackRegistry.init.add(new GuiTabRegistries());
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::addTabsToInventoryScreen);

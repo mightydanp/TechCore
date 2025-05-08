@@ -1,7 +1,10 @@
 package com.mightydanp.techcore.api.registries;
 
+import com.mightydanp.techcore.api.materials.Material;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -48,10 +51,16 @@ public class RegistriesHandler {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPE = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, CoreRef.MOD_ID);
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CoreRef.MOD_ID);
+
+    public static final ResourceKey<Registry<Material>> MATERIAL_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material"));
+    public static final Registry<Material> MATERIAL_REGISTRY = new RegistryBuilder<>(MATERIAL_KEY).sync(true).defaultKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material")).create();
+    public static final DeferredRegister<Material> MATERIAL_TYPE = DeferredRegister.create(MATERIAL_REGISTRY, CoreRef.MOD_ID);
 
     public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
     public static final Registry<WoodType> WOOD_TYPE_REGISTRY = new RegistryBuilder<>(WOOD_TYPE_KEY).sync(true).defaultKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type")).create();
     public static final DeferredRegister<WoodType> WOOD_TYPE = DeferredRegister.create(WOOD_TYPE_REGISTRY, CoreRef.MOD_ID);
+
 
 
 
@@ -68,6 +77,8 @@ public class RegistriesHandler {
         RECIPE_SERIALIZERS.register(bus);
         ATTACHMENT_TYPE.register(bus);
         CREATIVE_MODE_TABS.register(bus);
+        DATA_COMPONENT_TYPES.register(bus);
+        MATERIAL_TYPE.register(bus);
         WOOD_TYPE.register(bus);
 
         additionalRegistries.forEach((resourceLocation, registryHolder) -> {
@@ -83,6 +94,7 @@ public class RegistriesHandler {
 
     @SubscribeEvent
     public static void registerRegistries(NewRegistryEvent event) {
+        event.register(MATERIAL_REGISTRY);
         event.register(WOOD_TYPE_REGISTRY);
     }
 

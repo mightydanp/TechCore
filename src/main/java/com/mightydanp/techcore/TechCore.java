@@ -6,6 +6,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.guitabs.event.TCInventoryEvent;
 import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.component.TCDataComponents;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,6 +21,8 @@ public class TechCore {
 
     public TechCore(IEventBus bus){
         RegistriesHandler.init(bus);
+
+        TCDataComponents.init();
 
         GuiTabRegistries.init();
         AssetPackRegistry.init.add(new GuiTabRegistries());

@@ -17,15 +17,15 @@ public class AssetPackRegistries {
 
     public static void init() {
         blockState.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "blockstates/" + r.getPath() + ".json"), b.json()));
-        blockModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(),    "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/")  + r.getPath() + ".json"), b.json()));
-        itemModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/")  + (r.getPath().contains(":") ? r.getPath().split(":")[1] : r.getPath()) + ".json"), b.json()));
+        blockModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + r.getPath() + ".json"), b.json()));
+        itemModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + (r.getPath().contains(":") ? r.getPath().split(":")[1] : r.getPath()) + ".json"), b.json()));
         language.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "lang/" + r.getPath() + ".json"), b.json()));
     }
 
     public static boolean saveBlockState(BlockStateContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
-        if(!override && AssetPackRegistries.blockState.containsKey(resourceLocation)){
+        if (!override && AssetPackRegistries.blockState.containsKey(resourceLocation)) {
             return false;
         }
 
@@ -45,7 +45,7 @@ public class AssetPackRegistries {
     public static boolean saveBlockModel(BlockModelContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
-        if(!override && AssetPackRegistries.blockModel.containsKey(resourceLocation)){
+        if (!override && AssetPackRegistries.blockModel.containsKey(resourceLocation)) {
             return false;
         }
 
@@ -64,7 +64,7 @@ public class AssetPackRegistries {
     public static boolean saveItemModel(ItemModelContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
-        if(!override && AssetPackRegistries.itemModel.containsKey(resourceLocation)){
+        if (!override && AssetPackRegistries.itemModel.containsKey(resourceLocation)) {
             return false;
         }
 
@@ -83,7 +83,7 @@ public class AssetPackRegistries {
     public static boolean saveLanguage(LanguageContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
-        if(!override && AssetPackRegistries.language.containsKey(resourceLocation)){
+        if (!override && AssetPackRegistries.language.containsKey(resourceLocation)) {
             return false;
         }
 

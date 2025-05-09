@@ -18,14 +18,14 @@ public class DataPackRegistry {
     public static List<BaseRegistries> init = new ArrayList<>();
 
     @SubscribeEvent
-    public static void addResourcePack(AddPackFindersEvent event){
+    public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
         init.forEach(BaseRegistries::initResource);
 
         DataPackRegistries.init();
 
-        if (type == PackType.SERVER_DATA){
+        if (type == PackType.SERVER_DATA) {
             event.addRepositorySource((packConsumer) -> {
                 Pack pack = dataPack.createPack();
 

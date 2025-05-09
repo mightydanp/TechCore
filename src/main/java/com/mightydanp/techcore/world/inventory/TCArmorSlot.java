@@ -1,7 +1,6 @@
 package com.mightydanp.techcore.world.inventory;
 
 import com.mojang.datafixers.util.Pair;
-import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -13,6 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public class TCArmorSlot extends Slot {
     private final LivingEntity owner;

@@ -29,7 +29,7 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
         this.registryKey = resourceKey;
     }
 
-    public Codec<A> codec(){
+    public Codec<A> codec() {
         return null;
     }
 
@@ -46,11 +46,11 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
         return registryKey;
     }
 
-    public JsonObject json(Codec<A> codec, A builder){
+    public JsonObject json(Codec<A> codec, A builder) {
         return codec.encodeStart(JsonOps.INSTANCE, builder).getOrThrow(IllegalStateException::new).getAsJsonObject();
     }
 
-    public A trait(Codec<A> codec, JsonObject jsonObject){
+    public A trait(Codec<A> codec, JsonObject jsonObject) {
         return codec.decode(JsonOps.INSTANCE, jsonObject).getOrThrow(IllegalStateException::new).getFirst();
     }
 

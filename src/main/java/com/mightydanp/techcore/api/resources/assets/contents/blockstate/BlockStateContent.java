@@ -8,9 +8,13 @@ import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelCo
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.*;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.*;
 
 import java.lang.reflect.Constructor;
@@ -32,9 +36,9 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     @SuppressWarnings("ALL")
-    public A save(boolean override){
-        AssetPackRegistries.saveBlockState((A)this, override);
-        return (A)this;
+    public A save(boolean override) {
+        AssetPackRegistries.saveBlockState((A) this, override);
+        return (A) this;
     }
 
     public VariantBlockStateBuilder getVariantBuilder(Block b) throws Exception {
@@ -75,12 +79,12 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         return BuiltInRegistries.BLOCK.getKey(block);
     }
 
-    public BlockStateContent<A> setBlockState(IGeneratedBlockState generatedBlockState){
+    public BlockStateContent<A> setBlockState(IGeneratedBlockState generatedBlockState) {
         blockState = generatedBlockState;
         return this;
     }
 
-    public JsonObject json(){
+    public JsonObject json() {
         return blockState.toJson();
     }
 
@@ -148,7 +152,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     public void axisBlock(RotatedPillarBlock block) throws Exception {
         axisBlock(block, blockTexture(block));
     }
-
 
 
     public void axisBlock(RotatedPillarBlock block, ResourceLocation baseName) throws Exception {

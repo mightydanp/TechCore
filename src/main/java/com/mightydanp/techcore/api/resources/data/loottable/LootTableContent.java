@@ -32,6 +32,7 @@ public class LootTableContent {
     public String modid() {
         return modid;
     }
+
     public String name() {
         return name;
     }
@@ -41,7 +42,7 @@ public class LootTableContent {
         return this;
     }
 
-    public JsonObject json(){
+    public JsonObject json() {
         //LootTableProvider
         return LootTable.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, lootTable).getOrThrow(IllegalStateException::new).getAsJsonObject();
 

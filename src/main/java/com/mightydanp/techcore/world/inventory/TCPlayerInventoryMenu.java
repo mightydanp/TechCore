@@ -11,13 +11,18 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public static final Component translation = Component.translatable("menu.title." + CoreRef.MOD_ID + ".inventory");
@@ -56,19 +61,19 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
         int i1;
         int j1;
 
-        for(i1 = 0; i1 < 4; ++i1) {
+        for (i1 = 0; i1 < 4; ++i1) {
             EquipmentSlot equipmentslot = SLOT_IDS[i1];
             ResourceLocation resourcelocation = TEXTURE_EMPTY_SLOTS.get(equipmentslot);
             this.addSlot(equipmentslot.getName(), new TCArmorSlot(playerInventory, player, equipmentslot, 39 - i1, 8, 8 + i1 * 18, resourcelocation));
         }
 
-        for(i1 = 0; i1 < 3; ++i1) {
-            for(j1 = 0; j1 < 9; ++j1) {
+        for (i1 = 0; i1 < 3; ++i1) {
+            for (j1 = 0; j1 < 9; ++j1) {
                 this.addSlot("inventory", new Slot(playerInventory, j1 + (i1 + 1) * 9, 8 + j1 * 18, 84 + i1 * 18));
             }
         }
 
-        for(i1 = 0; i1 < 9; ++i1) {
+        for (i1 = 0; i1 < 9; ++i1) {
             this.addSlot("hotbar", new Slot(playerInventory, i1, 8 + i1 * 18, 142));
         }
 
@@ -162,16 +167,16 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
                 }
 
                 slot.onQuickCraft(itemstack1, itemstack);
-            }  else if (index >= 0 && index < 3) {
+            } else if (index >= 0 && index < 3) {
                 if (!this.moveItemStackTo(itemstack1, 4, 39, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !((Slot)this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
+            } else if (equipmentslot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !((Slot) this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
                 int i = 3 - equipmentslot.getIndex();
                 if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(40)).hasItem()) {
+            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot) this.slots.get(40)).hasItem()) {
                 if (!this.moveItemStackTo(itemstack1, 40, 41, false)) {
                     return ItemStack.EMPTY;
                 }

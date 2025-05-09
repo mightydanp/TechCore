@@ -174,7 +174,7 @@ public class GuiTabButton extends Button {
 
         // Render tooltip (without any tinting applied)
         if (guiTab != null && this.isMouseOver(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.translatable("tab." + guiTab.modId + "."+ guiTab.name), mouseX, mouseY);
+            guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.translatable("tab." + guiTab.modId + "." + guiTab.name), mouseX, mouseY);
         }
 
 

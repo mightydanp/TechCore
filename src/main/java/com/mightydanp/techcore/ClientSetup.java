@@ -1,7 +1,5 @@
 package com.mightydanp.techcore;
 
-import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
-import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,7 +12,7 @@ import static com.mightydanp.techcore.TechCore.LOGGER;
 public class ClientSetup {
 
     @SubscribeEvent
-    private static void onClientSetup(FMLClientSetupEvent event){
+    private static void onClientSetup(FMLClientSetupEvent event) {
         LOGGER.info("Tech Core client setup is starting");
 
         LOGGER.info("Tech Core client setup has finished");

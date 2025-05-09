@@ -1,8 +1,8 @@
 package com.mightydanp.techcore.api.configs;
 
 import com.mightydanp.techcore.TechCore;
-import com.mightydanp.techcore.client.trait.block.BlockTraitConfig;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.client.trait.block.BlockTraitConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class ConfigRegistries {
     private static final Map<ResourceLocation, BlockTraitConfig> blockTrait = new HashMap<>();
 
-    public static void registerConfigs(){
+    public static void registerConfigs() {
         TechCore.LOGGER.info("Tech Core config registry is starting.");
 
         blockTrait.forEach((resourceLocation, config) -> ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, config.build(), CoreRef.MOD_ID + "/blockTrait/" + resourceLocation.getPath() + ".toml"));
@@ -26,7 +26,7 @@ public class ConfigRegistries {
     }
 
     @SubscribeEvent
-    public static void onLoad(final ModConfigEvent event){
+    public static void onLoad(final ModConfigEvent event) {
         TechCore.LOGGER.info("Tech Core configs are loading.");
         blockTrait.forEach((resourceLocation, config) -> config.load());
 
@@ -38,7 +38,7 @@ public class ConfigRegistries {
     }
 
     public static boolean saveBlockTrait(ResourceLocation resourceLocation, BlockTraitConfig config, boolean override) {
-        if(!override && ConfigRegistries.blockTrait.containsKey(resourceLocation)){
+        if (!override && ConfigRegistries.blockTrait.containsKey(resourceLocation)) {
             return false;
         }
 

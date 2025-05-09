@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class TCModelBuilder<A> extends ModelFile{
+public class TCModelBuilder<A> extends ModelFile {
     //To-do Self ModelBuilder has Custom Loader that I am to lazy to figure out.
     //also this might not need the <A> I do not know.
 
@@ -51,8 +51,8 @@ public class TCModelBuilder<A> extends ModelFile{
     }
 
     @SuppressWarnings("unchecked")
-    public A end(){
-        return (A)this;
+    public A end() {
+        return (A) this;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class TCModelBuilder<A> extends ModelFile{
      *
      * @param resourceLocation the parent model resourceLocation
      * @return this builder
-     * @throws NullPointerException  if {@code parent} is {@code null}
+     * @throws NullPointerException if {@code parent} is {@code null}
      */
     public TCModelBuilder<A> parent(ResourceLocation resourceLocation) {
         Preconditions.checkNotNull(resourceLocation, "resourceLocation must not be null");
@@ -91,7 +91,7 @@ public class TCModelBuilder<A> extends ModelFile{
      *
      * @param modelContent the parent model
      * @return this builder
-     * @throws NullPointerException  if {@code parent} is {@code null}
+     * @throws NullPointerException if {@code parent} is {@code null}
      */
     public TCModelBuilder<A> parent(ModelContent<A> modelContent) {
         Preconditions.checkNotNull(modelContent, "modelContent must not be null");
@@ -402,6 +402,7 @@ public class TCModelBuilder<A> extends ModelFile{
             validateCoordinate(pos.y(), 'y');
             validateCoordinate(pos.z(), 'z');
         }
+
         public TCModelBuilder.ElementBuilder from(float x, float y, float z) {
             this.from = new Vector3f(x, y, z);
             validatePosition(this.from);
@@ -599,7 +600,7 @@ public class TCModelBuilder<A> extends ModelFile{
             }
 
             public TCModelBuilder.ElementBuilder.FaceBuilder uvs(float u1, float v1, float u2, float v2) {
-                this.uvs = new float[] { u1, v1, u2, v2 };
+                this.uvs = new float[]{u1, v1, u2, v2};
                 return this;
             }
 
@@ -815,7 +816,8 @@ public class TCModelBuilder<A> extends ModelFile{
         private @Nullable TransformationHelper.TransformOrigin origin;
         private @Nullable Vector3f originVec;
 
-        RootTransformsBuilder() {}
+        RootTransformsBuilder() {
+        }
 
         /**
          * Sets the translation of the root transform.
@@ -1073,17 +1075,16 @@ public class TCModelBuilder<A> extends ModelFile{
     }
 
 
-
     public enum ExistingBlockModels {
         block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/block"))),
         cube_all(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_all"))),
         cube_column(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column"))),
         cube_column_horizontal(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column_horizontal"))),
         leaves(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/leaves"))),
-        thin_block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/thin_block")))
-        ;
+        thin_block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/thin_block")));
 
         public final ModelFile model;
+
         ExistingBlockModels(ModelFile model) {
             this.model = model;
         }

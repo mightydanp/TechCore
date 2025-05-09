@@ -59,8 +59,8 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTooltip(guiGraphics, mouseX, mouseY);
-        this.xMouse = (float)mouseX;
-        this.yMouse = (float)mouseY;
+        this.xMouse = (float) mouseX;
+        this.yMouse = (float) mouseY;
 
     }
 
@@ -75,16 +75,16 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     public static void renderEntityInInventoryFollowsMouse(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int scale, float yOffset, float mouseX, float mouseY, LivingEntity entity) {
-        float f = (float)(x1 + x2) / 2.0F;
-        float f1 = (float)(y1 + y2) / 2.0F;
-        float f2 = (float)Math.atan((f - mouseX) / 40.0F);
-        float f3 = (float)Math.atan((f1 - mouseY) / 40.0F);
+        float f = (float) (x1 + x2) / 2.0F;
+        float f1 = (float) (y1 + y2) / 2.0F;
+        float f2 = (float) Math.atan((f - mouseX) / 40.0F);
+        float f3 = (float) Math.atan((f1 - mouseY) / 40.0F);
         renderEntityInInventoryFollowsAngle(guiGraphics, x1, y1, x2, y2, scale, yOffset, f2, f3, entity);
     }
 
     public static void renderEntityInInventoryFollowsAngle(GuiGraphics p_282802_, int p_275688_, int p_275245_, int p_275535_, int p_294406_, int p_294663_, float p_275604_, float angleXComponent, float angleYComponent, LivingEntity p_275689_) {
-        float f = (float)(p_275688_ + p_275535_) / 2.0F;
-        float f1 = (float)(p_275245_ + p_294406_) / 2.0F;
+        float f = (float) (p_275688_ + p_275535_) / 2.0F;
+        float f1 = (float) (p_275245_ + p_294406_) / 2.0F;
         p_282802_.enableScissor(p_275688_, p_275245_, p_275535_, p_294406_);
         Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
         Quaternionf quaternionf1 = (new Quaternionf()).rotateX(angleYComponent * 20.0F * 0.017453292F);
@@ -101,7 +101,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         p_275689_.yHeadRotO = p_275689_.getYRot();
         float f9 = p_275689_.getScale();
         Vector3f vector3f = new Vector3f(0.0F, p_275689_.getBbHeight() / 2.0F + p_275604_ * f9, 0.0F);
-        float f10 = (float)p_294663_ / f9;
+        float f10 = (float) p_294663_ / f9;
         renderEntityInInventory(p_282802_, f, f1, f10, vector3f, quaternionf, quaternionf1, p_275689_);
         p_275689_.yBodyRot = f4;
         p_275689_.setYRot(f5);
@@ -154,7 +154,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int mouseButton) {
-        return mouseX < (double)guiLeft || mouseY < (double)guiTop || mouseX >= (double)(guiLeft + this.imageWidth) || mouseY >= (double)(guiTop + this.imageHeight);
+        return mouseX < (double) guiLeft || mouseY < (double) guiTop || mouseX >= (double) (guiLeft + this.imageWidth) || mouseY >= (double) (guiTop + this.imageHeight);
     }
 
     protected void slotClicked(@NotNull Slot slot, int slotId, int mouseButton, @NotNull ClickType type) {

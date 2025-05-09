@@ -8,7 +8,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.*;
-import net.neoforged.neoforge.client.model.generators.*;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
+import net.neoforged.neoforge.client.model.generators.VariantBlockStateBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -28,7 +31,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent columnHorizontalModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             columnModel.model().renderType(renderType);
             columnHorizontalModel.model().renderType(renderType);
         }
@@ -46,7 +49,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent buttonPressedModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_pressed"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             buttonModel.model().renderType(renderType);
             buttonPressedModel.model().renderType(renderType);
         }
@@ -88,7 +91,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent topRightOpenModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_top_right_open"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             bottomLeftBlockModel.model().renderType(renderType);
             bottomLeftOpenModel.model().renderType(renderType);
             bottomRightModel.model().renderType(renderType);
@@ -100,13 +103,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         }
 
         TCModelBuilder<?> bottomLeft = bottomLeftBlockModel.tcDoorBottomLeftModel(baseName, particle, bottomTextures);
-        TCModelBuilder<?> bottomLeftOpen =  bottomLeftOpenModel.tcDoorBottomLeftOpenModel(baseName, particle, bottomTextures);
-        TCModelBuilder<?> bottomRight =  bottomRightModel.tcDoorBottomRightModel(baseName, particle, bottomTextures);
-        TCModelBuilder<?> bottomRightOpen =  bottomRightOpenModel.tcDoorBottomRightOpenModel(baseName, particle, bottomTextures);
-        TCModelBuilder<?> topLeft =  topLeftModel.tcDoorTopLeftModel(baseName, particle, topTextures);
-        TCModelBuilder<?> topLeftOpen =  topLeftOpenModel.tcDoorTopLeftOpenModel(baseName, particle, topTextures);
-        TCModelBuilder<?> topRight =  topRightModel.tcDoorTopRightModel(baseName, particle, topTextures);
-        TCModelBuilder<?> topRightOpen =  topRightOpenModel.tcDoorTopRightOpenModel(baseName, particle, topTextures);
+        TCModelBuilder<?> bottomLeftOpen = bottomLeftOpenModel.tcDoorBottomLeftOpenModel(baseName, particle, bottomTextures);
+        TCModelBuilder<?> bottomRight = bottomRightModel.tcDoorBottomRightModel(baseName, particle, bottomTextures);
+        TCModelBuilder<?> bottomRightOpen = bottomRightOpenModel.tcDoorBottomRightOpenModel(baseName, particle, bottomTextures);
+        TCModelBuilder<?> topLeft = topLeftModel.tcDoorTopLeftModel(baseName, particle, topTextures);
+        TCModelBuilder<?> topLeftOpen = topLeftOpenModel.tcDoorTopLeftOpenModel(baseName, particle, topTextures);
+        TCModelBuilder<?> topRight = topRightModel.tcDoorTopRightModel(baseName, particle, topTextures);
+        TCModelBuilder<?> topRightOpen = topRightOpenModel.tcDoorTopRightOpenModel(baseName, particle, topTextures);
         itemModel.tcDoor(itemTextures);
 
         doorBlock(block, bottomLeft, bottomLeftOpen, bottomRight, bottomRightOpen, topLeft, topLeftOpen, topRight, topRightOpen);
@@ -163,7 +166,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent fenceSideModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_side"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             fenceInventoryModel.model().renderType(renderType);
             fencePostModel.model().renderType(renderType);
             fenceSideModel.model().renderType(renderType);
@@ -186,7 +189,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent fenceGateWallOpenModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_wall_open"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             fenceGateModel.model().renderType(renderType);
             fenceGateOpenModel.model().renderType(renderType);
             fenceGateWallModel.model().renderType(renderType);
@@ -226,7 +229,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent hangingSignModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             hangingSignModel.model().renderType(renderType);
         }
 
@@ -239,12 +242,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     public void hangingSignBlock(Block block, ModelFile model) throws Exception {
         simpleBlock(block, new ConfiguredModel(model));
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void leavesInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent leavesModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             leavesModel.model().renderType(renderType);
         }
 
@@ -257,13 +261,14 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     public void leavesBlock(Block block, ModelFile model) throws Exception {
         simpleBlock(block, new ConfiguredModel(model));
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void logBlockInternal(RotatedPillarBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.LogAssetRecord> logTextures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent logsModel = new TCBlockModelContent(modid(), name(), "");
         TCBlockModelContent logsHorizontalModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_horizontal"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             logsModel.model().renderType(renderType);
             logsHorizontalModel.model().renderType(renderType);
         }
@@ -280,6 +285,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     public void logBlock(RotatedPillarBlock block, ModelFile vertical, ModelFile horizontal) throws Exception {
         this.axisBlock(block, vertical, horizontal);
     }
+
     //------------------------------------------------------------------------------------------------------------------
     private void paneBlockInternal(IronBarsBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, Map<Integer, TCBlockModelContent.PaneSideAltRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent panePostModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_post"), "");
@@ -289,7 +295,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent paneNoSideAltModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_noside_alt"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             panePostModel.model().renderType(renderType);
             paneSideModel.model().renderType(renderType);
             paneSideAltModel.model().renderType(renderType);
@@ -323,12 +329,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
         this.setBlockState(builder).save(false);
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void planksBlockSeparateInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.CubeSeparateRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent planksModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             planksModel.model().renderType(renderType);
         }
 
@@ -342,7 +349,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent planksModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             planksModel.model().renderType(renderType);
         }
 
@@ -355,13 +362,14 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     public void planksBlock(Block block, ModelFile model) throws Exception {
         simpleBlock(block, new ConfiguredModel(model));
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void pressurePlateBlock(PressurePlateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent pressurePlateModel = new TCBlockModelContent(modid(), name(), "");
         TCBlockModelContent pressurePlateDownModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_down"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             pressurePlateModel.model().renderType(renderType);
             pressurePlateDownModel.model().renderType(renderType);
         }
@@ -382,12 +390,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
         this.setBlockState(builder).save(false);
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void saplingBlockInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent saplingModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             saplingModel.model().renderType(renderType);
         }
 
@@ -400,12 +409,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     public void saplingBlock(Block block, ModelFile model) throws Exception {
         simpleBlock(block, new ConfiguredModel(model));
     }
+
     //------------------------------------------------------------------------------------------------------------------
     public void signBlockInternal(StandingSignBlock signBlock, WallSignBlock wallSignBlock, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent signModel = new TCBlockModelContent(modid(), name(), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             signModel.model().renderType(renderType);
         }
 
@@ -426,7 +436,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent slabTopModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_top"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             slabModel.model().renderType(renderType);
             slabTopModel.model().renderType(renderType);
         }
@@ -448,6 +458,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
 
         this.setBlockState(builder).save(false);
     }
+
     //------------------------------------------------------------------------------------------------------------------
     private void stairsBlockInternal(StairBlock block, String baseName, ResourceLocation particle, Map<Integer, TCBlockModelContent.StairsRecord> textures, @Nullable ResourceLocation renderType) throws Exception {
         TCBlockModelContent stairsModel = new TCBlockModelContent(modid(), name(), "");
@@ -455,7 +466,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent stairsOuterModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_outer"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             stairsModel.model().renderType(renderType);
             stairsInnerModel.model().renderType(renderType);
             stairsOuterModel.model().renderType(renderType);
@@ -504,13 +515,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
     //------------------------------------------------------------------------------------------------------------------
 
     private void trapdoorBlockInternal(TrapDoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, boolean orientable) throws Exception {
-        if(orientable){
+        if (orientable) {
             TCBlockModelContent trapdoorOrientableBottomModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom"), "");
             TCBlockModelContent trapdoorOrientableTopModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_top"), "");
             TCBlockModelContent trapdoorOrientableOpenModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_open"), "");
             TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-            if(renderType != null){
+            if (renderType != null) {
                 trapdoorOrientableBottomModel.model().renderType(renderType);
                 trapdoorOrientableTopModel.model().renderType(renderType);
                 trapdoorOrientableOpenModel.model().renderType(renderType);
@@ -522,13 +533,13 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
             itemModel.tcTrapDoor(trapdoorOrientableBottomModel);
 
             trapdoorBlock(block, trapdoorOrientableBottom, trapdoorOrientableTop, trapdoorOrientableOpen, true);
-        }else{
+        } else {
             TCBlockModelContent trapdoorBottomModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom"), "");
             TCBlockModelContent trapdoorTopModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_top"), "");
             TCBlockModelContent trapdoorOpenModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_open"), "");
             TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-            if(renderType != null){
+            if (renderType != null) {
                 trapdoorBottomModel.model().renderType(renderType);
                 trapdoorTopModel.model().renderType(renderType);
                 trapdoorOpenModel.model().renderType(renderType);
@@ -573,7 +584,7 @@ public class TCBlockStateContent extends BlockStateContent<TCBlockStateContent> 
         TCBlockModelContent wallSideTallModel = new TCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_side_tall"), "");
         TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
 
-        if(renderType != null){
+        if (renderType != null) {
             wallInventoryModel.model().renderType(renderType);
             wallPostModel.model().renderType(renderType);
             wallSideModel.model().renderType(renderType);

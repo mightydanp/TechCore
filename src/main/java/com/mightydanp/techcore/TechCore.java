@@ -1,11 +1,11 @@
 package com.mightydanp.techcore;
 
 import com.mightydanp.techcore.api.configs.ConfigRegistries;
-import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
-import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.guitabs.event.TCInventoryEvent;
 import com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.api.registries.RegistriesHandler;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
+import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.component.TCDataComponents;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public class TechCore {
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public TechCore(IEventBus bus){
+    public TechCore(IEventBus bus) {
         RegistriesHandler.init(bus);
 
         TCDataComponents.init();
@@ -33,8 +33,7 @@ public class TechCore {
     }
 
     @SubscribeEvent
-    private void onServerStarting(ServerStartingEvent event)
-    {
+    private void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Tech Core server is starting.");
     }
 }

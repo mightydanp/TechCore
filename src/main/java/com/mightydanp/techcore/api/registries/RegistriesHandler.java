@@ -4,7 +4,6 @@ import com.mightydanp.techcore.api.materials.Material;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -62,8 +61,6 @@ public class RegistriesHandler {
     public static final DeferredRegister<WoodType> WOOD_TYPE = DeferredRegister.create(WOOD_TYPE_REGISTRY, CoreRef.MOD_ID);
 
 
-
-
     public static void init(IEventBus bus) {
         ITEMS.register(bus);
         BLOCKS.register(bus);
@@ -98,19 +95,21 @@ public class RegistriesHandler {
         event.register(WOOD_TYPE_REGISTRY);
     }
 
-    public void addDeferredRegister(ResourceLocation name, registryHolder holder){
+    public void addDeferredRegister(ResourceLocation name, registryHolder holder) {
         additionalRegistries.put(name, holder);
     }
 
-    public finalizedRegistryHolder getDeferredRegister(ResourceLocation name){
-        if(!additionalRegistries.containsKey(name)){
+    public finalizedRegistryHolder getDeferredRegister(ResourceLocation name) {
+        if (!additionalRegistries.containsKey(name)) {
             return finalizedDeferredRegister.get(name);
         }
 
         throw new Error("DeferredRegister : " + name.toString() + " : was not registered!");
     }
 
-    public record registryHolder(Registry<?> key){}
+    public record registryHolder(Registry<?> key) {
+    }
 
-    public record finalizedRegistryHolder(ResourceKey<Registry<Object>> resourceKey, DeferredRegister<?> registry){}
+    public record finalizedRegistryHolder(ResourceKey<Registry<Object>> resourceKey, DeferredRegister<?> registry) {
+    }
 }

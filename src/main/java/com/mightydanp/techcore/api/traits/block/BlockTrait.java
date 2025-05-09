@@ -31,7 +31,7 @@ public class BlockTrait extends Trait<BlockTrait> {
         ).apply(instance, BlockTrait::new));
     }
 
-    public static BlockTrait getInstance(){
+    public static BlockTrait getInstance() {
         return new BlockTrait();
     }
 
@@ -39,6 +39,7 @@ public class BlockTrait extends Trait<BlockTrait> {
         this.color = color;
         return this;
     }
+
     public int color() {
         return color;
     }
@@ -66,6 +67,6 @@ public class BlockTrait extends Trait<BlockTrait> {
     }
 
 
-
-    record BlockTraitCodec(Integer color, Double kilograms, Boolean canPickUp){}
+    record BlockTraitCodec(Integer color, Double kilograms, Boolean canPickUp) {
+    }
 }

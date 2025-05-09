@@ -16,7 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class TraitProvider<A extends Trait<A>> implements DataProvider {
@@ -59,7 +62,7 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
 
     @Override
     public @NotNull String getName() {
-        return modId + " " + CommonHooks.prefixNamespace(resourceKey.location()) +  " traits";
+        return modId + " " + CommonHooks.prefixNamespace(resourceKey.location()) + " traits";
     }
 
     public static String getDir(ResourceKey<? extends Registry<?>> p_203919_) {

@@ -18,14 +18,14 @@ public class AssetPackRegistry {
     public static List<BaseRegistries> init = new ArrayList<>();
 
     @SubscribeEvent
-    public static void addResourcePack(AddPackFindersEvent event){
+    public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
         init.forEach(BaseRegistries::initResource);
 
         AssetPackRegistries.init();
 
-        if (type == PackType.CLIENT_RESOURCES){
+        if (type == PackType.CLIENT_RESOURCES) {
             event.addRepositorySource((packConsumer) -> {
 
                 Pack pack = assetPack.createPack();

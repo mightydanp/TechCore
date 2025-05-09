@@ -18,7 +18,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -38,6 +39,7 @@ public class RecipeContent {
     private ShapedRecipeBuilder shaped = null;
     private JsonObject recipeJson;
     private JsonObject advancementJson;
+
     public RecipeContent(String modid, String name) {
         this.modid = modid;
         this.name = name;
@@ -51,42 +53,43 @@ public class RecipeContent {
     public String modid() {
         return modid;
     }
+
     public String name() {
         return name;
     }
 
-    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item){
+    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item) {
         shapeless = ShapelessRecipeBuilder.shapeless(category, item);
         return shapeless;
     }
 
-    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item, int amount){
+    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item, int amount) {
         shapeless = ShapelessRecipeBuilder.shapeless(category, item, amount);
         return shapeless;
     }
 
-    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemStack itemStack){
+    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemStack itemStack) {
         shapeless = ShapelessRecipeBuilder.shapeless(category, itemStack);
         return shapeless;
     }
 
-    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item){
+    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item) {
         shaped = ShapedRecipeBuilder.shaped(category, item);
         return shaped;
     }
 
-    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item, int amount){
+    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item, int amount) {
         shaped = ShapedRecipeBuilder.shaped(category, item, amount);
         return shaped;
     }
 
-    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemStack itemStack){
+    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemStack itemStack) {
         shaped = ShapedRecipeBuilder.shaped(category, itemStack);
         return shaped;
     }
 
     @SuppressWarnings("removal")
-    public RecipeContent save(@Nullable Object optional){
+    public RecipeContent save(@Nullable Object optional) {
         RecipeOutput recipeOutput = new RecipeOutput() {
             @Override
             public void accept(@NotNull ResourceLocation resourceLocation, @NotNull Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder, ICondition @NotNull ... conditions) {
@@ -103,22 +106,22 @@ public class RecipeContent {
             }
         };
 
-        if(shapeless != null && shaped == null) {
-            if(optional instanceof String string){
+        if (shapeless != null && shaped == null) {
+            if (optional instanceof String string) {
                 shapeless.save(recipeOutput, string);
-            }else if(optional instanceof ResourceLocation resourceLocation) {
+            } else if (optional instanceof ResourceLocation resourceLocation) {
                 shapeless.save(recipeOutput, resourceLocation);
-            }else{
+            } else {
                 shapeless.save(recipeOutput, ResourceLocation.fromNamespaceAndPath(modid(), name()));
             }
         }
 
-        if(shapeless == null && shaped != null) {
-            if(optional instanceof String string){
+        if (shapeless == null && shaped != null) {
+            if (optional instanceof String string) {
                 shaped.save(recipeOutput, string);
-            }else if(optional instanceof ResourceLocation resourceLocation) {
+            } else if (optional instanceof ResourceLocation resourceLocation) {
                 shaped.save(recipeOutput, resourceLocation);
-            }else{
+            } else {
                 shaped.save(recipeOutput, ResourceLocation.fromNamespaceAndPath(modid(), name()));
             }
         }
@@ -127,14 +130,14 @@ public class RecipeContent {
     }
 
 
-    public JsonObject recipeJson(){
+    public JsonObject recipeJson() {
         //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
         //need to create an advancement data
         //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
         return recipeJson;
     }
 
-    public JsonObject advancementJson(){
+    public JsonObject advancementJson() {
         //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
         //need to create an advancement data
         //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
@@ -388,6 +391,7 @@ public class RecipeContent {
         save(null);
         return shaped;
     }
+
     public void nineBlockToOneStorage(RecipeCategory category, ItemLike outputItem, ItemLike inputItem, @javax.annotation.Nullable String group, ResourceLocation resourceLocation) {
         shaped = shaped(category, outputItem).define('#', inputItem).pattern("###").pattern("###").pattern("###").group(group).unlockedBy(getHasName(inputItem), has(inputItem));
         save(resourceLocation);

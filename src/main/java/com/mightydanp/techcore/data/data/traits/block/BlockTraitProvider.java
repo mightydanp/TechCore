@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.data.data.traits.block;
 
-import com.mightydanp.techcore.data.data.traits.TraitProvider;
 import com.mightydanp.techcore.api.traits.block.BlockTrait;
+import com.mightydanp.techcore.data.data.traits.TraitProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;

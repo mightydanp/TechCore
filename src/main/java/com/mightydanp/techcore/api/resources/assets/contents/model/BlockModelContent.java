@@ -5,7 +5,7 @@ import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.resources.ResourceLocation;
 
-public class BlockModelContent<A extends BlockModelContent<A>> extends ModelContent<BlockModelContent<A>>{
+public class BlockModelContent<A extends BlockModelContent<A>> extends ModelContent<BlockModelContent<A>> {
     public static final String BLOCK_FOLDER = "block";
 
     public BlockModelContent(String modelName, String parentFolder) {
@@ -21,9 +21,9 @@ public class BlockModelContent<A extends BlockModelContent<A>> extends ModelCont
     }
 
     @SuppressWarnings("ALL")
-    public A save(boolean override){
-        AssetPackRegistries.saveBlockModel((A)this, override);
-        return (A)this;
+    public A save(boolean override) {
+        AssetPackRegistries.saveBlockModel((A) this, override);
+        return (A) this;
     }
 
     public TCModelBuilder<BlockModelContent<A>> cube(String name, ResourceLocation down, ResourceLocation up, ResourceLocation north, ResourceLocation south, ResourceLocation east, ResourceLocation west) {

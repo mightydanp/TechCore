@@ -66,40 +66,40 @@ public abstract class InventoryMixin implements Container, Nameable {
     public Player player;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void Inventory(Player player, CallbackInfo ci){
+    public void Inventory(Player player, CallbackInfo ci) {
         compartments = ImmutableList.of(this.items, this.armor, this.offhand, tech_Ascension_Workspace$back);
     }
 
     @Inject(method = "save", at = @At("TAIL"), cancellable = true)
-    public void save(ListTag listTag, CallbackInfoReturnable<ListTag> cir){
-        for(int k = 0; k < this.tech_Ascension_Workspace$extra1.size(); ++k) {
+    public void save(ListTag listTag, CallbackInfoReturnable<ListTag> cir) {
+        for (int k = 0; k < this.tech_Ascension_Workspace$extra1.size(); ++k) {
             if (!this.tech_Ascension_Workspace$extra1.get(k).isEmpty()) {
                 CompoundTag compoundTag2 = new CompoundTag();
-                compoundTag2.putByte("Slot", (byte)(k + 200));
+                compoundTag2.putByte("Slot", (byte) (k + 200));
                 listTag.add(this.tech_Ascension_Workspace$extra1.get(k).save(this.player.registryAccess(), compoundTag2));
                 listTag.add(compoundTag2);
             }
         }
-        for(int k = 0; k < this.tech_Ascension_Workspace$back.size(); ++k) {
+        for (int k = 0; k < this.tech_Ascension_Workspace$back.size(); ++k) {
             if (!this.tech_Ascension_Workspace$back.get(k).isEmpty()) {
                 CompoundTag compoundTag2 = new CompoundTag();
-                compoundTag2.putByte("Slot", (byte)(k + 201));
+                compoundTag2.putByte("Slot", (byte) (k + 201));
                 listTag.add(this.tech_Ascension_Workspace$back.get(k).save(this.player.registryAccess(), compoundTag2));
                 listTag.add(compoundTag2);
             }
         }
-        for(int k = 0; k < this.tech_Ascension_Workspace$extra3.size(); ++k) {
+        for (int k = 0; k < this.tech_Ascension_Workspace$extra3.size(); ++k) {
             if (!this.tech_Ascension_Workspace$extra3.get(k).isEmpty()) {
                 CompoundTag compoundTag2 = new CompoundTag();
-                compoundTag2.putByte("Slot", (byte)(k + 202));
+                compoundTag2.putByte("Slot", (byte) (k + 202));
                 listTag.add(this.tech_Ascension_Workspace$extra3.get(k).save(this.player.registryAccess(), compoundTag2));
                 listTag.add(compoundTag2);
             }
         }
-        for(int k = 0; k < this.tech_Ascension_Workspace$extra4.size(); ++k) {
+        for (int k = 0; k < this.tech_Ascension_Workspace$extra4.size(); ++k) {
             if (!this.tech_Ascension_Workspace$extra4.get(k).isEmpty()) {
                 CompoundTag compoundTag2 = new CompoundTag();
-                compoundTag2.putByte("Slot", (byte)(k + 203));
+                compoundTag2.putByte("Slot", (byte) (k + 203));
                 listTag.add(this.tech_Ascension_Workspace$extra4.get(k).save(this.player.registryAccess(), compoundTag2));
                 listTag.add(compoundTag2);
             }
@@ -112,7 +112,7 @@ public abstract class InventoryMixin implements Container, Nameable {
     public void load(ListTag listTag, CallbackInfo ci) {
         this.tech_Ascension_Workspace$extra1.clear();
 
-        for(int i = 0; i < listTag.size(); ++i) {
+        for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundtag = listTag.getCompound(i);
             int j = compoundtag.getByte("Slot") & 255;
             ItemStack itemstack = ItemStack.parse(this.player.registryAccess(), compoundtag).orElse(ItemStack.EMPTY);
@@ -124,7 +124,7 @@ public abstract class InventoryMixin implements Container, Nameable {
         }
 
         this.tech_Ascension_Workspace$back.clear();
-        for(int i = 0; i < listTag.size(); ++i) {
+        for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundtag = listTag.getCompound(i);
             int j = compoundtag.getByte("Slot") & 255;
             ItemStack itemstack = ItemStack.parse(this.player.registryAccess(), compoundtag).orElse(ItemStack.EMPTY);
@@ -136,7 +136,7 @@ public abstract class InventoryMixin implements Container, Nameable {
         }
 
         this.tech_Ascension_Workspace$extra3.clear();
-        for(int i = 0; i < listTag.size(); ++i) {
+        for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundtag = listTag.getCompound(i);
             int j = compoundtag.getByte("Slot") & 255;
             ItemStack itemstack = ItemStack.parse(this.player.registryAccess(), compoundtag).orElse(ItemStack.EMPTY);
@@ -148,7 +148,7 @@ public abstract class InventoryMixin implements Container, Nameable {
         }
 
         this.tech_Ascension_Workspace$extra4.clear();
-        for(int i = 0; i < listTag.size(); ++i) {
+        for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundtag = listTag.getCompound(i);
             int j = compoundtag.getByte("Slot") & 255;
             ItemStack itemstack = ItemStack.parse(this.player.registryAccess(), compoundtag).orElse(ItemStack.EMPTY);
@@ -168,22 +168,22 @@ public abstract class InventoryMixin implements Container, Nameable {
 
     @Inject(method = "isEmpty", at = @At("TAIL"), cancellable = true)
     public void isEmpty(CallbackInfoReturnable<Boolean> cir) {
-        for(ItemStack itemstack : this.tech_Ascension_Workspace$extra1) {
+        for (ItemStack itemstack : this.tech_Ascension_Workspace$extra1) {
             if (!itemstack.isEmpty()) {
                 cir.setReturnValue(false);
             }
         }
-        for(ItemStack itemstack : this.tech_Ascension_Workspace$back) {
+        for (ItemStack itemstack : this.tech_Ascension_Workspace$back) {
             if (!itemstack.isEmpty()) {
                 cir.setReturnValue(false);
             }
         }
-        for(ItemStack itemstack : this.tech_Ascension_Workspace$extra3) {
+        for (ItemStack itemstack : this.tech_Ascension_Workspace$extra3) {
             if (!itemstack.isEmpty()) {
                 cir.setReturnValue(false);
             }
         }
-        for(ItemStack itemstack : this.tech_Ascension_Workspace$extra4) {
+        for (ItemStack itemstack : this.tech_Ascension_Workspace$extra4) {
             if (!itemstack.isEmpty()) {
                 cir.setReturnValue(false);
             }

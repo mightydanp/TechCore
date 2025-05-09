@@ -4,17 +4,17 @@ import com.google.gson.JsonObject;
 import com.mightydanp.techcore.TechCore;
 import net.minecraft.resources.ResourceLocation;
 
-public class LanguageContent  {
+public class LanguageContent {
     private final String modid;
     private final String name;
     private final JsonObject translations = new JsonObject();
 
-    public LanguageContent(ResourceLocation resourceLocation){
+    public LanguageContent(ResourceLocation resourceLocation) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
     }
 
-    public LanguageContent(String modid, String name){
+    public LanguageContent(String modid, String name) {
         this.modid = modid;
         this.name = name;
     }
@@ -40,25 +40,25 @@ public class LanguageContent  {
         return this;
     }
 
-    public static String translateUpperCase(String name){
+    public static String translateUpperCase(String name) {
         StringBuilder translatedName = new StringBuilder();
         if (name.contains("_")) {
             int i = 0;
             for (String word : name.split("_")) {
                 String str = word.substring(0, 1).toUpperCase() + word.substring(1);
-                if( i == 0 ){
+                if (i == 0) {
                     translatedName.append(str);
                     i++;
-                }else{
+                } else {
                     translatedName.append(" ").append(str);
                 }
             }
-        }else{
+        } else {
             String str = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-            if(str.contains(":")) {
+            if (str.contains(":")) {
                 translatedName.append(str.split(":")[1]);
-            }else {
+            } else {
                 translatedName.append(str);
             }
 

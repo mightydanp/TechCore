@@ -18,14 +18,15 @@ import java.util.concurrent.CompletableFuture;
 @EventBusSubscriber(modid = CoreRef.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class DataGen {
     @SubscribeEvent
-    public static void gatherData(@NotNull GatherDataEvent event){
-       DataGenerator generator = event.getGenerator();
-       PackOutput packOutput = generator.getPackOutput();
-       ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-       CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+    public static void gatherData(@NotNull GatherDataEvent event) {
+        DataGenerator generator = event.getGenerator();
+        PackOutput packOutput = generator.getPackOutput();
+        ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
     }
-    public static void addListeners(@NotNull AddReloadListenerEvent event){
+
+    public static void addListeners(@NotNull AddReloadListenerEvent event) {
         event.addListener(BlockTrait.getInstance());
         event.addListener(ItemTrait.getInstance());
     }

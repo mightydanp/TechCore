@@ -38,7 +38,7 @@ public class AssetPack implements PackResources {
     public Pack.Position defaultPosition;
     public boolean fixedPosition;
 
-    public AssetPack(String namespace, String name, boolean required, Pack.Position defaultPosition, boolean fixedPosition){
+    public AssetPack(String namespace, String name, boolean required, Pack.Position defaultPosition, boolean fixedPosition) {
         this.namespace = namespace;
         this.name = name;
         this.required = required;
@@ -46,21 +46,21 @@ public class AssetPack implements PackResources {
         this.fixedPosition = fixedPosition;
     }
 
-    public void addToResources(ResourceLocation location, JsonObject jsonObject){
+    public void addToResources(ResourceLocation location, JsonObject jsonObject) {
         if (!ASSET_HOLDER.containsKey(location)) {
             InputStream inputStream = new ByteArrayInputStream(jsonObject.toString().getBytes());
-            ASSET_HOLDER.put(location, ()-> inputStream);
+            ASSET_HOLDER.put(location, () -> inputStream);
             firstLoad = true;
-        }else{
-            if(!firstLoad)
+        } else {
+            if (!firstLoad)
                 TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
         }
     }
 
-    public void removeToResources(ResourceLocation location){
+    public void removeToResources(ResourceLocation location) {
         if (ASSET_HOLDER.containsKey(location)) {
             ASSET_HOLDER.remove(location);
-        }else{
+        } else {
             TechCore.LOGGER.warn("[{}] does not already exists in resource assets: ", location);
         }
     }
@@ -73,7 +73,7 @@ public class AssetPack implements PackResources {
 
     @Nullable
     @Override
-    public IoSupplier<InputStream> getResource(@NotNull PackType packType, @NotNull ResourceLocation location){
+    public IoSupplier<InputStream> getResource(@NotNull PackType packType, @NotNull ResourceLocation location) {
         /*
         return FileUtil.decomposePath(p_251554_.getPath()).get().map(p_248224_ -> {
             String s = p_251554_.getNamespace();
@@ -97,7 +97,8 @@ public class AssetPack implements PackResources {
                 try {
                     resource.get();
                     return resource;
-                } catch (IOException ignored){}
+                } catch (IOException ignored) {
+                }
             }
         }
 
@@ -107,16 +108,16 @@ public class AssetPack implements PackResources {
 
     @Override
     public void listResources(@NotNull PackType packType, @NotNull String namespace, @NotNull String path, @NotNull ResourceOutput resourceOutput) {
-        if (packType == type){
+        if (packType == type) {
             Map<String, IoSupplier<InputStream>> filteredMap = new HashMap<>();
 
             ASSET_HOLDER.forEach((resource, stream) -> {
-                if(resource.getNamespace().equals(namespace)){
+                if (resource.getNamespace().equals(namespace)) {
                     filteredMap.put(resource.getPath(), stream);
                 }
             });
 
-            if(filteredMap.isEmpty()){
+            if (filteredMap.isEmpty()) {
                 TechCore.LOGGER.error("Invalid path + {}", path);
             }
         }
@@ -136,7 +137,7 @@ public class AssetPack implements PackResources {
     @Nullable
     @Override
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        if(serializer.getMetadataSectionName().equals("pack")) {
+        if (serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
             object.addProperty("pack_format", version);
             object.addProperty("description", "dynamically generated resource assets");
@@ -166,7 +167,7 @@ public class AssetPack implements PackResources {
 
     }
 
-    public PackSelectionConfig packSelectionConfig(){
+    public PackSelectionConfig packSelectionConfig() {
         return new PackSelectionConfig(required, defaultPosition, fixedPosition);
     }
 

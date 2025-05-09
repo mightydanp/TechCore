@@ -55,15 +55,15 @@ public record Temperature(double temperature, Scale scale) {
                         138.5177312231 * Math.log(temp - 10) - 305.0447927307;
         blue = clamp(blue);
 
-        return new int[] {
-                (int)Math.round(red),
-                (int)Math.round(green),
-                (int)Math.round(blue)
+        return new int[]{
+                (int) Math.round(red),
+                (int) Math.round(green),
+                (int) Math.round(blue)
         };
     }
 
     private int clamp(double value) {
-        return (int)Math.round(Math.max(0, Math.min(255, value)));
+        return (int) Math.round(Math.max(0, Math.min(255, value)));
     }
 
     public static void main(String[] args) {
@@ -96,6 +96,18 @@ public record Temperature(double temperature, Scale scale) {
                     default -> throw new IllegalArgumentException("Unknown scale: " + str);
                 },
                 Scale::toString
+        );
+
+        public static final StreamCodec<FriendlyByteBuf, Scale> STREAM_CODEC = StreamCodec.of(
+                (buffer, scale) -> buffer.writeUtf(scale.toString()), // Encoding: Write the scale name to the buffer
+                buffer -> { // Decoding: Read the scale name from the buffer and map it to the enum
+                    String scaleStr = buffer.readUtf();
+                    return switch (scaleStr.toLowerCase()) {
+                        case "celsius" -> CELSIUS;
+                        case "fahrenheit" -> FAHRENHEIT;
+                        default -> throw new IllegalArgumentException("Unknown scale: " + scaleStr);
+                    };
+                }
         );
     }
 }

@@ -15,7 +15,7 @@ public class BlockTraitConfig implements IConfig {
     public Double kilogram;
     public Boolean canPickUp;
 
-    public BlockTraitConfig(String registry, Integer color, Double kilogram, Boolean canPickUp){
+    public BlockTraitConfig(String registry, Integer color, Double kilogram, Boolean canPickUp) {
         registryConfig = builder
                 .comment("registry of the Block.")
                 .define("registry", registry);
@@ -31,11 +31,12 @@ public class BlockTraitConfig implements IConfig {
     }
 
     @Override
-    public ModConfigSpec build(){
+    public ModConfigSpec build() {
         return builder.build();
     }
+
     @Override
-    public void load(){
+    public void load() {
         this.registry = registryConfig.get();
         this.color = colorConfig.get();
         this.kilogram = kilogramConfig.get();

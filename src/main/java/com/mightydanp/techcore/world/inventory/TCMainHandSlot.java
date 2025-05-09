@@ -39,7 +39,6 @@ public class TCMainHandSlot extends Slot {
     }
 
 
-
     @Override
     public boolean isFake() {
         return true;

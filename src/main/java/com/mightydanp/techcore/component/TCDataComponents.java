@@ -2,14 +2,10 @@ package com.mightydanp.techcore.component;
 
 import com.mightydanp.techcore.api.materials.properties.Temperature;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
-import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.item.component.Tool;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.util.ExtraCodecs;
 import net.neoforged.neoforge.registries.DeferredHolder;
-
-import java.util.function.UnaryOperator;
 
 public class TCDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Temperature>> TEMPERATURE =
@@ -20,5 +16,22 @@ public class TCDataComponents {
                             .build()
             );
 
-    public static void init() {}
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> MELTING_POINT =
+            RegistriesHandler.DATA_COMPONENT_TYPES.register("melting_point", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(ExtraCodecs.NON_NEGATIVE_INT)
+                            .networkSynchronized(ByteBufCodecs.VAR_INT)
+                            .build()
+            );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> BOILING_POINT =
+            RegistriesHandler.DATA_COMPONENT_TYPES.register("boiling_point", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(ExtraCodecs.NON_NEGATIVE_INT)
+                            .networkSynchronized(ByteBufCodecs.VAR_INT)
+                            .build()
+            );
+
+    public static void init() {
+    }
 }

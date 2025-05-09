@@ -36,14 +36,15 @@ public class ItemTrait extends Trait<ItemTrait> {
         ).apply(instance, ItemTrait::new));
     }
 
-    public static ItemTrait getInstance(){
+    public static ItemTrait getInstance() {
         return new ItemTrait();
     }
 
     public ItemTrait color(int color) {
-        this.color= color;
+        this.color = color;
         return this;
     }
+
     public int color() {
         return color;
     }

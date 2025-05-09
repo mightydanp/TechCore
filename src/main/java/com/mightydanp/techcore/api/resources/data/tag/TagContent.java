@@ -10,7 +10,10 @@ import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public class TagContent<A> {
     private final String modid;
@@ -21,7 +24,7 @@ public class TagContent<A> {
     private final @Nullable Registry<A> registry;
     private final ResourceKey<? extends Registry<A>> resourceKey;
 
-    public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry){
+    public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
         tagKey = TagKey.create(ResourceKey, resourceLocation);
@@ -29,7 +32,7 @@ public class TagContent<A> {
         this.resourceKey = ResourceKey;
     }
 
-    public TagContent(String modid, String name, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry){
+    public TagContent(String modid, String name, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry) {
         this.modid = modid;
         this.name = name;
         tagKey = TagKey.create(ResourceKey, ResourceLocation.fromNamespaceAndPath(modid, name));
@@ -45,13 +48,13 @@ public class TagContent<A> {
         return name;
     }
 
-    public TagContent<A> replace(boolean replace){
+    public TagContent<A> replace(boolean replace) {
         builder.replace(replace);
         return this;
     }
 
     public TagContent<A> add(A object) {
-        if(registry != null) {
+        if (registry != null) {
             builder.addElement(Objects.requireNonNull(registry.getKey(object)));
         }
 
@@ -60,7 +63,7 @@ public class TagContent<A> {
 
     @SafeVarargs
     public final TagContent<A> addAll(A... objects) {
-        if(registry != null) {
+        if (registry != null) {
             Arrays.stream(objects).forEach(object -> builder.addElement(Objects.requireNonNull(registry.getKey(object))));
         }
 
@@ -68,7 +71,7 @@ public class TagContent<A> {
     }
 
     public TagContent<A> remove(A object) {
-        if(registry != null) {
+        if (registry != null) {
             //re-look builder.removeElement
             builder.removeElement(registry.getKey(object));
         }
@@ -78,7 +81,7 @@ public class TagContent<A> {
 
     @SafeVarargs
     public final TagContent<A> removeAll(A... objects) {
-        if(registry != null) {
+        if (registry != null) {
             //re-look builder.removeElement
             Arrays.stream(objects).forEach(object -> builder.removeElement(Objects.requireNonNull(registry.getKey(object))));
         }
@@ -90,14 +93,14 @@ public class TagContent<A> {
         return tagKey;
     }
 
-    public TagContent<A> addExisting(){
-        if(registry != null) {
+    public TagContent<A> addExisting() {
+        if (registry != null) {
             registry.getTag(tagKey).ifPresent(holders -> holders.forEach(aHolder -> add(aHolder.value())));
         }
         return this;
     }
 
-    public JsonObject json(){
+    public JsonObject json() {
         return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), builder.isReplace(), builder.getRemoveEntries().toList())).getOrThrow(IllegalStateException::new).getAsJsonObject();
     }
 }

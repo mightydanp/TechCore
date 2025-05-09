@@ -1,9 +1,9 @@
 package com.mightydanp.techcore.api.guitabs.event;
 
+import com.mightydanp.techcore.api.guitabs.GuiTab;
 import com.mightydanp.techcore.api.guitabs.components.GuiTabBase;
 import com.mightydanp.techcore.api.guitabs.components.GuiTabButton;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.api.guitabs.GuiTab;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -26,7 +26,7 @@ import static com.mightydanp.techcore.api.guitabs.registries.GuiTabRegistries.gu
 
 @EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT)
 public class TCInventoryEvent {
-    public static KeyMapping tcInventoryKey = new KeyMapping("key."+ CoreRef.MOD_ID +".inventory", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_E, KeyMapping.CATEGORY_INVENTORY);
+    public static KeyMapping tcInventoryKey = new KeyMapping("key." + CoreRef.MOD_ID + ".inventory", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_E, KeyMapping.CATEGORY_INVENTORY);
 
     private static int currentPage = 0;
 
@@ -114,7 +114,8 @@ public class TCInventoryEvent {
                 }
 
                 // Page Indicator
-                Button label = Button.builder(Component.literal("Page " + (currentPage + 1) + "/" + totalPages), btn -> {})
+                Button label = Button.builder(Component.literal("Page " + (currentPage + 1) + "/" + totalPages), btn -> {
+                        })
                         .bounds(guiX + guiWidth / 2 - 30, navY, 60, 20).build();
                 label.active = false;
                 event.addListener(label);

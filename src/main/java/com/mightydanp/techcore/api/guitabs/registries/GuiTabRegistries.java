@@ -9,7 +9,6 @@ import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCo
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -23,13 +22,13 @@ public class GuiTabRegistries implements BaseRegistries {
     public static GuiTab playerInventory;
 
 
-    public static void init(){
+    public static void init() {
         guiTabs.put(InventoryScreen.class, playerInventory = new InventoryGuiTab(CoreRef.MOD_ID, GuiTabRef.player_inventory_name).setPriorityNumber(1).setItem(new ItemStack(Items.GRASS_BLOCK)));
     }
 
-    public void initResource(){
+    public void initResource() {
         LanguageContent enLang = AssetPackRegistries.getLanguage(CoreRef.MOD_ID, "en_us");
-        enLang.addTranslation("tab." + CoreRef.MOD_ID + "."+ GuiTabRef.player_inventory_name, LanguageContent.translateUpperCase(GuiTabRef.player_inventory_name));
+        enLang.addTranslation("tab." + CoreRef.MOD_ID + "." + GuiTabRef.player_inventory_name, LanguageContent.translateUpperCase(GuiTabRef.player_inventory_name));
 
         AssetPackRegistries.saveLanguage(enLang, false);
     }

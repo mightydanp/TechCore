@@ -9,7 +9,7 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Objects;
 
-public class ItemModelContent<A extends ItemModelContent<A>> extends ModelContent<ItemModelContent<A>>{
+public class ItemModelContent<A extends ItemModelContent<A>> extends ModelContent<ItemModelContent<A>> {
     public static final String ITEM_FOLDER = "item";
 
     public ItemModelContent(String modid, String modelName, String parentFolder) {
@@ -21,9 +21,9 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
     }
 
     @SuppressWarnings("ALL")
-    public A save(boolean override){
-        AssetPackRegistries.saveItemModel((A)this, override);
-        return (A)this;
+    public A save(boolean override) {
+        AssetPackRegistries.saveItemModel((A) this, override);
+        return (A) this;
     }
 
     public TCModelBuilder<A> basicItem(Item item) {

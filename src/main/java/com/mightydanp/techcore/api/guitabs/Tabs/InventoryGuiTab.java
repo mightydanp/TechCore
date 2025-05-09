@@ -4,13 +4,12 @@ import com.mightydanp.techcore.api.guitabs.GuiTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 public class InventoryGuiTab extends GuiTab {
     public Player player;
 
-    public InventoryGuiTab(String modID, String name){
+    public InventoryGuiTab(String modID, String name) {
         super(modID, name, 176, 166);
     }
 
@@ -24,7 +23,6 @@ public class InventoryGuiTab extends GuiTab {
     public boolean isCurrentlyUsed(Screen currentScreen) {
         return currentScreen instanceof InventoryScreen;
     }
-
 
 
 }

@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.api.registries;
 
-import com.mightydanp.techcore.api.materials.Material;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.materials.Material;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;

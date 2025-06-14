@@ -1,10 +1,12 @@
 package com.mightydanp.techcore.materials;
 
 import com.mightydanp.techcore.materials.Item.FluidStates;
-import com.mightydanp.techcore.materials.properties.MaterialFlags;
+import com.mightydanp.techcore.materials.properties.MaterialComponents;
 import com.mightydanp.techcore.materials.properties.OreTypes;
 import com.mightydanp.techcore.materials.properties.PureSubstances;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.FlowingFluid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.List;
 public class Material {
     public String name;
 
-    public List<MaterialFlags.MaterialFlag> flags = new ArrayList<>();
+    public List<MaterialComponents.MaterialComponent> flags = new ArrayList<>();
 
     public PureSubstances.PureSubstance type;
     public int atomicNumber;
@@ -38,6 +40,13 @@ public class Material {
 
 
     public Item ingot, gem, chippedGem, flawedGem, flawlessGem, legendaryGem, crushedOre, purifiedOre, centrifugedOre, impureDust, pureDust, dust, smallDust, tinyDust;
+
+    public FlowingFluid fluid, fluid_flowing;
+    public Block fluidBlock;
+
+    public Block layerBlock, rockBlock, smoothSlabBlock;
+
+    public Item layerItemBlock, rockItemBlock, smoothSlabItemBlock;
 
 
 }

@@ -1,59 +1,76 @@
 package com.mightydanp.techcore.materials.properties;
 
+import com.mightydanp.techcore.materials.Material;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.NotNull;
 
-public enum MaterialFlags {
-    BLOCK_GEM(new MaterialFlag("block_", "_gem")),
-    BLOCK_METAL(new MaterialFlag("block_", "_metal")),
-    DUST(new MaterialFlag("", "_dust")),
-    FLUID(new MaterialFlag("", "_fluid")),
-    GAS(new MaterialFlag("", "_gas")),
-    GEM(new MaterialFlag("", "_gem")),
-    HARDENED_INGOT(new MaterialFlag("hardened_", "_ingot")),
-    HOT_INGOT(new MaterialFlag("hot_", "_ingot")),
-    INGOT(new MaterialFlag("", "_ingot")),
-    ORE(new MaterialFlag("", "_ore")),
-    SMALL_ORE(new MaterialFlag("small_", "_ore")),
-    SOFTENED_INGOT(new MaterialFlag("softened_", "_ingot")),
-    STONE_LAYER(new MaterialFlag("stone_", "_layer")),
-    TOOL(new MaterialFlag("", "_tool"));
+import java.util.function.Consumer;
 
-    public final MaterialFlag materialFlag;
+public enum MaterialComponents {
+    BLOCK_GEM(new MaterialComponent("block_", "_gem", m -> {}, m -> {})),
+    BLOCK_METAL(new MaterialComponent("block_", "_metal", m -> {}, m -> {})),
+    DUST(new MaterialComponent("", "_dust", m -> {}, m -> {})),
+    FLUID(new MaterialComponent("", "_fluid", m -> {}, m -> {})),
+    GAS(new MaterialComponent("", "_gas", m -> {}, m -> {})),
+    GEM(new MaterialComponent("", "_gem", m -> {}, m -> {})),
+    HARDENED_INGOT(new MaterialComponent("hardened_", "_ingot", m -> {}, m -> {})),
+    HOT_INGOT(new MaterialComponent("hot_", "_ingot", m -> {}, m -> {})),
+    INGOT(new MaterialComponent("", "_ingot", m -> {}, m -> {})),
+    ORE(new MaterialComponent("", "_ore", m -> {}, m -> {})),
+    SMALL_ORE(new MaterialComponent("small_", "_ore", m -> {}, m -> {})),
+    SOFTENED_INGOT(new MaterialComponent("softened_", "_ingot", m -> {}, m -> {})),
+    STONE_LAYER(new MaterialComponent("stone_", "_layer", m -> {}, m -> {})),
+    TOOL(new MaterialComponent("", "_tool", m -> {}, m -> {}));
 
-    MaterialFlags(MaterialFlag materialFlag) {
-        this.materialFlag = materialFlag;
+    public final MaterialComponent materialComponent;
+
+    MaterialComponents(MaterialComponent materialComponent) {
+        this.materialComponent = materialComponent;
     }
 
     public String getPrefix() {
-        return materialFlag.prefix();
+        return materialComponent.prefix();
     }
 
     public String getSuffix() {
-        return materialFlag.suffix();
+        return materialComponent.suffix();
     }
 
     @Override
     public String toString() {
-        return materialFlag.prefix() + materialFlag.suffix();
+        return materialComponent.prefix() + materialComponent.suffix();
     }
 
-    public record MaterialFlag(String prefix, String suffix) {
-        public static final Codec<MaterialFlag> CODEC = RecordCodecBuilder.create(instance ->
+    public record MaterialComponent(String prefix, String suffix, Consumer<Material> onServerApply, Consumer<Material> onClientApply) {
+        public static final Codec<MaterialComponent> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
-                        Codec.STRING.fieldOf("prefix").forGetter(MaterialFlag::prefix),
-                        Codec.STRING.fieldOf("suffix").forGetter(MaterialFlag::suffix)
-                ).apply(instance, MaterialFlag::new)
+                        Codec.STRING.fieldOf("prefix").forGetter(MaterialComponent::prefix),
+                        Codec.STRING.fieldOf("suffix").forGetter(MaterialComponent::suffix)
+                ).apply(instance, (prefix, suffix) -> new MaterialComponent(prefix, suffix, m -> {}, m -> {}))
         );
 
-        public static final StreamCodec<FriendlyByteBuf, MaterialFlag> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.STRING_UTF8, MaterialFlag::prefix,
-                ByteBufCodecs.STRING_UTF8, MaterialFlag::suffix,
-                MaterialFlag::new
+        public static final StreamCodec<FriendlyByteBuf, MaterialComponent> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, MaterialComponent::prefix,
+                ByteBufCodecs.STRING_UTF8, MaterialComponent::suffix,
+                (prefix, suffix) -> new MaterialComponent(prefix, suffix, m -> {}, m -> {})
         );
+
+        @Override
+        public @NotNull String toString() {
+            return prefix + suffix;
+        }
+
+        public void applyServer(Material material) {
+            onServerApply.accept(material);
+        }
+
+        public void applyClient(Material material) {
+            onClientApply.accept(material);
+        }
     }
 }
 /*

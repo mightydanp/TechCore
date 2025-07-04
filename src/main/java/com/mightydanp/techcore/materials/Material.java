@@ -1,9 +1,8 @@
 package com.mightydanp.techcore.materials;
 
-import com.mightydanp.techcore.materials.Components.Component;
+import com.mightydanp.techcore.materials.components.*;
 import com.mightydanp.techcore.materials.Item.FluidStates;
 import com.mightydanp.techcore.materials.properties.OreTypes;
-import com.mightydanp.techcore.materials.properties.PureSubstances;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -14,39 +13,35 @@ import java.util.List;
 public class Material {
     public String name;
 
-    public List<Component> flags = new ArrayList<>();
+    public List<Component> components = new ArrayList<>();
 
-    public PureSubstances.PureSubstance type;
-    public int atomicNumber;
-    public String symbol;
-    public float molecularWeight;
-    public float atomicWeight;
+    public ChemicalComponent chemicalComponent = new ChemicalComponent();
+    public PhysicalComponent physicalComponent = new PhysicalComponent();
+    public ThermalComponent thermalComponent = new ThermalComponent();
+    public OreComponent oreComponent = new OreComponent();
+    public FluidComponent fluidComponent = new FluidComponent();
+    public StoneLayerComponent stoneLayerComponent = new StoneLayerComponent();
 
-    public OreTypes.OreType oreType;
-    public Integer harvestLevel = null;
+    public void initServer(){
+        chemicalComponent.initServer(this);
+        physicalComponent.initServer(this);
+        thermalComponent.initServer(this);
+        oreComponent.initServer(this);
+        fluidComponent.initServer(this);
+        stoneLayerComponent.initServer(this);
 
-    public double meltingPoint;
-    public double boilingPoint;
+        components.forEach(component -> component.initServer(this));
+    }
 
-    public Float fluidAcceleration = 0.014F;
-    public FluidStates.FluidState fluidState = null;
-    public Integer fluidDensity = null;
-    public Integer fluidViscosity = null;
-    public Integer fluidLuminosity = null;
+    public void initClient(){
+        chemicalComponent.initClient(this);
+        physicalComponent.initClient(this);
+        thermalComponent.initClient(this);
+        oreComponent.initClient(this);
+        fluidComponent.initClient(this);
+        stoneLayerComponent.initClient(this);
 
-    public Integer durability = null;
-    public Integer attackSpeed = null;
-    public Float attackDamage = null;
-
-
-    public Item ingot, gem, chippedGem, flawedGem, flawlessGem, legendaryGem, crushedOre, purifiedOre, centrifugedOre, impureDust, pureDust, dust, smallDust, tinyDust;
-
-    public FlowingFluid fluid, fluid_flowing;
-    public Block fluidBlock;
-
-    public Block layerBlock, rockBlock, smoothSlabBlock;
-
-    public Item layerItemBlock, rockItemBlock, smoothSlabItemBlock;
-
+        components.forEach(component -> component.initClient(this));
+    };
 
 }

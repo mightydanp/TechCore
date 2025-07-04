@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Components;
+package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.materials.Material;
 import com.mojang.serialization.Codec;
@@ -14,14 +14,14 @@ public class Component extends AbstractComponent<Component> {
         super(prefix, suffix, onServerApply, onClientApply);
     }
 
-    protected static final Codec<Component> CODEC = RecordCodecBuilder.create(instance ->
+    private static final Codec<Component> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.STRING.fieldOf("prefix").forGetter(Component::prefix),
                     Codec.STRING.fieldOf("suffix").forGetter(Component::suffix)
             ).apply(instance, (prefix, suffix) -> new Component(prefix, suffix, m -> {}, m -> {}))
     );
 
-    protected static final StreamCodec<FriendlyByteBuf, Component> STREAM_CODEC = StreamCodec.composite(
+    private static final StreamCodec<FriendlyByteBuf, Component> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, Component::prefix,
             ByteBufCodecs.STRING_UTF8, Component::suffix,
             (prefix, suffix) -> new Component(prefix, suffix, m -> {}, m -> {})

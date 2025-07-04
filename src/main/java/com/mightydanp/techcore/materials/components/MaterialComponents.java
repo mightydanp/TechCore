@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Components;
+package com.mightydanp.techcore.materials.components;
 
 public enum MaterialComponents {
     BLOCK_GEM(new Component("block_", "_gem", m -> {}, m -> {})),
@@ -16,18 +16,22 @@ public enum MaterialComponents {
     STONE_LAYER(new Component("stone_", "_layer", m -> {}, m -> {})),
     TOOL(new Component("", "_tool", m -> {}, m -> {}));
 
-    public final Component simpleComponent;
+    private final Component component;
 
-    MaterialComponents(Component simpleComponent) {
-        this.simpleComponent = simpleComponent;
+    MaterialComponents(Component component) {
+        this.component = component;
     }
 
-    public String getPrefix() {
-        return simpleComponent.prefix();
+    public Component component() {
+        return component;
     }
 
-    public String getSuffix() {
-        return simpleComponent.suffix();
+    public String prefix() {
+        return component.prefix();
+    }
+
+    public String suffix() {
+        return component.suffix();
     }
 }
 

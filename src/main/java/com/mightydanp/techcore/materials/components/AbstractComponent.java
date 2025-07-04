@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Components;
+package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.materials.Material;
 

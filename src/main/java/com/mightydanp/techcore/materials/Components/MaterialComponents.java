@@ -1,78 +1,37 @@
-package com.mightydanp.techcore.materials.properties;
-
-import com.mightydanp.techcore.materials.Material;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Consumer;
+package com.mightydanp.techcore.materials.Components;
 
 public enum MaterialComponents {
-    BLOCK_GEM(new MaterialComponent("block_", "_gem", m -> {}, m -> {})),
-    BLOCK_METAL(new MaterialComponent("block_", "_metal", m -> {}, m -> {})),
-    DUST(new MaterialComponent("", "_dust", m -> {}, m -> {})),
-    FLUID(new MaterialComponent("", "_fluid", m -> {}, m -> {})),
-    GAS(new MaterialComponent("", "_gas", m -> {}, m -> {})),
-    GEM(new MaterialComponent("", "_gem", m -> {}, m -> {})),
-    HARDENED_INGOT(new MaterialComponent("hardened_", "_ingot", m -> {}, m -> {})),
-    HOT_INGOT(new MaterialComponent("hot_", "_ingot", m -> {}, m -> {})),
-    INGOT(new MaterialComponent("", "_ingot", m -> {}, m -> {})),
-    ORE(new MaterialComponent("", "_ore", m -> {}, m -> {})),
-    SMALL_ORE(new MaterialComponent("small_", "_ore", m -> {}, m -> {})),
-    SOFTENED_INGOT(new MaterialComponent("softened_", "_ingot", m -> {}, m -> {})),
-    STONE_LAYER(new MaterialComponent("stone_", "_layer", m -> {}, m -> {})),
-    TOOL(new MaterialComponent("", "_tool", m -> {}, m -> {}));
+    BLOCK_GEM(new Component("block_", "_gem", m -> {}, m -> {})),
+    BLOCK_METAL(new Component("block_", "_metal", m -> {}, m -> {})),
+    DUST(new Component("", "_dust", m -> {}, m -> {})),
+    FLUID(new Component("", "_fluid", m -> {}, m -> {})),
+    GAS(new Component("", "_gas", m -> {}, m -> {})),
+    GEM(new Component("", "_gem", m -> {}, m -> {})),
+    HARDENED_INGOT(new Component("hardened_", "_ingot", m -> {}, m -> {})),
+    HOT_INGOT(new Component("hot_", "_ingot", m -> {}, m -> {})),
+    INGOT(new Component("", "_ingot", m -> {}, m -> {})),
+    ORE(new Component("", "_ore", m -> {}, m -> {})),
+    SMALL_ORE(new Component("small_", "_ore", m -> {}, m -> {})),
+    SOFTENED_INGOT(new Component("softened_", "_ingot", m -> {}, m -> {})),
+    STONE_LAYER(new Component("stone_", "_layer", m -> {}, m -> {})),
+    TOOL(new Component("", "_tool", m -> {}, m -> {}));
 
-    public final MaterialComponent materialComponent;
+    public final Component simpleComponent;
 
-    MaterialComponents(MaterialComponent materialComponent) {
-        this.materialComponent = materialComponent;
+    MaterialComponents(Component simpleComponent) {
+        this.simpleComponent = simpleComponent;
     }
 
     public String getPrefix() {
-        return materialComponent.prefix();
+        return simpleComponent.prefix();
     }
 
     public String getSuffix() {
-        return materialComponent.suffix();
-    }
-
-    @Override
-    public String toString() {
-        return materialComponent.prefix() + materialComponent.suffix();
-    }
-
-    public record MaterialComponent(String prefix, String suffix, Consumer<Material> onServerApply, Consumer<Material> onClientApply) {
-        public static final Codec<MaterialComponent> CODEC = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        Codec.STRING.fieldOf("prefix").forGetter(MaterialComponent::prefix),
-                        Codec.STRING.fieldOf("suffix").forGetter(MaterialComponent::suffix)
-                ).apply(instance, (prefix, suffix) -> new MaterialComponent(prefix, suffix, m -> {}, m -> {}))
-        );
-
-        public static final StreamCodec<FriendlyByteBuf, MaterialComponent> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.STRING_UTF8, MaterialComponent::prefix,
-                ByteBufCodecs.STRING_UTF8, MaterialComponent::suffix,
-                (prefix, suffix) -> new MaterialComponent(prefix, suffix, m -> {}, m -> {})
-        );
-
-        @Override
-        public @NotNull String toString() {
-            return prefix + suffix;
-        }
-
-        public void applyServer(Material material) {
-            onServerApply.accept(material);
-        }
-
-        public void applyClient(Material material) {
-            onClientApply.accept(material);
-        }
+        return simpleComponent.suffix();
     }
 }
+
+
 /*
     GEM, ORE, DUST, PART, PIPE, WIRE, FOIL, LENS, PLATE, DOUBLE_INGOT, DOUBLE_PLATE, DENSE_PLATE, GAS, SOLID, FLUID, PLASMA,
 

@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.materials;
 
+import com.mightydanp.techcore.materials.Components.Component;
 import com.mightydanp.techcore.materials.Item.FluidStates;
-import com.mightydanp.techcore.materials.properties.MaterialComponents;
 import com.mightydanp.techcore.materials.properties.OreTypes;
 import com.mightydanp.techcore.materials.properties.PureSubstances;
 import net.minecraft.world.item.Item;
@@ -14,7 +14,7 @@ import java.util.List;
 public class Material {
     public String name;
 
-    public List<MaterialComponents.MaterialComponent> flags = new ArrayList<>();
+    public List<Component> flags = new ArrayList<>();
 
     public PureSubstances.PureSubstance type;
     public int atomicNumber;

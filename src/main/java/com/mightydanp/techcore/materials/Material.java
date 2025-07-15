@@ -1,11 +1,6 @@
 package com.mightydanp.techcore.materials;
 
 import com.mightydanp.techcore.materials.components.*;
-import com.mightydanp.techcore.materials.Item.FluidStates;
-import com.mightydanp.techcore.materials.properties.OreTypes;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.FlowingFluid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +21,9 @@ public class Material {
         chemicalComponent.initServer(this);
         physicalComponent.initServer(this);
         thermalComponent.initServer(this);
+        stoneLayerComponent.initServer(this);
         oreComponent.initServer(this);
         fluidComponent.initServer(this);
-        stoneLayerComponent.initServer(this);
 
         components.forEach(component -> component.initServer(this));
     }

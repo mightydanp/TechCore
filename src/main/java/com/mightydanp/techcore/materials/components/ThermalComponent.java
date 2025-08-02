@@ -6,12 +6,7 @@ public class ThermalComponent extends Component {
     public double heatCapacity;
 
     public ThermalComponent() {
-        super("thermal", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("thermal", "component");
     }
 
     public ThermalComponent setMeltingPoint(double meltingPoint) {

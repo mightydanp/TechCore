@@ -1,20 +1,20 @@
 package com.mightydanp.techcore.materials.components;
 
 public enum MaterialComponents {
-    BLOCK_GEM(new Component("block_", "_gem", m -> {}, m -> {})),
-    BLOCK_METAL(new Component("block_", "_metal", m -> {}, m -> {})),
-    DUST(new Component("", "_dust", m -> {}, m -> {})),
-    FLUID(new Component("", "_fluid", m -> {}, m -> {})),
-    GAS(new Component("", "_gas", m -> {}, m -> {})),
-    GEM(new Component("", "_gem", m -> {}, m -> {})),
-    HARDENED_INGOT(new Component("hardened_", "_ingot", m -> {}, m -> {})),
-    HOT_INGOT(new Component("hot_", "_ingot", m -> {}, m -> {})),
-    INGOT(new Component("", "_ingot", m -> {}, m -> {})),
-    ORE(new Component("", "_ore", m -> {}, m -> {})),
-    SMALL_ORE(new Component("small_", "_ore", m -> {}, m -> {})),
-    SOFTENED_INGOT(new Component("softened_", "_ingot", m -> {}, m -> {})),
-    STONE_LAYER(new Component("stone_", "_layer", m -> {}, m -> {})),
-    TOOL(new Component("", "_tool", m -> {}, m -> {}));
+    BLOCK_GEM(new Component("block_", "_gem")),
+    BLOCK_METAL(new Component("block_", "_metal")),
+    DUST(new Component("", "_dust")),
+    FLUID(new Component("", "_fluid")),
+    GAS(new Component("", "_gas")),
+    GEM(new Component("", "_gem")),
+    HARDENED_INGOT(new Component("hardened_", "_ingot")),
+    HOT_INGOT(new Component("hot_", "_ingot")),
+    INGOT(new Component("", "_ingot")),
+    ORE(new Component("", "_ore")),
+    SMALL_ORE(new Component("small_", "_ore")),
+    SOFTENED_INGOT(new Component("softened_", "_ingot")),
+    STONE_LAYER(new Component("stone_", "_layer")),
+    TOOL(new Component("", "_tool"));
 
     private final Component component;
 

@@ -26,7 +26,7 @@ public class GuiTabRegistries implements BaseRegistries {
         guiTabs.put(InventoryScreen.class, playerInventory = new InventoryGuiTab(CoreRef.MOD_ID, GuiTabRef.player_inventory_name).setPriorityNumber(1).setItem(new ItemStack(Items.GRASS_BLOCK)));
     }
 
-    public void initResource() {
+    public void initClient() {
         LanguageContent enLang = AssetPackRegistries.getLanguage(CoreRef.MOD_ID, "en_us");
         enLang.addTranslation("tab." + CoreRef.MOD_ID + "." + GuiTabRef.player_inventory_name, LanguageContent.translateUpperCase(GuiTabRef.player_inventory_name));
 

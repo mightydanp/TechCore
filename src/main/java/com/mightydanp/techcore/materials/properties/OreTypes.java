@@ -12,7 +12,7 @@ public enum OreTypes {
     GEM(new OreType("gem")),
     CRYSTAL(new OreType("crystal"));
 
-    public final OreType oreType;
+    private final OreType oreType;
 
     OreTypes(OreType oreType) {
         this.oreType = oreType;
@@ -25,6 +25,10 @@ public enum OreTypes {
     @Override
     public String toString() {
         return oreType.name();
+    }
+
+    public OreType oreType() {
+        return oreType;
     }
 
     public record OreType(String name) {

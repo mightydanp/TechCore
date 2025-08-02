@@ -1,24 +1,19 @@
 package com.mightydanp.techcore.materials.Item;
 
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * Created by MightyDanp on 3/12/2021.
- */
-public class OreProductsItem extends Item {
+public class GemItem extends Item {
     public String symbol;
     public double meltingPoint;
     public double boilingPoint;
 
-    public OreProductsItem(Properties properties, double boilingPointIn, double meltingPointIn, String symbol) {
+    public GemItem(Properties properties, double boilingPointIn, double meltingPointIn, String symbol) {
         super(properties);
         meltingPoint = meltingPointIn;
         boilingPoint = boilingPointIn;

@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.api.resources.data;
 
+import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.server.packs.PackType;
@@ -21,7 +22,9 @@ public class DataPackRegistry {
     public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
-        init.forEach(BaseRegistries::initResource);
+        RegistriesHandler.MATERIALS.getEntries().forEach(C -> C.get().initClient());
+
+        init.forEach(BaseRegistries::initClient);
 
         DataPackRegistries.init();
 

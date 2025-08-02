@@ -6,12 +6,7 @@ public class ToolComponent extends Component {
     public Float attackDamage = null;
 
     public ToolComponent() {
-        super("tool", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("tool", "component");
     }
 
     public ToolComponent setDurability(int durability) {

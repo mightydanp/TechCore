@@ -24,10 +24,14 @@ public enum Icons {
     RUBY(new Icon("ruby")),
     SHINY(new Icon("shiny"));
 
-    public final Icon icon;
+    private final Icon icon;
 
     Icons(Icon icon) {
         this.icon = icon;
+    }
+
+    public Icon icon() {
+        return icon;
     }
 
     @Override

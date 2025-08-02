@@ -7,6 +7,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.component.TCDataComponents;
 import com.mightydanp.techcore.guitabs.event.TCInventoryEvent;
 import com.mightydanp.techcore.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.world.item.TCCreativeModeTabs;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +30,7 @@ public class TechCore {
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(TCInventoryEvent::addTabsToInventoryScreen);
+
         ConfigRegistries.registerConfigs();
     }
 

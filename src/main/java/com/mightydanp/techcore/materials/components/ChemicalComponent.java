@@ -10,12 +10,7 @@ public class ChemicalComponent extends Component {
     public float atomicWeight;
 
     public ChemicalComponent() {
-        super("chemical", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("chemical", "component");
     }
 
     public ChemicalComponent setType(PureSubstances.PureSubstance type) {

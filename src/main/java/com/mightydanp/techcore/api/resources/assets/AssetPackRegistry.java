@@ -21,7 +21,7 @@ public class AssetPackRegistry {
     public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
-        init.forEach(BaseRegistries::initResource);
+        init.forEach(BaseRegistries::initClient);
 
         AssetPackRegistries.init();
 

@@ -8,11 +8,6 @@ public class StoneLayerComponent extends Component {
     public Item layerItemBlock, rockItemBlock, smoothSlabItemBlock;
 
     public StoneLayerComponent() {
-        super("stone_layer", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("stone_layer", "component");
     }
 }

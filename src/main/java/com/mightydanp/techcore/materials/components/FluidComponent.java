@@ -15,12 +15,7 @@ public class FluidComponent extends Component {
     public Block fluidBlock;
 
     public FluidComponent() {
-        super("fluid", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("fluid", "component");
     }
 
     public FluidComponent setAcceleration(float acceleration) {

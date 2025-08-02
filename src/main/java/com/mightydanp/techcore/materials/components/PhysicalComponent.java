@@ -5,12 +5,7 @@ public class PhysicalComponent extends Component {
     public int harvestLevel;
 
     public PhysicalComponent() {
-        super("physical", "component",
-                m -> { //server
-
-            },  m -> { //client
-
-        });
+        super("physical", "component");
     }
 
     public PhysicalComponent setDensity(double density) {

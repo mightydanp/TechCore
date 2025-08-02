@@ -1,5 +1,7 @@
 package com.mightydanp.techcore;
 
+import com.mightydanp.techcore.api.registries.RegistriesHandler;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,5 +16,9 @@ public class CommonSetup {
     @SubscribeEvent
     private static void onCommonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Tech Core common setup is starting");
+
+        RegistriesHandler.MATERIALS.getEntries().forEach(m -> m.get().initServer());
+
+        LOGGER.info("Tech Core common setup is finished ");
     }
 }

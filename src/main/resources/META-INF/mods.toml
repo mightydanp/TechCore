@@ -1,0 +1,33 @@
+modLoader="javafml" # mandatory
+loaderVersion="[52,)" # mandatory
+license="AGPL-3.0 license"
+issueTrackerURL="https://github.com/MightyDanp/TechCore/issues"
+
+[[mods]]
+modId="techcore"
+version="0.0.0.1"
+displayName="Tech Core"
+authors="MightyDanp"
+description='''Example mod description.
+Newline characters can be used and will be replaced properly.'''
+
+[[dependencies.techcore]]
+modId="forge"
+mandatory=true
+versionRange="[52.1.3,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.techcore]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+
+[[mixins]]
+config="techascension.mixins.json"
+
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"

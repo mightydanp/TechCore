@@ -33,7 +33,7 @@ public class TechCore {
     }
 
     @SubscribeEvent
-    private void onServerStarting(ServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Tech Core server is starting.");
     }
 }

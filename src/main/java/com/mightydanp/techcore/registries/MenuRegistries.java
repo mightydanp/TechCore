@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class MenuRegistries {
-
     public static final Supplier<MenuType<TCPlayerInventoryMenu>> TC_PLAYER_INVENTORY_MENU =
             RegistriesHandler.MENU_TYPES.register(
                     "tc_player_inventory",

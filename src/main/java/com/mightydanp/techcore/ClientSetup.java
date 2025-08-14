@@ -14,7 +14,7 @@ import static com.mightydanp.techcore.TechCore.LOGGER;
 public class ClientSetup {
 
     @SubscribeEvent
-    private static void onClientSetup(FMLClientSetupEvent event) {
+    public static void onClientSetup(FMLClientSetupEvent event) {
         LOGGER.info("Tech Core client setup is starting");
 
         RegistriesHandler.MATERIALS.getEntries().forEach(m -> AssetPackRegistry.init.add(m.get()));

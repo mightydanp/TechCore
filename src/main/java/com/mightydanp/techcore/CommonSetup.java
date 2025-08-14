@@ -13,7 +13,7 @@ import static com.mightydanp.techcore.TechCore.LOGGER;
 public class CommonSetup {
 
     @SubscribeEvent
-    private static void onCommonSetup(final FMLCommonSetupEvent event) {
+    public static void onCommonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Tech Core common setup is starting");
 
         RegistriesHandler.MATERIALS.getEntries().forEach(m -> m.get().initServer());

@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.api.resources.data;
 
+import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.api.resources.data.loottable.LootTableContent;
 import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
 import com.mightydanp.techcore.api.resources.data.tag.TagContent;
@@ -40,27 +41,27 @@ public class DataPackRegistries {
     public static final Map<ResourceLocation, RecipeContent> recipe = new HashMap<>();
 
     public static void init() {
-        //bannerPatternTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/banner_pattern/" + s.getPath() + ".json"), b.json()));
-        blockTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/" + s.getPath() + ".json"), b.json()));
-        blockMineableTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/mineable/" + s.getPath() + ".json"), b.json()));
-        catVariantTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/cat_variant/" + s.getPath() + ".json"), b.json()));
+        //bannerPatternTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/banner_pattern/" + s.getPath() + ".json"), b.json()));
+        blockTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/" + s.getPath() + ".json"), b.json()));
+        blockMineableTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/mineable/" + s.getPath() + ".json"), b.json()));
+        catVariantTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/cat_variant/" + s.getPath() + ".json"), b.json()));
         //damageTypeTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/damage_type/" +  s.getPath() + ".json"), b.json()));
-        entityTypeTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/entity_type/" + s.getPath() + ".json"), b.json()));
-        fluidTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/fluids/" + s.getPath() + ".json"), b.json()));
-        gameEventTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/game_events/" + s.getPath() + ".json"), b.json()));
-        itemTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/items/" + s.getPath() + ".json"), b.json()));
-        instrumentTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/instrument/" + s.getPath() + ".json"), b.json()));
-        //paintingVariantTag.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/painting_variant/" + s.getPath() + ".json"), b.json()));
+        entityTypeTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/entity_type/" + s.getPath() + ".json"), b.json()));
+        fluidTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/fluids/" + s.getPath() + ".json"), b.json()));
+        gameEventTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/game_events/" + s.getPath() + ".json"), b.json()));
+        itemTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/items/" + s.getPath() + ".json"), b.json()));
+        instrumentTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/instrument/" + s.getPath() + ".json"), b.json()));
+        //paintingVariantTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/painting_variant/" + s.getPath() + ".json"), b.json()));
         //biomeTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/worldgen/biome/" +  s.getPath() + ".json"), b.json()));
         //configuredFeatureTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/worldgen/configured_structure_feature/" +  s.getPath() + ".json"), b.json()));
 
-        blockLootTable.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/blocks/" + s.getPath() + ".json"), b.json()));
-        chestLootTable.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/chests/" + s.getPath() + ".json"), b.json()));
-        entityLootTable.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/entities/" + s.getPath() + ".json"), b.json()));
-        gameplayLootTable.forEach((s, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/gameplay/" + s.getPath() + ".json"), b.json()));
+        blockLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/blocks/" + s.getPath() + ".json"), b.json()));
+        chestLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/chests/" + s.getPath() + ".json"), b.json()));
+        entityLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/entities/" + s.getPath() + ".json"), b.json()));
+        gameplayLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/gameplay/" + s.getPath() + ".json"), b.json()));
 
-        recipe.forEach((r, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "recipes/" + r.getPath() + ".json"), b.recipeJson()));
-        recipe.forEach((r, b) -> DataPackRegistry.dataPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "advancements/" + r.getPath() + ".json"), b.advancementJson()));
+        recipe.forEach((r, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "recipes/" + r.getPath() + ".json"), b.recipeJson()));
+        recipe.forEach((r, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "advancements/" + r.getPath() + ".json"), b.advancementJson()));
     }
 
     //------------------------------------------------------------------------------------------------------------------

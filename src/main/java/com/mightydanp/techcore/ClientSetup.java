@@ -1,7 +1,7 @@
 package com.mightydanp.techcore;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
-import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
+import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,7 +17,7 @@ public class ClientSetup {
     public static void onClientSetup(FMLClientSetupEvent event) {
         LOGGER.info("Tech Core client setup is starting");
 
-        RegistriesHandler.MATERIALS.getEntries().forEach(m -> AssetPackRegistry.init.add(m.get()));
+        RegistriesHandler.MATERIALS.getEntries().forEach(m -> ResourcePackRegistry.init.add(m.get()));
 
         LOGGER.info("Tech Core client setup has finished");
     }

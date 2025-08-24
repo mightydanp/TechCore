@@ -2,7 +2,7 @@ package com.mightydanp.techcore;
 
 import com.mightydanp.techcore.api.configs.ConfigRegistries;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
-import com.mightydanp.techcore.api.resources.assets.AssetPackRegistry;
+import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.guitabs.event.TCInventoryEvent;
 import com.mightydanp.techcore.guitabs.registries.GuiTabRegistries;
@@ -23,8 +23,10 @@ public class TechCore {
         IEventBus modEventBus = context.getModEventBus();
         RegistriesHandler.init(modEventBus);
 
+        //RegistriesHandler.MATERIALS.getEntries().forEach(c -> ResourcePackRegistry.init.add(c.get()));
+
         GuiTabRegistries.init();
-        AssetPackRegistry.init.add(new GuiTabRegistries());
+        ResourcePackRegistry.init.add(new GuiTabRegistries());
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(TCInventoryEvent::addTabsToInventoryScreen);

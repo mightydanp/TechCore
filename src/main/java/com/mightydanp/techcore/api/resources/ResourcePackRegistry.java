@@ -1,7 +1,6 @@
-package com.mightydanp.techcore.api.resources.data;
+package com.mightydanp.techcore.api.resources;
 
-import com.mightydanp.techcore.api.registries.RegistriesHandler;
-import com.mightydanp.techcore.api.resources.BaseRegistries;
+import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -13,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class DataPackRegistry {
-    public static DataPack dataPack = new DataPack(CoreRef.MOD_ID, "data", true, Pack.Position.TOP, true);
+public class ResourcePackRegistry {
+    public static final ResourcePack PACK = new ResourcePack(CoreRef.MOD_ID, "dynamic", true, Pack.Position.TOP, true);
 
     public static List<BaseRegistries> init = new ArrayList<>();
 
@@ -22,18 +21,14 @@ public class DataPackRegistry {
     public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
-        RegistriesHandler.MATERIALS.getEntries().forEach(C -> C.get().initClient());
-
         init.forEach(BaseRegistries::initClient);
 
-        DataPackRegistries.init();
+        AssetPackRegistries.init();
 
-        if (type == PackType.SERVER_DATA) {
-            event.addRepositorySource((packConsumer) -> {
-                Pack pack = dataPack.createPack();
-
-                packConsumer.accept(pack);
-            });
+        if (event.getPackType() == PackType.CLIENT_RESOURCES) {
+            event.addRepositorySource(consumer -> consumer.accept(PACK.createAssetPack()));
+        } else if (event.getPackType() == PackType.SERVER_DATA) {
+            event.addRepositorySource(consumer -> consumer.accept(PACK.createDataPack()));
         }
     }
 }

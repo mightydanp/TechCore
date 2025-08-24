@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.api.resources.assets;
 
+import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.api.resources.assets.contents.blockstate.BlockStateContent;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
@@ -16,10 +17,10 @@ public class AssetPackRegistries {
     public static Map<ResourceLocation, LanguageContent> language = new HashMap<>();
 
     public static void init() {
-        blockState.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "blockstates/" + r.getPath() + ".json"), b.json()));
-        blockModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + r.getPath() + ".json"), b.json()));
-        itemModel.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + (r.getPath().contains(":") ? r.getPath().split(":")[1] : r.getPath()) + ".json"), b.json()));
-        language.forEach((r, b) -> AssetPackRegistry.assetPack.addToResources(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "lang/" + r.getPath() + ".json"), b.json()));
+        blockState.forEach((r, b) -> ResourcePackRegistry.PACK.addAsset(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "blockstates/" + r.getPath() + ".json"), b.json()));
+        blockModel.forEach((r, b) -> ResourcePackRegistry.PACK.addAsset(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + r.getPath() + ".json"), b.json()));
+        itemModel.forEach((r, b) -> ResourcePackRegistry.PACK.addAsset(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "models/" + b.getModelType() + "/" + (b.getOrganizationPath() == null ? "" : b.getOrganizationPath() + "/") + (r.getPath().contains(":") ? r.getPath().split(":")[1] : r.getPath()) + ".json"), b.json()));
+        language.forEach((r, b) -> ResourcePackRegistry.PACK.addAsset(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "lang/" + r.getPath() + ".json"), b.json()));
     }
 
     public static boolean saveBlockState(BlockStateContent<?> content, boolean override) {

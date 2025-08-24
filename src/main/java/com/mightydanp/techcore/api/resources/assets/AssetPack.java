@@ -13,16 +13,13 @@ import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
 public class AssetPack implements PackResources {
-    public Map<ResourceLocation, IoSupplier<InputStream>> ASSET_HOLDER = new HashMap<>();
-
+    public Map<ResourceLocation, IoSupplier<InputStream>> HOLDER = new HashMap<>();
     static boolean firstLoad = false;
-    public final int version = 14;
+    public final int version = 15;
     public final PackType type = PackType.CLIENT_RESOURCES;
     public final PackSource source = PackSource.DEFAULT;
 
@@ -42,18 +39,16 @@ public class AssetPack implements PackResources {
     }
 
     public void addToResources(ResourceLocation location, JsonObject jsonObject) {
-        if (!ASSET_HOLDER.containsKey(location)) {
-            InputStream inputStream = new ByteArrayInputStream(jsonObject.toString().getBytes());
-            ASSET_HOLDER.put(location, () -> inputStream);
+        byte[] bytes = jsonObject.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        HOLDER.put(location, () -> new java.io.ByteArrayInputStream(bytes));
+        if (!firstLoad) {
+            TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
             firstLoad = true;
-        } else {
-            if (!firstLoad)
-                TechCore.LOGGER.warn("[{}] already exists in resource assets: ", location);
         }
     }
 
     public void removeFromResources(ResourceLocation location) {
-        if (ASSET_HOLDER.remove(location) == null) {
+        if (HOLDER.remove(location) == null) {
             TechCore.LOGGER.warn("[{}] does not exist in resource assets", location);
         }
     }
@@ -61,70 +56,45 @@ public class AssetPack implements PackResources {
     @Nullable
     @Override
     public IoSupplier<InputStream> getRootResource(String @NotNull ... locations) {
+        for (String l : locations) {
+            if ("pack.mcmeta".equals(l)) {
+                String meta = """
+            {"pack":{"pack_format":15,"description":"dynamically generated resource assets"}}
+            """;
+                byte[] bytes = meta.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                return () -> new java.io.ByteArrayInputStream(bytes);
+            }
+        }
         return null;
     }
 
     @Nullable
     @Override
     public IoSupplier<InputStream> getResource(@NotNull PackType packType, @NotNull ResourceLocation location) {
-        /*
-        return FileUtil.decomposePath(p_251554_.getPath()).get().map(p_248224_ -> {
-            String s = p_251554_.getNamespace();
-
-            for(Path path : this.pathsForType.get(p_250512_)) {
-                Path path1 = FileUtil.resolvePath(path.resolve(s), p_248224_);
-                if (Files.exists(path1) && PathPackResources.validatePath(path1)) {
-                    return IoSupplier.create(path1);
-                }
-            }
-
-            return null;
-        }, p_248230_ -> {
-            LOGGER.error("Invalid path {}: {}", p_251554_, p_248230_.message());
-            return null;
-        });
-         */
-        if (packType == type) {
-            if (ASSET_HOLDER.containsKey(location)) {
-                IoSupplier<InputStream> resource = ASSET_HOLDER.get(location);
-                try {
-                    resource.get();
-                    return resource;
-                } catch (IOException ignored) {
-                }
-            }
-        }
-
-        return null;
-        //throw new RuntimeException(new Throwable("Could not find resource in generated resource assets: " + location));
+        if (packType != type) return null;
+        return HOLDER.get(location);
     }
 
     @Override
     public void listResources(@NotNull PackType packType, @NotNull String namespace, @NotNull String path, @NotNull ResourceOutput resourceOutput) {
-        if (packType == type) {
-            Map<String, IoSupplier<InputStream>> filteredMap = new HashMap<>();
+        if (packType != type) return;
 
-            ASSET_HOLDER.forEach((resource, stream) -> {
-                if (resource.getNamespace().equals(namespace)) {
-                    filteredMap.put(resource.getPath(), stream);
-                }
-            });
-
-            if (filteredMap.isEmpty()) {
-                TechCore.LOGGER.error("Invalid path + {}", path);
+        // Only expose files under the requested namespace and path prefix.
+        HOLDER.forEach((loc, supplier) -> {
+            if (!loc.getNamespace().equals(namespace)) return;
+            String p = loc.getPath();
+            if (p.startsWith(path + "/")) {
+                TechCore.LOGGER.warn(p, supplier); // <-- critical: publish the resource
             }
-        }
+        });
     }
 
     @Override
     public @NotNull Set<String> getNamespaces(@NotNull PackType packType) {
-        Set<String> namespaces = new HashSet<>();
-        if (packType == type) {
-            for (ResourceLocation resource : ASSET_HOLDER.keySet()) {
-                namespaces.add(resource.getNamespace());
-            }
-        }
-        return namespaces;
+        if (packType != type) return java.util.Collections.emptySet();
+        java.util.Set<String> set = new java.util.HashSet<>();
+        HOLDER.keySet().forEach(loc -> set.add(loc.getNamespace()));
+        return set;
     }
 
     @Nullable
@@ -147,7 +117,7 @@ public class AssetPack implements PackResources {
 
     @Override
     public void close() {
-        ASSET_HOLDER.clear();
+        HOLDER.clear();
     }
 
     public PackResources open() {

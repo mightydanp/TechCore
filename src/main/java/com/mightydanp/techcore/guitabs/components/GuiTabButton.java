@@ -1,17 +1,12 @@
 package com.mightydanp.techcore.guitabs.components;
 
 import com.mightydanp.techcore.guitabs.GuiTab;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +15,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiTabButton extends Button {
@@ -41,45 +35,21 @@ public class GuiTabButton extends Button {
 
     protected final ResourceLocation customImage;
 
-    private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_4"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_5"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_6"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_7")
-    };
-    private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_3"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_4"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_5"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_6"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_7")
-    };
-    private static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_3"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_4"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_5"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_6"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_7")
-    };
-    private static final ResourceLocation[] SELECTED_BOTTOM_TABS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_1"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_2"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_3"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_4"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_5"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_6"),
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_7")
-    };
+    private static final ResourceLocation CREATIVE_TABS_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tabs.png");
+
+    // size of ONE tab cell in the sheet
+    private static final int CELL_W = 26;
+    private static final int CELL_H = 32;
+
+    // grid layout
+    private static final int COLS = 7; // 7 across
+    private static final int ROWS = 4;
+
+    // full texture size
+    private static final int SHEET_W = 256;
+    private static final int SHEET_H = 256;
 
     public static GuiTabButton create(int registryButtonNumber, GuiTab guiTab, Player player, Screen screen, int x, int y) {
-
         return new GuiTabButton(registryButtonNumber, guiTab, player, screen, x, y);
     }
 
@@ -147,40 +117,40 @@ public class GuiTabButton extends Button {
             guiGraphics.blit(customImage, this.getX(), this.getY(), 0, 0, this.width, this.height, 1, 1);
         } else {
             // Handle top/bottom tab logic
-            int group = (buttonNumber - 1) / 7;
-            int indexInGroup = (buttonNumber - 1) % 7;
+            int group = (buttonNumber - 1) / COLS;
+            int col = (buttonNumber - 1) % COLS;
             boolean isTop = group % 2 == 0;
+            boolean selected = this.isActive();
+            int row;
 
             if (isTop) {
-                WidgetSprites top = new WidgetSprites(SELECTED_TOP_TABS[indexInGroup], UNSELECTED_TOP_TABS[indexInGroup], SELECTED_TOP_TABS[indexInGroup], UNSELECTED_TOP_TABS[indexInGroup]);
-                ResourceLocation resourcelocation = top.get(this.isActive(), this.isHoveredOrFocused());
-                guiGraphics.blit(resourcelocation, this.getX(), this.getY() - (this.isActive() ? 0 : 1), 0, 0, this.width, this.height, 1, 1);
-
+                row = selected ? 1 : 0;     // top selected / unselected
             } else {
-                WidgetSprites bottom = new WidgetSprites(SELECTED_BOTTOM_TABS[indexInGroup], UNSELECTED_BOTTOM_TABS[indexInGroup], SELECTED_BOTTOM_TABS[indexInGroup], UNSELECTED_BOTTOM_TABS[indexInGroup]);
-                ResourceLocation resourcelocation = bottom.get(this.isActive(), this.isHoveredOrFocused());
-                guiGraphics.blit(resourcelocation, this.getX(), this.getY() + (this.isActive() ? 0 : 1), 0, 0, this.width, this.height, 1, 1);
+                row = selected ? 3 : 2;     // bottom selected / unselected
             }
+
+            // Pixel offsets inside the sheet
+            int frameW = this.width;
+            int frameH = this.height;
+            int u = col * frameW;
+            int v = row * frameH;
+
+            int drawY = this.getY() + (isTop ? (selected ? 0 : -1) : (selected ? 0 : 1));
+
+            // Draw the chosen cell from the sheet
+            guiGraphics.blit(CREATIVE_TABS_LOCATION, this.getX(), drawY, u, v, frameW, frameH, SHEET_W, SHEET_H);
         }
 
         // Reset color to default (transparent) to prevent it affecting the image
         guiGraphics.setColor(1f, 1f, 1f, 1f); // Reset to default color (no tint)
 
-        // Render the image without any color tint (this should not be affected by the color)
-        if (customImage != null) {
-            guiGraphics.blit(customImage, this.getX(), this.getY(), 0, 0, this.width, this.height, 1, 1);
-        }
-
-        // Render the item (without any tinting applied)
         if (item != null) {
             guiGraphics.renderFakeItem(item, this.getX() + 5, this.getY() + 9);
         }
 
-        // Render tooltip (without any tinting applied)
         if (guiTab != null && this.isMouseOver(mouseX, mouseY)) {
             guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.translatable("tab." + guiTab.modId + "." + guiTab.name), mouseX, mouseY);
         }
-
 
         guiGraphics.pose().popPose(); // Clean up pose after rendering
 

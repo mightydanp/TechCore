@@ -25,32 +25,32 @@ public class Material implements BaseRegistries {
         return this;
     }
 
-    public ChemicalComponent chemicalComponent = new ChemicalComponent();
-    public PhysicalComponent physicalComponent = new PhysicalComponent();
-    public ThermalComponent thermalComponent = new ThermalComponent();
-    public FluidComponent fluidComponent = new FluidComponent();
-    public OreComponent oreComponent = new OreComponent();
-    public StoneLayerComponent stoneLayerComponent = new StoneLayerComponent();
+    public ChemicalComponent chemical = new ChemicalComponent();
+    public PhysicalComponent physical = new PhysicalComponent();
+    public ThermalComponent thermal = new ThermalComponent();
+    public FluidComponent fluid = new FluidComponent();
+    public OreComponent ore = new OreComponent();
+    public StoneLayerComponent stoneLayer = new StoneLayerComponent();
 
     public void initServer(){
-        chemicalComponent.initServer(this);
-        physicalComponent.initServer(this);
-        thermalComponent.initServer(this);
-        fluidComponent.initServer(this);
-        stoneLayerComponent.initServer(this);
-        oreComponent.initServer(this);
+        chemical.initServer(this);
+        physical.initServer(this);
+        thermal.initServer(this);
+        fluid.initServer(this);
+        stoneLayer.initServer(this);
+        ore.initServer(this);
 
         components.forEach(component -> component.initServer(this));
     }
 
     @Override
     public void initClient(){
-        chemicalComponent.initClient(this);
-        physicalComponent.initClient(this);
-        thermalComponent.initClient(this);
-        fluidComponent.initClient(this);
-        oreComponent.initClient(this);
-        stoneLayerComponent.initClient(this);
+        chemical.initClient(this);
+        physical.initClient(this);
+        thermal.initClient(this);
+        fluid.initClient(this);
+        ore.initClient(this);
+        stoneLayer.initClient(this);
 
         components.forEach(component -> component.initClient(this));
     };

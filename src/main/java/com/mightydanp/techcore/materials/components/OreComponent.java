@@ -26,15 +26,15 @@ public class OreComponent extends Component {
     public Component initServer(Material material) {
         if(oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()){
             if (oreType == OreTypes.ORE.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-                chippedGem = RegistriesHandler.ITEMS.register("chipped_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-                flawedGem = RegistriesHandler.ITEMS.register("flawed_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-                flawlessGem = RegistriesHandler.ITEMS.register("flawless_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-                legendaryGem = RegistriesHandler.ITEMS.register("legendary_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
+                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                chippedGem = RegistriesHandler.ITEMS.register("chipped_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                flawedGem = RegistriesHandler.ITEMS.register("flawed_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                flawlessGem = RegistriesHandler.ITEMS.register("flawless_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                legendaryGem = RegistriesHandler.ITEMS.register("legendary_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
             }
-            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
-            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermalComponent.boilingPoint, material.thermalComponent.meltingPoint, material.chemicalComponent.symbol));
+            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
         }
 
         return super.initServer(material);

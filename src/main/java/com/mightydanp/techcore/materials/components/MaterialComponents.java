@@ -1,5 +1,14 @@
 package com.mightydanp.techcore.materials.components;
 
+import com.mightydanp.techcore.materials.Item.Temperature;
+import com.mightydanp.techcore.materials.properties.Icons;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public enum MaterialComponents {
     BLOCK_GEM(new Component("block_", "_gem")),
     BLOCK_METAL(new Component("block_", "_metal")),

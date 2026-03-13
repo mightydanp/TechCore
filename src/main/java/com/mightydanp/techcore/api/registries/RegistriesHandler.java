@@ -76,28 +76,14 @@ public class RegistriesHandler {
         Map<ResourceLocation, registryHolder> snapshot = new HashMap<>(additionalRegistries);
         additionalRegistries.clear();
 
-        for (Map.Entry<ResourceLocation, registryHolder> entry : snapshot.entrySet()) {
-            ResourceLocation name = entry.getKey();
-            registryHolder holder = entry.getValue();
-
+        snapshot.forEach((name, holder) -> {
             ResourceKey<? extends Registry<?>> key = ResourceKey.createRegistryKey(name);
 
-            DeferredRegister<?> register =
-                    DeferredRegister.create(holder.key().key(), name.getNamespace());
+            DeferredRegister<?> register = DeferredRegister.create(holder.key().key(), name.getNamespace());
             register.register(bus);
 
             finalizedDeferredRegister.put(name, new finalizedRegistryHolder(key, register));
-        }
 
-
-        additionalRegistries.forEach((resourceLocation, registryHolder) -> {
-            additionalRegistries.remove(resourceLocation);
-
-            ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(resourceLocation);
-            DeferredRegister<?> register = DeferredRegister.create(registryHolder.key().key(), resourceLocation.getNamespace());
-
-            register.register(bus);
-            finalizedDeferredRegister.put(resourceLocation, new finalizedRegistryHolder(key, register));
         });
     }
 

@@ -7,7 +7,10 @@ public class ChemicalComponent extends Component {
     public int atomicNumber;
     public String symbol;
     public float molecularWeight;
+    public float molecularMass;
     public float atomicWeight;
+    public float atomicMass;
+    public String molecularStructure;
 
     public ChemicalComponent() {
         super("chemical", "component");
@@ -23,6 +26,11 @@ public class ChemicalComponent extends Component {
         return this;
     }
 
+    public ChemicalComponent setAtomicMass(float atomicMass) {
+        this.atomicMass = atomicMass;
+        return this;
+    }
+
     public ChemicalComponent setSymbol(String symbol) {
         this.symbol = symbol;
         return this;
@@ -33,8 +41,20 @@ public class ChemicalComponent extends Component {
         return this;
     }
 
+    public ChemicalComponent setMolecularMass(float molecularMass) {
+        this.molecularMass = molecularMass;
+        return this;
+    }
+
     public ChemicalComponent setAtomicNumber(int atomicNumber) {
         this.atomicNumber = atomicNumber;
         return this;
     }
+
+    public ChemicalComponent setMolecularStructure(String molecularStructure) {
+        this.molecularStructure = molecularStructure;
+        return this;
+    }
+
+
 }

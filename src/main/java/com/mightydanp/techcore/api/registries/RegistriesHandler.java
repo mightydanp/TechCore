@@ -28,6 +28,8 @@ import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RegistriesHandler {
+    private static boolean initialized;
+
     private static final Map<ResourceLocation, registryHolder> additionalRegistries = new HashMap<>();
     private static final Map<ResourceLocation, finalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
 
@@ -55,6 +57,9 @@ public class RegistriesHandler {
 
 
     public static void init(IEventBus bus) {
+        if (initialized) return;
+        initialized = true;
+
         ITEMS.register(bus);
         BLOCKS.register(bus);
         BLOCK_ITEMS.register(bus);
@@ -102,8 +107,5 @@ public class RegistriesHandler {
     public record registryHolder(Registry<?> key) {
     }
 
-    public record finalizedRegistryHolder(
-            ResourceKey<? extends Registry<?>> resourceKey,
-            DeferredRegister<?> registry
-    ) {}
+    public record finalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey, DeferredRegister<?> registry) {}
 }

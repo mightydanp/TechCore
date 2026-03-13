@@ -31,7 +31,6 @@ public class RegistriesHandler {
     private static final Map<ResourceLocation, registryHolder> additionalRegistries = new HashMap<>();
     private static final Map<ResourceLocation, finalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
 
-
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, CoreRef.MOD_ID);
     public static final DeferredRegister<Item> BLOCK_ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
@@ -72,6 +71,25 @@ public class RegistriesHandler {
         MATERIALS.register(bus);
         WOOD_TYPES.register(bus);
 
+
+        // Snapshot to avoid ConcurrentModificationException while finalizing dynamic registries.
+        Map<ResourceLocation, registryHolder> snapshot = new HashMap<>(additionalRegistries);
+        additionalRegistries.clear();
+
+        for (Map.Entry<ResourceLocation, registryHolder> entry : snapshot.entrySet()) {
+            ResourceLocation name = entry.getKey();
+            registryHolder holder = entry.getValue();
+
+            ResourceKey<? extends Registry<?>> key = ResourceKey.createRegistryKey(name);
+
+            DeferredRegister<?> register =
+                    DeferredRegister.create(holder.key().key(), name.getNamespace());
+            register.register(bus);
+
+            finalizedDeferredRegister.put(name, new finalizedRegistryHolder(key, register));
+        }
+
+
         additionalRegistries.forEach((resourceLocation, registryHolder) -> {
             additionalRegistries.remove(resourceLocation);
 
@@ -98,6 +116,8 @@ public class RegistriesHandler {
     public record registryHolder(Registry<?> key) {
     }
 
-    public record finalizedRegistryHolder(ResourceKey<Registry<Object>> resourceKey, DeferredRegister<?> registry) {
-    }
+    public record finalizedRegistryHolder(
+            ResourceKey<? extends Registry<?>> resourceKey,
+            DeferredRegister<?> registry
+    ) {}
 }

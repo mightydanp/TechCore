@@ -37,6 +37,12 @@ public class OreComponent extends Component {
             centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
         }
 
+        impureDust = RegistriesHandler.ITEMS.register("impure_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        pureDust = RegistriesHandler.ITEMS.register("pure_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        smallDust = RegistriesHandler.ITEMS.register("small_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        tinyDust = RegistriesHandler.ITEMS.register("tiny_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+
         return super.initServer(material);
     }
 

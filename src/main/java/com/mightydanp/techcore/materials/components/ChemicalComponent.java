@@ -10,7 +10,7 @@ public class ChemicalComponent extends Component {
     public float molecularMass;
     public float atomicWeight;
     public float atomicMass;
-    public String molecularStructure;
+    public String chemicalFormula;
 
     public ChemicalComponent() {
         super("chemical", "component");
@@ -51,8 +51,8 @@ public class ChemicalComponent extends Component {
         return this;
     }
 
-    public ChemicalComponent setMolecularStructure(String molecularStructure) {
-        this.molecularStructure = molecularStructure;
+    public ChemicalComponent setChemicalFormula(String chemicalFormula) {
+        this.chemicalFormula = chemicalFormula;
         return this;
     }
 

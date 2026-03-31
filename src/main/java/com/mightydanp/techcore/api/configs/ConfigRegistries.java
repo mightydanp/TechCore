@@ -12,12 +12,12 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ConfigRegistries {
-    private static final Map<ResourceLocation, BlockTraitConfig> blockTrait = new HashMap<>();
+    private static final Map<ResourceLocation, BlockTraitConfig> blockTrait = new ConcurrentHashMap<>();
 
     public static void registerConfigs(FMLJavaModLoadingContext context) {
         TechCore.LOGGER.info("Tech Core config registry is starting.");

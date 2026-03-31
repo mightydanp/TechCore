@@ -39,6 +39,13 @@ public class TCInventoryResultSlot extends Slot {
         this.removeCount += numItemsCrafted;
     }
 
+    @Override
+    protected void checkTakeAchievements(ItemStack stack) {
+        if (this.removeCount > 0) {
+            stack.onCraftedBy(this.player.level(), this.player, this.removeCount);
+        }
+        this.removeCount = 0;
+
     /*
     protected void checkTakeAchievements(ItemStack stack) {
         if (this.removeCount > 0) {-
@@ -52,8 +59,8 @@ public class TCInventoryResultSlot extends Slot {
         }
 
         this.removeCount = 0;
-    }
      */
+    }
 
     @Override
     public void onTake(@NotNull Player player, @NotNull ItemStack stack) {

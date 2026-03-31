@@ -4,6 +4,7 @@ import com.mightydanp.techcore.api.configs.IConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class BlockTraitConfig implements IConfig {
+    private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
     private final ForgeConfigSpec.ConfigValue<String> registryConfig;
     private final ForgeConfigSpec.ConfigValue<Integer> colorConfig;
     private final ForgeConfigSpec.ConfigValue<Double> kilogramConfig;
@@ -27,6 +28,11 @@ public class BlockTraitConfig implements IConfig {
         canPickUpConfig = builder
                 .comment("are you allowed to pick this up and put it on your back?")
                 .define("can pick up", canPickUp);
+    }
+
+    @Override
+    public ForgeConfigSpec build() {
+        return builder.build();
     }
 
     @Override

@@ -14,14 +14,14 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final ResourceKey<? extends Registry<?>> registryKey;
-    private final Map<ResourceLocation, A> traits = new HashMap<>();
+    private final Map<ResourceLocation, A> traits = new ConcurrentHashMap<>();
 
     public Trait(ResourceKey<? extends Registry<?>> resourceKey) {
         super(GSON, getDir(resourceKey));
@@ -34,8 +34,12 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
 
     @Override
     protected void apply(@NotNull Map<ResourceLocation, JsonElement> resourceLocationJsonElementMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
-        resourceLocationJsonElementMap.forEach((resourceLocation, jsonElement) -> traits.put(resourceLocation, codec().decode(JsonOps.INSTANCE, jsonElement)
-                .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to encode: " + msg); })
+        Codec<A> codec = codec();
+        if (codec == null) {
+            throw new IllegalStateException(this.getClass().getSimpleName() + " must override codec() before traits can be loaded.");
+        }
+        resourceLocationJsonElementMap.forEach((resourceLocation, jsonElement) -> traits.put(resourceLocation, codec.decode(JsonOps.INSTANCE, jsonElement)
+                .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to decode: " + msg); })
                 .getFirst()));
     }
 

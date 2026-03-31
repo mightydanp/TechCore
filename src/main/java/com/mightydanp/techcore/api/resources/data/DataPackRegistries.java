@@ -15,30 +15,30 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataPackRegistries {
-    //private static final Map<ResourceLocation, TagContent<BannerPattern>> bannerPatternTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<Block>> blockTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<Block>> blockMineableTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<CatVariant>> catVariantTag = new HashMap<>();
+    //private static final Map<ResourceLocation, TagContent<BannerPattern>> bannerPatternTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Block>> blockTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Block>> blockMineableTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<CatVariant>> catVariantTag = new ConcurrentHashMap<>();
 
-    //private static final Map<ResourceLocation, TagContent<DamageType>> damageTypeTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<EntityType<?>>> entityTypeTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<Fluid>> fluidTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<GameEvent>> gameEventTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<Item>> itemTag = new HashMap<>();
-    private static final Map<ResourceLocation, TagContent<Instrument>> instrumentTag = new HashMap<>();
+    //private static final Map<ResourceLocation, TagContent<DamageType>> damageTypeTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<EntityType<?>>> entityTypeTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Fluid>> fluidTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<GameEvent>> gameEventTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Item>> itemTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Instrument>> instrumentTag = new ConcurrentHashMap<>();
 
-    //private static final Map<ResourceLocation, TagContent<PaintingVariant>> paintingVariantTag = new HashMap<>();
-    //private static final Map<ResourceLocation, TagContent<Biome>> biomeTag = new HashMap<>();
-    //private static final Map<ResourceLocation, TagContent<ConfiguredFeature<?, ?>>> configuredFeatureTag = new HashMap<>();
-    private static final Map<ResourceLocation, LootTableContent> blockLootTable = new HashMap<>();
-    private static final Map<ResourceLocation, LootTableContent> chestLootTable = new HashMap<>();
-    private static final Map<ResourceLocation, LootTableContent> entityLootTable = new HashMap<>();
-    private static final Map<ResourceLocation, LootTableContent> gameplayLootTable = new HashMap<>();
-    public static final Map<ResourceLocation, RecipeContent> recipe = new HashMap<>();
+    //private static final Map<ResourceLocation, TagContent<PaintingVariant>> paintingVariantTag = new ConcurrentHashMap<>();
+    //private static final Map<ResourceLocation, TagContent<Biome>> biomeTag = new ConcurrentHashMap<>();
+    //private static final Map<ResourceLocation, TagContent<ConfiguredFeature<?, ?>>> configuredFeatureTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, LootTableContent> blockLootTable = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, LootTableContent> chestLootTable = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, LootTableContent> entityLootTable = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, LootTableContent> gameplayLootTable = new ConcurrentHashMap<>();
+    public static final Map<ResourceLocation, RecipeContent> recipe = new ConcurrentHashMap<>();
 
     public static void init() {
         //bannerPatternTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/banner_pattern/" + s.getPath() + ".json"), b.json()));

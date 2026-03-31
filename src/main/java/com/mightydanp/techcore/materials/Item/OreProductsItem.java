@@ -3,6 +3,7 @@ package com.mightydanp.techcore.materials.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import com.mightydanp.techcore.materials.Item.ExtendedProperties;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class OreProductsItem extends Item {
     public double meltingPoint;
     public double boilingPoint;
 
-    public OreProductsItem(Properties properties, double boilingPointIn, double meltingPointIn, String symbol) {
+    public OreProductsItem(ExtendedProperties properties, double boilingPointIn, double meltingPointIn, String symbol) {
         super(properties);
         meltingPoint = meltingPointIn;
         boilingPoint = boilingPointIn;

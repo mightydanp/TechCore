@@ -10,17 +10,17 @@ public record Temperature(double temperature, Scales.Scale scale) {
     ).apply(instance, Temperature::new));
 
     public double toKelvin() {
-        return scale == Scales.CELSIUS.scale
+        return scale.equals(Scales.CELSIUS.scale)
                 ? temperature + 273.15
                 : (temperature - 32) * 5 / 9 + 273.15;
     }
 
     public double getTemperature(Scales.Scale targetScale) {
-        if (this.scale == targetScale) {
+        if (this.scale.equals(targetScale)) {
             return this.temperature;
         }
 
-        return targetScale == Scales.CELSIUS.scale
+        return targetScale.equals(Scales.CELSIUS.scale)
                 ? (temperature - 32) * 5 / 9
                 : (temperature * 9 / 5) + 32;
     }

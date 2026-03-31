@@ -101,7 +101,7 @@ public class RegistriesHandler {
             return finalizedDeferredRegister.get(name);
         }
 
-        throw new Error("DeferredRegister : " + name.toString() + " : was not registered!");
+        throw new IllegalStateException("DeferredRegister : " + name + " : has not been finalized yet. Ensure init() has been called before accessing registries.");
     }
 
     public record registryHolder(Registry<?> key) {

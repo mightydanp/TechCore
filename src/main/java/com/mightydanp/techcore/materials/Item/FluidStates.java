@@ -22,7 +22,7 @@ public enum FluidStates {
         // Regular Codec for FluidState
         public static final Codec<FluidState> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
-                        Codec.STRING.fieldOf("label").forGetter(FluidState::toString)
+                        Codec.STRING.fieldOf("label").forGetter(FluidState::label)
                 ).apply(instance, FluidState::new)
         );
     }

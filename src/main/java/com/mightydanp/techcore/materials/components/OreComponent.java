@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
+import com.mightydanp.techcore.materials.Item.ExtendedProperties;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreProductsItem;
 import com.mightydanp.techcore.materials.Material;
@@ -25,23 +26,23 @@ public class OreComponent extends Component {
     @Override
     public Component initServer(Material material) {
         if(oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()){
-            if (oreType == OreTypes.ORE.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-                chippedGem = RegistriesHandler.ITEMS.register("chipped_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-                flawedGem = RegistriesHandler.ITEMS.register("flawed_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-                flawlessGem = RegistriesHandler.ITEMS.register("flawless_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-                legendaryGem = RegistriesHandler.ITEMS.register("legendary_" + material.name + "_gem", () -> new GemItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            if (oreType == OreTypes.GEM.oreType()) {
+                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                chippedGem = RegistriesHandler.ITEMS.register("chipped_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                flawedGem = RegistriesHandler.ITEMS.register("flawed_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                flawlessGem = RegistriesHandler.ITEMS.register("flawless_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+                legendaryGem = RegistriesHandler.ITEMS.register("legendary_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
             }
-            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
         }
 
-        impureDust = RegistriesHandler.ITEMS.register("impure_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-        pureDust = RegistriesHandler.ITEMS.register("pure_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-        smallDust = RegistriesHandler.ITEMS.register("small_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
-        tinyDust = RegistriesHandler.ITEMS.register("tiny_" + material.name + "_dust", () -> new OreProductsItem(new Item.Properties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        impureDust = RegistriesHandler.ITEMS.register("impure_" + material.name + "_dust", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        pureDust = RegistriesHandler.ITEMS.register("pure_" + material.name + "_dust", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        smallDust = RegistriesHandler.ITEMS.register("small_" + material.name + "_dust", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
+        tinyDust = RegistriesHandler.ITEMS.register("tiny_" + material.name + "_dust", () -> new OreProductsItem(new ExtendedProperties(), material.thermal.boilingPoint, material.thermal.meltingPoint, material.chemical.symbol));
 
         return super.initServer(material);
     }

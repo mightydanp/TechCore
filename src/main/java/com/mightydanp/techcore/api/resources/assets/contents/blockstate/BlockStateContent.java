@@ -42,17 +42,23 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     public VariantBlockStateBuilder getVariantBuilder(Block b) throws Exception {
-        Constructor<VariantBlockStateBuilder> constructor = VariantBlockStateBuilder.class.getDeclaredConstructor(Block.class);
-        constructor.setAccessible(true);
-
-        return constructor.newInstance(b);
+        try {
+            Constructor<VariantBlockStateBuilder> constructor = VariantBlockStateBuilder.class.getDeclaredConstructor(Block.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(b);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("VariantBlockStateBuilder constructor signature has changed in this version of Forge — BlockStateContent needs to be updated.", e);
+        }
     }
 
     public MultiPartBlockStateBuilder getMultipartBuilder(Block b) throws Exception {
-        Constructor<MultiPartBlockStateBuilder> constructor = MultiPartBlockStateBuilder.class.getDeclaredConstructor(Block.class);
-        constructor.setAccessible(true);
-
-        return constructor.newInstance(b);
+        try {
+            Constructor<MultiPartBlockStateBuilder> constructor = MultiPartBlockStateBuilder.class.getDeclaredConstructor(Block.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(b);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("MultiPartBlockStateBuilder constructor signature has changed in this version of Forge — BlockStateContent needs to be updated.", e);
+        }
     }
 
     public String modid() {

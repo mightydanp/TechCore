@@ -8,20 +8,24 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ResourcePackRegistry {
     public static final ResourcePack PACK = new ResourcePack(CoreRef.MOD_ID, "dynamic", true, Pack.Position.TOP, true);
 
-    public static List<BaseRegistries> init = new ArrayList<>();
+    public static List<BaseRegistries> init = new CopyOnWriteArrayList<>();
+    private static boolean clientInitialized = false;
 
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event) {
         PackType type = event.getPackType();
 
-        init.forEach(BaseRegistries::initClient);
+        if (!clientInitialized) {
+            init.forEach(BaseRegistries::initClient);
+            clientInitialized = true;
+        }
 
         AssetPackRegistries.init();
 

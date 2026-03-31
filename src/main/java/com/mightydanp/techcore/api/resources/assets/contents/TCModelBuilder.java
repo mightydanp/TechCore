@@ -355,7 +355,9 @@ public class TCModelBuilder<A> extends ModelFile {
                         faceObj.addProperty("tintindex", face.tintIndex);
                     }
                     if (!face.getFaceData().equals(ForgeFaceData.DEFAULT)) {
-                        faceObj.add("forge_data", ForgeFaceData.CODEC.encodeStart(JsonOps.INSTANCE, face.getFaceData()).result().get());
+                        if(ForgeFaceData.CODEC.encodeStart(JsonOps.INSTANCE, face.getFaceData()).result().isPresent()) {
+                            faceObj.add("forge_data", ForgeFaceData.CODEC.encodeStart(JsonOps.INSTANCE, face.getFaceData()).result().get());
+                        }
                     }
                     faces.add(dir.getSerializedName(), faceObj);
                 }

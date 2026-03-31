@@ -41,11 +41,16 @@ public class LanguageContent {
     }
 
     public static String translateUpperCase(String name) {
+        if (name.isEmpty()) return "";
         StringBuilder translatedName = new StringBuilder();
         if (name.contains("_")) {
             int i = 0;
-            for (String word : name.split("_")) {
-                String str = word.substring(0, 1).toUpperCase() + word.substring(1);
+            String[] words = name.split("_");
+            for (String word : words) {
+                if (word.isEmpty()) continue;
+                String firstChar = word.substring(0, 1).toUpperCase();
+                String remainder = word.substring(1);
+                String str = firstChar + remainder;
                 if (i == 0) {
                     translatedName.append(str);
                     i++;
@@ -54,14 +59,18 @@ public class LanguageContent {
                 }
             }
         } else {
-            String str = name.substring(0, 1).toUpperCase() + name.substring(1);
+            String firstChar = name.substring(0, 1).toUpperCase();
+            String remainder = name.substring(1);
+            String str = firstChar + remainder;
 
             if (str.contains(":")) {
-                translatedName.append(str.split(":")[1]);
+                String[] parts = str.split(":");
+                if (parts.length > 1) {
+                    translatedName.append(parts[1]);
+                }
             } else {
                 translatedName.append(str);
             }
-
         }
 
         return translatedName.toString();

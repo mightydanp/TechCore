@@ -7,14 +7,14 @@ import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelCon
 import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AssetPackRegistries {
-    public static Map<ResourceLocation, BlockStateContent<?>> blockState = new HashMap<>();
-    public static Map<ResourceLocation, BlockModelContent<?>> blockModel = new HashMap<>();
-    public static Map<ResourceLocation, ItemModelContent<?>> itemModel = new HashMap<>();
-    public static Map<ResourceLocation, LanguageContent> language = new HashMap<>();
+    public static Map<ResourceLocation, BlockStateContent<?>> blockState = new ConcurrentHashMap<>();
+    public static Map<ResourceLocation, BlockModelContent<?>> blockModel = new ConcurrentHashMap<>();
+    public static Map<ResourceLocation, ItemModelContent<?>> itemModel = new ConcurrentHashMap<>();
+    public static Map<ResourceLocation, LanguageContent> language = new ConcurrentHashMap<>();
 
     public static void init() {
         blockState.forEach((r, b) -> ResourcePackRegistry.PACK.addAsset(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "blockstates/" + r.getPath() + ".json"), b.json()));

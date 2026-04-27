@@ -166,7 +166,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(itemstack1, 4, 39, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot.getType() == EquipmentSlot.Type.HAND && !((Slot) this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
+            } else if (equipmentslot.getType() == EquipmentSlot.Type.ARMOR && !((Slot) this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
                 int i = 3 - equipmentslot.getIndex();
                 if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,9 @@ public class TCArmorSlot extends Slot {
     }
 
     public void setByPlayer(@NotNull ItemStack newStack, @NotNull ItemStack oldStack) {
-        this.owner.onEquipItem(this.slot, oldStack, newStack);
+        if (Equipable.get(newStack) != null) {
+            this.owner.onEquipItem(this.slot, oldStack, newStack);
+        }
         super.setByPlayer(newStack);
     }
 

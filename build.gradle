@@ -1,18 +1,41 @@
+// ============================================================
+// TechCore — build.gradle
+//
+// Build script for the Tech Core library mod. This mod has no
+// dependency on Tech Ascension and can be built standalone.
+//
+// Addon mod developers: if your mod depends only on Tech Core
+// (not Tech Ascension), use this file as a reference. To depend
+// on Tech Core, add it as a compileOnly dependency and include
+// its sources in the minecraftSetup mods block so it loads
+// during dev runs alongside your mod.
+// ============================================================
+
+// Load all shared build helpers from gradletools.gradle.
 apply from: rootProject.file('gradletools.gradle')
 
+// Register Maven repositories (JEI, Forge, etc.).
 repos()
+
+// Apply common project settings (mod ID, version, group, Java 17).
 commonSetup()
 
-minecraftSetup {
+// Configure the minecraft {} block and all run configurations.
+// false = use official Mojang mappings (change to true for ParchmentMC).
+minecraftSetup(false) {
     "${project.findProperty('mod_id')}" {
         source sourceSets.main
     }
 }
 
+// Embed mod metadata into the built JAR manifest.
 ext.jars()
 
+// Add Forge, JEI, and Mixin annotation processor as dependencies.
 commonDeps()
 
+// Replace ${token} placeholders in mods.toml and pack.mcmeta.
 commonProcessResources()
 
+// Register the reobfuscated JAR as the final build output.
 reobfArtifact()

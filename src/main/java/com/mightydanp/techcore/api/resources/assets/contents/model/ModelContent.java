@@ -22,20 +22,30 @@ public class ModelContent<A> {
     private final String modelType;
     private final String organizationPath;
 
+    @SuppressWarnings("unchecked")
     public ModelContent(String modid, String name, String modelType, String organizationPath) {
         this.modid = modid;
         this.name = name;
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
     }
 
+    @SuppressWarnings("unchecked")
     public ModelContent(ResourceLocation resourceLocation, String modelType, String organizationPath) {
         this.name = resourceLocation.getPath();
         this.modid = resourceLocation.getNamespace();
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"));
+        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
+    }
+
+    protected ModelContent(String modid, String name, String modelType, String organizationPath, TCModelBuilder<A> builder) {
+        this.modid = modid;
+        this.name = name;
+        this.modelType = modelType;
+        this.organizationPath = organizationPath;
+        this.model = builder;
     }
 
     public String modid() {

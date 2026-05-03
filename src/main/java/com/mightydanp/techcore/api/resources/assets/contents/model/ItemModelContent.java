@@ -20,6 +20,11 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
         super(resourceLocation, ITEM_FOLDER, parentFolder);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public ItemModelContent(String modid, String modelName, String parentFolder, TCModelBuilder builder) {
+        super(modid, modelName, ITEM_FOLDER, parentFolder, builder);
+    }
+
     public ItemModelContent<A> save(boolean override) {
         AssetPackRegistries.saveItemModel(this, override);
         return this;

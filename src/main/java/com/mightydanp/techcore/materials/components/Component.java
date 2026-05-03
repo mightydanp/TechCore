@@ -1,17 +1,22 @@
 package com.mightydanp.techcore.materials.components;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 
-public class Component extends AbstractComponent<Component> {
+public class Component<A extends Component<A>> extends AbstractComponent<A> {
     public Component(String prefix, String suffix) {
         super(prefix, suffix);
     }
 
-    private static final Codec<Component> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    Codec.STRING.fieldOf("prefix").forGetter(Component::prefix),
-                    Codec.STRING.fieldOf("suffix").forGetter(Component::suffix)
-            ).apply(instance, Component::new)
-    );
+    public void registerBasicItemColor(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event, Item item, int color) {
+        if (item != null) {
+            event.register((stack, tintIndex) -> tintIndex == 0 ? color : -1, item);
+        }
+    }
+
+    public void registerItemProperty(Item item, ResourceLocation key, net.minecraft.client.renderer.item.ClampedItemPropertyFunction property) {
+        if(item != null) {
+            net.minecraft.client.renderer.item.ItemProperties.register(item, key, property);
+        }
+    }
 }

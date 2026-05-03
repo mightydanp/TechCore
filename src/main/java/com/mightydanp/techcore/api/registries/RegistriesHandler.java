@@ -18,12 +18,13 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.*;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -50,7 +51,8 @@ public class RegistriesHandler {
     //public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CoreRef.MOD_ID);
 
     public static final ResourceKey<Registry<Material>> MATERIAL_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material"));
-    public static final DeferredRegister<Material> MATERIALS = DeferredRegister.create(MATERIAL_KEY, CoreRef.MOD_ID);
+    private static final DeferredRegister<Material> MATERIALS = DeferredRegister.create(MATERIAL_KEY, CoreRef.MOD_ID);
+    private static final Supplier<IForgeRegistry<Material>> MATERIAL_REGISTRY = MATERIALS.makeRegistry(RegistryBuilder::new);
 
     public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
     public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
@@ -108,4 +110,15 @@ public class RegistriesHandler {
     }
 
     public record finalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey, DeferredRegister<?> registry) {}
+
+    public static Supplier<Material> registerMaterial(String name, Supplier<Material> supplier) {
+        Material mat = supplier.get();
+        mat.init();
+        return MATERIALS.register(name, () -> mat);
+    }
+
+    public static Collection<RegistryObject<Material>> getMaterials() {
+        return MATERIALS.getEntries();
+    }
+
 }

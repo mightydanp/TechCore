@@ -1,9 +1,6 @@
 package com.mightydanp.techcore.client.ref;
 
 public class CoreCreativeTabsRef {
-    public static final String common_proxy_location = "mightydanp.techascension.common.CommonEvent";
-    public static final String client_proxy_location = "mightydanp.techascension.common.ClientEvent";
-
     public static final String block_tab = CoreRef.MOD_ID + "." + "block_tab";
     public static final String item_tab = CoreRef.MOD_ID + "." + "item_tab";
     public static final String ore_tab = CoreRef.MOD_ID + "." + "ore_tab";

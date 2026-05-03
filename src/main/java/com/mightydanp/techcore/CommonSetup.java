@@ -1,22 +1,26 @@
 package com.mightydanp.techcore;
 
-import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import net.minecraftforge.api.distmarker.Dist;
+import com.mightydanp.techcore.network.TCNetworkChannel;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import static com.mightydanp.techcore.TechCore.LOGGER;
 
-@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
+@Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonSetup {
 
     @SubscribeEvent
     public static void onCommonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Tech Core common setup is starting");
 
-        RegistriesHandler.MATERIALS.getEntries().forEach(m -> m.get().initServer());
+        //enqueueWork is only needed for things that aren't thread-safe
+        event.enqueueWork(() ->{
+
+        });
+
+        TCNetworkChannel.init();
 
         LOGGER.info("Tech Core common setup is finished ");
     }

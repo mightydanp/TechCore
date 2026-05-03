@@ -3,6 +3,7 @@ package com.mightydanp.techcore.materials;
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.materials.components.*;
 import com.mightydanp.techcore.materials.properties.Icons;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,47 +13,89 @@ public class Material implements BaseRegistries {
     public String name;
     public Icons.Icon icon;
 
-    public List<Component> components = new ArrayList<>();
+    public ChemicalComponent<Material> chemical;
+    public PhysicalComponent<Material> physical;
+    public ThermalComponent<Material> thermal;
+    public FluidComponent<Material> fluid;
+    public OreComponent<Material> ore;
+    public StoneLayerComponent<Material> stoneLayer;
+
+    public List<Component<?>> components = new ArrayList<>();
 
     public Material(String name, Icons.Icon icon){
         this.name = name;
         this.icon = icon;
+
+        chemical = new ChemicalComponent<>(this);
+        physical = new PhysicalComponent<>(this);
+        thermal = new ThermalComponent<>(this);
+        fluid = new FluidComponent<>(this);
+        ore = new OreComponent<>(this);
+        stoneLayer = new StoneLayerComponent<>(this);
     }
 
     //keep in mind that this will initialize based off what you put first
-    public Material additionalComponents(Component... components){
+    public Material additionalComponents(Component<?>... components){
         this.components.addAll(Arrays.asList(components));
         return this;
     }
 
-    public ChemicalComponent chemical = new ChemicalComponent();
-    public PhysicalComponent physical = new PhysicalComponent();
-    public ThermalComponent thermal = new ThermalComponent();
-    public FluidComponent fluid = new FluidComponent();
-    public OreComponent ore = new OreComponent();
-    public StoneLayerComponent stoneLayer = new StoneLayerComponent();
+    @Override
+    public void init(){
+        chemical.init();
+        physical.init();
+        thermal.init();
+        fluid.init();
+        stoneLayer.init();
+        ore.init();
 
-    public void initServer(){
-        chemical.initServer(this);
-        physical.initServer(this);
-        thermal.initServer(this);
-        fluid.initServer(this);
-        stoneLayer.initServer(this);
-        ore.initServer(this);
-
-        components.forEach(component -> component.initServer(this));
+        components.forEach(AbstractComponent::init);
     }
 
     @Override
     public void initClient(){
-        chemical.initClient(this);
-        physical.initClient(this);
-        thermal.initClient(this);
-        fluid.initClient(this);
-        ore.initClient(this);
-        stoneLayer.initClient(this);
+        chemical.initClient();
+        physical.initClient();
+        thermal.initClient();
+        fluid.initClient();
+        ore.initClient();
+        stoneLayer.initClient();
 
-        components.forEach(component -> component.initClient(this));
-    };
+        components.forEach(AbstractComponent::initClient);
+    }
+
+    @Override
+    public void initLanguages() {
+        chemical.initLanguages();
+        physical.initLanguages();
+        thermal.initLanguages();
+        fluid.initLanguages();
+        ore.initLanguages();
+        stoneLayer.initLanguages();
+
+        components.forEach(AbstractComponent::initLanguages);
+    }
+
+    public void initItemProperties() {
+        chemical.initItemProperties();
+        physical.initItemProperties();
+        thermal.initItemProperties();
+        fluid.initItemProperties();
+        ore.initItemProperties();
+        stoneLayer.initItemProperties();
+
+        components.forEach(AbstractComponent::initItemProperties);
+    }
+
+    public void initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
+        chemical.initClientRenderLayers();
+        physical.initClientRenderLayers();
+        thermal.initClientRenderLayers();
+        fluid.initClientRenderLayers();
+        ore.initClientRenderLayers();
+        stoneLayer.initClientRenderLayers();
+
+        components.forEach(AbstractComponent::initClientRenderLayers);
+    }
 
 }

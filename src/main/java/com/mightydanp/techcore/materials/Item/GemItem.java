@@ -16,11 +16,11 @@ public class GemItem extends Item {
     public double meltingPoint;
     public double boilingPoint;
 
-    public GemItem(ExtendedProperties properties, double boilingPointIn, double meltingPointIn, String symbol) {
+    public GemItem(ExtendedProperties properties) {
         super(properties);
-        meltingPoint = meltingPointIn;
-        boilingPoint = boilingPointIn;
-        this.symbol = symbol;
+        meltingPoint = properties.getMeltingPoint();
+        boilingPoint = properties.getBoilingPoint();
+        symbol = properties.getSymbol();
     }
 
     @Override

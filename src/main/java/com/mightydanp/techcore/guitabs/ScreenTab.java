@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.guitabs;
 
-import com.mightydanp.techcore.guitabs.components.GuiTabBase;
-import com.mightydanp.techcore.guitabs.registries.GuiTabRegistries;
+import com.mightydanp.techcore.guitabs.components.ScreenTabBase;
+import com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class GuiTab implements GuiTabBase {
+public class ScreenTab implements ScreenTabBase {
     public String modId;
     public String name;
 
@@ -31,22 +31,20 @@ public class GuiTab implements GuiTabBase {
     public Component narration = CommonComponents.EMPTY;
     public Tooltip tooltip = null;
 
-    public GuiTab(String modId, String name, int width, int height) {
+    public ScreenTab(String modId, String name, int width, int height) {
         this.modId = modId;
         this.name = name;
         this.width = width;
         this.height = height;
     }
 
-    public GuiTab setPriorityNumber(int priorityNumber) {
-        // Check for invalid negative numbers
+    public ScreenTab setPriorityNumber(int priorityNumber) {
         if (priorityNumber < -1) {
             throw new IllegalArgumentException("Priority number cannot be less than -1.");
         }
 
-        // Check if the priority number is already in use (except -1)
         if (priorityNumber != -1) {
-            boolean priorityExists = GuiTabRegistries.guiTabs.values().stream().anyMatch(tab -> tab.priorityNumber == priorityNumber);
+            boolean priorityExists = ScreenTabRegistries.screenTabs.values().stream().anyMatch(tab -> tab.priorityNumber == priorityNumber);
 
             if (priorityExists) {
                 throw new IllegalArgumentException("Priority number " + priorityNumber + " is already in use.");
@@ -57,15 +55,14 @@ public class GuiTab implements GuiTabBase {
         return this;
     }
 
-
-    public GuiTab setColor(float red, float green, float blue) {
+    public ScreenTab setColor(float red, float green, float blue) {
         this.red = red;
         this.green = green;
         this.blue = blue;
         return this;
     }
 
-    public GuiTab setColor(float red, float green, float blue, float alpha) {
+    public ScreenTab setColor(float red, float green, float blue, float alpha) {
         this.red = red;
         this.green = green;
         this.blue = blue;
@@ -73,26 +70,25 @@ public class GuiTab implements GuiTabBase {
         return this;
     }
 
-    public GuiTab setImage(ResourceLocation image) {
+    public ScreenTab setImage(ResourceLocation image) {
         this.image = image;
         return this;
     }
 
-    public GuiTab setItem(ItemStack item) {
+    public ScreenTab setItem(ItemStack item) {
         this.item = item;
         return this;
     }
 
-    public GuiTab setNarration(Component narration) {
+    public ScreenTab setNarration(Component narration) {
         this.narration = narration;
         return this;
     }
 
-    public GuiTab setCustomTexture(ResourceLocation image) {
+    public ScreenTab setCustomTexture(ResourceLocation image) {
         this.sprites = image;
         return this;
     }
-
 
     public void openTargetScreen(Player player) {
         System.out.println("test");
@@ -102,7 +98,7 @@ public class GuiTab implements GuiTabBase {
         return false;
     }
 
-    public GuiTab setToolTip(Tooltip tooltip) {
+    public ScreenTab setToolTip(Tooltip tooltip) {
         this.tooltip = tooltip;
         return this;
     }

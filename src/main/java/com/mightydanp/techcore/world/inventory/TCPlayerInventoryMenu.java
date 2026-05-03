@@ -12,11 +12,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.RecipeHolder;
+
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     //public final boolean active;
     private final Player player;
 
-    private List<String> inventorySecretary = new ArrayList<>();
+    private final List<String> inventorySecretary = new ArrayList<>();
 
     public TCPlayerInventoryMenu(int windowId, Inventory playerInventory) {
         super(MenuRegistries.TC_PLAYER_INVENTORY_MENU.get(), windowId);

@@ -15,15 +15,18 @@ import java.util.List;
  * Created by MightyDanp on 3/12/2021.
  */
 public class OreProductsItem extends Item {
-    public String symbol;
-    public double meltingPoint;
-    public double boilingPoint;
+    public final String symbol;
+    public final int color;
+    public final double meltingPoint;
+    public final double boilingPoint;
 
-    public OreProductsItem(ExtendedProperties properties, double boilingPointIn, double meltingPointIn, String symbol) {
+
+    public OreProductsItem(ExtendedProperties properties) {
         super(properties);
-        meltingPoint = meltingPointIn;
-        boilingPoint = boilingPointIn;
-        this.symbol = symbol;
+        symbol = properties.getSymbol();
+        color = properties.getColor();
+        meltingPoint = properties.getMeltingPoint();
+        boilingPoint = properties.getBoilingPoint();
     }
 
     @Override

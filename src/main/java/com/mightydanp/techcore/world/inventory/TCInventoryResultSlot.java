@@ -29,7 +29,7 @@ public class TCInventoryResultSlot extends Slot {
     }
 
     @Override
-    protected void onQuickCraft(ItemStack stack, int amount) {
+    protected void onQuickCraft(@NotNull ItemStack stack, int amount) {
         this.removeCount += amount;
         this.checkTakeAchievements(stack);
     }
@@ -40,7 +40,7 @@ public class TCInventoryResultSlot extends Slot {
     }
 
     @Override
-    protected void checkTakeAchievements(ItemStack stack) {
+    protected void checkTakeAchievements(@NotNull ItemStack stack) {
         if (this.removeCount > 0) {
             stack.onCraftedBy(this.player.level(), this.player, this.removeCount);
         }

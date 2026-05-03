@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraftforge.client.model.ForgeFaceData;
-import net.minecraftforge.client.model.generators.ModelBuilder;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.util.TransformationHelper;
 import org.jetbrains.annotations.Nullable;
@@ -42,8 +41,17 @@ public class TCModelBuilder<A> extends ModelFile {
 
     private final RootTransformsBuilder rootTransforms = new RootTransformsBuilder();
 
+    @Nullable
+    private final A parentRef;
+
     public TCModelBuilder(ResourceLocation location) {
         super(location);
+        this.parentRef = null;
+    }
+
+    public TCModelBuilder(ResourceLocation location, @Nullable A parentRef) {
+        super(location);
+        this.parentRef = parentRef;
     }
 
     public TCModelBuilder<A> builder(){
@@ -383,6 +391,9 @@ public class TCModelBuilder<A> extends ModelFile {
         if (tex.charAt(0) == '#') {
             return tex;
         }
+        if (tex.contains(":")) {
+            return tex;
+        }
         return ResourceLocation.withDefaultNamespace(tex).toString();
     }
 
@@ -403,7 +414,7 @@ public class TCModelBuilder<A> extends ModelFile {
 
     @SuppressWarnings("unchecked")
     public A end() {
-        return (A) this;
+        return parentRef != null ? parentRef : (A) this;
     }
 
     public class ElementBuilder {

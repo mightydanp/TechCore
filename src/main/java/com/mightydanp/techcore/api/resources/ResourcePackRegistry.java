@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.api.resources;
 
+import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.server.packs.PackType;
@@ -23,7 +24,11 @@ public class ResourcePackRegistry {
         PackType type = event.getPackType();
 
         if (!clientInitialized) {
+            RegistriesHandler.getMaterials().forEach(material -> ResourcePackRegistry.init.add(material.get()));
+
+            //RegistriesHandler.getMaterials().forEach(m -> m.get().initClient());
             init.forEach(BaseRegistries::initClient);
+            init.forEach(BaseRegistries::initLanguages);
             clientInitialized = true;
         }
 

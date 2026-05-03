@@ -1,9 +1,5 @@
 package com.mightydanp.techcore.materials.components;
 
-import com.mightydanp.techcore.materials.Material;
-
-import java.util.function.Consumer;
-
 public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     private final String prefix;
     private final String suffix;
@@ -26,12 +22,27 @@ public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     }
 
     @SuppressWarnings("unchecked")
-    public A initServer(Material material) {
+    public A init() {
         return (A)this;
     }
 
     @SuppressWarnings("unchecked")
-    public A initClient(Material material) {
+    public A initClient() {
+        return (A)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public A initLanguages() {
+        return (A)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public A initItemProperties() {
+        return (A)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public A initClientRenderLayers() {
         return (A)this;
     }
 }

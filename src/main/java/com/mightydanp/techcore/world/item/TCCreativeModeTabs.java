@@ -2,7 +2,6 @@ package com.mightydanp.techcore.world.item;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreCreativeTabsRef;
-import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;

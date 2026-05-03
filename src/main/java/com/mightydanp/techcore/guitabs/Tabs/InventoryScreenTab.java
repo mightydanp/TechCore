@@ -1,15 +1,15 @@
 package com.mightydanp.techcore.guitabs.Tabs;
 
-import com.mightydanp.techcore.guitabs.GuiTab;
+import com.mightydanp.techcore.guitabs.ScreenTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.entity.player.Player;
 
-public class InventoryGuiTab extends GuiTab {
+public class InventoryScreenTab extends ScreenTab {
     public Player player;
 
-    public InventoryGuiTab(String modID, String name) {
+    public InventoryScreenTab(String modID, String name) {
         super(modID, name, 176, 166);
     }
 
@@ -23,6 +23,4 @@ public class InventoryGuiTab extends GuiTab {
     public boolean isCurrentlyUsed(Screen currentScreen) {
         return currentScreen instanceof InventoryScreen;
     }
-
-
 }

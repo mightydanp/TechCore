@@ -1,5 +1,5 @@
 package com.mightydanp.techcore.guitabs.libs;
 
-public class GuiTabRef {
+public class ScreenTabRef {
     public static String player_inventory_name = "player_inventory";
 }

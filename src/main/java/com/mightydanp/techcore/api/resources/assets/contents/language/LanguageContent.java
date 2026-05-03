@@ -40,6 +40,15 @@ public class LanguageContent {
         return this;
     }
 
+    public LanguageContent addToTranslations(JsonObject json) {
+        json.asMap().forEach((modid, translation) ->{
+            if (!translations.has(name)) {
+                translations.add(modid, translation);
+            }
+        });
+        return this;
+    }
+
     public static String translateUpperCase(String name) {
         if (name.isEmpty()) return "";
         StringBuilder translatedName = new StringBuilder();
@@ -75,4 +84,6 @@ public class LanguageContent {
 
         return translatedName.toString();
     }
+
+    public record translation(ResourceLocation language, String translatable, String translation){}
 }

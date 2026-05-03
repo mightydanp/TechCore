@@ -152,6 +152,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         }
     }
 
+    @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int mouseButton) {
         return mouseX < (double) guiLeft || mouseY < (double) guiTop || mouseX >= (double) (guiLeft + this.imageWidth) || mouseY >= (double) (guiTop + this.imageHeight);
     }

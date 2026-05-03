@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Item;
+package com.mightydanp.techcore.materials.properties;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

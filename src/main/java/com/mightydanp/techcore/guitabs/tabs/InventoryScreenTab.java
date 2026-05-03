@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.guitabs.Tabs;
+package com.mightydanp.techcore.guitabs.tabs;
 
 import com.mightydanp.techcore.guitabs.ScreenTab;
 import net.minecraft.client.Minecraft;

@@ -28,7 +28,13 @@ public class TCClientEvents {
             if (event.getButton() != 1) return;
 
             // Cursor isn't holding a DustItem — let vanilla handle it
-            if (!(cursorStack.getItem() instanceof DustItem)) return;
+            if (cursorStack.getItem() instanceof DustItem dust){
+                if(dust.getQuantity(cursorStack) <= 1){
+                    return;
+                }
+            }else{
+                return;
+            }
 
             // No slot under the mouse — do nothing
             if (hoveredSlot == null) return;

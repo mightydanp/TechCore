@@ -3,12 +3,13 @@ package com.mightydanp.techcore.materials.components;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCItemModelBuilder;
+import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
-import com.mightydanp.techcore.materials.Item.ExtendedProperties;
+import com.mightydanp.techcore.materials.properties.ExtendedProperties;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreProductsItem;
 import com.mightydanp.techcore.materials.Material;
@@ -129,7 +130,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
         //Dust
         AssetPackRegistries.safetyMSLT(false, dust,
-                new LanguageContent.translation(ResourceLocation.fromNamespaceAndPath(modid, name), "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
                 );
 
         return this;

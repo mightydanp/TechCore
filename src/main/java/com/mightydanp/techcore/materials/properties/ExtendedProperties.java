@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Item;
+package com.mightydanp.techcore.materials.properties;
 
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.food.FoodProperties;

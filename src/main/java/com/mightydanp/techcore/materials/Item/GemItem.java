@@ -3,7 +3,7 @@ package com.mightydanp.techcore.materials.Item;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import com.mightydanp.techcore.materials.Item.ExtendedProperties;
+import com.mightydanp.techcore.materials.properties.ExtendedProperties;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;

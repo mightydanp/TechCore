@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.materials.Item;
 
+import com.mightydanp.techcore.materials.properties.ExtendedProperties;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;

@@ -85,5 +85,5 @@ public class LanguageContent {
         return translatedName.toString();
     }
 
-    public record translation(ResourceLocation language, String translatable, String translation){}
+    public record translation(String modID, String language, String translatable, String translation){}
 }

@@ -6,6 +6,7 @@ import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.guitabs.event.ScreenTabEvent;
 import com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries;
+import com.mightydanp.techcore.registries.ScreenRegistries;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -20,6 +21,10 @@ public class TechCore {
     public TechCore(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         RegistriesHandler.init(modEventBus);
+
+        ScreenRegistries screenRegistries = new ScreenRegistries();
+        screenRegistries.init();
+        ResourcePackRegistry.init.add(screenRegistries);
 
         ScreenTabRegistries screenTabRegistries = new ScreenTabRegistries();
         screenTabRegistries.init();

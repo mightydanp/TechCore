@@ -122,7 +122,7 @@ public class AssetPackRegistries {
     //Multiple Single Language Translations
     public static void saveMSLT(boolean override, LanguageContent.translation... translations) {
         Arrays.stream(translations).forEach(translation -> {
-            LanguageContent savedTranslations = getLanguage(translation.language());
+            LanguageContent savedTranslations = getLanguage(ResourceLocation.fromNamespaceAndPath(translation.modID(), translation.language()));
             savedTranslations.addTranslation(translation.translatable(), translation.translation());
             saveLanguage(savedTranslations, false);
         });

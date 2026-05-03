@@ -1,6 +1,6 @@
 package com.mightydanp.techcore.materials.components;
 
-import com.mightydanp.techcore.materials.Item.FluidStates;
+import com.mightydanp.techcore.materials.properties.FluidStates;
 import com.mightydanp.techcore.materials.Material;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.FlowingFluid;

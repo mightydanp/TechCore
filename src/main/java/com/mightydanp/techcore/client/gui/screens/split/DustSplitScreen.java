@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.widget.ForgeSlider;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ public class DustSplitScreen extends Screen {
     private final Screen parent;
     // The dust ItemStack currently held in the player's cursor
     private final ItemStack cursorStack;
+    private final Slot hoveredSlot;
     // The inventory slot index the player right-clicked — where the split dust will be placed
     private final int slotIndex;
     // The slider widget used to choose how much dust to split off
@@ -28,10 +30,11 @@ public class DustSplitScreen extends Screen {
     private Runnable pendingCloseAction = null;
 
     // title is the screen name shown in the title bar, looked up from the lang file
-    public DustSplitScreen(Screen parent, ItemStack cursorStack, int slotIndex) {
+    public DustSplitScreen(Screen parent, ItemStack cursorStack, Slot hoverSlot, int slotIndex) {
         super(Component.translatable(ScreenRef.dust_split_screen));
         this.parent = parent;
         this.cursorStack = cursorStack;
+        this.hoveredSlot = hoverSlot;
         this.slotIndex = slotIndex;
     }
 
@@ -40,9 +43,32 @@ public class DustSplitScreen extends Screen {
     @Override
     protected void init() {
         // Safety check — only build widgets if the cursor item is actually a DustItem
-        if (cursorStack.getItem() instanceof DustItem) {
-            // Read how much dust is currently in the cursor stack — this is the slider's maximum
-            int quantity = ((DustItem) cursorStack.getItem()).getQuantity(cursorStack);
+        boolean slotCompatible = !hoveredSlot.hasItem() || hoveredSlot.getItem().getDisplayName().getString().equals(cursorStack.getDisplayName().getString());
+
+        if (cursorStack.getItem() instanceof DustItem cursorDust && slotCompatible)  {
+            int cursorQuantity = cursorDust.getQuantity(cursorStack);
+
+            // Slider's max value depends on the target slot:
+            //   - Empty slot:                full cursor amount
+            //   - Slot has the same dust:    min(cursor amount, remaining capacity in the slot)
+            //   - Slot has anything else:    shouldn't happen (event prevents it), fall back to 1
+            //
+            // Same-dust check uses display name string equality, matching what the event handler
+            // does. Two DustItem instances are NOT enough — different materials can both be
+            // DustItem but should never merge.
+            int quantity;
+            if (!hoveredSlot.hasItem()) {
+                quantity = cursorQuantity;
+            } else if (hoveredSlot.getItem().getItem() instanceof DustItem slotDust) {
+                int slotQuantity = slotDust.getQuantity(hoveredSlot.getItem());
+                quantity = Math.min(cursorQuantity, slotDust.maxQuantity - slotQuantity);
+            } else {
+                quantity = 1;
+            }
+
+            // Failsafe — never let the slider exceed this material's maxQuantity, even if the
+            // math above somehow produced a larger value.
+            quantity = Math.min(quantity, cursorDust.maxQuantity);
 
             // Slider — lets the player choose how much dust to split off (1 to current quantity)
             // Centered horizontally, slightly above the middle of the screen
@@ -53,7 +79,11 @@ public class DustSplitScreen extends Screen {
                     1, quantity,   // min value, max value
                     quantity,      // starting value — defaults to the full current amount
                     1, 0, true     // step size 1 (whole units only), precision 0, draw the value as text
-            ));
+            ){
+                {
+                    if (Double.isNaN(value)) value = 1.0;
+                }
+            });
 
             // Confirm button — green checkmark, sends the split packet then closes the screen
             addRenderableWidget(Button.builder(

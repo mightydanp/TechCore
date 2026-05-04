@@ -3,7 +3,10 @@ package com.mightydanp.techcore.client.event;
 import com.mightydanp.techcore.client.gui.screens.split.DustSplitScreen;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
+import com.mightydanp.techcore.network.TCNetworkChannel;
+import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitDustPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -24,29 +27,43 @@ public class TCClientEvents {
             // Get the slot currently under the mouse
             Slot hoveredSlot = containerScreen.hoveredSlot;
 
+            // No slot under the mouse — do nothing
+            if (hoveredSlot == null) return;
+
             // Not a right-click — let vanilla handle it
             if (event.getButton() != 1) return;
 
             // Cursor isn't holding a DustItem — let vanilla handle it
             if (cursorStack.getItem() instanceof DustItem dust){
-                if(dust.getQuantity(cursorStack) <= 1){
+                String curserName = cursorStack.getHoverName().getString();
+                String hoveredName = hoveredSlot.getItem().getHoverName().getString();
+
+                if(hoveredSlot.hasItem() && !curserName.equals(hoveredName)) return;
+
+                if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && dustItem.getQuantity(hoveredSlot.getItem()) == dustItem.maxQuantity) return;
+
+                if(dust.getQuantity(cursorStack) < 1) return;
+
+                int cursorQty = dust.getQuantity(cursorStack);
+                int maxAmount;
+
+                if (!hoveredSlot.hasItem()) {
+                    maxAmount = cursorQty;
+                } else if (hoveredSlot.getItem().getItem() instanceof DustItem slotDust) {
+                    int slotQty = slotDust.getQuantity(hoveredSlot.getItem());
+                    maxAmount = Math.min(cursorQty, slotDust.maxQuantity - slotQty);
+                } else {
                     return;
                 }
-            }else{
-                return;
+
+                event.setCanceled(true);
+
+                if (Screen.hasShiftDown() || maxAmount == 1) {
+                    TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitDustPacket(hoveredSlot.index, maxAmount));
+                } else {
+                    Minecraft.getInstance().setScreen(new DustSplitScreen(containerScreen, cursorStack, hoveredSlot, hoveredSlot.index));
+                }
             }
-
-            // No slot under the mouse — do nothing
-            if (hoveredSlot == null) return;
-
-            // Slot already has an item — do nothing
-            if (hoveredSlot.hasItem()) return;
-
-            // Empty slot with dust in cursor — cancel vanilla click and open split screen
-            event.setCanceled(true);
-            Minecraft.getInstance().setScreen(
-                    new DustSplitScreen(containerScreen, cursorStack, hoveredSlot.index)
-            );
         }
     }
 }

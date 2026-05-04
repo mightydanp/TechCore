@@ -34,30 +34,63 @@ public class ServerBoundSplitDustPacket {
         contextSupplier.get().enqueueWork(() -> {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player == null) return;
+            if (this.amount < 1) return;
 
             ItemStack cursor = player.containerMenu.getCarried();
             Slot slot = player.containerMenu.slots.get(slotIndex);
 
-            if (slot.hasItem()) return;
+            if (slot.hasItem()){
+                String curserName = cursor.getHoverName().getString();
+                String hoveredName = slot.getItem().getHoverName().getString();
 
-            if(cursor.getItem() instanceof DustItem dustItem){
-                int currentQuantity = dustItem.getQuantity(cursor);
-                if(currentQuantity >= this.amount){
-                    ItemStack dustCopy = cursor.copy();
+                if(!curserName.equals(hoveredName)) return;
 
-                    dustItem.setQuantity(dustCopy , amount);
-                    dustItem.setQuantity(cursor, currentQuantity - amount);
+                if (slot.getItem().getItem() instanceof DustItem slotDust && cursor.getItem() instanceof DustItem cursorDust){
+                    int currentSlotQty = slotDust.getQuantity(slot.getItem());
+                    int currentCursorQty = cursorDust.getQuantity(cursor);
+                    int availableSpace = slotDust.maxQuantity - currentSlotQty;
 
-                    slot.set(dustCopy );
+                    if (currentCursorQty >= this.amount && availableSpace >= this.amount) {
+                        ItemStack cursorDustCopy = cursor.copy();
+                        ItemStack slotDustCopy = slot.getItem().copy();
+
+                        if (this.amount <= currentCursorQty && this.amount <= availableSpace) {
+                            slotDust.setQuantity(slotDustCopy, currentSlotQty + this.amount);
+                            cursorDust.setQuantity(cursorDustCopy, currentCursorQty - this.amount);
+                            slot.set(slotDustCopy);
+
+                            applyAndUpdateCursor(player, cursorDust, cursorDustCopy);
+                        }
+                    }
+                }
+            } else {
+                if (cursor.getItem() instanceof DustItem cursorDust) {
+                    int currentCursorQty = cursorDust.getQuantity(cursor);
+                    if (currentCursorQty >= this.amount) {
+                        ItemStack cursorDustCopy = cursor.copy();
+                        ItemStack slotDustCopy = cursor.copy();
+
+                        cursorDust.setQuantity(slotDustCopy, this.amount);
+                        cursorDust.setQuantity(cursorDustCopy, currentCursorQty - this.amount);
+
+                        slot.set(slotDustCopy);
+
+                        applyAndUpdateCursor(player, cursorDust, cursorDustCopy);
+                    }
                 }
             }
-
-
-
         });
 
         contextSupplier.get().setPacketHandled(true);
+    }
 
+    private void applyAndUpdateCursor(ServerPlayer player, DustItem cursorDust, ItemStack cursorDustCopy) {
+        if (cursorDust.getQuantity(cursorDustCopy) <= 0) {
+            player.containerMenu.setCarried(ItemStack.EMPTY);
+        } else {
+            player.containerMenu.setCarried(cursorDustCopy);
+        }
+        player.containerMenu.broadcastChanges();
     }
 }
 

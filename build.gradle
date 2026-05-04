@@ -37,5 +37,13 @@ commonDeps()
 // Replace ${token} placeholders in mods.toml and pack.mcmeta.
 commonProcessResources()
 
+// Register the mixin refmap and config with MixinGradle.
+// Remove this if your addon does not use Mixins.
+mixinSetup()
+
 // Register the reobfuscated JAR as the final build output.
 reobfArtifact()
+
+java {
+    withSourcesJar()
+}

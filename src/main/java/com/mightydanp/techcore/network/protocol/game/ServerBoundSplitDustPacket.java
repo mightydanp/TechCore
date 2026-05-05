@@ -48,7 +48,7 @@ public class ServerBoundSplitDustPacket {
                 if (slot.getItem().getItem() instanceof DustItem slotDust && cursor.getItem() instanceof DustItem cursorDust){
                     int currentSlotQty = slotDust.getQuantity(slot.getItem());
                     int currentCursorQty = cursorDust.getQuantity(cursor);
-                    int availableSpace = slotDust.maxQuantity - currentSlotQty;
+                    int availableSpace = slotDust.getMaxQuantity() - currentSlotQty;
 
                     if (currentCursorQty >= this.amount && availableSpace >= this.amount) {
                         ItemStack cursorDustCopy = cursor.copy();

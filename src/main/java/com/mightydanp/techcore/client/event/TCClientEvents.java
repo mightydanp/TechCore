@@ -40,7 +40,7 @@ public class TCClientEvents {
 
                 if(hoveredSlot.hasItem() && !curserName.equals(hoveredName)) return;
 
-                if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && dustItem.getQuantity(hoveredSlot.getItem()) == dustItem.maxQuantity) return;
+                if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && dustItem.getQuantity(hoveredSlot.getItem()) == dustItem.getMaxQuantity()) return;
 
                 if(dust.getQuantity(cursorStack) < 1) return;
 
@@ -51,7 +51,7 @@ public class TCClientEvents {
                     maxAmount = cursorQty;
                 } else if (hoveredSlot.getItem().getItem() instanceof DustItem slotDust) {
                     int slotQty = slotDust.getQuantity(hoveredSlot.getItem());
-                    maxAmount = Math.min(cursorQty, slotDust.maxQuantity - slotQty);
+                    maxAmount = Math.min(cursorQty, slotDust.getMaxQuantity() - slotQty);
                 } else {
                     return;
                 }

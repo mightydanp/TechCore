@@ -61,14 +61,14 @@ public class DustSplitScreen extends Screen {
                 quantity = cursorQuantity;
             } else if (hoveredSlot.getItem().getItem() instanceof DustItem slotDust) {
                 int slotQuantity = slotDust.getQuantity(hoveredSlot.getItem());
-                quantity = Math.min(cursorQuantity, slotDust.maxQuantity - slotQuantity);
+                quantity = Math.min(cursorQuantity, slotDust.getMaxQuantity() - slotQuantity);
             } else {
                 quantity = 1;
             }
 
             // Failsafe — never let the slider exceed this material's maxQuantity, even if the
             // math above somehow produced a larger value.
-            quantity = Math.min(quantity, cursorDust.maxQuantity);
+            quantity = Math.min(quantity, cursorDust.getMaxQuantity());
 
             // Slider — lets the player choose how much dust to split off (1 to current quantity)
             // Centered horizontally, slightly above the middle of the screen

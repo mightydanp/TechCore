@@ -9,7 +9,7 @@ public class ScreenRef {
 
     //English Translation
 
-    public static String dust_split_screen_translation = "Split Dust";
-    public static String dust_split_amount_translation = "Amount";
+    public static String dust_split_screen_english_translation = "Split Dust";
+    public static String amount_english_translation = "Amount";
 
 }

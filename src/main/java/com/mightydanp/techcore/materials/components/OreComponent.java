@@ -43,18 +43,14 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     public OreComponent<A> init() {
         if(oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()){
             if (oreType == OreTypes.GEM.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-                //chippedGem = RegistriesHandler.ITEMS.register("chipped_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-                //flawedGem = RegistriesHandler.ITEMS.register("flawed_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-                //flawlessGem = RegistriesHandler.ITEMS.register("flawless_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-                //legendaryGem = RegistriesHandler.ITEMS.register("legendary_" + material.name + "_gem", () -> new GemItem(new ExtendedProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
+                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialProperties().symbol(material.chemical.getSymbol()).maxQuality(material.physical.getMaxQuality()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
             }
             crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
             purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
             centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
         }
 
-        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialProperties().color(material.physical.getColor()).symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
+        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialProperties().color(material.physical.getColor()).maxQuantity(material.physical.getMaxQuantity()).symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
 
         return this;
     }
@@ -108,6 +104,78 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             new ItemModelContent<>(modid, name + "_dust", null, mainBuilder).save(false);
         }
 
+        if(gem != null) {
+            String modid = CoreRef.MOD_ID;
+            String name = material.name;
+
+            new TCItemModelContent(modid, "chipped_gem", "gem")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/chipped_gem"))
+                    .end()
+                    .save(false);
+
+            new TCItemModelContent(modid, "flawed_gem", "gem")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/flawed_gem"))
+                    .end()
+                    .save(false);
+
+            new TCItemModelContent(modid, "gem", "gem")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/gem"))
+                    .end()
+                    .save(false);
+
+            new TCItemModelContent(modid, "flawless_gem", "gem")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/flawless_gem"))
+                    .end()
+                    .save(false);
+
+            new TCItemModelContent(modid, "legendary_gem", "gem")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/legendary_gem"))
+                    .end()
+                    .save(false);
+
+            TCItemModelBuilder mainBuilder = new TCItemModelBuilder(
+                    ResourceLocation.fromNamespaceAndPath(modid, "models/item/" + "gem.json"));
+            mainBuilder.parent(new ModelFile.UncheckedModelFile("item/generated"));
+            mainBuilder.texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/chipped_gem"));
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "gem_quality"), 0.2f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/gem/" + "chipped_gem")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "gem_quality"), 0.4f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/gem/" + "flawed_gem")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "gem_quality"), 0.6f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/gem/" + "gem")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "gem_quality"), 0.8f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/gem/" + "flawless_gem")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "gem_quality"), 1.0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/gem/" + "legendary_gem")))
+                    .end();
+
+            new ItemModelContent<>(modid, name + "_gem", null, mainBuilder).save(false);
+        }
+
         return this;
     }
 
@@ -116,11 +184,17 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "fill_level"),
                 (stack, level, entity, seed) ->
                         ((DustItem) (dust.get())).getFillLevel(stack));
+
+        registerItemProperty(gem.get(),
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
+                (stack, level, entity, seed) ->
+                        ((GemItem) (gem.get())).getGemQuality(stack));
         return this;
     }
 
     public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
         registerBasicItemColor(event, dust.get(), material.physical.getColor());
+        registerBasicItemColor(event, gem.get(), material.physical.getColor());
         return this;
     }
 
@@ -129,10 +203,15 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
-        //Dust
+        //dust
         AssetPackRegistries.safetyMSLT(false, dust,
                 new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
                 );
+
+        //Gem
+        AssetPackRegistries.safetyMSLT(false, gem,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_gem", LanguageContent.translateUpperCase(name) + " Gem")
+        );
 
         return this;
     }

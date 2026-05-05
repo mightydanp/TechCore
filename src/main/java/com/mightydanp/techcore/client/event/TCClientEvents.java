@@ -15,6 +15,8 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Objects;
+
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class TCClientEvents {
 
@@ -40,7 +42,7 @@ public class TCClientEvents {
 
                 if(hoveredSlot.hasItem() && !curserName.equals(hoveredName)) return;
 
-                if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && dustItem.getQuantity(hoveredSlot.getItem()) == dustItem.getMaxQuantity()) return;
+                if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && Objects.equals(dustItem.getQuantity(hoveredSlot.getItem()), dustItem.getMaxQuantity())) return;
 
                 if(dust.getQuantity(cursorStack) < 1) return;
 

@@ -5,17 +5,19 @@ import net.minecraft.world.item.ItemStack;
 
 
 public class DustItem extends MaterialItem{
-
     public DustItem(MaterialProperties properties) {
         super(properties.stacksTo(1));
     }
 
     public float getFillLevel(ItemStack itemStack) {
-        int quantity = getQuantity(itemStack);
+        Integer quantity = ((DustItem)itemStack.getItem()).getQuantity(itemStack);
+        Integer maxQuantity = ((DustItem)itemStack.getItem()).getMaxQuantity();
 
-        if(quantity <= (this.getMaxQuantity() / 9)) return 0.0f;
+        if(maxQuantity == null || quantity == null) return -1;
 
-        if(quantity <= (this.getMaxQuantity() / 4)) return 0.5f;
+        if(quantity <= (maxQuantity / 9)) return 0.0f;
+
+        if(quantity <= (maxQuantity / 4)) return 0.5f;
 
         return 1.0f;
     }

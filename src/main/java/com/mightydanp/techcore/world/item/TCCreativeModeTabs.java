@@ -2,6 +2,7 @@ package com.mightydanp.techcore.world.item;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreCreativeTabsRef;
+import com.mightydanp.techcore.materials.Item.GemItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +57,33 @@ public class TCCreativeModeTabs {
             .title(Component.translatable(CoreCreativeTabsRef.gem_tab))
             .icon(() -> new ItemStack(Items.DIAMOND))
             .displayItems((params, output) -> {
-                // Add gems here
+                RegistriesHandler.getMaterials().forEach(matObj -> {
+                    var mat = matObj.get();
+                    if (mat.ore.gem == null) return;
+
+                    GemItem gemItem = (GemItem) mat.ore.gem.get();
+                    int max = mat.physical.getMaxQuality();
+
+                    ItemStack chipped = new ItemStack(gemItem);
+                    gemItem.setQuality(chipped, max / 5);
+                    output.accept(chipped);
+
+                    ItemStack flawed = new ItemStack(gemItem);
+                    gemItem.setQuality(flawed, max * 2 / 5);
+                    output.accept(flawed);
+
+                    ItemStack normal = new ItemStack(gemItem);
+                    gemItem.setQuality(normal, max * 3 / 5);
+                    output.accept(normal);
+
+                    ItemStack flawless = new ItemStack(gemItem);
+                    gemItem.setQuality(flawless, max * 4 / 5);
+                    output.accept(flawless);
+
+                    ItemStack legendary = new ItemStack(gemItem);
+                    gemItem.setQuality(legendary, max);
+                    output.accept(legendary);
+                });
             })
             .build()
     );

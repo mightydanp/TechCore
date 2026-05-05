@@ -3,8 +3,8 @@ package com.mightydanp.techcore.materials.components;
 import com.mightydanp.techcore.materials.Material;
 
 public class ThermalComponent<A extends Material> extends Component<ThermalComponent<A>> {
-    private double meltingPoint;
-    private double boilingPoint;
+    private Double meltingPoint;
+    private Double boilingPoint;
     private double heatCapacity;
 
     private final A material;
@@ -14,12 +14,12 @@ public class ThermalComponent<A extends Material> extends Component<ThermalCompo
         this.material = material;
     }
 
-    public ThermalComponent<A> setMeltingPoint(double meltingPoint) {
+    public ThermalComponent<A> setMeltingPoint(Double meltingPoint) {
         this.meltingPoint = meltingPoint;
         return this;
     }
 
-    public ThermalComponent<A> setBoilingPoint(double boilingPoint) {
+    public ThermalComponent<A> setBoilingPoint(Double boilingPoint) {
         this.boilingPoint = boilingPoint;
         return this;
     }
@@ -29,11 +29,11 @@ public class ThermalComponent<A extends Material> extends Component<ThermalCompo
         return this;
     }
 
-    public double getMeltingPoint() {
+    public Double getMeltingPoint() {
         return meltingPoint;
     }
 
-    public double getBoilingPoint() {
+    public Double getBoilingPoint() {
         return boilingPoint;
     }
 

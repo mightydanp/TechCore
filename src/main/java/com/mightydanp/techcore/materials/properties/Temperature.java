@@ -59,14 +59,14 @@ public record Temperature(double temperature, Scales.Scale scale) {
     public static void main(String[] args) {
         Temperature t = new Temperature(100, Scales.CELSIUS.scale);
         System.out.printf("Original: %.2f %s%n", t.temperature(), t.scale());
-        System.out.printf("In fahrenheit: %.2f %s%n", t.getTemperature(Scales.FAHRENHEIT.scale), Scales.FAHRENHEIT);
+        System.out.printf("In Fahrenheit: %.2f %s%n", t.getTemperature(Scales.FAHRENHEIT.scale), Scales.FAHRENHEIT);
         int[] rgb = t.getRGBColor();
         System.out.printf("RGB color: (%d, %d, %d)%n", rgb[0], rgb[1], rgb[2]);
     }
 
     public enum Scales {
-        CELSIUS(new Scale("celsius")),
-        FAHRENHEIT(new Scale("fahrenheit"));
+        CELSIUS(new Scale("Celsius")),
+        FAHRENHEIT(new Scale("Fahrenheit"));
 
         public final Scale scale;
 

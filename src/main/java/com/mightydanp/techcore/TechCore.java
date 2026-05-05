@@ -7,6 +7,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.guitabs.event.ScreenTabEvent;
 import com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries;
 import com.mightydanp.techcore.registries.ScreenRegistries;
+import com.mightydanp.techcore.world.item.TCCreativeModeTabs;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -22,6 +23,8 @@ public class TechCore {
         IEventBus modEventBus = context.getModEventBus();
         RegistriesHandler.init(modEventBus);
 
+        ConfigRegistries.registerConfigs(context);
+
         ScreenRegistries screenRegistries = new ScreenRegistries();
         screenRegistries.init();
         ResourcePackRegistry.init.add(screenRegistries);
@@ -33,6 +36,6 @@ public class TechCore {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ScreenTabEvent::addTabsToInventoryScreen);
 
-        ConfigRegistries.registerConfigs(context);
+        TCCreativeModeTabs.init();
     }
 }

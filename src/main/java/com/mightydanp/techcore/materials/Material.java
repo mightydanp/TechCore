@@ -2,6 +2,7 @@ package com.mightydanp.techcore.materials;
 
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.materials.components.*;
+import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.Icons;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
@@ -72,6 +73,7 @@ public class Material implements BaseRegistries {
         fluid.initLanguages();
         ore.initLanguages();
         stoneLayer.initLanguages();
+        MaterialRef.initLanguages();
 
         components.forEach(AbstractComponent::initLanguages);
     }

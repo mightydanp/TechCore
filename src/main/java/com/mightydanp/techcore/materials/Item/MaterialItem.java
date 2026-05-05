@@ -36,19 +36,31 @@ public class MaterialItem extends Item {
 
     @Override
     public boolean isBarVisible(@NotNull ItemStack itemStack) {
-        return hasQuantity(itemStack) && getQuantity(itemStack) < this.getMaxQuantity();
+        Integer maxQuantity = getMaxQuantity();
+        if(maxQuantity != null){
+            return hasQuantity(itemStack) && getQuantity(itemStack) < maxQuantity;
+        }
+
+        return super.isBarVisible(itemStack);
     }
 
     @Override
     public int getBarWidth(@NotNull ItemStack itemStack) {
+        Integer maxQuantity = getMaxQuantity();
+
+        if (maxQuantity == null) return super.getBarWidth(itemStack);
+
         return Math.round(13.0f * getQuantity(itemStack) / this.getMaxQuantity());
     }
 
     @Override
     public int getBarColor(@NotNull ItemStack itemStack) {
-        int barColor = 0xFFFFFFFF;
+        Integer maxQuantity = getMaxQuantity();
+
+        if (getMaxQuantity() == null) return super.getBarColor(itemStack);
 
         if(hasQuantity(itemStack)) {
+            int barColor = 0xFFFFFFFF;
             if (getQuantity(itemStack) < this.getMaxQuantity() / 2 && getQuantity(itemStack) > this.getMaxQuantity() / 4)
                 barColor = 0xFFFFFF00;
             if (getQuantity(itemStack) <= this.getMaxQuantity() / 4) barColor = 0xFFFF0000;
@@ -57,7 +69,7 @@ public class MaterialItem extends Item {
             return barColor;
         }
 
-        return barColor;
+        return super.getBarColor(itemStack);
     }
 
     @Override
@@ -67,15 +79,23 @@ public class MaterialItem extends Item {
         }
 
         if(hasQuantity(itemStack)) {
-            tooltip.add(Component.translatable(MaterialRef.quantity_left_translatable).append(" "+ getQuantity(itemStack) + "/" + this.getMaxQuantity()));
+            tooltip.add(Component.translatable(MaterialRef.quantity_left_translatable).append(" : " + getQuantity(itemStack) + "/" + this.getMaxQuantity()));
         }
 
-        if (meltingPoint != null) {
-            tooltip.add(Component.nullToEmpty("Melting Point of" + " §5" + meltingPoint));
+        if(hasQuality(itemStack)) {
+            tooltip.add(Component.translatable(MaterialRef.quality_translatable).append(" : " + getQuality(itemStack)));
         }
 
-        if (boilingPoint != null) {
-            tooltip.add(Component.nullToEmpty("Boiling Point of" + " §5" + boilingPoint));
+        if(hasPurity(itemStack)) {
+            tooltip.add(Component.translatable(MaterialRef.purity_translatable).append(" : "+ getPurity(itemStack)));
+        }
+
+        if (getMeltingPoint() != null) {
+            tooltip.add(Component.translatable(MaterialRef.melting_point_translatable).append(" : §5" + meltingPoint));
+        }
+
+        if (getBoilingPoint() != null) {
+            tooltip.add(Component.translatable(MaterialRef.boiling_point_translatable).append("  : §5" + boilingPoint));
         }
 
         super.appendHoverText(itemStack, level, tooltip, tooltipFlag);
@@ -109,28 +129,36 @@ public class MaterialItem extends Item {
         return maxPurity;
 
     }
+
     public Integer getQuantity(ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
+
         if (tag != null && tag.contains("quantity")) {
             return tag.getInt("quantity");
+        } else {
+            setQuantity(itemStack, this.getMaxQuantity());
+            return this.getMaxQuantity();
         }
-        return this.getMaxQuantity();
     }
 
     public Integer getQuality(ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         if (tag != null && tag.contains("quality")) {
             return tag.getInt("quality");
+        } else {
+            setQuality(itemStack, this.getMaxQuality());
+            return this.getMaxQuality();
         }
-        return this.getMaxQuality();
     }
 
     public Double getPurity(ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         if (tag != null && tag.contains("purity")) {
             return tag.getDouble("purity");
+        } else {
+            setPurity(itemStack, this.getMaxPurity());
+            return this.getMaxPurity();
         }
-        return this.getMaxPurity();
 
     }
 
@@ -139,7 +167,8 @@ public class MaterialItem extends Item {
     }
 
     public void setQuality(ItemStack itemStack, int value) {
-        itemStack.getOrCreateTag().putInt("quality", this.getMaxQuality() != null ? Mth.clamp(value, 0, this.getMaxQuality()) : value);
+        Integer maxQuality = getMaxQuality();
+        itemStack.getOrCreateTag().putInt("quality", maxQuality != null ? Mth.clamp(value, 0, maxQuality) : value);
     }
 
     public void setPurity(ItemStack itemStack, double value) {

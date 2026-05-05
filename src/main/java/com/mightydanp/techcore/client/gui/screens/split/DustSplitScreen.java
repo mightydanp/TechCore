@@ -46,6 +46,7 @@ public class DustSplitScreen extends Screen {
         boolean slotCompatible = !hoveredSlot.hasItem() || hoveredSlot.getItem().getDisplayName().getString().equals(cursorStack.getDisplayName().getString());
 
         if (cursorStack.getItem() instanceof DustItem cursorDust && slotCompatible)  {
+            //if()
             int cursorQuantity = cursorDust.getQuantity(cursorStack);
 
             // Slider's max value depends on the target slot:

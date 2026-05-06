@@ -4,30 +4,30 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public record Temperature(double temperature, Scales.Scale scale) {
+    public static final double celsiusDefaultRoomTemperature = 20.0;
+
     public static final Codec<Temperature> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.DOUBLE.fieldOf("temperature").forGetter(Temperature::temperature),
             Scales.Scale.CODEC.fieldOf("scale").forGetter(Temperature::scale)
     ).apply(instance, Temperature::new));
 
     public double toKelvin() {
-        return scale.equals(Scales.CELSIUS.scale)
-                ? temperature + 273.15
-                : (temperature - 32) * 5 / 9 + 273.15;
+        return temperature + 273.15;
+    }
+
+    public double toFahrenheit() {
+        return (temperature * 9.0 / 5.0) + 32;
     }
 
     public double getTemperature(Scales.Scale targetScale) {
-        if (this.scale.equals(targetScale)) {
-            return this.temperature;
-        }
-
-        return targetScale.equals(Scales.CELSIUS.scale)
-                ? (temperature - 32) * 5 / 9
-                : (temperature * 9 / 5) + 32;
+        if (targetScale.equals(Scales.KELVIN.scale)) return toKelvin();
+        if (targetScale.equals(Scales.FAHRENHEIT.scale)) return toFahrenheit();
+        return temperature;
     }
 
     public int[] getRGBColor() {
         double kelvin = toKelvin();
-        kelvin = Math.max(1000, Math.min(kelvin, 40000)); // clamp for realism
+        kelvin = Math.max(1000, Math.min(kelvin, 40000));
 
         double temp = kelvin / 100;
         double red, green, blue;
@@ -60,13 +60,15 @@ public record Temperature(double temperature, Scales.Scale scale) {
         Temperature t = new Temperature(100, Scales.CELSIUS.scale);
         System.out.printf("Original: %.2f %s%n", t.temperature(), t.scale());
         System.out.printf("In Fahrenheit: %.2f %s%n", t.getTemperature(Scales.FAHRENHEIT.scale), Scales.FAHRENHEIT);
+        System.out.printf("In Kelvin: %.2f %s%n", t.getTemperature(Scales.KELVIN.scale), Scales.KELVIN);
         int[] rgb = t.getRGBColor();
         System.out.printf("RGB color: (%d, %d, %d)%n", rgb[0], rgb[1], rgb[2]);
     }
 
     public enum Scales {
         CELSIUS(new Scale("Celsius")),
-        FAHRENHEIT(new Scale("Fahrenheit"));
+        FAHRENHEIT(new Scale("Fahrenheit")),
+        KELVIN(new Scale("Kelvin"));
 
         public final Scale scale;
 

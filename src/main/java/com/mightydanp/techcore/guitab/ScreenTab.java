@@ -1,7 +1,7 @@
-package com.mightydanp.techcore.guitabs;
+package com.mightydanp.techcore.guitab;
 
-import com.mightydanp.techcore.guitabs.components.ScreenTabBase;
-import com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries;
+import com.mightydanp.techcore.guitab.components.ScreenTabBase;
+import com.mightydanp.techcore.guitab.registries.ScreenTabRegistries;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;

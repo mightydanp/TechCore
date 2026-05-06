@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.data.traits;
+package com.mightydanp.techcore.data.trait;
 
 import com.google.gson.JsonElement;
 import com.mightydanp.techcore.traits.Trait;

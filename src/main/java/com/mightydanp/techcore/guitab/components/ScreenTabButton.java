@@ -1,6 +1,6 @@
-package com.mightydanp.techcore.guitabs.components;
+package com.mightydanp.techcore.guitab.components;
 
-import com.mightydanp.techcore.guitabs.ScreenTab;
+import com.mightydanp.techcore.guitab.ScreenTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

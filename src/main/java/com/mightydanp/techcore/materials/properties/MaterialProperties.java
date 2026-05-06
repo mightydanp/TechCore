@@ -28,27 +28,27 @@ public class MaterialProperties extends Item.Properties {
         return this;
     }
 
-    public MaterialProperties boilingPoint(double value) {
+    public MaterialProperties boilingPoint(Double value) {
         this.boilingPoint = value;
         return this;
     }
 
-    public MaterialProperties meltingPoint(double value) {
+    public MaterialProperties meltingPoint(Double value) {
         this.meltingPoint = value;
         return this;
     }
 
-    public MaterialProperties maxQuantity(int value) {
+    public MaterialProperties maxQuantity(Integer value) {
         this.maxQuantity = value;
         return this;
     }
 
-    public MaterialProperties maxQuality(int value) {
+    public MaterialProperties maxQuality(Integer value) {
         this.maxQuality = value;
         return this;
     }
 
-    public MaterialProperties maxPurity(double value) {
+    public MaterialProperties maxPurity(Double value) {
         this.maxPurity = value;
         return this;
     }

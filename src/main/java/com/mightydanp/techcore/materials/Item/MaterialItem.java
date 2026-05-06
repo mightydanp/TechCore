@@ -2,6 +2,7 @@ package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.Temperature;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -109,6 +110,17 @@ public class MaterialItem extends Item {
         return color;
     }
 
+    public Double getTemperature(ItemStack itemStack) {
+        CompoundTag tag = itemStack.getTag();
+
+        if (tag != null && tag.contains("temperature")) {
+            return tag.getDouble("temperature");
+        } else {
+            setTemperature(itemStack, Temperature.celsiusDefaultRoomTemperature);
+            return Temperature.celsiusDefaultRoomTemperature;
+        }
+    }
+
     public Double getBoilingPoint() {
         return boilingPoint;
     }
@@ -162,8 +174,13 @@ public class MaterialItem extends Item {
 
     }
 
+    public void setTemperature(ItemStack itemStack, double value) {
+        itemStack.getOrCreateTag().putDouble("temperature", value);
+    }
+
     public void setQuantity(ItemStack itemStack, int value) {
-        itemStack.getOrCreateTag().putInt("quantity", this.getMaxQuantity() != null ? Mth.clamp(value, 0, this.getMaxQuantity()) : value);
+        Integer maxQuantity = getMaxQuantity();
+        itemStack.getOrCreateTag().putInt("quantity", maxQuantity != null ? Mth.clamp(value, 0, maxQuantity) : value);
     }
 
     public void setQuality(ItemStack itemStack, int value) {
@@ -172,7 +189,13 @@ public class MaterialItem extends Item {
     }
 
     public void setPurity(ItemStack itemStack, double value) {
-        itemStack.getOrCreateTag().putDouble("purity", this.getMaxPurity() != null ? Mth.clamp(value, 0, this.getMaxPurity()) : value);
+        Double maxPurity = getMaxPurity();
+        itemStack.getOrCreateTag().putDouble("purity", maxPurity != null ? Mth.clamp(value, 0, maxPurity) : value);
+    }
+
+    public boolean hasTemperature(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        return tag != null && tag.contains("temperature");
     }
 
     public boolean hasQuantity(ItemStack stack) {

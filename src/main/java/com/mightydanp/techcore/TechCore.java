@@ -1,11 +1,11 @@
 package com.mightydanp.techcore;
 
-import com.mightydanp.techcore.api.configs.ConfigRegistries;
+import com.mightydanp.techcore.client.config.ConfigRegistries;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.guitabs.event.ScreenTabEvent;
-import com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries;
+import com.mightydanp.techcore.guitab.event.ScreenTabEvent;
+import com.mightydanp.techcore.guitab.registries.ScreenTabRegistries;
 import com.mightydanp.techcore.registries.ScreenRegistries;
 import com.mightydanp.techcore.world.item.TCCreativeModeTabs;
 import com.mojang.logging.LogUtils;

@@ -1,6 +1,6 @@
-package com.mightydanp.techcore.guitabs.tabs;
+package com.mightydanp.techcore.guitab.tabs;
 
-import com.mightydanp.techcore.guitabs.ScreenTab;
+import com.mightydanp.techcore.guitab.ScreenTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;

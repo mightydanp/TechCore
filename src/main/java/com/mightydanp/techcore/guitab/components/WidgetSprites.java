@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.guitabs.components;
+package com.mightydanp.techcore.guitab.components;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;

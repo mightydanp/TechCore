@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.api.configs;
+package com.mightydanp.techcore.client.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

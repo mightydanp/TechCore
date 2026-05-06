@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.guitabs.components;
+package com.mightydanp.techcore.guitab.components;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;

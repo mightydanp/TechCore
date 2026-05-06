@@ -1,6 +1,6 @@
 package com.mightydanp.techcore.client.trait.block;
 
-import com.mightydanp.techcore.api.configs.IConfig;
+import com.mightydanp.techcore.client.config.IConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class BlockTraitConfig implements IConfig {

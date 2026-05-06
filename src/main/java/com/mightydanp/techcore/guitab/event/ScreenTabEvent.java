@@ -1,9 +1,9 @@
-package com.mightydanp.techcore.guitabs.event;
+package com.mightydanp.techcore.guitab.event;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.guitabs.ScreenTab;
-import com.mightydanp.techcore.guitabs.components.ScreenTabBase;
-import com.mightydanp.techcore.guitabs.components.ScreenTabButton;
+import com.mightydanp.techcore.guitab.ScreenTab;
+import com.mightydanp.techcore.guitab.components.ScreenTabBase;
+import com.mightydanp.techcore.guitab.components.ScreenTabButton;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -22,7 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.mightydanp.techcore.guitabs.registries.ScreenTabRegistries.screenTabs;
+import static com.mightydanp.techcore.guitab.registries.ScreenTabRegistries.screenTabs;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT)
 public class ScreenTabEvent {

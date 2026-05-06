@@ -1,13 +1,13 @@
-package com.mightydanp.techcore.guitabs.registries;
+package com.mightydanp.techcore.guitab.registries;
 
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.guitabs.ScreenTab;
-import com.mightydanp.techcore.guitabs.tabs.InventoryScreenTab;
-import com.mightydanp.techcore.guitabs.libs.ScreenTabRef;
+import com.mightydanp.techcore.guitab.ScreenTab;
+import com.mightydanp.techcore.guitab.tabs.InventoryScreenTab;
+import com.mightydanp.techcore.guitab.libs.ScreenTabRef;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.item.ItemStack;

@@ -3,15 +3,13 @@
   "package": "com.mightydanp.techcore.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "techcore.mixins.refmap.json",
-  "mixins": [
-  ],
+  "mixins": [],
   "client": [
-    "client.ItemRendererAccessor",
-    "client.ItemRendererMixin"
+    "client.ItemRendererMixin",
+    "client.ItemRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "minVersion": "0.8"
-
 }

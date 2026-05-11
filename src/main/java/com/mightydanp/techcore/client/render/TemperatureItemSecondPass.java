@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.client.render;
 
+import com.mightydanp.techcore.TechCore;
 import com.mightydanp.techcore.mixin.client.ItemRendererAccessor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -29,6 +30,8 @@ public final class TemperatureItemSecondPass {
             if (stack.hasFoil()) {
                 strength *= 0.65F;
             }
+
+            TechCore.LOGGER.info("Temperature pass rendering {}", stack.getHoverName().getString());
 
             VertexConsumer baseConsumer = bufferSource.getBuffer(
                     TechCoreRenderTypes.temperatureItem()

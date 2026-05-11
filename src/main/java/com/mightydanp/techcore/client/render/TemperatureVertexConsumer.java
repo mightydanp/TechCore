@@ -23,42 +23,50 @@ public final class TemperatureVertexConsumer implements VertexConsumer {
 
     @Override
     public @NotNull VertexConsumer vertex(double x, double y, double z) {
-        return this.parent.vertex(x, y, z);
+        this.parent.vertex(x, y, z);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer vertex(@NotNull Matrix4f matrix, float x, float y, float z) {
-        return this.parent.vertex(matrix, x, y, z);
+        this.parent.vertex(matrix, x, y, z);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer color(int red, int green, int blue, int alpha) {
-        return this.parent.color(this.r, this.g, this.b, this.a);
+        this.parent.color(this.r, this.g, this.b, this.a);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer uv(float u, float v) {
-        return this.parent.uv(u, v);
+        this.parent.uv(u, v);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer overlayCoords(int u, int v) {
-        return this.parent.overlayCoords(u, v);
+        this.parent.overlayCoords(u, v);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer uv2(int u, int v) {
-        return this.parent.uv2(u, v);
+        this.parent.uv2(u, v);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer normal(float x, float y, float z) {
-        return this.parent.normal(x, y, z);
+        this.parent.normal(x, y, z);
+        return this;
     }
 
     @Override
     public @NotNull VertexConsumer normal(@NotNull Matrix3f matrix, float x, float y, float z) {
-        return this.parent.normal(matrix, x, y, z);
+        this.parent.normal(matrix, x, y, z);
+        return this;
     }
 
     @Override

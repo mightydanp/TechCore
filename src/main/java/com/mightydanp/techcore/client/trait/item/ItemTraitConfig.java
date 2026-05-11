@@ -12,6 +12,8 @@ public class ItemTraitConfig implements IConfig {
     private final ForgeConfigSpec.ConfigValue<Double> kilogramsConfig;
     private final ForgeConfigSpec.ConfigValue<Double> metersConfig;
 
+    private ForgeConfigSpec builtSpec;
+
     public String registry;
     public Integer color;
     public Integer maxDamage;
@@ -42,11 +44,13 @@ public class ItemTraitConfig implements IConfig {
 
     @Override
     public ForgeConfigSpec build() {
-        return builder.build();
+        if (builtSpec == null) builtSpec = builder.build();
+        return builtSpec;
     }
 
     @Override
     public void load() {
+        if (builtSpec == null || !builtSpec.isLoaded()) return;
         this.registry = registryConfig.get();
         this.color = colorConfig.get();
         this.maxDamage = maxDamageConfig.get();

@@ -10,6 +10,8 @@ public class BlockTraitConfig implements IConfig {
     private final ForgeConfigSpec.ConfigValue<Double> kilogramConfig;
     private final ForgeConfigSpec.ConfigValue<Boolean> canPickUpConfig;
 
+    private ForgeConfigSpec builtSpec;
+
     public String registry;
     public Integer color;
     public Double kilogram;
@@ -32,11 +34,13 @@ public class BlockTraitConfig implements IConfig {
 
     @Override
     public ForgeConfigSpec build() {
-        return builder.build();
+        if (builtSpec == null) builtSpec = builder.build();
+        return builtSpec;
     }
 
     @Override
     public void load() {
+        if (builtSpec == null || !builtSpec.isLoaded()) return;
         this.registry = registryConfig.get();
         this.color = colorConfig.get();
         this.kilogram = kilogramConfig.get();

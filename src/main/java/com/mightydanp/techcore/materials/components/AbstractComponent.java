@@ -1,5 +1,7 @@
 package com.mightydanp.techcore.materials.components;
 
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+
 public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     private final String prefix;
     private final String suffix;
@@ -42,7 +44,7 @@ public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     }
 
     @SuppressWarnings("unchecked")
-    public A initClientRenderLayers() {
+    public A initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         return (A)this;
     }
 }

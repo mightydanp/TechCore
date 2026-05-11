@@ -75,6 +75,11 @@ public class MaterialItem extends Item {
 
     @Override
     public void appendHoverText(@NotNull ItemStack itemStack, @Nullable Level level, @NotNull List<Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
+        if(hasTemperature(itemStack)) {
+            Temperature temperature = new Temperature(getTemperature(itemStack), Temperature.getScale());
+            tooltip.add(Component.translatable(MaterialRef.temperature_translatable).append(" : " + temperature.getTemperature(temperature.scale()) + " " + temperature.scale().label()));
+        }
+
         if (symbol != null) {
             tooltip.add(Component.nullToEmpty(symbol));
         }
@@ -111,14 +116,7 @@ public class MaterialItem extends Item {
     }
 
     public Double getTemperature(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-
-        if (tag != null && tag.contains("temperature")) {
-            return tag.getDouble("temperature");
-        } else {
-            setTemperature(itemStack, Temperature.celsiusDefaultRoomTemperature);
-            return Temperature.celsiusDefaultRoomTemperature;
-        }
+        return Temperature.getTemperature(itemStack);
     }
 
     public Double getBoilingPoint() {
@@ -194,8 +192,7 @@ public class MaterialItem extends Item {
     }
 
     public boolean hasTemperature(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains("temperature");
+        return Temperature.hasTemperature(stack);
     }
 
     public boolean hasQuantity(ItemStack stack) {

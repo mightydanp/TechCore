@@ -1,7 +1,10 @@
 package com.mightydanp.techcore.materials.properties;
 
+import com.mightydanp.techcore.materials.config.MaterialConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 
 public record Temperature(double temperature, Scales.Scale scale) {
     public static final double celsiusDefaultRoomTemperature = 20.0;
@@ -25,8 +28,37 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return temperature;
     }
 
+    public static Double getTemperature(ItemStack itemStack) {
+        CompoundTag tag = itemStack.getTag();
+
+        if (tag != null && tag.contains("temperature")) {
+            return tag.getDouble("temperature");
+        }
+        return null;
+    }
+
+    public static boolean hasTemperature(ItemStack itemStack) {
+        CompoundTag tag = itemStack.getTag();
+        return tag != null && tag.contains("temperature");
+    }
+
+    public static Scales.Scale getScale() {
+        return MaterialConfig.TEMPERATURE_SCALE.get().scale;
+    }
+
     public int[] getRGBColor() {
         double kelvin = toKelvin();
+        double roomKelvin = celsiusDefaultRoomTemperature + 273.15;
+
+        if (kelvin < roomKelvin) {
+            double t = kelvin / roomKelvin;
+            return new int[]{
+                (int) Math.round(t * 255),
+                (int) Math.round(t * 255),
+                255
+            };
+        }
+
         kelvin = Math.max(1000, Math.min(kelvin, 40000));
 
         double temp = kelvin / 100;
@@ -54,15 +86,6 @@ public record Temperature(double temperature, Scales.Scale scale) {
 
     private int clamp(double value) {
         return (int) Math.round(Math.max(0, Math.min(255, value)));
-    }
-
-    public static void main(String[] args) {
-        Temperature t = new Temperature(100, Scales.CELSIUS.scale);
-        System.out.printf("Original: %.2f %s%n", t.temperature(), t.scale());
-        System.out.printf("In Fahrenheit: %.2f %s%n", t.getTemperature(Scales.FAHRENHEIT.scale), Scales.FAHRENHEIT);
-        System.out.printf("In Kelvin: %.2f %s%n", t.getTemperature(Scales.KELVIN.scale), Scales.KELVIN);
-        int[] rgb = t.getRGBColor();
-        System.out.printf("RGB color: (%d, %d, %d)%n", rgb[0], rgb[1], rgb[2]);
     }
 
     public enum Scales {

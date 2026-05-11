@@ -6,6 +6,7 @@ import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCo
 import com.mightydanp.techcore.client.ref.CoreRef;
 
 public class MaterialRef {
+    public static String temperature_translatable = CoreRef.MOD_ID+ "." + "temperature";
     public static String quantity_left_translatable = CoreRef.MOD_ID+ "." + "quantity_left";
     public static String quality_translatable = CoreRef.MOD_ID+ "." + "quality";
     public static String purity_translatable = CoreRef.MOD_ID + "." + "purity";
@@ -22,6 +23,7 @@ public class MaterialRef {
     public static String legendary_translatable = CoreRef.MOD_ID + "." + "legendary";
 
     //English Translation
+    public static String temperature_english_translation = "Temperature";
     public static String quantity_left_english_translation = "Quantity Left";
     public static String quality_english_translation = "Quality";
     public static String purity_english_translation = "Purity";
@@ -38,6 +40,9 @@ public class MaterialRef {
     public static String legendary_english_translation = "Legendary";
 
     public static void initLanguages(){
+        AssetPackRegistries.saveMSLT(false,
+                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, temperature_translatable, temperature_english_translation)
+        );
         AssetPackRegistries.saveMSLT(false,
                 new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, quantity_left_translatable, quantity_left_english_translation)
         );

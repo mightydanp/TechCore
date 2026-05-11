@@ -30,7 +30,7 @@ public class ConfigRegistries {
     public static void onLoad(final ModConfigEvent event) {
         TechCore.LOGGER.info("Tech Core configs are loading.");
 
-        ClientConfig.load();
+        if (event.getConfig().getSpec() == ClientConfig.SPEC) ClientConfig.load();
         BlockTraitConfig.load();
         ItemTraitConfig.load();
 

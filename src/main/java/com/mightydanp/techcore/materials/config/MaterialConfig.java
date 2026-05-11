@@ -12,7 +12,7 @@ public class MaterialConfig {
 
         builder.push("display");
         TEMPERATURE_SCALE = builder
-                .comment("Temperature scale used for display. Options: CELSIUS, FAHRENHEIT, KELVIN")
+                .comment("Temperature scale used for display. Please avoid using kelvin. Options: CELSIUS, FAHRENHEIT, KELVIN")
                 .defineEnum("temperatureScale", Temperature.Scales.CELSIUS);
         builder.pop();
 

@@ -2,6 +2,7 @@ package com.mightydanp.techcore.world.item;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreCreativeTabsRef;
+import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -92,7 +93,22 @@ public class TCCreativeModeTabs {
             .title(Component.translatable(CoreCreativeTabsRef.ore_products_tab))
             .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
             .displayItems((params, output) -> {
-                // Add processed ore products here
+                RegistriesHandler.getMaterials().forEach(matObj -> {
+                    var mat = matObj.get();
+                    if (mat.ore.dust == null) return;
+
+                    DustItem dustItem = (DustItem) mat.ore.dust.get();
+                    int max = mat.physical.getMaxQuality();
+
+                    ItemStack normal = new ItemStack(dustItem);
+                    output.accept(normal);
+
+                    ItemStack hot = new ItemStack(dustItem);
+                    dustItem.setTemperature(hot, 1500);
+
+                    output.accept(normal);
+                    output.accept(hot);
+                });
             })
             .build()
     );

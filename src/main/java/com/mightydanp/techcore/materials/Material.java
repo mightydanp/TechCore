@@ -90,14 +90,14 @@ public class Material implements BaseRegistries {
     }
 
     public void initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
-        chemical.initClientRenderLayers();
-        physical.initClientRenderLayers();
-        thermal.initClientRenderLayers();
-        fluid.initClientRenderLayers();
-        ore.initClientRenderLayers();
-        stoneLayer.initClientRenderLayers();
+        chemical.initClientRenderLayers(event);
+        physical.initClientRenderLayers(event);
+        thermal.initClientRenderLayers(event);
+        fluid.initClientRenderLayers(event);
+        ore.initClientRenderLayers(event);
+        stoneLayer.initClientRenderLayers(event);
 
-        components.forEach(AbstractComponent::initClientRenderLayers);
+        components.forEach(c -> c.initClientRenderLayers(event));
     }
 
 }

@@ -1,5 +1,3 @@
-#version 150
-
 in vec3 Position;
 in vec4 Color;
 in vec2 UV0;

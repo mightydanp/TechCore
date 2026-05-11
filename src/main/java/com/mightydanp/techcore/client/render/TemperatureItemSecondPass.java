@@ -12,25 +12,12 @@ import net.minecraft.world.item.ItemStack;
 public final class TemperatureItemSecondPass {
     private TemperatureItemSecondPass() {}
 
-    public static void render(
-            ItemStack stack,
-            ItemDisplayContext displayContext,
-            boolean leftHanded,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            BakedModel model
-    ) {
-        if (ItemRenderEventGuard.isRenderingExtraPass()) {
-            return;
-        }
+    public static void render(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model) {
+        if (ItemRenderEventGuard.isRenderingExtraPass()) return;
 
         float strength = TemperatureClientRender.getStrength(stack);
 
-        if (strength <= 0.0F) {
-            return;
-        }
+        if (strength <= 0.0F) return;
 
         int color = TemperatureClientRender.getColor(stack);
 
@@ -47,21 +34,9 @@ public final class TemperatureItemSecondPass {
                     TechCoreRenderTypes.temperatureItem()
             );
 
-            VertexConsumer temperatureConsumer = new TemperatureVertexConsumer(
-                    baseConsumer,
-                    color,
-                    strength
-            );
+            VertexConsumer temperatureConsumer = new TemperatureVertexConsumer(baseConsumer, color, strength);
 
-            ((ItemRendererAccessor) Minecraft.getInstance().getItemRenderer())
-                    .techcore$renderModelLists(
-                            model,
-                            stack,
-                            packedLight,
-                            packedOverlay,
-                            poseStack,
-                            temperatureConsumer
-                    );
+            ((ItemRendererAccessor) Minecraft.getInstance().getItemRenderer()).techcore$renderModelLists(model, stack, packedLight, packedOverlay, poseStack, temperatureConsumer);
         } finally {
             poseStack.popPose();
             ItemRenderEventGuard.endExtraPass();

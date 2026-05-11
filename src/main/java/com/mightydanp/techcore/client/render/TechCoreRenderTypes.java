@@ -12,16 +12,7 @@ public final class TechCoreRenderTypes extends RenderType {
     private static final ShaderStateShard TEMPERATURE_ITEM_SHADER =
             new ShaderStateShard(() -> temperatureItemShader);
 
-    private TechCoreRenderTypes(
-            String name,
-            VertexFormat format,
-            VertexFormat.Mode mode,
-            int bufferSize,
-            boolean affectsCrumbling,
-            boolean sortOnUpload,
-            Runnable setupState,
-            Runnable clearState
-    ) {
+    private TechCoreRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
 

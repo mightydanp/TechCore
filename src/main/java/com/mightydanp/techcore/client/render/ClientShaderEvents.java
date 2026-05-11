@@ -22,13 +22,6 @@ public final class ClientShaderEvents {
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(
-                new ShaderInstance(
-                        event.getResourceProvider(),
-                        ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "rendertype_temperature_item"),
-                        DefaultVertexFormat.NEW_ENTITY
-                ),
-                TechCoreRenderTypes::setTemperatureItemShader
-        );
+        event.registerShader(new ShaderInstance(event.getResourceProvider(), ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "rendertype_temperature_item"), DefaultVertexFormat.NEW_ENTITY), TechCoreRenderTypes::setTemperatureItemShader);
     }
 }

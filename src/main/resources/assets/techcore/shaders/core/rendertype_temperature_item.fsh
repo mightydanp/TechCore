@@ -1,5 +1,3 @@
-#version 150
-
 uniform sampler2D Sampler0;
 uniform vec4 ColorModulator;
 

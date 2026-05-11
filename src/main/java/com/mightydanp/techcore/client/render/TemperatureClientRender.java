@@ -44,7 +44,7 @@ public final class TemperatureClientRender {
 
     public static float getTemperature(ItemStack stack) {
         if (!stack.hasTag()) {
-            return Temperature.celsiusDefaultRoomTemperature;
+            return 20.0F;
         }
 
         return getTemperature(stack);

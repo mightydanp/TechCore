@@ -2,7 +2,6 @@ package com.mightydanp.techcore.client.color;
 
 import com.mightydanp.techcore.client.config.ClientConfig;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.materials.properties.Temperature;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.color.item.ItemColors;
@@ -66,10 +65,6 @@ public class ColorEvents {
                 Double temperature = Temperature.getTemperature(stack);
 
                 if (temperature == null) return existingHandler != null ? existingHandler.getColor(stack, 0) : -1;
-
-                if(item instanceof MaterialItem){
-                    Item item2 = item;
-                }
 
                 int[] rgb = new Temperature(temperature, Temperature.getScale()).getRGBColor();
                 return (0xFF << 24) | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];

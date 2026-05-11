@@ -1,11 +1,14 @@
 package com.mightydanp.techcore.client.color;
 
 import com.mightydanp.techcore.client.config.ClientConfig;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,12 +19,34 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 public class TemperatureGlowBakedModel extends BakedModelWrapper<BakedModel> {
 
+    private final IdentityHashMap<BakedModel, TemperatureGlowBakedModel> overrideCache = new IdentityHashMap<>();
+    private ItemOverrides wrappingOverrides = null;
+
     public TemperatureGlowBakedModel(BakedModel originalModel) {
         super(originalModel);
+    }
+
+    @Override
+    public @NotNull ItemOverrides getOverrides() {
+        ItemOverrides original = originalModel.getOverrides();
+        if (original == ItemOverrides.EMPTY) return ItemOverrides.EMPTY;
+        if (wrappingOverrides == null) {
+            wrappingOverrides = new ItemOverrides() {
+                @Override
+                public BakedModel resolve(@NotNull BakedModel model, @NotNull ItemStack stack,
+                                          @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+                    BakedModel resolved = original.resolve(originalModel, stack, level, entity, seed);
+                    if (resolved == null || resolved instanceof TemperatureGlowBakedModel) return resolved;
+                    return overrideCache.computeIfAbsent(resolved, TemperatureGlowBakedModel::new);
+                }
+            };
+        }
+        return wrappingOverrides;
     }
 
     @Override

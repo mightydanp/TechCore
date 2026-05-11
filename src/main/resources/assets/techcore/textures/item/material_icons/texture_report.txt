@@ -1,0 +1,508 @@
+=== Folder Matches ===
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, magnetic, metallic, quartz, redstone, rough, ruby, shiny share 209 texture name(s)
+
+  arrow_head_overlay.png
+  axe_head.png
+  axe_head_overlay.png
+  bending_cylinder.png
+  bending_cylinder_small.png
+  berry.png
+  blossom.png
+  bolt.png
+  bolt_overlay.png
+  boule.png
+  builderwand_head.png
+  builderwand_head_overlay.png
+  butcher_knife_handle.png
+  butcher_knife_head.png
+  buzz_saw_head.png
+  buzz_saw_head_overlay.png
+  centrifuged_ore.png
+  centrifuged_ore_overlay.png
+  centrifuged_tiny_ore.png
+  centrifuged_tiny_ore_overlay.png
+  chain.png
+  chain_overlay.png
+  chainsaw_head.png
+  chainsaw_head_overlay.png
+  chemtube.png
+  chipped_gem_overlay.png
+  chisel_binding.png
+  chisel_handle.png
+  chisel_head.png
+  chisel_head_overlay.png
+  chunk.png
+  chunk_overlay.png
+  construction_pickaxe_head.png
+  construction_pickaxe_head_overlay.png
+  crowbar_handle.png
+  crushed_ore.png
+  crushed_tiny_ore.png
+  curved_plate.png
+  curved_plate_overlay.png
+  dense_plate_overlay.png
+  div72_dust_overlay.png
+  double_axe_head.png
+  double_axe_head_overlay.png
+  double_ingot.png
+  double_ingot_overlay.png
+  double_plate_overlay.png
+  drill_head.png
+  drill_head_overlay.png
+  dull_arrow_head_overlay.png
+  dull_axe_head.png
+  dull_axe_head_overlay.png
+  dull_chisel_head.png
+  dull_chisel_head_overlay.png
+  dull_double_axe_head.png
+  dull_double_axe_head_overlay.png
+  dull_knife_head.png
+  dull_pickaxe_head.png
+  dull_pickaxe_head_overlay.png
+  dull_plow_head.png
+  dull_plow_head_overlay.png
+  dull_saw_head.png
+  dull_saw_head_overlay.png
+  dull_sense_head.png
+  dull_sense_head_overlay.png
+  dull_shovel_head.png
+  dull_shovel_head_overlay.png
+  dull_spade_head.png
+  dull_spade_head_overlay.png
+  dull_sword_head_overlay.png
+  dull_universal_spade_head.png
+  dull_universal_spade_head_overlay.png
+  dust_overlay.png
+  exquisite_gem_overlay.png
+  file_handle.png
+  file_head.png
+  file_head_overlay.png
+  fine_wire.png
+  flawed_gem_overlay.png
+  flawless_gem_overlay.png
+  flint_tinder_handle.png
+  foil.png
+  foil_overlay.png
+  gear_overlay.png
+  gem_overlay.png
+  gem_plate_overlay.png
+  grafter_overlay.png
+  hammer_head.png
+  hammer_head_overlay.png
+  hand_drill_handle.png
+  handle_screwdriver.png
+  head_raw_hoe.png
+  head_raw_hoe_overlay.png
+  hoe_head.png
+  hoe_head_overlay.png
+  hot_ingot.png
+  ingot_overlay.png
+  knife_binding.png
+  knife_handle.png
+  knife_head.png
+  large_bullet.png
+  legendary_gem_overlay.png
+  lens.png
+  long_rod.png
+  long_rod_overlay.png
+  magnifying_glass.png
+  magnifying_glass_overlay.png
+  medium_bullet.png
+  minecart_wheels.png
+  monkey_wrench.png
+  monkey_wrench_overlay.png
+  nugget_overlay.png
+  pickaxe_head.png
+  pickaxe_head_gem.png
+  pickaxe_head_overlay.png
+  pincers_handle.png
+  pincers_head.png
+  pistol.png
+  pistol_handle.png
+  plant_fiber.png
+  plant_fiber_overlay.png
+  plastic_arrow.png
+  plate_overlay.png
+  plow_head.png
+  plow_head_overlay.png
+  plunger_handle.png
+  plunger_head.png
+  primitive_axe_binding.png
+  primitive_axe_handle.png
+  primitive_axe_head.png
+  primitive_hoe_binding.png
+  primitive_hoe_handle.png
+  primitive_hoe_head.png
+  primitive_pickaxe_binding.png
+  primitive_pickaxe_handle.png
+  primitive_pickaxe_head.png
+  primitive_shovel_binding.png
+  primitive_shovel_handle.png
+  primitive_shovel_head.png
+  purified_ore.png
+  purified_ore_overlay.png
+  purified_tiny_ore.png
+  purified_tiny_ore_overlay.png
+  quadruple_ingot.png
+  quadruple_ingot_overlay.png
+  quadruple_plate_overlay.png
+  quintuple_ingot.png
+  quintuple_ingot_overlay.png
+  quintuple_plate_overlay.png
+  rail.png
+  rail_overlay.png
+  raw_ore_overlay.png
+  ring.png
+  rock_overlay.png
+  rod_overlay.png
+  rolling_pin.png
+  rotor.png
+  rotor_overlay.png
+  round.png
+  round_overlay.png
+  saw_handle.png
+  saw_head.png
+  saw_head_overlay.png
+  scissors_handle.png
+  scissors_head.png
+  scoop_handle.png
+  scoop_head.png
+  scrap_overlay.png
+  screw.png
+  screw_overlay.png
+  screwdriver_head.png
+  screwdriver_head_overlay.png
+  sense_head.png
+  sense_head_overlay.png
+  shovel_head.png
+  shovel_head_overlay.png
+  sickle_handle.png
+  sickle_head.png
+  small_bullet.png
+  small_casing.png
+  small_casing_overlay.png
+  small_dust_overlay.png
+  small_gear_overlay.png
+  small_spring.png
+  small_spring_overlay.png
+  spade_head.png
+  spade_head_overlay.png
+  spring.png
+  spring_overlay.png
+  sword_handle.png
+  sword_head_overlay.png
+  tiny_dust_overlay.png
+  tiny_gem_plate.png
+  tiny_gem_plate_overlay.png
+  triple_ingot.png
+  triple_ingot_overlay.png
+  triple_plate_overlay.png
+  twig.png
+  universal_spade_head.png
+  universal_spade_head_overlay.png
+  void.png
+  void_overlay.png
+  wart.png
+  wart_overlay.png
+  wire_cutter_handle.png
+  wire_cutter_head.png
+  wood_arrow.png
+  wrench.png
+  wrench_head.png
+  wrench_head_overlay.png
+
+------------------------------------------------------------
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, magnetic, metallic, quartz, rough, ruby, shiny share 6 texture name(s)
+
+  chipped_gem.png
+  div72_dust.png
+  exquisite_gem.png
+  flawed_gem.png
+  flawless_gem.png
+  legendary_gem.png
+
+------------------------------------------------------------
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, magnetic, metallic, redstone, rough, ruby, shiny share 1 texture name(s)
+
+  rock.png
+
+------------------------------------------------------------
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 18 texture name(s)
+
+  berry_overlay.png
+  blossom_overlay.png
+  boule_overlay.png
+  chemtube_overlay.png
+  crushed_ore_overlay.png
+  crushed_tiny_ore_overlay.png
+  fine_wire_overlay.png
+  hot_ingot_overlay.png
+  impure_dust_overlay.png
+  lens_overlay.png
+  minecart_wheels_overlay.png
+  pickaxe_head_gem_overlay.png
+  plastic_arrow_overlay.png
+  pure_dust_overlay.png
+  ring_overlay.png
+  tiny_plate_overlay.png
+  twig_overlay.png
+  wood_arrow_overlay.png
+
+------------------------------------------------------------
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, redstone, rough, ruby, shiny share 1 texture name(s)
+
+  rock_overlay.png
+
+------------------------------------------------------------
+
+diamond, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, quartz, redstone, rough, ruby share 6 texture name(s)
+
+  dense_plate.png
+  double_plate.png
+  quadruple_plate.png
+  quintuple_plate.png
+  tiny_plate.png
+  triple_plate.png
+
+------------------------------------------------------------
+
+diamond, emerald, flint, gem_horizontal, gem_vertical, ruby share 1 texture name(s)
+
+  scrap.png
+
+------------------------------------------------------------
+
+diamond, emerald, gem_horizontal, gem_vertical, lapis, redstone share 2 texture name(s)
+
+  raw_ore.png
+  raw_ore_overlay.png
+
+------------------------------------------------------------
+
+diamond, emerald, gem_horizontal, gem_vertical, metallic, ruby, shiny share 5 texture name(s)
+
+  gem_plate.png
+  gem_plate_overlay.png
+  plate.png
+  plate_overlay.png
+  tiny_gem_plate_overlay.png
+
+------------------------------------------------------------
+
+diamond, emerald, gem_horizontal, gem_vertical, ruby, shiny share 32 texture name(s)
+
+  arrow_head.png
+  arrow_head_overlay.png
+  dull_arrow_head.png
+  dull_arrow_head_overlay.png
+  dull_sword_head.png
+  dust.png
+  dust_overlay.png
+  gear.png
+  gear_overlay.png
+  hammer_wedge_handle.png
+  impure_dust.png
+  ingot.png
+  ingot_overlay.png
+  large_bullet_overlay.png
+  medium_bullet_overlay.png
+  nugget.png
+  nugget_overlay.png
+  pickaxe_wedge_handle - Copy.png
+  pickaxe_wedge_handle.png
+  pure_dust.png
+  rod.png
+  rod_overlay.png
+  small_bullet_overlay.png
+  small_dust.png
+  small_dust_overlay.png
+  small_gear.png
+  small_gear_overlay.png
+  sword_head.png
+  tiny_dust.png
+  tiny_dust_overlay.png
+  wedge.png
+  wedge_handle.png
+
+------------------------------------------------------------
+
+diamond, gem_vertical, shiny share 2 texture name(s)
+
+  hammer_wedge.png
+  pickaxe_wedge.png
+
+------------------------------------------------------------
+
+dull, fine, flint, lapis, lignite, magnetic, metallic, quartz, redstone, rough share 5 texture name(s)
+
+  arrow_head.png
+  dull_arrow_head.png
+  dull_sword_head.png
+  small_gear.png
+  sword_head.png
+
+------------------------------------------------------------
+
+dull, fine, flint, lapis, lignite, metallic, quartz, redstone, rough share 3 texture name(s)
+
+  large_bullet_overlay.png
+  medium_bullet_overlay.png
+  small_bullet_overlay.png
+
+------------------------------------------------------------
+
+dull, fine, flint, lapis, lignite, quartz, redstone, rough share 1 texture name(s)
+
+  nugget.png
+
+------------------------------------------------------------
+
+dull, fine, lapis, magnetic, metallic, redstone, rough, shiny share 1 texture name(s)
+
+  scrap.png
+
+------------------------------------------------------------
+
+dull, fine, quartz, redstone, rough share 6 texture name(s)
+
+  hammer_wedge_handle.png
+  handle.png
+  pickaxe_wedge_handle.png
+  rod.png
+  wedge.png
+  wedge_handle.png
+
+------------------------------------------------------------
+
+dull, fine, rough, ruby, shiny share 1 texture name(s)
+
+  gem.png
+
+------------------------------------------------------------
+
+dull, flint share 2 texture name(s)
+
+  gem_plate.png
+  plate.png
+
+------------------------------------------------------------
+
+dull, magnetic, metallic share 1 texture name(s)
+
+  gear.png
+
+------------------------------------------------------------
+
+dull, magnetic, metallic, shiny share 7 texture name(s)
+
+  dense_plate.png
+  double_plate.png
+  plate.png
+  quadruple_plate.png
+  quintuple_plate.png
+  tiny_plate.png
+  triple_plate.png
+
+------------------------------------------------------------
+
+dull, quartz share 2 texture name(s)
+
+  hammer_wedge.png
+  pickaxe_wedge.png
+
+------------------------------------------------------------
+
+emerald, gem_horizontal share 2 texture name(s)
+
+  hammer_wedge.png
+  pickaxe_wedge.png
+
+------------------------------------------------------------
+
+fine, flint, lapis, lignite, quartz, redstone, rough share 2 texture name(s)
+
+  gear.png
+  ingot.png
+
+------------------------------------------------------------
+
+fine, flint, lignite, magnetic, rough share 1 texture name(s)
+
+  raw_ore.png
+
+------------------------------------------------------------
+
+fine, lapis, lignite, quartz, redstone, rough share 2 texture name(s)
+
+  gem_plate.png
+  plate.png
+
+------------------------------------------------------------
+
+fine, lapis, quartz share 5 texture name(s)
+
+  dust.png
+  impure_dust.png
+  pure_dust.png
+  small_dust.png
+  tiny_dust.png
+
+------------------------------------------------------------
+
+flint, lapis, lignite, magnetic, metallic share 5 texture name(s)
+
+  hammer_wedge_handle.png
+  pickaxe_wedge_handle.png
+  rod.png
+  wedge.png
+  wedge_handle.png
+
+------------------------------------------------------------
+
+flint, lignite, rough share 5 texture name(s)
+
+  dust.png
+  impure_dust.png
+  pure_dust.png
+  small_dust.png
+  tiny_dust.png
+
+------------------------------------------------------------
+
+lapis, lignite, magnetic, metallic share 2 texture name(s)
+
+  hammer_wedge.png
+  pickaxe_wedge.png
+
+------------------------------------------------------------
+
+lignite, quartz share 1 texture name(s)
+
+  scrap.png
+
+------------------------------------------------------------
+
+magnetic, metallic share 8 texture name(s)
+
+  dust.png
+  gem.png
+  impure_dust.png
+  ingot.png
+  nugget.png
+  pure_dust.png
+  small_dust.png
+  tiny_dust.png
+
+------------------------------------------------------------
+
+quartz, shiny share 1 texture name(s)
+
+  raw_ore.png
+
+------------------------------------------------------------
+

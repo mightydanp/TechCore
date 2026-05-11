@@ -1,6 +1,5 @@
 package com.mightydanp.techcore.client.render;
 
-import com.mightydanp.techcore.TechCore;
 import com.mightydanp.techcore.client.event.RenderItemEvent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraft.client.resources.model.BakedModel;

@@ -2,6 +2,7 @@ package com.mightydanp.techcore.client.render;
 
 import com.mightydanp.techcore.common.tag.TechCoreItemTags;
 import com.mightydanp.techcore.materials.properties.Temperature;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -42,41 +43,42 @@ public final class TemperatureClientRender {
         return Temperature.hasTemperature(stack);
     }
 
-    public static float getTemperature(ItemStack stack) {
-        if (!stack.hasTag()) {
-            return 20.0F;
-        }
+    public static double getTemperature(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+
+        if (tag == null) return Temperature.celsiusDefaultRoomTemperature;
+        if (!Temperature.hasTemperature(stack)) return Temperature.celsiusDefaultRoomTemperature;
 
         return getTemperature(stack);
     }
 
     public static float getStrength(ItemStack stack) {
-        float temp = Math.abs(getTemperature(stack));
+        double temp = Math.abs(getTemperature(stack));
 
-        // Change this to your real max temperature.
-        float max = 100.0F;
+        // Use your real max visual temperature here.
+        double max = 100.0D;
 
-        return Mth.clamp(temp / max, 0.0F, 1.0F);
+        return (float) Mth.clamp(temp / max, 0.0D, 1.0D);
     }
 
     public static int getColor(ItemStack stack) {
-        float temp = Mth.clamp(getTemperature(stack), -100.0F, 100.0F);
+        double temp = Mth.clamp(getTemperature(stack), -100.0D, 100.0D);
 
-        if (temp < 0.0F) {
-            float amount = -temp / 100.0F;
+        if (temp < 0.0D) {
+            double amount = -temp / 100.0D;
 
-            int r = (int) Mth.lerp(amount, 180, 80);
-            int g = (int) Mth.lerp(amount, 220, 160);
+            int r = (int) Mth.lerp(amount, 180.0D, 80.0D);
+            int g = (int) Mth.lerp(amount, 220.0D, 160.0D);
             int b = 255;
 
             return (r << 16) | (g << 8) | b;
         }
 
-        float amount = temp / 100.0F;
+        double amount = temp / 100.0D;
 
         int r = 255;
-        int g = (int) Mth.lerp(amount, 100, 235);
-        int b = (int) Mth.lerp(amount, 40, 160);
+        int g = (int) Mth.lerp(amount, 100.0D, 235.0D);
+        int b = (int) Mth.lerp(amount, 40.0D, 160.0D);
 
         return (r << 16) | (g << 8) | b;
     }

@@ -16,20 +16,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemRenderer.class)
 public abstract class ItemRendererMixin {
-    @Inject(method = "render", at = @At("HEAD"))
+    static {
+        System.out.println("TECHCORE ItemRendererMixin CLASS LOADED");
+    }
+
+    @Inject(
+            method = "render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V",
+            at = @At("HEAD")
+    )
     private void preRenderItem(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model, CallbackInfo ci) {
         if (stack.isEmpty()) return;
         if (ItemRenderEventGuard.isRenderingExtraPass()) return;
 
         MinecraftForge.EVENT_BUS.post(new RenderItemEvent.Pre(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model));
+
+        //System.out.println("TECHCORE ItemRendererMixin PRE HIT: " + stack.getHoverName().getString());
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
+    @Inject(
+            method = "render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V",
+            at = @At("TAIL")
+    )
     private void postRenderItem(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model, CallbackInfo ci) {
         if (stack.isEmpty()) return;
         if (ItemRenderEventGuard.isRenderingExtraPass()) return;
 
         MinecraftForge.EVENT_BUS.post(new RenderItemEvent.Post(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model
         ));
+
+        //System.out.println("TECHCORE ItemRendererMixin POST HIT: " + stack.getHoverName().getString());
     }
 }

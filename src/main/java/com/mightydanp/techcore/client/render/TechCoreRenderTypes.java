@@ -28,6 +28,7 @@ public final class TechCoreRenderTypes extends RenderType {
                 .setCullState(NO_CULL)
                 .setLightmapState(LIGHTMAP)
                 .setOverlayState(OVERLAY)
+                .setWriteMaskState(COLOR_DEPTH_WRITE)
                 .createCompositeState(true);
 
         return create(

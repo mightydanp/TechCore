@@ -35,7 +35,7 @@ public class ColorEvents {
             ModelResourceLocation mrl = new ModelResourceLocation(rl, "inventory");
             BakedModel model = models.get(mrl);
             if (model != null && !(model instanceof TemperatureGlowBakedModel)) {
-                models.put(mrl, new TemperatureGlowBakedModel(model));
+                //models.put(mrl, new TemperatureGlowBakedModel(model));
             }
         }
     }

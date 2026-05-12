@@ -95,8 +95,18 @@ public class TCCreativeModeTabs {
                             .title(Component.translatable(CoreCreativeTabsRef.ore_products_tab))
                             .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
                             .displayItems((params, output) -> {
+                                int[] coldTestTemperatures = {
+                                        -300,
+                                        -200,
+                                        -150,
+                                        -100,
+                                        -75,
+                                        -50,
+                                        -25,
+                                        0
+                                };
+
                                 int[] testTemperatures = {
-                                        0,
                                         250,
                                         425,
                                         525,
@@ -127,6 +137,12 @@ public class TCCreativeModeTabs {
 
                                     ItemStack normal = new ItemStack(dustItem);
                                     output.accept(normal);
+
+                                    for (int temperature : coldTestTemperatures) {
+                                        ItemStack stack = new ItemStack(dustItem);
+                                        dustItem.setTemperature(stack, temperature);
+                                        output.accept(stack);
+                                    }
 
                                     for (int temperature : testTemperatures) {
                                         ItemStack stack = new ItemStack(dustItem);

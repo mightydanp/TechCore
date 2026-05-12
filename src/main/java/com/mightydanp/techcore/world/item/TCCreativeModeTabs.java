@@ -89,29 +89,54 @@ public class TCCreativeModeTabs {
             .build()
     );
 
-    public static final Supplier<CreativeModeTab> ORE_PRODUCTS_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register("ore_products_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable(CoreCreativeTabsRef.ore_products_tab))
-            .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
-            .displayItems((params, output) -> {
-                RegistriesHandler.getMaterials().forEach(matObj -> {
-                    var mat = matObj.get();
-                    if (mat.ore.dust == null) return;
+    public static final Supplier<CreativeModeTab> ORE_PRODUCTS_TAB =
+            RegistriesHandler.CREATIVE_MODE_TABS.register("ore_products_tab", () ->
+                    CreativeModeTab.builder()
+                            .title(Component.translatable(CoreCreativeTabsRef.ore_products_tab))
+                            .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
+                            .displayItems((params, output) -> {
+                                int[] testTemperatures = {
+                                        0,
+                                        250,
+                                        425,
+                                        525,
+                                        600,
+                                        700,
+                                        815,
+                                        900,
+                                        1000,
+                                        1100,
+                                        1250,
+                                        1315,
+                                        1500,
+                                        1800,
+                                        2200,
+                                        2800,
+                                        4000,
+                                        5500
+                                };
 
-                    DustItem dustItem = (DustItem) mat.ore.dust.get();
-                    int max = mat.physical.getMaxQuality();
+                                RegistriesHandler.getMaterials().forEach(matObj -> {
+                                    var mat = matObj.get();
 
-                    ItemStack normal = new ItemStack(dustItem);
-                    output.accept(normal);
+                                    if (mat.ore.dust == null) {
+                                        return;
+                                    }
 
-                    ItemStack hot = new ItemStack(dustItem);
-                    dustItem.setTemperature(hot, 1500);
+                                    DustItem dustItem = (DustItem) mat.ore.dust.get();
 
-                    output.accept(normal);
-                    output.accept(hot);
-                });
-            })
-            .build()
-    );
+                                    ItemStack normal = new ItemStack(dustItem);
+                                    output.accept(normal);
+
+                                    for (int temperature : testTemperatures) {
+                                        ItemStack stack = new ItemStack(dustItem);
+                                        dustItem.setTemperature(stack, temperature);
+                                        output.accept(stack);
+                                    }
+                                });
+                            })
+                            .build()
+            );
 
     public static final Supplier<CreativeModeTab> STONE_LAYER_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register("stone_layer_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable(CoreCreativeTabsRef.stone_layer_tab))

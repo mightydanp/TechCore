@@ -23,12 +23,13 @@ public final class TechCoreRenderTypes extends RenderType {
     public static RenderType temperatureItem() {
         CompositeState state = CompositeState.builder()
                 .setShaderState(TEMPERATURE_ITEM_SHADER)
-                .setTextureState(new TextureStateShard(InventoryMenu.BLOCK_ATLAS, false, false))
+                .setTextureState(new TextureStateShard(InventoryMenu.BLOCK_ATLAS, false, true))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                .setCullState(NO_CULL)
+                .setCullState(CULL)
                 .setLightmapState(LIGHTMAP)
-                .setOverlayState(OVERLAY)
-                .setWriteMaskState(COLOR_DEPTH_WRITE)
+                .setOverlayState(NO_OVERLAY)
+                .setDepthTestState(LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
                 .createCompositeState(true);
 
         return create(

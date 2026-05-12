@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.client.render;
 
+import com.mightydanp.techcore.client.config.ClientConfig;
 import com.mightydanp.techcore.common.tag.TechCoreItemTags;
 import com.mightydanp.techcore.materials.properties.Temperature;
 import net.minecraft.util.Mth;
@@ -13,6 +14,8 @@ public final class TemperatureClientRender {
         if (stack.isEmpty()) return false;
 
         if (stack.is(TechCoreItemTags.DISABLE_TEMPERATURE_RENDER)) return false;
+
+        if (ClientConfig.isBlacklisted(stack.getItem())) return false;
 
         if(stack.getTag() == null) return false;
 

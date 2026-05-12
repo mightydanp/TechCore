@@ -49,6 +49,15 @@ public final class TemperatureClientRender {
     public static float getStrength(ItemStack stack) {
         double celsius = getTemperature(stack);
 
+        if (celsius < 0.0D) {
+            double coldness = Math.abs(celsius);
+
+            double amount = 1.0D - Math.exp(-coldness / 300.0D);
+            amount = Math.pow(amount, 1.25D);
+
+            return (float) Mth.clamp(amount, 0.0D, 0.72D);
+        }
+
         if (celsius <= 425.0D) {
             return 0.0F;
         }
@@ -128,12 +137,13 @@ public final class TemperatureClientRender {
     }
 
     private static int coldColor(double celsius) {
-        double coldness = Math.abs(celsius);
+        double coldness = Math.abs(Math.min(0.0D, celsius));
 
-        double amount = 1.0D - Math.exp(-coldness / 120.0D);
+        // Bigger scale = slower transition into deep cold blue.
+        double amount = 1.0D - Math.exp(-coldness / 300.0D);
         amount = Mth.clamp(amount, 0.0D, 1.0D);
 
-        int r = (int) Mth.lerp(amount, 180.0D, 70.0D);
+        int r = (int) Mth.lerp(amount, 170.0D, 45.0D);
         int g = (int) Mth.lerp(amount, 220.0D, 170.0D);
         int b = 255;
 

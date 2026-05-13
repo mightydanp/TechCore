@@ -9,6 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -90,9 +92,20 @@ public class DustSplitScreen extends Screen {
             addRenderableWidget(Button.builder(
                     Component.literal("✔").withStyle(ChatFormatting.GREEN),
                     btn -> {
+                        int splitAmount = slider.getValueInt();
                         TCNetworkChannel.INSTANCE.sendToServer(
-                                new ServerBoundSplitDustPacket(slotIndex, slider.getValueInt())
+                                new ServerBoundSplitDustPacket(slotIndex, splitAmount, this.cursorStack)
                         );
+                        if (parent instanceof CreativeModeInventoryScreen cs) {
+                            int newQty = cursorDust.getQuantity(cursorStack) - splitAmount;
+                            if (newQty <= 0) {
+                                cs.getMenu().setCarried(ItemStack.EMPTY);
+                            } else {
+                                ItemStack newCursor = cursorStack.copy();
+                                cursorDust.setQuantity(newCursor, newQty);
+                                cs.getMenu().setCarried(newCursor);
+                            }
+                        }
                         pendingCloseAction = this::onClose;
                     }).bounds(
                     this.width / 2 + 5,    // x — 5px right of center

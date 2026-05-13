@@ -7,6 +7,9 @@ public class PhysicalComponent<A extends Material> extends Component<PhysicalCom
     private double density;
     private int harvestLevel;
 
+    private Integer defaultQuantity;
+    private Integer defaultQuality;
+    private Double defaultPurity;
     private Integer maxQuantity;
     private Integer maxQuality;
     private Double maxPurity;
@@ -30,6 +33,21 @@ public class PhysicalComponent<A extends Material> extends Component<PhysicalCom
 
     public PhysicalComponent<A> setHarvestLevel(int harvestLevel) {
         this.harvestLevel = harvestLevel;
+        return this;
+    }
+
+    public PhysicalComponent<A> setDefaultQuantity(Integer defaultQuantity) {
+        this.defaultQuantity = defaultQuantity;
+        return this;
+    }
+
+    public PhysicalComponent<A> setDefaultQuality(Integer defaultQuality) {
+        this.defaultQuality = defaultQuality;
+        return this;
+    }
+
+    public PhysicalComponent<A> setDefaultPurity(Double defaultPurity) {
+        this.defaultPurity = defaultPurity;
         return this;
     }
 
@@ -58,6 +76,18 @@ public class PhysicalComponent<A extends Material> extends Component<PhysicalCom
 
     public int getHarvestLevel() {
         return harvestLevel;
+    }
+
+    public Integer getDefaultQuantity() {
+        return defaultQuantity;
+    }
+
+    public Integer getDefaultQuality() {
+        return defaultQuality;
+    }
+
+    public Double getDefaultPurity() {
+        return defaultPurity;
     }
 
     public Integer getMaxQuantity() {

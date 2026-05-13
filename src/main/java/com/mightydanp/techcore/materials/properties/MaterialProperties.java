@@ -13,6 +13,9 @@ public class MaterialProperties extends Item.Properties {
     private Double boilingPoint;
     private Double meltingPoint;
 
+    private Integer defaultQuantity;
+    private Integer defaultQuality;
+    private Double defaultPurity;
     private Integer maxQuantity;
     private Integer maxQuality;
     private Double maxPurity;
@@ -35,6 +38,21 @@ public class MaterialProperties extends Item.Properties {
 
     public MaterialProperties meltingPoint(Double value) {
         this.meltingPoint = value;
+        return this;
+    }
+
+    public MaterialProperties defaultQuantity(Integer value) {
+        this.defaultQuantity = value;
+        return this;
+    }
+
+    public MaterialProperties defaultQuality(Integer value) {
+        this.defaultQuality = value;
+        return this;
+    }
+
+    public MaterialProperties defaultPurity(Double value) {
+        this.defaultPurity = value <= 100 ? value : 100;
         return this;
     }
 
@@ -66,6 +84,18 @@ public class MaterialProperties extends Item.Properties {
 
     public Double getMeltingPoint() {
         return meltingPoint;
+    }
+
+    public Integer getDefaultQuantity() {
+        return defaultQuantity;
+    }
+
+    public Integer getDefaultQuality() {
+        return defaultQuality;
+    }
+
+    public Double getDefaultPurity() {
+        return defaultPurity;
     }
 
     public Integer getMaxQuantity() {

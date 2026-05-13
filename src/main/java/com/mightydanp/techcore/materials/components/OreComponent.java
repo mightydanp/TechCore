@@ -43,14 +43,42 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     public OreComponent<A> init() {
         if(oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()){
             if (oreType == OreTypes.GEM.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialProperties().symbol(material.chemical.getSymbol()).maxQuality(material.physical.getMaxQuality()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
+                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialProperties()
+                        .symbol(material.chemical.getSymbol())
+                        .defaultQuality(material.physical.getDefaultQuality())
+                        .maxQuality(material.physical.getMaxQuality())
+                        .boilingPoint(material.thermal.getBoilingPoint())
+                        .meltingPoint(material.thermal.getMeltingPoint())
+                ));
             }
-            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
-            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties().symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
+            crushedOre = RegistriesHandler.ITEMS.register("crushed_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties()
+                    .symbol(material.chemical.getSymbol())
+                    .boilingPoint(material.thermal.getBoilingPoint())
+                    .meltingPoint(material.thermal.getMeltingPoint())
+            ));
+            purifiedOre = RegistriesHandler.ITEMS.register("purified_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties()
+                    .symbol(material.chemical.getSymbol())
+                    .boilingPoint(material.thermal.getBoilingPoint())
+                    .meltingPoint(material.thermal.getMeltingPoint())
+            ));
+            centrifugedOre = RegistriesHandler.ITEMS.register("centrifuged_" + material.name + "_ore", () -> new MaterialItem(new MaterialProperties()
+                    .symbol(material.chemical.getSymbol())
+                    .boilingPoint(material.thermal.getBoilingPoint())
+                    .meltingPoint(material.thermal.getMeltingPoint())
+            ));
         }
 
-        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialProperties().color(material.physical.getColor()).maxQuantity(material.physical.getMaxQuantity()).symbol(material.chemical.getSymbol()).boilingPoint(material.thermal.getBoilingPoint()).meltingPoint(material.thermal.getMeltingPoint())));
+        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .defaultQuantity(material.physical.getDefaultQuantity())
+                .maxQuantity(material.physical.getMaxQuantity())
+                .defaultPurity(material.physical.getDefaultPurity())
+                .maxPurity(material.physical.getMaxPurity())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
 
         return this;
     }
@@ -61,7 +89,53 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             String modid = CoreRef.MOD_ID;
             String name = material.name;
 
-            // Full dust sub-model — referenced by the main model's 0 override
+            //impure
+            // div72 dust sub-model — base texture (fill_level 0.0, quantity ≤ maxQuantity/72)
+            new TCItemModelContent(modid, "impure_div72_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/div72_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/impure_div72_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Tiny dust sub-model — referenced by the main model's 0.25 override
+            new TCItemModelContent(modid, "impure_tiny_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/tiny_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/impure_tiny_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Small dust sub-model — referenced by the main model's 0.5 override
+            new TCItemModelContent(modid, "impure_small_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/small_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/impure_small_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Full dust sub-model — referenced by the main model's 1.0 override
+            new TCItemModelContent(modid, "impure_full_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/impure_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/impure_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            //normal
+            // div72 dust sub-model — base texture (fill_level 0.0, quantity ≤ maxQuantity/72)
+            new TCItemModelContent(modid, "div72_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/div72_dust"))
+                    .end()
+                    .save(false);
+
+            // Tiny dust sub-model — referenced by the main model's 0.25 override
             new TCItemModelContent(modid, "tiny_dust", "dust")
                     .model()
                     .parent(new ModelFile.UncheckedModelFile("item/generated"))
@@ -85,20 +159,121 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                     .end()
                     .save(false);
 
-            // Main dust model — tiny texture by default, overrides for small and full
+            //pure
+            // div72 dust sub-model — base texture (fill_level 0.0, quantity ≤ maxQuantity/72)
+            new TCItemModelContent(modid, "pure_div72_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/div72_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/pure_div72_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Tiny dust sub-model — referenced by the main model's 0.25 override
+            new TCItemModelContent(modid, "pure_tiny_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/tiny_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/pure_tiny_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Small dust sub-model — referenced by the main model's 0.5 override
+            new TCItemModelContent(modid, "pure_small_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/small_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/pure_small_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Full dust sub-model — referenced by the main model's 1.0 override
+            new TCItemModelContent(modid, "pure_full_dust", "dust")
+                    .model()
+                    .parent(new ModelFile.UncheckedModelFile("item/generated"))
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/pure_dust"))
+                    .texture("layer1", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/pure_dust_overlay"))
+                    .end()
+                    .save(false);
+
+            // Main dust model — div72 texture by default, overrides for tiny/small/full
             TCItemModelBuilder mainBuilder = new TCItemModelBuilder(
                     ResourceLocation.fromNamespaceAndPath(modid, "models/item/" + "dust.json"));
             mainBuilder.parent(new ModelFile.UncheckedModelFile("item/generated"));
-            mainBuilder.texture("layer0", ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/tiny_dust"));
+
+            //impure
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "impure_div72_dust")))
+                    .end();
 
             mainBuilder.override()
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "fill_level"), 0.5f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.25f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "impure_tiny_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.50f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "impure_small_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 1.0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "impure_full_dust")))
+                    .end();
+
+            //normal
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0.75f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "div72_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.25f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0.75f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "tiny_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.50f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0.75f)
                     .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "small_dust")))
                     .end();
 
             mainBuilder.override()
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "fill_level"), 1.0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 1.0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 0.75f)
                     .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "full_dust")))
+                    .end();
+
+            //pure
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 1.0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "pure_div72_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.25f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 1.0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "pure_tiny_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 0.50f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 1.0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "pure_small_dust")))
+                    .end();
+
+            mainBuilder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), 1.0f)
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), 1.0f)
+                    .model(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/dust/" + "pure_full_dust")))
                     .end();
 
             new ItemModelContent<>(modid, name + "_dust", null, mainBuilder).save(false);
@@ -181,9 +356,14 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     public OreComponent<A> initItemProperties(){
         registerItemProperty(dust.get(),
-                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "fill_level"),
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
                 (stack, level, entity, seed) ->
-                        ((DustItem) (dust.get())).getFillLevel(stack));
+                        ((DustItem) (dust.get())).getQuantityLevel(stack));
+
+        registerItemProperty(dust.get(),
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
+                (stack, level, entity, seed) ->
+                        ((DustItem) (dust.get())).getPurityLevel(stack));
 
         registerItemProperty(gem.get(),
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),

@@ -20,6 +20,9 @@ public class MaterialItem extends Item {
     private final int color;
     private final Double boilingPoint;
     private final Double meltingPoint;
+    private final Integer defaultQuantity;
+    private final Integer defaultQuality;
+    private final Double defaultPurity;
     private final Integer maxQuantity;
     private final Integer maxQuality;
     private final Double maxPurity;
@@ -30,6 +33,9 @@ public class MaterialItem extends Item {
         this.color = properties.getColor();
         this.boilingPoint = properties.getBoilingPoint();
         this.meltingPoint = properties.getMeltingPoint();
+        this.defaultQuantity = properties.getDefaultQuantity();
+        this.defaultQuality = properties.getDefaultQuality();
+        this.defaultPurity = properties.getDefaultPurity();
         this.maxQuantity = properties.getMaxQuantity();
         this.maxQuality = properties.getMaxQuality();
         this.maxPurity = properties.getMaxPurity();
@@ -146,8 +152,8 @@ public class MaterialItem extends Item {
         if (tag != null && tag.contains("quantity")) {
             return tag.getInt("quantity");
         } else {
-            setQuantity(itemStack, this.getMaxQuantity());
-            return this.getMaxQuantity();
+            setQuantity(itemStack, this.defaultQuantity);
+            return this.defaultQuantity;
         }
     }
 
@@ -156,8 +162,8 @@ public class MaterialItem extends Item {
         if (tag != null && tag.contains("quality")) {
             return tag.getInt("quality");
         } else {
-            setQuality(itemStack, this.getMaxQuality());
-            return this.getMaxQuality();
+            setQuality(itemStack, this.defaultQuality);
+            return this.defaultQuality;
         }
     }
 
@@ -166,8 +172,8 @@ public class MaterialItem extends Item {
         if (tag != null && tag.contains("purity")) {
             return tag.getDouble("purity");
         } else {
-            setPurity(itemStack, this.getMaxPurity());
-            return this.getMaxPurity();
+            setPurity(itemStack, this.defaultPurity);
+            return this.defaultPurity;
         }
 
     }

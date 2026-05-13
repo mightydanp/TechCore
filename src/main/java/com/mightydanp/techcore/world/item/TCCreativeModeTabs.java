@@ -96,47 +96,28 @@ public class TCCreativeModeTabs {
                             .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
                             .displayItems((params, output) -> {
                                 int[] coldTestTemperatures = {
-                                        -300,
-                                        -200,
-                                        -150,
-                                        -100,
-                                        -75,
-                                        -50,
-                                        -25,
-                                        0
+                                        -300, -200, -150, -100, -75, -50, -25, 0
                                 };
 
                                 int[] testTemperatures = {
-                                        250,
-                                        425,
-                                        525,
-                                        600,
-                                        700,
-                                        815,
-                                        900,
-                                        1000,
-                                        1100,
-                                        1250,
-                                        1315,
-                                        1500,
-                                        1800,
-                                        2200,
-                                        2800,
-                                        4000,
-                                        5500
+                                        250, 425, 525, 600, 700, 815, 900, 1000, 1100, 1250, 1315, 1500, 1800, 2200, 2800, 4000, 5500
                                 };
 
                                 RegistriesHandler.getMaterials().forEach(matObj -> {
                                     var mat = matObj.get();
 
-                                    if (mat.ore.dust == null) {
-                                        return;
-                                    }
+                                    if (mat.ore.dust == null) return;
 
                                     DustItem dustItem = (DustItem) mat.ore.dust.get();
 
+                                    ItemStack impure = new ItemStack(dustItem);
+                                    output.accept(impure);
+                                    dustItem.setPurity(impure, 25);
                                     ItemStack normal = new ItemStack(dustItem);
                                     output.accept(normal);
+                                    ItemStack pure = new ItemStack(dustItem);
+                                    dustItem.setPurity(pure, 100);
+                                    output.accept(pure);
 
                                     for (int temperature : coldTestTemperatures) {
                                         ItemStack stack = new ItemStack(dustItem);

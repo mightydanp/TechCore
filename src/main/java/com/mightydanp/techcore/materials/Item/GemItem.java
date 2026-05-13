@@ -19,19 +19,15 @@ public class GemItem extends MaterialItem {
     }
 
     public float getGemQuality(ItemStack itemStack) {
-        if(hasQuality(itemStack)) {
-            int quality = getQuality(itemStack);
-            int maxQuality = ((GemItem)itemStack.getItem()).getMaxQuality();
+        int quality = getQuality(itemStack);
+        int maxQuality = ((GemItem)itemStack.getItem()).getMaxQuality();
 
-            if (quality <= (maxQuality / 5))        return 0.2f; //chipped
-            if (quality <= (maxQuality * 2 / 5))    return 0.4f; //flawed
-            if (quality <= (maxQuality * 3 / 5))    return 0.6f; //gem
-            if (quality <= (maxQuality * 4 / 5))    return 0.8f; //flawless
+        if (quality <= (maxQuality / 5))        return 0.2f; //chipped
+        if (quality <= (maxQuality * 2 / 5))    return 0.4f; //flawed
+        if (quality <= (maxQuality * 3 / 5))    return 0.6f; //gem
+        if (quality <= (maxQuality * 4 / 5))    return 0.8f; //flawless
 
-            return 1.0f; //legendaryGem
-        }
-
-        return -1.0F;
+        return 1.0f; //legendaryGem
     }
 
     @Override

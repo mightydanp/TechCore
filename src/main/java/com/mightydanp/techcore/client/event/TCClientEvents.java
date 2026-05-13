@@ -8,6 +8,7 @@ import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitDustPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -58,12 +59,35 @@ public class TCClientEvents {
                     return;
                 }
 
+                int serverSlotIndex;
+                if (containerScreen instanceof CreativeModeInventoryScreen creativeScreen) {
+                    if (creativeScreen.isInventoryOpen()) {
+                        serverSlotIndex = hoveredSlot.getContainerSlot();
+                    } else if (hoveredSlot.index >= 45 && hoveredSlot.index < 54) {
+                        serverSlotIndex = 36 + hoveredSlot.getContainerSlot();
+                    } else {
+                        return;
+                    }
+                } else {
+                    serverSlotIndex = hoveredSlot.index;
+                }
+
                 event.setCanceled(true);
 
                 if (Screen.hasShiftDown() || maxAmount == 1) {
-                    TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitDustPacket(hoveredSlot.index, maxAmount));
+                    TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitDustPacket(serverSlotIndex, maxAmount, cursorStack));
+                    if (containerScreen instanceof CreativeModeInventoryScreen) {
+                        int newQty = cursorQty - maxAmount;
+                        if (newQty <= 0) {
+                            containerScreen.getMenu().setCarried(ItemStack.EMPTY);
+                        } else {
+                            ItemStack newCursor = cursorStack.copy();
+                            dust.setQuantity(newCursor, newQty);
+                            containerScreen.getMenu().setCarried(newCursor);
+                        }
+                    }
                 } else {
-                    Minecraft.getInstance().setScreen(new DustSplitScreen(containerScreen, cursorStack, hoveredSlot, hoveredSlot.index));
+                    Minecraft.getInstance().setScreen(new DustSplitScreen(containerScreen, cursorStack, hoveredSlot, serverSlotIndex));
                 }
             }
         }

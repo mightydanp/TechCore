@@ -7,27 +7,32 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ServerBoundSplitDustPacket {
     public int slotIndex;
     public int amount;
+    public ItemStack cursorStack;
 
-    public ServerBoundSplitDustPacket(int slotIndex, int amount) {
+    public ServerBoundSplitDustPacket(int slotIndex, int amount, ItemStack cursorStack) {
         this.slotIndex = slotIndex;
         this.amount = amount;
+        this.cursorStack = cursorStack;
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(this.slotIndex);
         buffer.writeInt(this.amount);
+        buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
     }
 
     public static ServerBoundSplitDustPacket decode(FriendlyByteBuf buffer) {
         int slotIndex = buffer.readInt();
         int amount  = buffer.readInt();
+        ItemStack itemStack = buffer.readItem();
 
-        return new ServerBoundSplitDustPacket(slotIndex, amount);
+        return new ServerBoundSplitDustPacket(slotIndex, amount, itemStack);
     }
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
@@ -35,23 +40,22 @@ public class ServerBoundSplitDustPacket {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player == null) return;
             if (this.amount < 1) return;
-
-            ItemStack cursor = player.containerMenu.getCarried();
+            if (slotIndex < 0 || slotIndex >= player.containerMenu.slots.size()) return;
             Slot slot = player.containerMenu.slots.get(slotIndex);
 
             if (slot.hasItem()){
-                String curserName = cursor.getHoverName().getString();
+                String curserName = cursorStack.getHoverName().getString();
                 String hoveredName = slot.getItem().getHoverName().getString();
 
                 if(!curserName.equals(hoveredName)) return;
 
-                if (slot.getItem().getItem() instanceof DustItem slotDust && cursor.getItem() instanceof DustItem cursorDust){
+                if (slot.getItem().getItem() instanceof DustItem slotDust && cursorStack.getItem() instanceof DustItem cursorDust){
                     int currentSlotQty = slotDust.getQuantity(slot.getItem());
-                    int currentCursorQty = cursorDust.getQuantity(cursor);
+                    int currentCursorQty = cursorDust.getQuantity(cursorStack);
                     int availableSpace = slotDust.getMaxQuantity() - currentSlotQty;
 
                     if (currentCursorQty >= this.amount && availableSpace >= this.amount) {
-                        ItemStack cursorDustCopy = cursor.copy();
+                        ItemStack cursorDustCopy = cursorStack.copy();
                         ItemStack slotDustCopy = slot.getItem().copy();
 
                         if (this.amount <= currentCursorQty && this.amount <= availableSpace) {
@@ -64,11 +68,11 @@ public class ServerBoundSplitDustPacket {
                     }
                 }
             } else {
-                if (cursor.getItem() instanceof DustItem cursorDust) {
-                    int currentCursorQty = cursorDust.getQuantity(cursor);
+                if (cursorStack.getItem() instanceof DustItem cursorDust) {
+                    int currentCursorQty = cursorDust.getQuantity(cursorStack);
                     if (currentCursorQty >= this.amount) {
-                        ItemStack cursorDustCopy = cursor.copy();
-                        ItemStack slotDustCopy = cursor.copy();
+                        ItemStack cursorDustCopy = cursorStack.copy();
+                        ItemStack slotDustCopy = cursorStack.copy();
 
                         cursorDust.setQuantity(slotDustCopy, this.amount);
                         cursorDust.setQuantity(cursorDustCopy, currentCursorQty - this.amount);

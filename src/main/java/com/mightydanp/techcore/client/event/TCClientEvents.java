@@ -46,6 +46,7 @@ public class TCClientEvents {
                 if(hoveredSlot.hasItem() && hoveredSlot.getItem().getItem() instanceof DustItem dustItem && Objects.equals(dustItem.getQuantity(hoveredSlot.getItem()), dustItem.getMaxQuantity())) return;
 
                 if(dust.getQuantity(cursorStack) < 1) return;
+                if(!hoveredSlot.mayPlace(cursorStack)) return;
 
                 int cursorQty = dust.getQuantity(cursorStack);
                 int maxAmount;

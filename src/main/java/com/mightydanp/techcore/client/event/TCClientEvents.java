@@ -1,10 +1,10 @@
 package com.mightydanp.techcore.client.event;
 
-import com.mightydanp.techcore.client.gui.screens.split.DustSplitScreen;
+import com.mightydanp.techcore.client.gui.screens.split.QuantitySplitScreen;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.network.TCNetworkChannel;
-import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitDustPacket;
+import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -76,7 +76,7 @@ public class TCClientEvents {
                 event.setCanceled(true);
 
                 if (Screen.hasShiftDown() || maxAmount == 1) {
-                    TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitDustPacket(serverSlotIndex, maxAmount, cursorStack));
+                    TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitQuantityPacket(serverSlotIndex, maxAmount, cursorStack));
                     if (containerScreen instanceof CreativeModeInventoryScreen) {
                         int newQty = cursorQty - maxAmount;
                         if (newQty <= 0) {
@@ -88,7 +88,7 @@ public class TCClientEvents {
                         }
                     }
                 } else {
-                    Minecraft.getInstance().setScreen(new DustSplitScreen(containerScreen, cursorStack, hoveredSlot, serverSlotIndex));
+                    Minecraft.getInstance().setScreen(new QuantitySplitScreen(containerScreen, cursorStack, hoveredSlot, serverSlotIndex));
                 }
             }
         }

@@ -91,7 +91,7 @@ public class MaterialItem extends Item {
         }
 
         if(hasQuantity(itemStack)) {
-            tooltip.add(Component.translatable(MaterialRef.quantity_left_translatable).append(" : " + getQuantity(itemStack) + "/" + this.getMaxQuantity()));
+            tooltip.add(Component.translatable(MaterialRef.quantity_translatable).append(" : " + getQuantity(itemStack) + "/" + this.getMaxQuantity()));
         }
 
         if(hasQuality(itemStack)) {

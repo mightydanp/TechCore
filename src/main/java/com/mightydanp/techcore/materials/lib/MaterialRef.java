@@ -7,7 +7,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 
 public class MaterialRef {
     public static String temperature_translatable = CoreRef.MOD_ID+ "." + "temperature";
-    public static String quantity_left_translatable = CoreRef.MOD_ID+ "." + "quantity_left";
+    public static String quantity_translatable = CoreRef.MOD_ID+ "." + "quantity";
     public static String quality_translatable = CoreRef.MOD_ID+ "." + "quality";
     public static String purity_translatable = CoreRef.MOD_ID + "." + "purity";
 
@@ -24,7 +24,7 @@ public class MaterialRef {
 
     //English Translation
     public static String temperature_english_translation = "Temperature";
-    public static String quantity_left_english_translation = "Quantity Left";
+    public static String quantity_english_translation = "Quantity";
     public static String quality_english_translation = "Quality";
     public static String purity_english_translation = "Purity";
 
@@ -44,7 +44,7 @@ public class MaterialRef {
                 new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, temperature_translatable, temperature_english_translation)
         );
         AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, quantity_left_translatable, quantity_left_english_translation)
+                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, quantity_translatable, quantity_english_translation)
         );
 
         AssetPackRegistries.saveMSLT(false,

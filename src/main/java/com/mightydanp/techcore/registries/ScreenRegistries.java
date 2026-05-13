@@ -18,9 +18,9 @@ public class ScreenRegistries implements BaseRegistries {
     @Override
     public void initLanguages() {
         AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, ScreenRef.dust_split_screen, ScreenRef.dust_split_screen_english_translation));
+                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, ScreenRef.quantity_split_screen, ScreenRef.quantity_split_screen_english_translation));
         AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, ScreenRef.dust_split_amount, ScreenRef.amount_english_translation + " : "));
+                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, ScreenRef.quantity_split_amount, ScreenRef.amount_english_translation + " : "));
 
     }
 }

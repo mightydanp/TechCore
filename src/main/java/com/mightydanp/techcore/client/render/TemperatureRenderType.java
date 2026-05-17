@@ -6,13 +6,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.inventory.InventoryMenu;
 
-public final class TechCoreRenderTypes extends RenderType {
+public final class TemperatureRenderType extends RenderType {
     private static ShaderInstance temperatureItemShader;
 
     private static final ShaderStateShard TEMPERATURE_ITEM_SHADER =
             new ShaderStateShard(() -> temperatureItemShader);
 
-    private TechCoreRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
+    private static final RenderType TEMPERATURE_ITEM = createTemperatureItem();
+
+    private TemperatureRenderType(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
 
@@ -21,6 +23,10 @@ public final class TechCoreRenderTypes extends RenderType {
     }
 
     public static RenderType temperatureItem() {
+        return TEMPERATURE_ITEM;
+    }
+
+    private static RenderType createTemperatureItem() {
         CompositeState state = CompositeState.builder()
                 .setShaderState(TEMPERATURE_ITEM_SHADER)
                 .setTextureState(new TextureStateShard(InventoryMenu.BLOCK_ATLAS, false, true))
@@ -33,7 +39,7 @@ public final class TechCoreRenderTypes extends RenderType {
                 .createCompositeState(true);
 
         return create(
-                "techcore_temperature_item",
+                "temperature_item",
                 DefaultVertexFormat.NEW_ENTITY,
                 VertexFormat.Mode.QUADS,
                 256,

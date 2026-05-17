@@ -2,10 +2,10 @@ package com.mightydanp.techcore.api.resources.assets.contents.model;
 
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
 
@@ -31,10 +31,9 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
     }
 
     public TCModelBuilder<A> basicItem(Item item) {
-        return basicItem(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)));
+        return basicItem(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)));
     }
 
-    @SuppressWarnings("unchecked")
     public TCModelBuilder<A> basicItem(ResourceLocation item) {
         TCModelBuilder<A> model = new TCModelBuilder<A>(item)
                 .parent(new ModelFile.UncheckedModelFile("item/generated"));

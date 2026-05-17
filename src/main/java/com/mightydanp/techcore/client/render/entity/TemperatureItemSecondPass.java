@@ -1,15 +1,19 @@
-package com.mightydanp.techcore.client.render;
+package com.mightydanp.techcore.client.render.entity;
 
+import com.mightydanp.techcore.client.event.ItemRenderEventGuard;
+import com.mightydanp.techcore.client.render.TemperatureRenderType;
+import com.mightydanp.techcore.client.render.TemperatureVertexConsumer;
 import com.mightydanp.techcore.mixin.client.ItemRendererAccessor;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.RenderTypeHelper;
 
 public final class TemperatureItemSecondPass {
     private TemperatureItemSecondPass() {}
@@ -21,7 +25,11 @@ public final class TemperatureItemSecondPass {
 
         if (strength <= 0.0F) return;
 
-        int color = TemperatureClientRender.getColor(stack);
+        Double itemTemperature = Temperature.getTemperature(stack);
+
+        if(itemTemperature == null) return;
+
+        int color = new Temperature(itemTemperature, Temperature.getScale()).getColor(stack);
 
         ItemRenderEventGuard.startExtraPass();
 
@@ -32,19 +40,15 @@ public final class TemperatureItemSecondPass {
                 strength *= 0.65F;
             }
 
-            RenderType temperatureRenderType = TechCoreRenderTypes.temperatureItem();
+            RenderType temperatureRenderType = TemperatureRenderType.temperatureItem();
 
             if (bufferSource instanceof MultiBufferSource.BufferSource bufferSourceImpl) {
                 flushVanillaItemRenderTypes(bufferSourceImpl, stack, model);
             }
 
-            //scaleAroundItemCenter(poseStack, 1.001F);
-
             //TechCore.LOGGER.info("Temperature pass rendering {}", stack.getHoverName().getString());
 
-            VertexConsumer baseConsumer = bufferSource.getBuffer(
-                    TechCoreRenderTypes.temperatureItem()
-            );
+            VertexConsumer baseConsumer = bufferSource.getBuffer(temperatureRenderType);
 
             VertexConsumer temperatureConsumer = new TemperatureVertexConsumer(baseConsumer, color, strength);
 
@@ -59,12 +63,6 @@ public final class TemperatureItemSecondPass {
         }
     }
 
-    private static void scaleAroundItemCenter(PoseStack poseStack, float scale) {
-        poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.scale(scale, scale, scale);
-        poseStack.translate(-0.5F, -0.5F, -0.5F);
-    }
-
     private static void flushVanillaItemRenderTypes(
             MultiBufferSource.BufferSource bufferSource,
             ItemStack stack,
@@ -74,7 +72,7 @@ public final class TemperatureItemSecondPass {
          * Flush the common vanilla item render type.
          * This covers most simple items.
          */
-        bufferSource.endBatch(ItemBlockRenderTypes.getRenderType(stack, true));
+        bufferSource.endBatch(RenderTypeHelper.getFallbackItemRenderType(stack, model, true));
 
         /*
          * Flush Forge model render passes.

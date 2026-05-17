@@ -1,7 +1,8 @@
-package com.mightydanp.techcore.client.render;
+package com.mightydanp.techcore.client.event;
 
-import com.mightydanp.techcore.client.event.RenderItemEvent;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.client.render.entity.TemperatureClientRender;
+import com.mightydanp.techcore.client.render.entity.TemperatureItemSecondPass;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,10 +16,11 @@ import net.minecraftforge.fml.common.Mod;
         bus = Mod.EventBusSubscriber.Bus.FORGE
 )
 public final class TemperatureItemRenderEvents {
-    private TemperatureItemRenderEvents() {}
+    private TemperatureItemRenderEvents() {
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onRenderItemPost(RenderItemEvent.Post event) {
+    public static void onRenderItemDuring(RenderItemEvent.During event) {
         ItemStack stack = event.getStack();
 
         if (!TemperatureClientRender.shouldRender(stack, event.getDisplayContext())) {

@@ -6,7 +6,6 @@ import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CrossCollisionBlock;
@@ -16,8 +15,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.*;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Constructor;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class BlockStateContent<A extends BlockStateContent<A>> {
@@ -82,7 +83,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     }
 
     ResourceLocation key(Block block) {
-        return BuiltInRegistries.BLOCK.getKey(block);
+        return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block));
     }
 
     public BlockStateContent<A> setBlockState(IGeneratedBlockState generatedBlockState) {

@@ -264,6 +264,7 @@ public class TCModelBuilder<A> extends ModelFile {
         return rootTransforms;
     }
 
+    @SuppressWarnings("ALL")
     @VisibleForTesting
     public JsonObject toJson() {
         JsonObject root = new JsonObject();
@@ -606,6 +607,7 @@ public class TCModelBuilder<A> extends ModelFile {
             return new BlockElement(from, to, faces, rotation == null ? null : rotation.build(), shade, new ForgeFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion, this.calculateNormals));
         }
 
+        @SuppressWarnings("ALL")
         public class FaceBuilder {
 
             private Direction cullface;

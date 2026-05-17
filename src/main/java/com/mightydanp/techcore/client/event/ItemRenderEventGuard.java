@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.client.render;
+package com.mightydanp.techcore.client.event;
 
 public final class ItemRenderEventGuard {
     private static final ThreadLocal<Boolean> RENDERING_EXTRA_PASS =
@@ -15,6 +15,6 @@ public final class ItemRenderEventGuard {
     }
 
     public static void endExtraPass() {
-        RENDERING_EXTRA_PASS.set(false);
+        RENDERING_EXTRA_PASS.remove();
     }
 }

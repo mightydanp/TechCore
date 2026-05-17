@@ -1,6 +1,7 @@
-package com.mightydanp.techcore.client.render;
+package com.mightydanp.techcore.client.event;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.client.render.TemperatureRenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,6 +23,14 @@ public final class ClientShaderEvents {
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "rendertype_temperature_item"), DefaultVertexFormat.NEW_ENTITY), TechCoreRenderTypes::setTemperatureItemShader);
+        ResourceLocation shaderLocation = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "rendertype_temperature_item");
+        event.registerShader(new ShaderInstance(
+                event.getResourceProvider(),
+                        shaderLocation,
+                        DefaultVertexFormat.NEW_ENTITY
+                ),
+
+                TemperatureRenderType::setTemperatureItemShader
+        );
     }
 }

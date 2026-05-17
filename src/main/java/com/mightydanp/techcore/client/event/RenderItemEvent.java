@@ -10,7 +10,8 @@ import net.minecraftforge.eventbus.api.Event;
 /**
  * Fired from ItemRenderer#render on the Forge event bus.
  * Pre is fired before vanilla item model rendering.
- * Post is fired after vanilla item model rendering.
+ * During is fired after vanilla item model rendering and before the render tail.
+ * Post is fired at the tail of item rendering.
  * This event is intended for additional rendering only.
  * Subscribers should not mutate the ItemStack, replace the model, or flush the
  * provided MultiBufferSource.
@@ -27,6 +28,7 @@ public abstract class RenderItemEvent extends Event {
     private final int packedLight;
     private final int packedOverlay;
     private final BakedModel model;
+    private final ItemRenderPassPhase renderPassPhase;
 
     protected RenderItemEvent(
             ItemStack stack,
@@ -36,7 +38,8 @@ public abstract class RenderItemEvent extends Event {
             MultiBufferSource bufferSource,
             int packedLight,
             int packedOverlay,
-            BakedModel model
+            BakedModel model,
+            ItemRenderPassPhase renderPassPhase
     ) {
         this.stack = stack;
         this.displayContext = displayContext;
@@ -46,6 +49,7 @@ public abstract class RenderItemEvent extends Event {
         this.packedLight = packedLight;
         this.packedOverlay = packedOverlay;
         this.model = model;
+        this.renderPassPhase = renderPassPhase;
     }
 
     public ItemStack getStack() {
@@ -80,6 +84,10 @@ public abstract class RenderItemEvent extends Event {
         return this.model;
     }
 
+    public ItemRenderPassPhase getRenderPassPhase() {
+        return this.renderPassPhase;
+    }
+
     public static class Pre extends RenderItemEvent {
         public Pre(
                 ItemStack stack,
@@ -91,13 +99,26 @@ public abstract class RenderItemEvent extends Event {
                 int packedOverlay,
                 BakedModel model
         ) {
-            super(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model);
+            super(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model, ItemRenderPassPhase.BEFORE_EFFECTS);
+        }
+    }
+
+    public static class During extends RenderItemEvent {
+        public During(
+                ItemStack stack,
+                ItemDisplayContext displayContext,
+                boolean leftHanded,
+                PoseStack poseStack,
+                MultiBufferSource bufferSource,
+                int packedLight,
+                int packedOverlay,
+                BakedModel model
+        ) {
+            super(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model, ItemRenderPassPhase.EFFECTS);
         }
     }
 
     public static class Post extends RenderItemEvent {
-        //private final ItemRenderPassPhase phase;
-
         public Post(
                 ItemStack stack,
                 ItemDisplayContext displayContext,
@@ -108,7 +129,7 @@ public abstract class RenderItemEvent extends Event {
                 int packedOverlay,
                 BakedModel model
         ) {
-            super(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model);
+            super(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model, ItemRenderPassPhase.AFTER_EFFECTS);
         }
     }
 }

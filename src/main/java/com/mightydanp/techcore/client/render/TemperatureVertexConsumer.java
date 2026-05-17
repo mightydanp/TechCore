@@ -2,19 +2,17 @@ package com.mightydanp.techcore.client.render;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.Mth;
+import net.minecraftforge.client.model.pipeline.VertexConsumerWrapper;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
-public final class TemperatureVertexConsumer implements VertexConsumer {
-    private final VertexConsumer parent;
+public final class TemperatureVertexConsumer extends VertexConsumerWrapper {
     private final int r;
     private final int g;
     private final int b;
     private final int a;
 
     public TemperatureVertexConsumer(VertexConsumer parent, int rgb, float strength) {
-        this.parent = parent;
+        super(parent);
         this.r = (rgb >> 16) & 0xFF;
         this.g = (rgb >> 8) & 0xFF;
         this.b = rgb & 0xFF;
@@ -22,65 +20,12 @@ public final class TemperatureVertexConsumer implements VertexConsumer {
     }
 
     @Override
-    public @NotNull VertexConsumer vertex(double x, double y, double z) {
-        this.parent.vertex(x, y, z);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer vertex(@NotNull Matrix4f matrix, float x, float y, float z) {
-        this.parent.vertex(matrix, x, y, z);
-        return this;
-    }
-
-    @Override
     public @NotNull VertexConsumer color(int red, int green, int blue, int alpha) {
-        this.parent.color(this.r, this.g, this.b, this.a);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer uv(float u, float v) {
-        this.parent.uv(u, v);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer overlayCoords(int u, int v) {
-        this.parent.overlayCoords(u, v);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer uv2(int u, int v) {
-        this.parent.uv2(u, v);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer normal(float x, float y, float z) {
-        this.parent.normal(x, y, z);
-        return this;
-    }
-
-    @Override
-    public @NotNull VertexConsumer normal(@NotNull Matrix3f matrix, float x, float y, float z) {
-        this.parent.normal(matrix, x, y, z);
-        return this;
-    }
-
-    @Override
-    public void endVertex() {
-        this.parent.endVertex();
+        return super.color(this.r, this.g, this.b, this.a);
     }
 
     @Override
     public void defaultColor(int red, int green, int blue, int alpha) {
-        this.parent.defaultColor(this.r, this.g, this.b, this.a);
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-        this.parent.unsetDefaultColor();
+        super.defaultColor(this.r, this.g, this.b, this.a);
     }
 }

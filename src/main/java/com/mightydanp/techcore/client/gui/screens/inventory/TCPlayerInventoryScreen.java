@@ -3,8 +3,9 @@ package com.mightydanp.techcore.client.gui.screens.inventory;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.world.inventory.TCPlayerInventoryMenu;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
@@ -123,12 +124,28 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         }
 
         entityrenderdispatcher.setRenderShadow(false);
-        RenderSystem.runAsFancy(() -> entityrenderdispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880));
+        renderAsFancy(() -> entityrenderdispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880));
         guiGraphics.flush();
         entityrenderdispatcher.setRenderShadow(true);
         guiGraphics.pose().popPose();
         Lighting.setupFor3DItems();
     }
+
+    private static void renderAsFancy(Runnable renderCall) {
+        if (!Minecraft.useShaderTransparency()) {
+            renderCall.run();
+            return;
+            }
+        
+        OptionInstance<GraphicsStatus> graphicsMode = Minecraft.getInstance().options.graphicsMode();
+        GraphicsStatus previousGraphicsMode = graphicsMode.get();
+        graphicsMode.set(GraphicsStatus.FANCY);
+        try {
+                renderCall.run();
+            } finally {
+                graphicsMode.set(previousGraphicsMode);
+            }
+        }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -150,11 +167,6 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         } else {
             return super.mouseReleased(mouseX, mouseY, button);
         }
-    }
-
-    @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int mouseButton) {
-        return mouseX < (double) guiLeft || mouseY < (double) guiTop || mouseX >= (double) (guiLeft + this.imageWidth) || mouseY >= (double) (guiTop + this.imageHeight);
     }
 
     protected void slotClicked(@NotNull Slot slot, int slotId, int mouseButton, @NotNull ClickType type) {

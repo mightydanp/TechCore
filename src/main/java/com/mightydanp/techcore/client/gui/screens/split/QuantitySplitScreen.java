@@ -1,36 +1,35 @@
 package com.mightydanp.techcore.client.gui.screens.split;
 
 import com.mightydanp.techcore.client.ref.ScreenRef;
-import com.mightydanp.techcore.materials.Item.DustItem;
+import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.network.TCNetworkChannel;
 import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
+import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.widget.ForgeSlider;
 import org.jetbrains.annotations.NotNull;
 
-// Overlay screen shown when the player right-clicks an empty inventory slot while holding a DustItem.
-// Renders on top of the parent screen (the inventory the player had open).
+
 public class QuantitySplitScreen extends Screen {
-    // The screen that was open before this one — rendered behind and returned to on close
     private final Screen parent;
-    // The dust ItemStack currently held in the player's cursor
+
     private final ItemStack cursorStack;
     private final Slot hoveredSlot;
-    // The inventory slot index the player right-clicked — where the split dust will be placed
+
     private final int slotIndex;
-    // The slider widget used to choose how much dust to split off
+
     private ForgeSlider slider;
     private Runnable pendingCloseAction = null;
 
-    // title is the screen name shown in the title bar, looked up from the lang file
     public QuantitySplitScreen(Screen parent, ItemStack cursorStack, Slot hoverSlot, int slotIndex) {
         super(Component.translatable(ScreenRef.quantity_split_screen));
         this.parent = parent;
@@ -39,88 +38,108 @@ public class QuantitySplitScreen extends Screen {
         this.slotIndex = slotIndex;
     }
 
-    // init() is called by Minecraft whenever the screen is (re)opened or the window is resized.
-    // this.width and this.height are set before init() runs, so it's safe to use them for positioning.
     @Override
     protected void init() {
-        // Safety check — only build widgets if the cursor item is actually a DustItem
-        boolean slotCompatible = !hoveredSlot.hasItem() || hoveredSlot.getItem().getDisplayName().getString().equals(cursorStack.getDisplayName().getString());
+        if (!(cursorStack.getItem() instanceof MaterialItem cursorMaterial)) return;
 
-        if (cursorStack.getItem() instanceof DustItem cursorDust && slotCompatible)  {
-            //if()
-            int cursorQuantity = cursorDust.getQuantity(cursorStack);
+        Integer cursorQuantity = Quantity.getQuantity(cursorStack);
+        Integer cursorMaxQuantity = cursorMaterial.getMaxQuantity();
 
-            // Slider's max value depends on the target slot:
-            //   - Empty slot:                full cursor amount
-            //   - Slot has the same dust:    min(cursor amount, remaining capacity in the slot)
-            //   - Slot has anything else:    shouldn't happen (event prevents it), fall back to 1
-            //
-            // Same-dust check uses display name string equality, matching what the event handler
-            // does. Two DustItem instances are NOT enough — different materials can both be
-            // DustItem but should never merge.
-            int quantity;
-            if (!hoveredSlot.hasItem()) {
-                quantity = cursorQuantity;
-            } else if (hoveredSlot.getItem().getItem() instanceof DustItem slotDust) {
-                int slotQuantity = slotDust.getQuantity(hoveredSlot.getItem());
-                quantity = Math.min(cursorQuantity, slotDust.getMaxQuantity() - slotQuantity);
-            } else {
-                quantity = 1;
-            }
+        if (cursorQuantity == null || cursorMaxQuantity == null) return;
 
-            // Failsafe — never let the slider exceed this material's maxQuantity, even if the
-            // math above somehow produced a larger value.
-            quantity = Math.min(quantity, cursorDust.getMaxQuantity());
+        int quantity;
+        if (!hoveredSlot.hasItem()) {
+            quantity = cursorQuantity;
+        } else if (hoveredSlot.getItem().getItem() instanceof MaterialItem slotMaterial && canMergeQuantityStacks(cursorStack, hoveredSlot.getItem())) {
+            Integer slotQuantity = Quantity.getQuantity(hoveredSlot.getItem());
+            Integer slotMaxQuantity = slotMaterial.getMaxQuantity();
 
-            // Slider — lets the player choose how much dust to split off (1 to current quantity)
-            // Centered horizontally, slightly above the middle of the screen
-            slider = addRenderableWidget(new ForgeSlider(
-                    this.width / 2 - 75, this.height / 2 - 10,  // x, y — centered
-                    150, 20,                                      // width, height
-                    Component.translatable(ScreenRef.quantity_split_amount), Component.empty(), // prefix label, no suffix
-                    1, quantity,   // min value, max value
-                    quantity,      // starting value — defaults to the full current amount
-                    1, 0, true     // step size 1 (whole units only), precision 0, draw the value as text
-            ){
-                {
-                    if (Double.isNaN(value)) value = 1.0;
-                }
-            });
+            if (slotQuantity == null || slotMaxQuantity == null) return;
 
-            // Confirm button — green checkmark, sends the split packet then closes the screen
-            addRenderableWidget(Button.builder(
-                    Component.literal("✔").withStyle(ChatFormatting.GREEN),
-                    btn -> {
-                        int splitAmount = slider.getValueInt();
-                        TCNetworkChannel.INSTANCE.sendToServer(
-                                new ServerBoundSplitQuantityPacket(slotIndex, splitAmount, this.cursorStack)
-                        );
-                        if (parent instanceof CreativeModeInventoryScreen cs) {
-                            int newQty = cursorDust.getQuantity(cursorStack) - splitAmount;
-                            if (newQty <= 0) {
-                                cs.getMenu().setCarried(ItemStack.EMPTY);
-                            } else {
-                                ItemStack newCursor = cursorStack.copy();
-                                cursorDust.setQuantity(newCursor, newQty);
-                                cs.getMenu().setCarried(newCursor);
-                            }
-                        }
-                        pendingCloseAction = this::onClose;
-                    }).bounds(
-                    this.width / 2 + 5,    // x — 5px right of center
-                    this.height / 2 + 20,  // y — 20px below center, below the slider
-                    20, 20                 // small square button
-            ).build());
-
-            // Cancel button — red X, discards the split and returns to parent without sending a packet
-            addRenderableWidget(Button.builder(
-                    Component.literal("✘").withStyle(ChatFormatting.RED),
-                    btn -> pendingCloseAction = this::onClose).bounds(
-                    this.width / 2 - 25,   // x — 25px left of center (20px button width + 5px gap)
-                    this.height / 2 + 20,  // y — same row as the confirm button
-                    20, 20                 // small square button
-            ).build());
+            quantity = Math.min(cursorQuantity, slotMaxQuantity - slotQuantity);
+        } else {
+            return;
         }
+
+        quantity = Math.min(quantity, cursorMaxQuantity);
+
+        if (quantity < 1) return;
+
+        slider = addRenderableWidget(new ForgeSlider(
+                this.width / 2 - 75,
+                this.height / 2 - 10,
+                150,
+                20,
+                Component.translatable(ScreenRef.quantity_split_amount),
+                Component.empty(),
+                1,
+                quantity,
+                quantity,
+                1,
+                0,
+                true
+        ){
+            {
+                if (Double.isNaN(value)) value = 1.0;
+            }
+        });
+
+        // Confirm button — green checkmark, sends the split packet then closes the screen
+        addRenderableWidget(Button.builder(
+                Component.literal("✔").withStyle(ChatFormatting.GREEN),
+                btn -> {
+                    int splitAmount = slider.getValueInt();
+                    TCNetworkChannel.INSTANCE.sendToServer(
+                            new ServerBoundSplitQuantityPacket(slotIndex, splitAmount, this.cursorStack)
+                    );
+                    if (parent instanceof CreativeModeInventoryScreen cs) {
+                        int newQty = cursorQuantity - splitAmount;
+                        if (newQty <= 0) {
+                            cs.getMenu().setCarried(ItemStack.EMPTY);
+                        } else {
+                            ItemStack newCursor = cursorStack.copy();
+                            Quantity.setQuantity(newCursor, newQty, cursorMaxQuantity);
+                            cs.getMenu().setCarried(newCursor);
+                        }
+                    }
+                    pendingCloseAction = this::onClose;
+                }).bounds(
+                this.width / 2 + 5,    // x — 5px right of center
+                this.height / 2 + 20,  // y — 20px below center, below the slider
+                20, 20                 // small square button
+        ).build());
+
+        // Cancel button — red X, discards the split and returns to parent without sending a packet
+        addRenderableWidget(Button.builder(
+                Component.literal("✘").withStyle(ChatFormatting.RED),
+                btn -> pendingCloseAction = this::onClose).bounds(
+                this.width / 2 - 25,   // x — 25px left of center (20px button width + 5px gap)
+                this.height / 2 + 20,  // y — same row as the confirm button
+                20, 20// small square button
+        ).build());
+    }
+
+    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
+        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
+            return false;
+        }
+
+        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
+    }
+
+    private static ItemStack withoutQuantity(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        CompoundTag tag = copy.getTag();
+
+        if (tag != null) {
+            tag.remove(Quantity.TAG);
+
+            if (tag.isEmpty()) {
+                copy.setTag(null);
+            }
+        }
+
+        return copy;
     }
 
     @Override

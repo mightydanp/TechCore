@@ -2,6 +2,7 @@ package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.world.item.properties.Quality;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -19,8 +20,10 @@ public class GemItem extends MaterialItem {
     }
 
     public float getGemQuality(ItemStack itemStack) {
-        int quality = getQuality(itemStack);
+        Integer quality = Quality.getQuality(itemStack);
         int maxQuality = ((GemItem)itemStack.getItem()).getMaxQuality();
+
+        if (quality == null) return 0.6f;
 
         if (quality <= (maxQuality / 5))        return 0.2f; //chipped
         if (quality <= (maxQuality * 2 / 5))    return 0.4f; //flawed

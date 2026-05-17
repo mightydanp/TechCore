@@ -1,6 +1,8 @@
 package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.world.item.ItemStack;
 
 
@@ -10,7 +12,7 @@ public class DustItem extends MaterialItem{
     }
 
     public float getQuantityLevel(ItemStack itemStack) {
-        Integer quantity = ((DustItem)itemStack.getItem()).getQuantity(itemStack);
+        Integer quantity = Quantity.getQuantity(itemStack);
         Integer maxQuantity = ((DustItem)itemStack.getItem()).getMaxQuantity();
 
         if(maxQuantity == null || quantity == null) return -1;
@@ -25,7 +27,7 @@ public class DustItem extends MaterialItem{
     }
 
     public float getPurityLevel(ItemStack itemStack) {
-        Double purity = ((DustItem)itemStack.getItem()).getPurity(itemStack);
+        Double purity = Purity.getPurity(itemStack);
         Double maxPurity = ((DustItem)itemStack.getItem()).getMaxPurity();
 
         if(maxPurity == null || purity == null) return -1;
@@ -36,4 +38,6 @@ public class DustItem extends MaterialItem{
 
         return 1.0f;//pure
     }
+
+
 }

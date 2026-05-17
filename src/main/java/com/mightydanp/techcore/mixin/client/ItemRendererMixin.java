@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.mixin.client;
 
 import com.mightydanp.techcore.client.event.RenderItemEvent;
-import com.mightydanp.techcore.client.render.ItemRenderEventGuard;
+import com.mightydanp.techcore.client.event.ItemRenderEventGuard;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -45,13 +45,21 @@ public abstract class ItemRendererMixin {
                     shift = At.Shift.AFTER
             )
     )
+    private void duringRenderItem(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model, CallbackInfo ci) {
+        if (stack.isEmpty()) return;
+        if (ItemRenderEventGuard.isRenderingExtraPass()) return;
+
+        MinecraftForge.EVENT_BUS.post(new RenderItemEvent.During(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model));
+    }
+
+    @Inject(
+            method = "render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V",
+            at = @At("TAIL")
+    )
     private void postRenderItem(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model, CallbackInfo ci) {
         if (stack.isEmpty()) return;
         if (ItemRenderEventGuard.isRenderingExtraPass()) return;
 
-        MinecraftForge.EVENT_BUS.post(new RenderItemEvent.Post(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model
-        ));
-
-        //System.out.println("TECHCORE ItemRendererMixin POST HIT: " + stack.getHoverName().getString());
+        MinecraftForge.EVENT_BUS.post(new RenderItemEvent.Post(stack, displayContext, leftHanded, poseStack, bufferSource, packedLight, packedOverlay, model));
     }
 }

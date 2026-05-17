@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.tags.ITagManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -19,6 +21,7 @@ public class TagContent<A> {
     private final TagKey<A> tagKey;
     private final Set<ResourceLocation> values = new HashSet<>();
     private final @Nullable Registry<A> registry;
+    private final @Nullable IForgeRegistry<A> forgeRegistry;
     private final ResourceKey<? extends Registry<A>> resourceKey;
 
     public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry) {
@@ -26,6 +29,7 @@ public class TagContent<A> {
         this.name = resourceLocation.getPath();
         tagKey = TagKey.create(ResourceKey, resourceLocation);
         this.registry = registry;
+        this.forgeRegistry = null;
         this.resourceKey = ResourceKey;
     }
 
@@ -34,6 +38,25 @@ public class TagContent<A> {
         this.name = name;
         tagKey = TagKey.create(ResourceKey, ResourceLocation.fromNamespaceAndPath(modid, name));
         this.registry = registry;
+        this.forgeRegistry = null;
+        this.resourceKey = ResourceKey;
+    }
+
+    public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable IForgeRegistry<A> forgeRegistry) {
+        this.modid = resourceLocation.getNamespace();
+        this.name = resourceLocation.getPath();
+        tagKey = TagKey.create(ResourceKey, resourceLocation);
+        this.registry = null;
+        this.forgeRegistry = forgeRegistry;
+        this.resourceKey = ResourceKey;
+    }
+
+    public TagContent(String modid, String name, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable IForgeRegistry<A> forgeRegistry) {
+        this.modid = modid;
+        this.name = name;
+        tagKey = TagKey.create(ResourceKey, ResourceLocation.fromNamespaceAndPath(modid, name));
+        this.registry = null;
+        this.forgeRegistry = forgeRegistry;
         this.resourceKey = ResourceKey;
     }
 
@@ -50,9 +73,21 @@ public class TagContent<A> {
         return this;
     }
 
+    private boolean hasRegistry() {
+        return registry != null || forgeRegistry != null;
+    }
+
+    private @Nullable ResourceLocation key(A object) {
+        if (forgeRegistry != null) {
+            return forgeRegistry.getKey(object);
+        }
+
+        return registry == null ? null : registry.getKey(object);
+    }
+
     public TagContent<A> add(A object) {
-        if (registry != null) {
-            builder.addElement(Objects.requireNonNull(registry.getKey(object)));
+        if (hasRegistry()) {
+            builder.addElement(Objects.requireNonNull(key(object)));
         }
 
         return this;
@@ -60,26 +95,27 @@ public class TagContent<A> {
 
     @SafeVarargs
     public final TagContent<A> addAll(A... objects) {
-        if (registry != null) {
-            Arrays.stream(objects).forEach(object -> builder.addElement(Objects.requireNonNull(registry.getKey(object))));
+        if (hasRegistry()) {
+            Arrays.stream(objects).forEach(object -> builder.addElement(Objects.requireNonNull(key(object))));
         }
 
         return this;
     }
 
     public TagContent<A> remove(A object, String modid) {
-        if (registry != null) {
+        if (hasRegistry()) {
             //re-look builder.removeElement
-            builder.removeElement(registry.getKey(object), Objects.requireNonNull(registry.getKey(object)).getNamespace());
+            ResourceLocation resourceLocation = Objects.requireNonNull(key(object));
+            builder.removeElement(resourceLocation, resourceLocation.getNamespace());
         }
 
         return this;
     }
 
     public final TagContent<A> removeAll(Map<A, String> list) {
-        if (registry != null) {
+        if (hasRegistry()) {
             //re-look builder.removeElement
-            list.forEach((object, modid) -> builder.removeElement(Objects.requireNonNull(registry.getKey(object)), modid));
+            list.forEach((object, modid) -> builder.removeElement(Objects.requireNonNull(key(object)), modid));
         }
 
         return this;
@@ -92,6 +128,11 @@ public class TagContent<A> {
     public TagContent<A> addExisting() {
         if (registry != null) {
             registry.getTag(tagKey).ifPresent(holders -> holders.forEach(aHolder -> add(aHolder.value())));
+        } else if (forgeRegistry != null) {
+            ITagManager<A> tags = forgeRegistry.tags();
+            if (tags != null) {
+                tags.getTag(tagKey).stream().forEach(this::add);
+            }
         }
         return this;
     }

@@ -2,10 +2,11 @@ package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialProperties;
-import com.mightydanp.techcore.materials.properties.Temperature;
-import net.minecraft.nbt.CompoundTag;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quality;
+import com.mightydanp.techcore.world.item.properties.Quantity;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -43,9 +44,13 @@ public class MaterialItem extends Item {
 
     @Override
     public boolean isBarVisible(@NotNull ItemStack itemStack) {
-        Integer maxQuantity = getMaxQuantity();
-        if(maxQuantity != null){
-            return hasQuantity(itemStack) && getQuantity(itemStack) < maxQuantity;
+        Integer maxQuantity = this.getMaxQuantity();
+
+        if(maxQuantity != null) {
+            Integer fallbackQuantity = defaultQuantity == null ? maxQuantity : defaultQuantity;
+            int quantity = java.util.Objects.requireNonNull(Quantity.getQuantityOrDefault(itemStack, fallbackQuantity));
+
+            return Quantity.hasQuantity(itemStack) && quantity < maxQuantity;
         }
 
         return super.isBarVisible(itemStack);
@@ -53,25 +58,41 @@ public class MaterialItem extends Item {
 
     @Override
     public int getBarWidth(@NotNull ItemStack itemStack) {
-        Integer maxQuantity = getMaxQuantity();
+        Integer maxQuantity = this.getMaxQuantity();
 
-        if (maxQuantity == null) return super.getBarWidth(itemStack);
+        if(maxQuantity != null) {
+            Integer fallbackQuantity = defaultQuantity == null ? maxQuantity : defaultQuantity;
+            int quantity = java.util.Objects.requireNonNull(
+                    Quantity.getQuantityOrDefault(itemStack, fallbackQuantity)
+            );
 
-        return Math.round(13.0f * getQuantity(itemStack) / this.getMaxQuantity());
+            return Math.round(13.0f * quantity / maxQuantity);
+        }
+
+        return super.getBarWidth(itemStack);
     }
+
 
     @Override
     public int getBarColor(@NotNull ItemStack itemStack) {
-        Integer maxQuantity = getMaxQuantity();
+        Integer maxQuantity = this.getMaxQuantity();
 
-        if (getMaxQuantity() == null) return super.getBarColor(itemStack);
+        if(maxQuantity != null) {
+            Integer fallbackQuantity = defaultQuantity == null ? maxQuantity : defaultQuantity;
+            int quantity = java.util.Objects.requireNonNull(
+                    Quantity.getQuantityOrDefault(itemStack, fallbackQuantity)
+            );
 
-        if(hasQuantity(itemStack)) {
             int barColor = 0xFFFFFFFF;
-            if (getQuantity(itemStack) < this.getMaxQuantity() / 2 && getQuantity(itemStack) > this.getMaxQuantity() / 4)
+
+            if (quantity < maxQuantity / 2 && quantity > maxQuantity / 4)
                 barColor = 0xFFFFFF00;
-            if (getQuantity(itemStack) <= this.getMaxQuantity() / 4) barColor = 0xFFFF0000;
-            if (getQuantity(itemStack) <= 1) barColor = 0xFF000000;
+
+            if (quantity <= maxQuantity / 4)
+                barColor = 0xFFFF0000;
+
+            if (quantity <= 1)
+                barColor = 0xFF000000;
 
             return barColor;
         }
@@ -79,27 +100,33 @@ public class MaterialItem extends Item {
         return super.getBarColor(itemStack);
     }
 
+
+
     @Override
     public void appendHoverText(@NotNull ItemStack itemStack, @Nullable Level level, @NotNull List<Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
-        if(hasTemperature(itemStack)) {
-            Temperature temperature = new Temperature(getTemperature(itemStack), Temperature.getScale());
-            tooltip.add(Component.translatable(MaterialRef.temperature_translatable).append(" : " + temperature.getTemperature(temperature.scale()) + " " + temperature.scale().label()));
-        }
+        Temperature temperature = Temperature.fromStack(itemStack);
 
         if (symbol != null) {
             tooltip.add(Component.nullToEmpty(symbol));
         }
 
-        if(hasQuantity(itemStack)) {
-            tooltip.add(Component.translatable(MaterialRef.quantity_translatable).append(" : " + getQuantity(itemStack) + "/" + this.getMaxQuantity()));
+        if(temperature != null) {
+            tooltip.add(Component.translatable(MaterialRef.temperature_translatable).append(" : " + temperature.getTemperature(temperature.scale()) + " " + temperature.scale().label()));
         }
 
-        if(hasQuality(itemStack)) {
-            tooltip.add(Component.translatable(MaterialRef.quality_translatable).append(" : " + getQuality(itemStack)));
+        Integer quantity = Quantity.getQuantityOrDefault(itemStack, defaultQuantity == null ? maxQuantity : defaultQuantity);
+        if(quantity != null) {
+            tooltip.add(Component.translatable(MaterialRef.quantity_translatable).append(" : " + quantity + "/" + this.getMaxQuantity()));
         }
 
-        if(hasPurity(itemStack)) {
-            tooltip.add(Component.translatable(MaterialRef.purity_translatable).append(" : "+ getPurity(itemStack)));
+        Integer quality = Quality.getQualityOrDefault(itemStack, defaultQuality);
+        if(quality != null) {
+            tooltip.add(Component.translatable(MaterialRef.quality_translatable).append(" : " + quality));
+        }
+
+        Double purity = Purity.getPurityOrDefault(itemStack, defaultPurity);
+        if(purity != null) {
+            tooltip.add(Component.translatable(MaterialRef.purity_translatable).append(" : "+ Purity.getPurityOrDefault(itemStack, purity)));
         }
 
         if (getMeltingPoint() != null) {
@@ -121,10 +148,6 @@ public class MaterialItem extends Item {
         return color;
     }
 
-    public Double getTemperature(ItemStack itemStack) {
-        return Temperature.getTemperature(itemStack);
-    }
-
     public Double getBoilingPoint() {
         return boilingPoint;
     }
@@ -143,77 +166,6 @@ public class MaterialItem extends Item {
 
     public Double getMaxPurity() {
         return maxPurity;
-
-    }
-
-    public Integer getQuantity(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-
-        if (tag != null && tag.contains("quantity")) {
-            return tag.getInt("quantity");
-        } else {
-            setQuantity(itemStack, this.defaultQuantity);
-            return this.defaultQuantity;
-        }
-    }
-
-    public Integer getQuality(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-        if (tag != null && tag.contains("quality")) {
-            return tag.getInt("quality");
-        } else {
-            setQuality(itemStack, this.defaultQuality);
-            return this.defaultQuality;
-        }
-    }
-
-    public Double getPurity(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-        if (tag != null && tag.contains("purity")) {
-            return tag.getDouble("purity");
-        } else {
-            setPurity(itemStack, this.defaultPurity);
-            return this.defaultPurity;
-        }
-
-    }
-
-    public void setTemperature(ItemStack itemStack, double value) {
-        itemStack.getOrCreateTag().putDouble("temperature", value);
-    }
-
-    public void setQuantity(ItemStack itemStack, int value) {
-        Integer maxQuantity = getMaxQuantity();
-        itemStack.getOrCreateTag().putInt("quantity", maxQuantity != null ? Mth.clamp(value, 0, maxQuantity) : value);
-    }
-
-    public void setQuality(ItemStack itemStack, int value) {
-        Integer maxQuality = getMaxQuality();
-        itemStack.getOrCreateTag().putInt("quality", maxQuality != null ? Mth.clamp(value, 0, maxQuality) : value);
-    }
-
-    public void setPurity(ItemStack itemStack, double value) {
-        Double maxPurity = getMaxPurity();
-        itemStack.getOrCreateTag().putDouble("purity", maxPurity != null ? Mth.clamp(value, 0, maxPurity) : value);
-    }
-
-    public boolean hasTemperature(ItemStack stack) {
-        return Temperature.hasTemperature(stack);
-    }
-
-    public boolean hasQuantity(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains("quantity");
-    }
-
-    public boolean hasQuality(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains("quality");
-    }
-
-    public boolean hasPurity(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains("purity");
     }
 
 

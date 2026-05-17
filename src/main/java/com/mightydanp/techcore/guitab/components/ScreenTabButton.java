@@ -86,7 +86,6 @@ public class ScreenTabButton extends Button {
     @Override
     public Tooltip getTooltip() {
         if (screenTab.tooltip != null) {
-            super.getTooltip();
             return screenTab.tooltip;
         }
 

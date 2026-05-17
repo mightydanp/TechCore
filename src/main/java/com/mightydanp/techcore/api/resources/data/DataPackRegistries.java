@@ -14,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,11 +99,11 @@ public class DataPackRegistries {
     }
 
     public static TagContent<Block> getBlockTag(ResourceLocation name) {
-        return blockTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, BuiltInRegistries.BLOCK));
+        return blockTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS));
     }
 
     public static TagContent<Block> getBlockTag(String modid, String name) {
-        return blockTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, BuiltInRegistries.BLOCK));
+        return blockTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, ForgeRegistries.BLOCKS));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -118,11 +119,11 @@ public class DataPackRegistries {
     }
 
     public static TagContent<Block> getBlockMineableTag(ResourceLocation name) {
-        return blockMineableTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, BuiltInRegistries.BLOCK));
+        return blockMineableTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS));
     }
 
     public static TagContent<Block> getBlockMineableTag(String modid, String name) {
-        return blockMineableTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, BuiltInRegistries.BLOCK));
+        return blockMineableTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, ForgeRegistries.BLOCKS));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -179,11 +180,11 @@ public class DataPackRegistries {
     }
 
     public static TagContent<EntityType<?>> getEntityTypeTag(ResourceLocation name) {
-        return entityTypeTag.getOrDefault(name, new TagContent<>(name, Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE));
+        return entityTypeTag.getOrDefault(name, new TagContent<>(name, Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES));
     }
 
     public static TagContent<EntityType<?>> getEntityTypeTag(String modid, String name) {
-        return entityTypeTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE));
+        return entityTypeTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -199,11 +200,11 @@ public class DataPackRegistries {
     }
 
     public static TagContent<Fluid> getFluidTag(ResourceLocation name) {
-        return fluidTag.getOrDefault(name, new TagContent<>(name, Registries.FLUID, BuiltInRegistries.FLUID));
+        return fluidTag.getOrDefault(name, new TagContent<>(name, Registries.FLUID, ForgeRegistries.FLUIDS));
     }
 
     public static TagContent<Fluid> getFluidTag(String modid, String name) {
-        return fluidTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.FLUID, BuiltInRegistries.FLUID));
+        return fluidTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.FLUID, ForgeRegistries.FLUIDS));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -260,11 +261,11 @@ public class DataPackRegistries {
 
 
     public static TagContent<Item> getItemTag(ResourceLocation name) {
-        return itemTag.getOrDefault(name, new TagContent<>(name, Registries.ITEM, BuiltInRegistries.ITEM));
+        return itemTag.getOrDefault(name, new TagContent<>(name, Registries.ITEM, ForgeRegistries.ITEMS));
     }
 
     public static TagContent<Item> getItemTag(String modid, String name) {
-        return itemTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ITEM, BuiltInRegistries.ITEM));
+        return itemTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ITEM, ForgeRegistries.ITEMS));
     }
 
     //------------------------------------------------------------------------------------------------------------------

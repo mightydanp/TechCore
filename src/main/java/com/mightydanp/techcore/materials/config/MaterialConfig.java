@@ -1,6 +1,6 @@
 package com.mightydanp.techcore.materials.config;
 
-import com.mightydanp.techcore.materials.properties.Temperature;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class MaterialConfig {

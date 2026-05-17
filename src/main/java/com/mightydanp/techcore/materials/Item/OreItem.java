@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.world.item.ItemStack;
 
 public class OreItem extends MaterialItem{
@@ -9,7 +10,7 @@ public class OreItem extends MaterialItem{
     }
 
     public float getQuantityLevel(ItemStack itemStack) {
-        Integer quantity = ((OreItem)itemStack.getItem()).getQuantity(itemStack);
+        Integer quantity = Quantity.getQuantity(itemStack);
         Integer maxQuantity = ((OreItem)itemStack.getItem()).getMaxQuantity();
 
         if(maxQuantity == null || quantity == null) return -1;

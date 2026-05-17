@@ -4,6 +4,9 @@ import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreCreativeTabsRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quality;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -57,35 +60,33 @@ public class TCCreativeModeTabs {
     public static final Supplier<CreativeModeTab> GEM_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register("gem_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable(CoreCreativeTabsRef.gem_tab))
             .icon(() -> new ItemStack(Items.DIAMOND))
-            .displayItems((params, output) -> {
-                RegistriesHandler.getMaterials().forEach(matObj -> {
-                    var mat = matObj.get();
-                    if (mat.ore.gem == null) return;
+            .displayItems((params, output) -> RegistriesHandler.getMaterials().forEach(matObj -> {
+                var mat = matObj.get();
+                if (mat.ore.gem == null) return;
 
-                    GemItem gemItem = (GemItem) mat.ore.gem.get();
-                    int max = mat.physical.getMaxQuality();
+                GemItem gemItem = (GemItem) mat.ore.gem.get();
+                int max = mat.physical.getMaxQuality();
 
-                    ItemStack chipped = new ItemStack(gemItem);
-                    gemItem.setQuality(chipped, max / 5);
-                    output.accept(chipped);
+                ItemStack chipped = new ItemStack(gemItem);
+                Quality.setQuality(chipped, max / 5);
+                output.accept(chipped);
 
-                    ItemStack flawed = new ItemStack(gemItem);
-                    gemItem.setQuality(flawed, max * 2 / 5);
-                    output.accept(flawed);
+                ItemStack flawed = new ItemStack(gemItem);
+                Quality.setQuality(flawed, max * 2 / 5);
+                output.accept(flawed);
 
-                    ItemStack normal = new ItemStack(gemItem);
-                    gemItem.setQuality(normal, max * 3 / 5);
-                    output.accept(normal);
+                ItemStack normal = new ItemStack(gemItem);
+                Quality.setQuality(normal, max * 3 / 5);
+                output.accept(normal);
 
-                    ItemStack flawless = new ItemStack(gemItem);
-                    gemItem.setQuality(flawless, max * 4 / 5);
-                    output.accept(flawless);
+                ItemStack flawless = new ItemStack(gemItem);
+                Quality.setQuality(flawless, max * 4 / 5);
+                output.accept(flawless);
 
-                    ItemStack legendary = new ItemStack(gemItem);
-                    gemItem.setQuality(legendary, max);
-                    output.accept(legendary);
-                });
-            })
+                ItemStack legendary = new ItemStack(gemItem);
+                Quality.setQuality(legendary, max);
+                output.accept(legendary);
+            }))
             .build()
     );
 
@@ -112,22 +113,22 @@ public class TCCreativeModeTabs {
 
                                     ItemStack impure = new ItemStack(dustItem);
                                     output.accept(impure);
-                                    dustItem.setPurity(impure, 25);
+                                    Purity.setPurity(impure, 25);
                                     ItemStack normal = new ItemStack(dustItem);
                                     output.accept(normal);
                                     ItemStack pure = new ItemStack(dustItem);
-                                    dustItem.setPurity(pure, 100);
+                                    Purity.setPurity(pure, 100);
                                     output.accept(pure);
 
                                     for (int temperature : coldTestTemperatures) {
                                         ItemStack stack = new ItemStack(dustItem);
-                                        dustItem.setTemperature(stack, temperature);
+                                        Temperature.fromStack(stack).setTemperature(stack, temperature);
                                         output.accept(stack);
                                     }
 
                                     for (int temperature : testTemperatures) {
                                         ItemStack stack = new ItemStack(dustItem);
-                                        dustItem.setTemperature(stack, temperature);
+                                        Temperature.fromStack(stack).setTemperature(stack, temperature);
                                         output.accept(stack);
                                     }
                                 });

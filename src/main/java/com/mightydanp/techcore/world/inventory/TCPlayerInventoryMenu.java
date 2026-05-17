@@ -137,9 +137,9 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public void removed(@NotNull Player player) {
         super.removed(player);
         this.resultSlots.clearContent();
-        if (!player.level().isClientSide) {
+        //if (!player.level().isClientSide) {
             //this.clearContainer(player, this.craftSlots);
-        }
+        //}
 
     }
 
@@ -165,12 +165,12 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(itemstack1, 4, 39, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot.getType() == EquipmentSlot.Type.ARMOR && !((Slot) this.slots.get(3 - equipmentslot.getIndex())).hasItem()) {
+            } else if (equipmentslot.getType() == EquipmentSlot.Type.ARMOR && !this.slots.get(3 - equipmentslot.getIndex()).hasItem()) {
                 int i = 3 - equipmentslot.getIndex();
                 if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslot == EquipmentSlot.OFFHAND && !((Slot) this.slots.get(40)).hasItem()) {
+            } else if (equipmentslot == EquipmentSlot.OFFHAND && !this.slots.get(40).hasItem()) {
                 if (!this.moveItemStackTo(itemstack1, 40, 41, false)) {
                     return ItemStack.EMPTY;
                 }

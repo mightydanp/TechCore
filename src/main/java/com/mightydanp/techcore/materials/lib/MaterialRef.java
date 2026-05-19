@@ -10,6 +10,7 @@ public class MaterialRef {
     public static String quantity_translatable = CoreRef.MOD_ID+ "." + "quantity";
     public static String quality_translatable = CoreRef.MOD_ID+ "." + "quality";
     public static String purity_translatable = CoreRef.MOD_ID + "." + "purity";
+    public static String processed_stage_translatable = CoreRef.MOD_ID+ "." + "process_stage";
 
     public static String melting_point_translatable = CoreRef.MOD_ID + "." + "melting_point";
     public static String boiling_point_translatable = CoreRef.MOD_ID + "." + "boiling_point";
@@ -27,6 +28,7 @@ public class MaterialRef {
     public static String quantity_english_translation = "Quantity";
     public static String quality_english_translation = "Quality";
     public static String purity_english_translation = "Purity";
+    public static String processed_stage_english_translation = "Processed Stage";
 
     public static String melting_point_english_translation = "Melting Point";
     public static String boiling_point_english_translation = "Boiling Point";
@@ -38,6 +40,7 @@ public class MaterialRef {
     public static String gem_english_translation = "Gem";
     public static String flawless_english_translation = "Flawless";
     public static String legendary_english_translation = "Legendary";
+
 
     public static void initLanguages(){
         AssetPackRegistries.saveMSLT(false,
@@ -53,6 +56,10 @@ public class MaterialRef {
 
         AssetPackRegistries.saveMSLT(false,
                 new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, purity_translatable, purity_english_translation)
+        );
+
+        AssetPackRegistries.saveMSLT(false,
+                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, processed_stage_translatable, processed_stage_english_translation)
         );
 
         AssetPackRegistries.saveMSLT(false,

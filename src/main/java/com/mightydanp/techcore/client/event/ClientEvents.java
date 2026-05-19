@@ -2,7 +2,7 @@ package com.mightydanp.techcore.client.event;
 
 import com.mightydanp.techcore.client.gui.screens.split.QuantitySplitScreen;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.DustItem;
+import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.network.TCNetworkChannel;
 import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
 import com.mightydanp.techcore.world.item.properties.Quantity;
@@ -31,7 +31,7 @@ public class ClientEvents {
         ItemStack heldStack = containerScreen.getMenu().getCarried();
 
         // Change this for splitting other things
-        if (!(heldStack.getItem() instanceof DustItem dust)) return;
+        if (!(heldStack.getItem() instanceof MaterialItem dust)) return;
 
 
         // Get the slot currently under the mouse and check if you can place it in that slot
@@ -54,7 +54,7 @@ public class ClientEvents {
         int maxAmount = heldQuantity;
 
         // If the hovered slot doesn't have an item then the max quantity the itemstack can have is the quantity in the held
-        if (hoveredSlot.hasItem() && hoveredStack.getItem() instanceof DustItem slotDust) {
+        if (hoveredSlot.hasItem() && hoveredStack.getItem() instanceof MaterialItem slotDust) {
             if(!canMergeQuantityStacks(heldStack, hoveredStack)) return;
 
             // If the held itemstack is not the same name as the hovered slot itemstack do nothing

@@ -4,9 +4,8 @@ import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreCreativeTabsRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
-import com.mightydanp.techcore.world.item.properties.Purity;
-import com.mightydanp.techcore.world.item.properties.Quality;
-import com.mightydanp.techcore.world.item.properties.Temperature;
+import com.mightydanp.techcore.materials.Item.OreItem;
+import com.mightydanp.techcore.world.item.properties.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -107,30 +106,71 @@ public class TCCreativeModeTabs {
                                 RegistriesHandler.getMaterials().forEach(matObj -> {
                                     var mat = matObj.get();
 
-                                    if (mat.ore.dust == null) return;
+                                    if (mat.ore.dust != null) {
+                                        DustItem dustItem = (DustItem) mat.ore.dust.get();
 
-                                    DustItem dustItem = (DustItem) mat.ore.dust.get();
+                                        ItemStack impure = new ItemStack(dustItem);
+                                        Purity.setPurity(impure, 25);
+                                        output.accept(impure);
+                                        ItemStack normal = new ItemStack(dustItem);
+                                        output.accept(normal);
+                                        ItemStack pure = new ItemStack(dustItem);
+                                        Purity.setPurity(pure, 100);
+                                        output.accept(pure);
 
-                                    ItemStack impure = new ItemStack(dustItem);
-                                    output.accept(impure);
-                                    Purity.setPurity(impure, 25);
-                                    ItemStack normal = new ItemStack(dustItem);
-                                    output.accept(normal);
-                                    ItemStack pure = new ItemStack(dustItem);
-                                    Purity.setPurity(pure, 100);
-                                    output.accept(pure);
+                                        for (int temperature : coldTestTemperatures) {
+                                            ItemStack stack = new ItemStack(dustItem);
+                                            Temperature.fromStack(stack).setTemperature(stack, temperature);
+                                            output.accept(stack);
+                                        }
 
-                                    for (int temperature : coldTestTemperatures) {
-                                        ItemStack stack = new ItemStack(dustItem);
-                                        Temperature.fromStack(stack).setTemperature(stack, temperature);
-                                        output.accept(stack);
+                                        for (int temperature : testTemperatures) {
+                                            ItemStack stack = new ItemStack(dustItem);
+                                            Temperature.fromStack(stack).setTemperature(stack, temperature);
+                                            output.accept(stack);
+                                        }
                                     }
 
-                                    for (int temperature : testTemperatures) {
-                                        ItemStack stack = new ItemStack(dustItem);
-                                        Temperature.fromStack(stack).setTemperature(stack, temperature);
-                                        output.accept(stack);
+                                    if (mat.ore.ore != null) {
+                                        OreItem oreItem = (OreItem) mat.ore.ore.get();
+
+                                        ProcessedStage.ProcessedStages[] processedStages = {
+                                                ProcessedStage.ProcessedStages.CENTRIFUGED,
+                                                ProcessedStage.ProcessedStages.CRUSHED,
+                                                ProcessedStage.ProcessedStages.PURIFIED
+                                        };
+
+                                        addOreStack(output, oreItem, null, null);
+
+                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
+                                            addOreStack(output, oreItem, stage, null);
+                                        }
+
+
+                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
+                                            for (int temperature : coldTestTemperatures) {
+                                                addOreStack(output, oreItem, stage, temperature);
+                                            }
+                                        }
+
+
+                                        for (int temperature : coldTestTemperatures) {
+                                            addOreStack(output, oreItem, null, temperature);
+                                            addOreStack(output, oreItem, null, temperature);
+                                        }
+
+                                        for (int temperature : testTemperatures) {
+                                            addOreStack(output, oreItem, null, temperature);
+                                            addOreStack(output, oreItem, null, temperature);
+                                        }
+
+                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
+                                            for (int temperature : testTemperatures) {
+                                                addOreStack(output, oreItem, stage, temperature);
+                                            }
+                                        }
                                     }
+
                                 });
                             })
                             .build()
@@ -180,6 +220,22 @@ public class TCCreativeModeTabs {
             })
             .build()
     );
+
+    private static void addOreStack(CreativeModeTab.Output output, OreItem oreItem, ProcessedStage.ProcessedStages processedStage, Integer temperature) {
+        ItemStack stack = new ItemStack(oreItem);
+
+        if (processedStage != null) {
+            ProcessedStage.setProcessedStage(stack, processedStage.getStage());
+        }
+
+        if (temperature != null) {
+            Temperature.setTemperature(stack, temperature);
+        }
+
+        output.accept(stack);
+    }
+
+
 
 
 }

@@ -15,7 +15,8 @@ public class DustItem extends MaterialItem{
         Integer quantity = Quantity.getQuantity(itemStack);
         Integer maxQuantity = ((DustItem)itemStack.getItem()).getMaxQuantity();
 
-        if(maxQuantity == null || quantity == null) return -1;
+        if (maxQuantity == null) return -1;
+        if (quantity == null) return 1.0f;
 
         if(quantity <= (maxQuantity / 72)) return 0.0f;//div72
 
@@ -30,7 +31,8 @@ public class DustItem extends MaterialItem{
         Double purity = Purity.getPurity(itemStack);
         Double maxPurity = ((DustItem)itemStack.getItem()).getMaxPurity();
 
-        if(maxPurity == null || purity == null) return -1;
+        if (maxPurity == null) return -1;
+        if (purity == null) return 0.75f;
 
         if(purity < 75) return 0.0f;//impure
 

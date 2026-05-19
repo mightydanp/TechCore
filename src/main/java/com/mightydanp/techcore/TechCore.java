@@ -21,6 +21,7 @@ public class TechCore {
 
     public TechCore(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+
         RegistriesHandler.init(modEventBus);
 
         ConfigRegistries.registerConfigs(context);

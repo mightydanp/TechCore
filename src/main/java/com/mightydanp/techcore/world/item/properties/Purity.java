@@ -23,13 +23,13 @@ public record Purity(double purity) {
         return tag != null && tag.contains(TAG) ? tag.getDouble(TAG) : null;
     }
 
-    public static Double getPurityOrDefault(ItemStack itemStack, Double defaultQuantity) {
+    public static Double getPurityOrDefault(ItemStack itemStack, Double defaultPurity) {
         if(hasPurity(itemStack)) return getPurity(itemStack);
 
-        if(defaultQuantity == null) return null;
+        if(defaultPurity == null) return null;
 
-        setPurity(itemStack, defaultQuantity);
-        return defaultQuantity;
+        setPurity(itemStack, defaultPurity);
+        return defaultPurity;
     }
 
     public static void setPurity(ItemStack itemStack, double purity) {

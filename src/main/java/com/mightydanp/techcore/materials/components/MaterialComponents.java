@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.materials.components;
 
 public enum MaterialComponents {
+
     BLOCK_GEM(new Component<>("block_", "_gem")),
     BLOCK_METAL(new Component<>("block_", "_metal")),
     DUST(new Component<>("", "_dust")),
@@ -33,7 +34,10 @@ public enum MaterialComponents {
     public String suffix() {
         return component.suffix();
     }
+
 }
+
+
 
 
 /*

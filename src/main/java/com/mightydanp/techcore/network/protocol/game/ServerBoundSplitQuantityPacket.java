@@ -1,7 +1,8 @@
 package com.mightydanp.techcore.network.protocol.game;
 
-import com.mightydanp.techcore.materials.Item.DustItem;
+import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.world.item.properties.Quantity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
@@ -45,46 +46,45 @@ public class ServerBoundSplitQuantityPacket {
             Slot slot = player.containerMenu.slots.get(slotIndex);
 
             if (slot.hasItem()){
-                String curserName = cursorStack.getHoverName().getString();
-                String hoveredName = slot.getItem().getHoverName().getString();
+                if (slot.getItem().getItem() instanceof MaterialItem slotMaterial && cursorStack.getItem() instanceof MaterialItem cursorMaterial){
 
-                if(!curserName.equals(hoveredName)) return;
+                    if (!canMergeQuantityStacks(cursorStack, slot.getItem())) return;
 
-                if (slot.getItem().getItem() instanceof DustItem slotDust && cursorStack.getItem() instanceof DustItem cursorDust){
+
                     Integer currentSlotQty = Quantity.getQuantity(slot.getItem());
                     Integer currentCursorQty = Quantity.getQuantity(cursorStack);
 
                     if(currentSlotQty != null && currentCursorQty != null) {
-                        int availableSpace = slotDust.getMaxQuantity() - currentSlotQty;
+                        int availableSpace = slotMaterial.getMaxQuantity() - currentSlotQty;
 
                         if (currentCursorQty >= this.amount && availableSpace >= this.amount) {
-                            ItemStack cursorDustCopy = cursorStack.copy();
-                            ItemStack slotDustCopy = slot.getItem().copy();
+                            ItemStack cursorCopy = cursorStack.copy();
+                            ItemStack slotCopy = slot.getItem().copy();
 
                             if (this.amount <= currentCursorQty && this.amount <= availableSpace) {
-                                Quantity.setQuantity(slotDustCopy, currentSlotQty + this.amount);
-                                Quantity.setQuantity(cursorDustCopy, currentCursorQty - this.amount);
-                                slot.set(slotDustCopy);
+                                Quantity.setQuantity(slotCopy, currentSlotQty + this.amount);
+                                Quantity.setQuantity(cursorCopy, currentCursorQty - this.amount);
+                                slot.set(slotCopy);
 
-                                applyAndUpdateCursor(player, cursorDustCopy);
+                                applyAndUpdateCursor(player, cursorCopy);
                             }
                         }
                     }
                 }
             } else {
-                if (cursorStack.getItem() instanceof DustItem cursorDust) {
+                if (cursorStack.getItem() instanceof MaterialItem cursorMaterial) {
                     Integer currentCursorQty = Quantity.getQuantity(cursorStack);
 
                     if (currentCursorQty != null && currentCursorQty >= this.amount) {
-                        ItemStack cursorDustCopy = cursorStack.copy();
-                        ItemStack slotDustCopy = cursorStack.copy();
+                        ItemStack cursorCopy = cursorStack.copy();
+                        ItemStack slotCopy = cursorStack.copy();
 
-                        Quantity.setQuantity(slotDustCopy, this.amount);
-                        Quantity.setQuantity(cursorDustCopy, currentCursorQty - this.amount);
+                        Quantity.setQuantity(slotCopy, this.amount);
+                        Quantity.setQuantity(cursorCopy, currentCursorQty - this.amount);
 
-                        slot.set(slotDustCopy);
+                        slot.set(slotCopy);
 
-                        applyAndUpdateCursor(player, cursorDustCopy);
+                        applyAndUpdateCursor(player, cursorCopy);
                     }
                 }
             }
@@ -93,16 +93,40 @@ public class ServerBoundSplitQuantityPacket {
         contextSupplier.get().setPacketHandled(true);
     }
 
-    private void applyAndUpdateCursor(ServerPlayer player, ItemStack cursorDustCopy) {
-        Integer copyQuantity = Quantity.getQuantity(cursorDustCopy);
+    private void applyAndUpdateCursor(ServerPlayer player, ItemStack cursorCopy) {
+        Integer copyQuantity = Quantity.getQuantity(cursorCopy);
 
         if (copyQuantity != null) {
             if (copyQuantity <= 0) {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             } else {
-                player.containerMenu.setCarried(cursorDustCopy);
+                player.containerMenu.setCarried(cursorCopy);
             }
             player.containerMenu.broadcastChanges();
         }
     }
+
+    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
+        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
+            return false;
+        }
+
+        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
+    }
+
+    private static ItemStack withoutQuantity(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        CompoundTag tag = copy.getTag();
+
+        if (tag != null) {
+            tag.remove(Quantity.TAG);
+
+            if (tag.isEmpty()) {
+                copy.setTag(null);
+            }
+        }
+
+        return copy;
+    }
+
 }

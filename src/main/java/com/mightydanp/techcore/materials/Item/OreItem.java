@@ -13,7 +13,8 @@ public class OreItem extends MaterialItem{
         Integer quantity = Quantity.getQuantity(itemStack);
         Integer maxQuantity = ((OreItem)itemStack.getItem()).getMaxQuantity();
 
-        if(maxQuantity == null || quantity == null) return -1;
+        if (maxQuantity == null) return -1;
+        if (quantity == null) return 1.0f;
 
         if(quantity <= (maxQuantity / 72)) return 0.0f;//div72
 

@@ -1,14 +1,13 @@
 package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.materials.Material;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class StoneLayerComponent<A extends Material> extends Component<StoneLayerComponent<A>> {
+    public boolean hasStoneLayer;
 
-
-    public ResourceLocation existingStonelayerBlock;
+    public Block existingStonelayerBlock;
     public Block layerBlock, smoothSlabBlock;
     public Item layerItemBlock, smoothSlabItemBlock;
 
@@ -19,8 +18,14 @@ public class StoneLayerComponent<A extends Material> extends Component<StoneLaye
         this.material = material;
     }
 
-    public StoneLayerComponent<A> stoneLayer(ResourceLocation existingStonelayerBlock) {
+    public StoneLayerComponent<A> stoneLayer(Block existingStonelayerBlock) {
         this.existingStonelayerBlock = existingStonelayerBlock;
+        hasStoneLayer = true;
+        return this;
+    }
+
+    public StoneLayerComponent<A> stoneLayer() {
+        hasStoneLayer = true;
         return this;
     }
 

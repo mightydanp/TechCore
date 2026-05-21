@@ -6,7 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import org.jetbrains.annotations.NotNull;
 
-public class MaterialProperties extends Item.Properties {
+public class MaterialItemProperties extends Item.Properties {
     private String symbol;
     private int color;
 
@@ -21,52 +21,52 @@ public class MaterialProperties extends Item.Properties {
     private Double maxPurity;
 
 
-    public MaterialProperties symbol(String value) {
+    public MaterialItemProperties symbol(String value) {
         this.symbol = value;
         return this;
     }
 
-    public MaterialProperties color(int color) {
+    public MaterialItemProperties color(int color) {
         this.color = color;
         return this;
     }
 
-    public MaterialProperties boilingPoint(Double value) {
+    public MaterialItemProperties boilingPoint(Double value) {
         this.boilingPoint = value;
         return this;
     }
 
-    public MaterialProperties meltingPoint(Double value) {
+    public MaterialItemProperties meltingPoint(Double value) {
         this.meltingPoint = value;
         return this;
     }
 
-    public MaterialProperties defaultQuantity(Integer value) {
+    public MaterialItemProperties defaultQuantity(Integer value) {
         this.defaultQuantity = value;
         return this;
     }
 
-    public MaterialProperties defaultQuality(Integer value) {
+    public MaterialItemProperties defaultQuality(Integer value) {
         this.defaultQuality = value;
         return this;
     }
 
-    public MaterialProperties defaultPurity(Double value) {
-        this.defaultPurity = value <= 100 ? value : 100;
+    public MaterialItemProperties defaultPurity(Double value) {
+        this.defaultPurity = value == null ? null : Math.min(value, 100);
         return this;
     }
 
-    public MaterialProperties maxQuantity(Integer value) {
+    public MaterialItemProperties maxQuantity(Integer value) {
         this.maxQuantity = value;
         return this;
     }
 
-    public MaterialProperties maxQuality(Integer value) {
+    public MaterialItemProperties maxQuality(Integer value) {
         this.maxQuality = value;
         return this;
     }
 
-    public MaterialProperties maxPurity(Double value) {
+    public MaterialItemProperties maxPurity(Double value) {
         this.maxPurity = value;
         return this;
     }
@@ -113,49 +113,49 @@ public class MaterialProperties extends Item.Properties {
     // --- Item.Properties overrides ---
 
     @Override
-    public @NotNull MaterialProperties food(@NotNull FoodProperties value) {
+    public @NotNull MaterialItemProperties food(@NotNull FoodProperties value) {
         super.food(value);
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties stacksTo(int value) {
+    public @NotNull MaterialItemProperties stacksTo(int value) {
         super.stacksTo(value);
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties durability(int value) {
+    public @NotNull MaterialItemProperties durability(int value) {
         super.durability(value);
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties craftRemainder(@NotNull Item item) {
+    public @NotNull MaterialItemProperties craftRemainder(@NotNull Item item) {
         super.craftRemainder(item);
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties rarity(@NotNull Rarity value) {
+    public @NotNull MaterialItemProperties rarity(@NotNull Rarity value) {
         super.rarity(value);
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties fireResistant() {
+    public @NotNull MaterialItemProperties fireResistant() {
         super.fireResistant();
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties setNoRepair() {
+    public @NotNull MaterialItemProperties setNoRepair() {
         super.setNoRepair();
         return this;
     }
 
     @Override
-    public @NotNull MaterialProperties requiredFeatures(FeatureFlag @NotNull ... flags) {
+    public @NotNull MaterialItemProperties requiredFeatures(FeatureFlag @NotNull ... flags) {
         super.requiredFeatures(flags);
         return this;
     }

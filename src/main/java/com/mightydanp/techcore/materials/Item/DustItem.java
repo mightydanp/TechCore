@@ -1,13 +1,13 @@
 package com.mightydanp.techcore.materials.Item;
 
-import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Purity;
 import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.world.item.ItemStack;
 
 
 public class DustItem extends MaterialItem{
-    public DustItem(MaterialProperties properties) {
+    public DustItem(MaterialItemProperties properties) {
         super(properties.stacksTo(1));
     }
 

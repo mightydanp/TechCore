@@ -1,11 +1,11 @@
 package com.mightydanp.techcore.materials.Item;
 
-import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.world.item.ItemStack;
 
 public class OreItem extends MaterialItem{
-    public OreItem(MaterialProperties properties) {
+    public OreItem(MaterialItemProperties properties) {
         super(properties.stacksTo(1));
     }
 

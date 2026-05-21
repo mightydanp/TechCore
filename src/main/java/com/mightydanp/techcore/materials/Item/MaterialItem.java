@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
-import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -25,7 +25,7 @@ public class MaterialItem extends Item {
     private final Integer maxQuality;
     private final Double maxPurity;
 
-    public MaterialItem(MaterialProperties properties) {
+    public MaterialItem(MaterialItemProperties properties) {
         super(properties);
         this.symbol = properties.getSymbol();
         this.color = properties.getColor();

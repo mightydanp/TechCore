@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
-import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Quality;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +15,7 @@ import java.util.List;
 public class GemItem extends MaterialItem {
     public int defaultQuality = 60;
 
-    public GemItem(MaterialProperties properties) {
+    public GemItem(MaterialItemProperties properties) {
         super(properties);
     }
 

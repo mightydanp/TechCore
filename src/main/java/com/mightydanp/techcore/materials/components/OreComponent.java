@@ -12,13 +12,12 @@ import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.materials.properties.MaterialProperties;
+import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.materials.properties.OreTypes;
 import com.mightydanp.techcore.world.item.properties.ProcessedStage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
-
 import java.util.function.Supplier;
 
 public class OreComponent<A extends Material> extends Component<OreComponent<A>> {
@@ -49,8 +48,14 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     @Override
     public OreComponent<A> init() {
         if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
+            //List<RegistryObject<Material>> stoneLayerList = RegistriesHandler.getMaterials().stream().filter(material -> {
+            //    return material.get().stoneLayer.hasStoneLayer;
+            //}).toList();
+
+            //for (RegistryObject<Material> stoneLayer : stoneLayerList) {}
+
             if (oreType == OreTypes.GEM.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialProperties()
+                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialItemProperties()
                         .color(material.physical.getColor())
                         .symbol(material.chemical.getSymbol())
                         .defaultQuality(material.physical.getDefaultQuality())
@@ -60,7 +65,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 ));
             }
 
-            ore = RegistriesHandler.ITEMS.register(material.name + "_ore", () -> new OreItem(new MaterialProperties()
+            ore = RegistriesHandler.ITEMS.register(material.name + "_ore", () -> new OreItem(new MaterialItemProperties()
                     .color(material.physical.getColor())
                     .symbol(material.chemical.getSymbol())
                     .defaultQuantity(material.physical.getDefaultQuantity())
@@ -72,7 +77,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             ));
         }
 
-        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialProperties()
+        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
                 .color(material.physical.getColor())
                 .symbol(material.chemical.getSymbol())
                 .defaultQuantity(material.physical.getDefaultQuantity())
@@ -100,28 +105,28 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     }
 
     public OreComponent<A> initItemProperties(){
-        registerItemProperty(gem.get(),
+        registerItemProperty(gem,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
                 (stack, level, entity, seed) ->
                         ((GemItem) (gem.get())).getGemQuality(stack));
 
-        registerItemProperty(ore.get(),
+        registerItemProperty(ore,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
                 (stack, level, entity, seed) ->
                         ((OreItem) (ore.get())).getQuantityLevel(stack));
 
-        registerItemProperty(ore.get(),
+        registerItemProperty(ore,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "processed_stage"),
                 (stack, level, entity, seed) -> ProcessedStage.hasProcessedStage(stack)
                         ? ProcessedStage.ProcessedStages.getProcessedStageLevel(stack)
                         : 1f);
 
-        registerItemProperty(dust.get(),
+        registerItemProperty(dust,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
                 (stack, level, entity, seed) ->
                         ((DustItem) (dust.get())).getQuantityLevel(stack));
 
-        registerItemProperty(dust.get(),
+        registerItemProperty(dust,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
                 (stack, level, entity, seed) ->
                         ((DustItem) (dust.get())).getPurityLevel(stack));
@@ -129,9 +134,9 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     }
 
     public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
-        registerBasicItemColor(event, gem.get(), material.physical.getColor());
-        registerBasicItemColor(event, ore.get(), material.physical.getColor());
-        registerBasicItemColor(event, dust.get(), material.physical.getColor());
+        registerBasicItemColor(event, gem, material.physical.getColor());
+        registerBasicItemColor(event, ore, material.physical.getColor());
+        registerBasicItemColor(event, dust, material.physical.getColor());
 
         return this;
     }

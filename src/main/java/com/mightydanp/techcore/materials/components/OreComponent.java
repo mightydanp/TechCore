@@ -18,6 +18,9 @@ import com.mightydanp.techcore.world.item.properties.ProcessedStage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.registries.RegistryObject;
+
+import java.util.List;
 import java.util.function.Supplier;
 
 public class OreComponent<A extends Material> extends Component<OreComponent<A>> {
@@ -48,10 +51,10 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     @Override
     public OreComponent<A> init() {
         if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
-            //List<RegistryObject<Material>> stoneLayerList = RegistriesHandler.getMaterials().stream().filter(material -> {
-            //    return material.get().stoneLayer.hasStoneLayer;
-            //}).toList();
 
+            List<RegistryObject<Material>> stoneLayerList = RegistriesHandler.getMaterials().stream().filter(material -> {
+                return material.get().stoneLayer.hasStoneLayer;
+            }).toList();
             //for (RegistryObject<Material> stoneLayer : stoneLayerList) {}
 
             if (oreType == OreTypes.GEM.oreType()) {

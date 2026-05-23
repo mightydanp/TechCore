@@ -8,12 +8,8 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.function.Function;
 
 public class Material implements BaseRegistries {
-    private static final List<MaterialComponentFactory> GLOBAL_COMPONENTS = new ArrayList<>();
-
     public String name;
     public Icons.Icon icon;
 
@@ -24,95 +20,57 @@ public class Material implements BaseRegistries {
     public OreComponent<Material> ore;
     public StoneLayerComponent<Material> stoneLayer;
 
-    public List<OrderedComponent> components = new ArrayList<>();
-    private boolean globalComponentsLoaded;
+    private final List<Component<?>> components = new ArrayList<>();
 
     public Material(String name, Icons.Icon icon){
         this.name = name;
         this.icon = icon;
 
-        chemical = new ChemicalComponent<>(this);
-        physical = new PhysicalComponent<>(this);
-        thermal = new ThermalComponent<>(this);
-        fluid = new FluidComponent<>(this);
-        ore = new OreComponent<>(this);
-        stoneLayer = new StoneLayerComponent<>(this);
+        chemical = addComponent(0, new ChemicalComponent<>(this));
+        physical = addComponent(1, new PhysicalComponent<>(this));
+        thermal = addComponent(2, new ThermalComponent<>(this));
+        fluid = addComponent(3, new FluidComponent<>(this));
+        stoneLayer = addComponent(4, new StoneLayerComponent<>(this));
+        ore = addComponent(5, new OreComponent<>(this));
     }
 
     @Override
     public void init(){
-        orderedComponents().forEach(AbstractComponent::init);
+        components.forEach(AbstractComponent::init);
     }
 
     @Override
     public void initClient(){
-        orderedComponents().forEach(AbstractComponent::initClient);
+        components.forEach(AbstractComponent::initClient);
     }
 
     @Override
     public void initLanguages() {
-        orderedComponents().forEach(AbstractComponent::initLanguages);
+        components.forEach(AbstractComponent::initLanguages);
         MaterialRef.initLanguages();
     }
 
     public void initItemProperties() {
-        orderedComponents().forEach(AbstractComponent::initItemProperties);
+        components.forEach(AbstractComponent::initItemProperties);
     }
 
     public void initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
-        orderedComponents().forEach(component -> component.initClientRenderLayers(event));
+        components.forEach(component -> component.initClientRenderLayers(event));
     }
 
-    private List<Component<?>> orderedComponents() {
-        loadGlobalComponents();
-
-        TreeMap<Integer, Component<?>> componentsByOrder = new TreeMap<>();
-
-        insertComponent(componentsByOrder, 0, chemical);
-        insertComponent(componentsByOrder, 1, physical);
-        insertComponent(componentsByOrder, 2, thermal);
-        insertComponent(componentsByOrder, 3, fluid);
-        insertComponent(componentsByOrder, 4, stoneLayer);
-        insertComponent(componentsByOrder, 5, ore);
-
-        for (OrderedComponent orderedComponent : components) {
-            insertComponent(componentsByOrder, orderedComponent.loadOrder(), orderedComponent.component());
+    public <A extends Component<?>> A addComponent(int loadOrder, A component) {
+        if (loadOrder < 0) {
+            throw new IllegalArgumentException("loadOrder cannot be negative: " + loadOrder);
         }
 
-        return new ArrayList<>(componentsByOrder.values());
+        int insertIndex = Math.min(loadOrder, components.size());
+        components.add(insertIndex, component);
+
+        return component;
     }
 
-    public static void registerComponent(int loadOrder, Function<Material, Component<?>> factory) {
-        GLOBAL_COMPONENTS.add(new MaterialComponentFactory(loadOrder, factory));
+    public <A extends Component<?>> A addComponent(A component) {
+        return addComponent(components.size(), component);
     }
-
-    public Material additionalComponent(int loadOrder, Function<Material, Component<?>> factory){
-        this.components.add(new OrderedComponent(loadOrder, factory.apply(this)));
-        return this;
-    }
-
-    private void loadGlobalComponents() {
-        if (globalComponentsLoaded) return;
-
-        for (MaterialComponentFactory factory : GLOBAL_COMPONENTS) {
-            components.add(new OrderedComponent(factory.loadOrder(), factory.factory().apply(this)));
-        }
-
-        globalComponentsLoaded = true;
-    }
-
-    private void insertComponent(TreeMap<Integer, Component<?>> componentsByOrder, int loadOrder, Component<?> component) {
-        if (loadOrder == Integer.MAX_VALUE && componentsByOrder.containsKey(loadOrder)) {
-            throw new IllegalStateException("Cannot shift component past max load order: " + component);
-        }
-
-        Component<?> shifted = componentsByOrder.put(loadOrder, component);
-        if (shifted != null) {
-            insertComponent(componentsByOrder, loadOrder + 1, shifted);
-        }
-    }
-
-    public record OrderedComponent(int loadOrder, Component<?> component) {}
-
-    private record MaterialComponentFactory(int loadOrder, Function<Material, Component<?>> factory) {}
 }
+

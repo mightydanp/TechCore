@@ -8,6 +8,7 @@ import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.world.item.properties.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -16,7 +17,7 @@ import java.util.function.Supplier;
 
 public class TCCreativeModeTabs {
 
-    public static void init(){
+    public static void init() {
 
     }
 
@@ -59,31 +60,31 @@ public class TCCreativeModeTabs {
     public static final Supplier<CreativeModeTab> GEM_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register("gem_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable(CoreCreativeTabsRef.gem_tab))
             .icon(() -> new ItemStack(Items.DIAMOND))
-            .displayItems((params, output) -> RegistriesHandler.getMaterials().forEach(matObj -> {
+            .displayItems((params, output) -> RegistriesHandler.getMaterialObjects().forEach(matObj -> {
                 var mat = matObj.get();
                 if (mat.ore.gem == null) return;
 
                 GemItem gemItem = (GemItem) mat.ore.gem.get();
-                int max = mat.physical.getMaxQuality();
+                int max = Quality.MAX;
 
                 ItemStack chipped = new ItemStack(gemItem);
-                Quality.setQuality(chipped, max / 5);
+                Quality.stack(chipped).set(max / 5);
                 output.accept(chipped);
 
                 ItemStack flawed = new ItemStack(gemItem);
-                Quality.setQuality(flawed, max * 2 / 5);
+                Quality.stack(flawed).set(max * 2 / 5);
                 output.accept(flawed);
 
                 ItemStack normal = new ItemStack(gemItem);
-                Quality.setQuality(normal, max * 3 / 5);
+                Quality.stack(normal).set(max * 3 / 5);
                 output.accept(normal);
 
                 ItemStack flawless = new ItemStack(gemItem);
-                Quality.setQuality(flawless, max * 4 / 5);
+                Quality.stack(flawless).set(max * 4 / 5);
                 output.accept(flawless);
 
                 ItemStack legendary = new ItemStack(gemItem);
-                Quality.setQuality(legendary, max);
+                Quality.stack(legendary).set(max);
                 output.accept(legendary);
             }))
             .build()
@@ -95,82 +96,44 @@ public class TCCreativeModeTabs {
                             .title(Component.translatable(CoreCreativeTabsRef.ore_products_tab))
                             .icon(() -> new ItemStack(Items.GLOWSTONE_DUST))
                             .displayItems((params, output) -> {
-                                int[] coldTestTemperatures = {
-                                        -300, -200, -150, -100, -75, -50, -25, 0
-                                };
-
-                                int[] testTemperatures = {
-                                        250, 425, 525, 600, 700, 815, 900, 1000, 1100, 1250, 1315, 1500, 1800, 2200, 2800, 4000, 5500
-                                };
-
-                                RegistriesHandler.getMaterials().forEach(matObj -> {
+                                RegistriesHandler.getMaterialObjects().forEach(matObj -> {
                                     var mat = matObj.get();
 
-                                    if (mat.ore.dust != null) {
-                                        DustItem dustItem = (DustItem) mat.ore.dust.get();
 
-                                        ItemStack impure = new ItemStack(dustItem);
-                                        Purity.setPurity(impure, 25);
-                                        output.accept(impure);
-                                        ItemStack normal = new ItemStack(dustItem);
-                                        output.accept(normal);
-                                        ItemStack pure = new ItemStack(dustItem);
-                                        Purity.setPurity(pure, 100);
-                                        output.accept(pure);
+                                    for (Supplier<Item> dust : mat.ore.dustItems) {
+                                        if (dust != null) {
+                                            DustItem dustItem = (DustItem) dust.get();
 
-                                        for (int temperature : coldTestTemperatures) {
-                                            ItemStack stack = new ItemStack(dustItem);
-                                            Temperature.fromStack(stack).setTemperature(stack, temperature);
-                                            output.accept(stack);
-                                        }
-
-                                        for (int temperature : testTemperatures) {
-                                            ItemStack stack = new ItemStack(dustItem);
-                                            Temperature.fromStack(stack).setTemperature(stack, temperature);
-                                            output.accept(stack);
+                                            ItemStack impure = new ItemStack(dustItem);
+                                            Quantity.stack(impure).set(Quantity.DEFAULT_MAX, Quantity.DEFAULT_MAX);
+                                            Purity.stack(impure).set(25);
+                                            output.accept(impure);
+                                            ItemStack normal = new ItemStack(dustItem);
+                                            Quantity.stack(normal).set(Quantity.DEFAULT_MAX, Quantity.DEFAULT_MAX);
+                                            Purity.stack(normal).set(Purity.DEFAULT);
+                                            output.accept(normal);
+                                            ItemStack pure = new ItemStack(dustItem);
+                                            Quantity.stack(pure).set(Quantity.DEFAULT_MAX, Quantity.DEFAULT_MAX);
+                                            Purity.stack(pure).set(Purity.MAX);
+                                            output.accept(pure);
                                         }
                                     }
 
-                                    if (mat.ore.ore != null) {
-                                        OreItem oreItem = (OreItem) mat.ore.ore.get();
+                                    for (Supplier<Item> ore : mat.ore.oreItems) {
+                                        if (ore != null) {
+                                            OreItem oreItem = (OreItem) ore.get();
 
-                                        ProcessedStage.ProcessedStages[] processedStages = {
-                                                ProcessedStage.ProcessedStages.CENTRIFUGED,
-                                                ProcessedStage.ProcessedStages.CRUSHED,
-                                                ProcessedStage.ProcessedStages.PURIFIED
-                                        };
+                                            ProcessedStage.ProcessedStages[] processedStages = {
+                                                    ProcessedStage.ProcessedStages.CENTRIFUGED,
+                                                    ProcessedStage.ProcessedStages.CRUSHED,
+                                                    ProcessedStage.ProcessedStages.PURIFIED
+                                            };
 
-                                        addOreStack(output, oreItem, null, null);
-
-                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
-                                            addOreStack(output, oreItem, stage, null);
-                                        }
-
-
-                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
-                                            for (int temperature : coldTestTemperatures) {
-                                                addOreStack(output, oreItem, stage, temperature);
-                                            }
-                                        }
-
-
-                                        for (int temperature : coldTestTemperatures) {
-                                            addOreStack(output, oreItem, null, temperature);
-                                            addOreStack(output, oreItem, null, temperature);
-                                        }
-
-                                        for (int temperature : testTemperatures) {
-                                            addOreStack(output, oreItem, null, temperature);
-                                            addOreStack(output, oreItem, null, temperature);
-                                        }
-
-                                        for (ProcessedStage.ProcessedStages stage : processedStages) {
-                                            for (int temperature : testTemperatures) {
-                                                addOreStack(output, oreItem, stage, temperature);
+                                            for (ProcessedStage.ProcessedStages stage : processedStages) {
+                                                addOreStack(output, oreItem, stage, null);
                                             }
                                         }
                                     }
-
                                 });
                             })
                             .build()
@@ -223,6 +186,7 @@ public class TCCreativeModeTabs {
 
     private static void addOreStack(CreativeModeTab.Output output, OreItem oreItem, ProcessedStage.ProcessedStages processedStage, Integer temperature) {
         ItemStack stack = new ItemStack(oreItem);
+        Quantity.stack(stack).set(Quantity.DEFAULT_MAX, Quantity.DEFAULT_MAX);
 
         if (processedStage != null) {
             ProcessedStage.setProcessedStage(stack, processedStage.getStage());
@@ -234,8 +198,6 @@ public class TCCreativeModeTabs {
 
         output.accept(stack);
     }
-
-
 
 
 }

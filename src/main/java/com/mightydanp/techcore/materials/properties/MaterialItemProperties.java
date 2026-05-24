@@ -13,13 +13,6 @@ public class MaterialItemProperties extends Item.Properties {
     private Double boilingPoint;
     private Double meltingPoint;
 
-    private Integer defaultQuantity;
-    private Integer defaultQuality;
-    private Double defaultPurity;
-    private Integer maxQuantity;
-    private Integer maxQuality;
-    private Double maxPurity;
-
 
     public MaterialItemProperties symbol(String value) {
         this.symbol = value;
@@ -41,36 +34,6 @@ public class MaterialItemProperties extends Item.Properties {
         return this;
     }
 
-    public MaterialItemProperties defaultQuantity(Integer value) {
-        this.defaultQuantity = value;
-        return this;
-    }
-
-    public MaterialItemProperties defaultQuality(Integer value) {
-        this.defaultQuality = value;
-        return this;
-    }
-
-    public MaterialItemProperties defaultPurity(Double value) {
-        this.defaultPurity = value == null ? null : Math.min(value, 100);
-        return this;
-    }
-
-    public MaterialItemProperties maxQuantity(Integer value) {
-        this.maxQuantity = value;
-        return this;
-    }
-
-    public MaterialItemProperties maxQuality(Integer value) {
-        this.maxQuality = value;
-        return this;
-    }
-
-    public MaterialItemProperties maxPurity(Double value) {
-        this.maxPurity = value;
-        return this;
-    }
-
     public String getSymbol() {
         return symbol;
     }
@@ -86,29 +49,6 @@ public class MaterialItemProperties extends Item.Properties {
         return meltingPoint;
     }
 
-    public Integer getDefaultQuantity() {
-        return defaultQuantity;
-    }
-
-    public Integer getDefaultQuality() {
-        return defaultQuality;
-    }
-
-    public Double getDefaultPurity() {
-        return defaultPurity;
-    }
-
-    public Integer getMaxQuantity() {
-        return maxQuantity;
-    }
-
-    public Integer getMaxQuality() {
-        return maxQuality;
-    }
-
-    public Double getMaxPurity() {
-        return maxPurity;
-    }
 
     // --- Item.Properties overrides ---
 

@@ -3,40 +3,48 @@ package com.mightydanp.techcore.materials.Item;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Purity;
 import com.mightydanp.techcore.world.item.properties.Quantity;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 
-public class DustItem extends MaterialItem{
+public class DustItem extends MaterialItem {
     public DustItem(MaterialItemProperties properties) {
         super(properties.stacksTo(1));
     }
 
-    public float getQuantityLevel(ItemStack itemStack) {
-        Integer quantity = Quantity.getQuantity(itemStack);
-        Integer maxQuantity = ((DustItem)itemStack.getItem()).getMaxQuantity();
+    @Override
+    public @NotNull Component getName(@NotNull ItemStack itemStack) {
+        Component component = super.getName(itemStack);
 
-        if (maxQuantity == null) return -1;
+        return component;
+    }
+
+    public float getQuantityLevel(ItemStack itemStack) {
+        Quantity quantity = Quantity.stack(itemStack).get();
+
         if (quantity == null) return 1.0f;
 
-        if(quantity <= (maxQuantity / 72)) return 0.0f;//div72
+        int stackQuantity = quantity.quantity();
+        int maxQuantity = quantity.maxQuantity();
 
-        if(quantity <= (maxQuantity / 9)) return 0.25f;//tiny
+        if (stackQuantity <= (maxQuantity / 72)) return 0.0f;//div72
 
-        if(quantity <= (maxQuantity / 4)) return 0.50f;//small
+        if (stackQuantity <= (maxQuantity / 9)) return 0.25f;//tiny
+
+        if (stackQuantity <= (maxQuantity / 4)) return 0.50f;//small
 
         return 1.0f;//full
     }
 
     public float getPurityLevel(ItemStack itemStack) {
-        Double purity = Purity.getPurity(itemStack);
-        Double maxPurity = ((DustItem)itemStack.getItem()).getMaxPurity();
+        Purity purity = Purity.stack(itemStack).get();
 
-        if (maxPurity == null) return -1;
         if (purity == null) return 0.75f;
 
-        if(purity < 75) return 0.0f;//impure
+        if (purity.purity() < 75) return 0.0f;//impure
 
-        if(purity < 100) return 0.75f;//normal
+        if (purity.purity() < 100) return 0.75f;//normal
 
         return 1.0f;//pure
     }

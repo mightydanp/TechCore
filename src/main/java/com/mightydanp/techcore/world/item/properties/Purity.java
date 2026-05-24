@@ -8,41 +8,57 @@ import net.minecraft.world.item.ItemStack;
 
 public record Purity(double purity) {
     public static final String TAG = "purity";
+    public static final double MIN = 0.0;
+    public static final double DEFAULT = 75;
+    public static final double MAX = 100.0;
 
     public static final Codec<Purity> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.DOUBLE.fieldOf(TAG).forGetter(Purity::purity)
     ).apply(instance, Purity::new));
 
-    public static boolean hasPurity(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-        return tag != null && tag.contains(TAG);
+    public Purity {
+        purity = Mth.clamp(purity, MIN, MAX);
     }
 
-    public static Double getPurity(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-        return tag != null && tag.contains(TAG) ? tag.getDouble(TAG) : null;
+    public static Stack stack(ItemStack stack) {
+        return new Stack(stack);
     }
 
-    public static Double getPurityOrDefault(ItemStack itemStack, Double defaultPurity) {
-        if(hasPurity(itemStack)) return getPurity(itemStack);
+    public static final class Stack {
+        private final ItemStack stack;
 
-        if(defaultPurity == null) return null;
+        private Stack(ItemStack stack) {
+            this.stack = stack;
+        }
 
-        setPurity(itemStack, defaultPurity);
-        return defaultPurity;
-    }
+        public boolean has() {
+            CompoundTag tag = stack.getTag();
+            return tag != null && tag.contains(TAG);
+        }
 
-    public static void setPurity(ItemStack itemStack, double purity) {
-        itemStack.getOrCreateTag().putDouble(TAG, purity);
-    }
+        public Purity get() {
+            CompoundTag tag = stack.getTag();
+            return tag != null && tag.contains(TAG) ? new Purity(tag.getDouble(TAG)) : null;
+        }
 
-    public static void setPurity(ItemStack itemStack, double purity, Double maxPurity) {
-        itemStack.getOrCreateTag().putDouble(TAG, maxPurity != null ? Mth.clamp(purity, 0, maxPurity) : purity);
-    }
+        public Purity getOrDefault(Purity fallback) {
+            Purity value = get();
+            return value == null ? fallback : value;
+        }
 
-    public static Purity fromStack(ItemStack itemStack) {
-        Double purity = getPurity(itemStack);
+        public Stack set(Purity purity) {
+            stack.getOrCreateTag().putDouble(TAG, purity.purity());
+            return this;
+        }
 
-        return purity != null ? new Purity(purity) : null;
+        public Stack set(double purity) {
+            return set(new Purity(purity));
+        }
+
+        public Stack remove() {
+            CompoundTag tag = stack.getTag();
+            if (tag != null) tag.remove(TAG);
+            return this;
+        }
     }
 }

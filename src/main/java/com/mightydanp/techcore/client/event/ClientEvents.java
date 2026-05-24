@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.Mod;
 public class ClientEvents {
 
     @SubscribeEvent
-    public static void splitEvent(ScreenEvent.MouseButtonPressed.Pre event){
+    public static void splitEvent(ScreenEvent.MouseButtonPressed.Pre event) {
         // Checks if the screen is an AbstractContainerScreen
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
 
@@ -31,7 +31,7 @@ public class ClientEvents {
         ItemStack heldStack = containerScreen.getMenu().getCarried();
 
         // Change this for splitting other things
-        if (!(heldStack.getItem() instanceof MaterialItem dust)) return;
+        if (!(heldStack.getItem() instanceof MaterialItem)) return;
 
 
         // Get the slot currently under the mouse and check if you can place it in that slot
@@ -40,39 +40,37 @@ public class ClientEvents {
         if (!hoveredSlot.mayPlace(heldStack)) return;
 
         // Get quantity
-        Integer heldQuantity = Quantity.getQuantity(heldStack);
+        Quantity heldQuantity = Quantity.stack(heldStack).get();
 
         // If it equals null — let vanilla handle it
         if (heldQuantity == null) return;
 
         // If it is less than 1 — let vanilla handle it
-        if (heldQuantity < 1) return;
+        if (heldQuantity.quantity() < 1) return;
 
         // Get the itemstack in the hovered slot
         ItemStack hoveredStack = hoveredSlot.getItem();
 
-        int maxAmount = heldQuantity;
+        int maxAmount = heldQuantity.quantity();
 
         // If the hovered slot doesn't have an item then the max quantity the itemstack can have is the quantity in the held
-        if (hoveredSlot.hasItem() && hoveredStack.getItem() instanceof MaterialItem slotDust) {
-            if(!canMergeQuantityStacks(heldStack, hoveredStack)) return;
+        if (hoveredSlot.hasItem() && hoveredStack.getItem() instanceof MaterialItem) {
+            if (!canMergeQuantityStacks(heldStack, hoveredStack)) return;
 
             // If the held itemstack is not the same name as the hovered slot itemstack do nothing
             if (!heldStack.getHoverName().getString().equals(hoveredStack.getHoverName().getString())) return;
 
             // Grabs the quantity in the hovered slot itemstack
-            Integer slotQuantity = Quantity.getQuantity(hoveredStack);
+            Quantity slotQuantity = Quantity.stack(hoveredStack).get();
 
             // If — let vanilla handle it
             if (slotQuantity == null) return;
 
             // If the slots itemstack is its max quantity it can have return nothing
-            if (slotQuantity.equals(slotDust.getMaxQuantity())) return;
+            if (slotQuantity.quantity() >= slotQuantity.maxQuantity()) return;
 
-            // Takes the slots max quantity and takes away the slot itemstack quantity.
-            // After it will check which one is smaller heldQuantity or slotDust.getMaxQuantity() - slotQuantity
             // Use the smaller value: the held quantity or the slot's remaining capacity.
-            maxAmount = Math.min(heldQuantity, slotDust.getMaxQuantity() - slotQuantity);
+            maxAmount = Math.min(heldQuantity.quantity(), slotQuantity.maxQuantity() - slotQuantity.quantity());
         }
 
         // Get the slot index from the hovered slot
@@ -85,14 +83,14 @@ public class ClientEvents {
         event.setCanceled(true);
 
         // If player is shifting or the amount that can be given is one
-        if (Screen.hasShiftDown() || heldQuantity == 1) {
+        if (Screen.hasShiftDown() || heldQuantity.quantity() == 1) {
             // Server handles the splitting.
             TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitQuantityPacket(serverSlotIndex, maxAmount, heldStack));
 
             // If you are in the creative inventory screen
             if (containerScreen instanceof CreativeModeInventoryScreen) {
                 // Takes away the max amount that can be given from the held itemstack quantity
-                int newQuantity = heldQuantity - maxAmount;
+                int newQuantity = heldQuantity.quantity() - maxAmount;
 
                 // If the new quantity of the held itemstack is 0 or negative
                 if (newQuantity <= 0) {
@@ -103,7 +101,7 @@ public class ClientEvents {
                     ItemStack newHeld = heldStack.copy();
 
                     //sets the quantity of the copied itemstack
-                    Quantity.setQuantity(newHeld, newQuantity);
+                    Quantity.stack(newHeld).set(newQuantity, heldQuantity.maxQuantity());
 
                     //sets the carried item to the copy
                     containerScreen.getMenu().setCarried(newHeld);
@@ -150,9 +148,11 @@ public class ClientEvents {
         ItemStack hoveredCopy = hoveredStack.copy();
 
         //remove quantity from held itemstack
-        heldCopy.getOrCreateTag().remove("quantity");
+        heldCopy.getOrCreateTag().remove(Quantity.TAG);
+        heldCopy.getOrCreateTag().remove(Quantity.MAX_TAG);
         //remove hovered from held itemstack
-        hoveredCopy.getOrCreateTag().remove("quantity");
+        hoveredCopy.getOrCreateTag().remove(Quantity.TAG);
+        hoveredCopy.getOrCreateTag().remove(Quantity.MAX_TAG);
 
         //compare and return boolean
         return ItemStack.isSameItemSameTags(heldCopy, hoveredCopy);

@@ -31,7 +31,7 @@ public class ServerBoundSplitQuantityPacket {
 
     public static ServerBoundSplitQuantityPacket decode(FriendlyByteBuf buffer) {
         int slotIndex = buffer.readInt();
-        int amount  = buffer.readInt();
+        int amount = buffer.readInt();
         ItemStack itemStack = buffer.readItem();
 
         return new ServerBoundSplitQuantityPacket(slotIndex, amount, itemStack);
@@ -45,42 +45,40 @@ public class ServerBoundSplitQuantityPacket {
             if (slotIndex < 0 || slotIndex >= player.containerMenu.slots.size()) return;
             Slot slot = player.containerMenu.slots.get(slotIndex);
 
-            if (slot.hasItem()){
-                if (slot.getItem().getItem() instanceof MaterialItem slotMaterial && cursorStack.getItem() instanceof MaterialItem cursorMaterial){
+            if (slot.hasItem()) {
+                if (slot.getItem().getItem() instanceof MaterialItem && cursorStack.getItem() instanceof MaterialItem) {
 
                     if (!canMergeQuantityStacks(cursorStack, slot.getItem())) return;
 
 
-                    Integer currentSlotQty = Quantity.getQuantity(slot.getItem());
-                    Integer currentCursorQty = Quantity.getQuantity(cursorStack);
+                    Quantity currentSlotQty = Quantity.stack(slot.getItem()).get();
+                    Quantity currentCursorQty = Quantity.stack(cursorStack).get();
 
-                    if(currentSlotQty != null && currentCursorQty != null) {
-                        int availableSpace = slotMaterial.getMaxQuantity() - currentSlotQty;
+                    if (currentSlotQty != null && currentCursorQty != null) {
+                        int availableSpace = currentSlotQty.maxQuantity() - currentSlotQty.quantity();
 
-                        if (currentCursorQty >= this.amount && availableSpace >= this.amount) {
+                        if (currentCursorQty.quantity() >= this.amount && availableSpace >= this.amount) {
                             ItemStack cursorCopy = cursorStack.copy();
                             ItemStack slotCopy = slot.getItem().copy();
 
-                            if (this.amount <= currentCursorQty && this.amount <= availableSpace) {
-                                Quantity.setQuantity(slotCopy, currentSlotQty + this.amount);
-                                Quantity.setQuantity(cursorCopy, currentCursorQty - this.amount);
-                                slot.set(slotCopy);
+                            Quantity.stack(slotCopy).set(currentSlotQty.quantity() + this.amount, currentSlotQty.maxQuantity());
+                            Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
+                            slot.set(slotCopy);
 
-                                applyAndUpdateCursor(player, cursorCopy);
-                            }
+                            applyAndUpdateCursor(player, cursorCopy);
                         }
                     }
                 }
             } else {
-                if (cursorStack.getItem() instanceof MaterialItem cursorMaterial) {
-                    Integer currentCursorQty = Quantity.getQuantity(cursorStack);
+                if (cursorStack.getItem() instanceof MaterialItem) {
+                    Quantity currentCursorQty = Quantity.stack(cursorStack).get();
 
-                    if (currentCursorQty != null && currentCursorQty >= this.amount) {
+                    if (currentCursorQty != null && currentCursorQty.quantity() >= this.amount) {
                         ItemStack cursorCopy = cursorStack.copy();
                         ItemStack slotCopy = cursorStack.copy();
 
-                        Quantity.setQuantity(slotCopy, this.amount);
-                        Quantity.setQuantity(cursorCopy, currentCursorQty - this.amount);
+                        Quantity.stack(slotCopy).set(this.amount, currentCursorQty.maxQuantity());
+                        Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
 
                         slot.set(slotCopy);
 
@@ -94,10 +92,10 @@ public class ServerBoundSplitQuantityPacket {
     }
 
     private void applyAndUpdateCursor(ServerPlayer player, ItemStack cursorCopy) {
-        Integer copyQuantity = Quantity.getQuantity(cursorCopy);
+        Quantity copyQuantity = Quantity.stack(cursorCopy).get();
 
         if (copyQuantity != null) {
-            if (copyQuantity <= 0) {
+            if (copyQuantity.quantity() <= 0) {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             } else {
                 player.containerMenu.setCarried(cursorCopy);
@@ -120,6 +118,7 @@ public class ServerBoundSplitQuantityPacket {
 
         if (tag != null) {
             tag.remove(Quantity.TAG);
+            tag.remove(Quantity.MAX_TAG);
 
             if (tag.isEmpty()) {
                 copy.setTag(null);

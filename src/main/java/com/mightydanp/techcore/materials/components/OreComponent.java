@@ -14,83 +14,84 @@ import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.materials.properties.OreTypes;
+import com.mightydanp.techcore.materials.properties.RockTypes;
 import com.mightydanp.techcore.world.item.properties.ProcessedStage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.registries.RegistryObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class OreComponent<A extends Material> extends Component<OreComponent<A>> {
     private final A material;
 
+    public List<Material> sameRockMaterials = new ArrayList<>();
+
     private OreTypes.OreType oreType;
+    private List<RockTypes.RockType> rockTypes = new ArrayList<>();
     private int maxDensity = 1;
 
-    public Supplier<Item> ore, dust, gem;
-    public Supplier<Item> ingot;
+    public Supplier<Item> gem;
+    public List<Supplier<Item>> oreItems =  new ArrayList<>();
+    public List<Supplier<Item>> dustItems = new ArrayList<>();
+    //public Supplier<Item> ingot;
 
     public OreComponent(A material) {
         super("ore", "component");
         this.material = material;
     }
 
-    public OreComponent<A> setOre(OreTypes.OreType oreType, int maxDensity) {
+    public OreComponent<A> setOre(OreTypes.OreType oreType , int maxDensity, RockTypes.RockType... rockTypes) {
         this.oreType = oreType;
         this.maxDensity = maxDensity;
+        this.rockTypes = Arrays.asList(rockTypes);
+        this.sameRockMaterials = StoneLayerComponent.getStoneLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.stoneLayer.rockType)).toList();
         return this;
     }
 
-    public OreComponent<A> setOre(OreTypes.OreType oreType) {
+    public OreComponent<A> setOre(OreTypes.OreType oreType, RockTypes.RockType... rockTypes) {
         this.oreType = oreType;
+        this.rockTypes = Arrays.asList(rockTypes);
+        this.sameRockMaterials = StoneLayerComponent.getStoneLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.stoneLayer.rockType)).toList();
         return this;
     }
 
     @Override
     public OreComponent<A> init() {
-        if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
-
-            List<RegistryObject<Material>> stoneLayerList = RegistriesHandler.getMaterials().stream().filter(material -> {
-                return material.get().stoneLayer.hasStoneLayer;
-            }).toList();
-            //for (RegistryObject<Material> stoneLayer : stoneLayerList) {}
-
-            if (oreType == OreTypes.GEM.oreType()) {
-                gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialItemProperties()
-                        .color(material.physical.getColor())
-                        .symbol(material.chemical.getSymbol())
-                        .defaultQuality(material.physical.getDefaultQuality())
-                        .maxQuality(material.physical.getMaxQuality())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-                ));
-            }
-
-            ore = RegistriesHandler.ITEMS.register(material.name + "_ore", () -> new OreItem(new MaterialItemProperties()
+        //grade of the ore
+        if (oreType == OreTypes.GEM.oreType()) {
+            gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialItemProperties()
                     .color(material.physical.getColor())
                     .symbol(material.chemical.getSymbol())
-                    .defaultQuantity(material.physical.getDefaultQuantity())
-                    .maxQuantity(material.physical.getMaxQuantity())
-                    .defaultPurity(material.physical.getDefaultPurity())
-                    .maxPurity(material.physical.getMaxPurity())
                     .boilingPoint(material.thermal.getBoilingPoint())
                     .meltingPoint(material.thermal.getMeltingPoint())
             ));
         }
 
-        dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
-                .color(material.physical.getColor())
-                .symbol(material.chemical.getSymbol())
-                .defaultQuantity(material.physical.getDefaultQuantity())
-                .maxQuantity(material.physical.getMaxQuantity())
-                .defaultPurity(material.physical.getDefaultPurity())
-                .maxPurity(material.physical.getMaxPurity())
-                .symbol(material.chemical.getSymbol())
-                .boilingPoint(material.thermal.getBoilingPoint())
-                .meltingPoint(material.thermal.getMeltingPoint())
-        ));
+        for (Material stoneLayer : sameRockMaterials) {
+            String stoneName = stoneLayer.name;
+
+            if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
+
+                oreItems.add(RegistriesHandler.ITEMS.register(stoneName + "_" + material.name + "_ore", () -> new OreItem(new MaterialItemProperties()
+                        .color(material.physical.getColor())
+                        .symbol(material.chemical.getSymbol())
+                        .boilingPoint(material.thermal.getBoilingPoint())
+                        .meltingPoint(material.thermal.getMeltingPoint())
+                )));
+            }
+
+            dustItems.add(RegistriesHandler.ITEMS.register(stoneName + "_" + material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
+                    .color(material.physical.getColor())
+                    .symbol(material.chemical.getSymbol())
+                    .symbol(material.chemical.getSymbol())
+                    .boilingPoint(material.thermal.getBoilingPoint())
+                    .meltingPoint(material.thermal.getMeltingPoint())
+            )));
+        }
 
         return this;
     }
@@ -101,8 +102,14 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         String name = material.name;
 
         if (gem != null) initGemModels(modid, name);
-        if (ore != null) initOreModels(modid, name);
-        if (dust != null) initDustModels(modid, name);
+
+        for (Supplier<Item> oreItem: oreItems) {
+            if (oreItem != null) initOreModels(modid, name);
+        }
+
+        for (Supplier<Item> dustItem: dustItems) {
+            if (dustItem != null) initDustModels(modid, name);
+        }
 
         return this;
     }
@@ -113,33 +120,46 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 (stack, level, entity, seed) ->
                         ((GemItem) (gem.get())).getGemQuality(stack));
 
-        registerItemProperty(ore,
-                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                (stack, level, entity, seed) ->
-                        ((OreItem) (ore.get())).getQuantityLevel(stack));
+        for (Supplier<Item> oreItem: oreItems) {
+            registerItemProperty(oreItem,
+                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
+                    (stack, level, entity, seed) ->
+                            ((OreItem) (oreItem.get())).getQuantityLevel(stack));
 
-        registerItemProperty(ore,
-                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "processed_stage"),
-                (stack, level, entity, seed) -> ProcessedStage.hasProcessedStage(stack)
-                        ? ProcessedStage.ProcessedStages.getProcessedStageLevel(stack)
-                        : 1f);
+            registerItemProperty(oreItem,
+                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "processed_stage"),
+                    (stack, level, entity, seed) -> ProcessedStage.hasProcessedStage(stack)
+                            ? ProcessedStage.ProcessedStages.getProcessedStageLevel(stack)
+                            : 1f);
+        }
 
-        registerItemProperty(dust,
-                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                (stack, level, entity, seed) ->
-                        ((DustItem) (dust.get())).getQuantityLevel(stack));
+        for (Supplier<Item> dustItem: dustItems) {
+            registerItemProperty(dustItem,
+                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
+                    (stack, level, entity, seed) ->
+                            ((DustItem) (dustItem.get())).getQuantityLevel(stack));
 
-        registerItemProperty(dust,
-                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
-                (stack, level, entity, seed) ->
-                        ((DustItem) (dust.get())).getPurityLevel(stack));
+            registerItemProperty(dustItem,
+                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
+                    (stack, level, entity, seed) ->
+                            ((DustItem) (dustItem.get())).getPurityLevel(stack));
+        }
         return this;
     }
 
     public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
         registerBasicItemColor(event, gem, material.physical.getColor());
-        registerBasicItemColor(event, ore, material.physical.getColor());
-        registerBasicItemColor(event, dust, material.physical.getColor());
+
+        for(int i = 0; i < oreItems.size(); i++) {
+            int rockColor = sameRockMaterials.get(i).physical.getColor();
+
+            registerMultiItemColor(event, oreItems.get(i), material.physical.getColor(), rockColor);
+        }
+
+        for(int i = 0; i < dustItems.size(); i++) {
+            int rockColor = sameRockMaterials.get(i).physical.getColor();
+            registerBasicItemColor(event, dustItems.get(i), material.physical.getColor());
+        }
 
         return this;
     }
@@ -154,13 +174,22 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_gem", LanguageContent.translateUpperCase(name) + " Gem")
         );
 
-        AssetPackRegistries.safetyMSLT(false, ore,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_ore", LanguageContent.translateUpperCase(name) + " Ore")
-        );
+        for(int i = 0; i < oreItems.size(); i++) {
+            String rockName = sameRockMaterials.get(i).name;
 
-        AssetPackRegistries.safetyMSLT(false, dust,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
-        );
+            AssetPackRegistries.safetyMSLT(false, oreItems.get(i),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_ore", LanguageContent.translateUpperCase(rockName + "_" + name) + " Ore")
+            );
+        }
+
+        for(int i = 0; i < dustItems.size(); i++) {
+            String rockName = sameRockMaterials.get(i).name;
+
+            AssetPackRegistries.safetyMSLT(false, dustItems.get(i),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase(rockName + "_" + name) + " Dust")
+            );
+
+        }
 
         return this;
     }
@@ -198,7 +227,10 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         addOreOverrides(mainBuilder, modid, "purified", ProcessedStage.ProcessedStages.PURIFIED.getValue());
         addOreOverrides(mainBuilder, modid, "raw", 1F);
 
-        new ItemModelContent<>(modid, name + "_ore", null, mainBuilder).save(false);
+        for(int i = 0; i < oreItems.size(); i++) {
+            String rockName = sameRockMaterials.get(i).name;
+            new ItemModelContent<>(modid, rockName + "_" + name + "_ore", null, mainBuilder).save(false);
+        }
     }
 
     private void saveOreModels(String modid, String stage) {
@@ -242,7 +274,11 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         addDustOverrides(mainBuilder, modid, "", 0.75f);
         addDustOverrides(mainBuilder, modid, "pure_", 1.0f);
 
-        new ItemModelContent<>(modid, name + "_dust", null, mainBuilder).save(false);
+
+        for(int i = 0; i < dustItems.size(); i++) {
+            String rockName = sameRockMaterials.get(i).name;
+            new ItemModelContent<>(modid, rockName + "_" + name + "_dust", null, mainBuilder).save(false);
+        }
     }
 
     private void saveDustModels(String modid, String prefix) {
@@ -302,11 +338,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     private ModelFile.UncheckedModelFile uncheckedItemModel(String modid, String folder, String model) {
         return new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/" + folder + "/" + model));
-    }
-
-    public OreComponent<A> setOreType(OreTypes.OreType oreType) {
-        this.oreType = oreType;
-        return this;
     }
 
     public OreComponent<A> setMaxDensity(int maxDensity) {

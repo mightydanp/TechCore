@@ -40,28 +40,26 @@ public class QuantitySplitScreen extends Screen {
 
     @Override
     protected void init() {
-        if (!(cursorStack.getItem() instanceof MaterialItem cursorMaterial)) return;
+        if (!(cursorStack.getItem() instanceof MaterialItem)) return;
 
-        Integer cursorQuantity = Quantity.getQuantity(cursorStack);
-        Integer cursorMaxQuantity = cursorMaterial.getMaxQuantity();
+        Quantity cursorQuantity = Quantity.stack(cursorStack).get();
 
-        if (cursorQuantity == null || cursorMaxQuantity == null) return;
+        if (cursorQuantity == null) return;
 
         int quantity;
         if (!hoveredSlot.hasItem()) {
-            quantity = cursorQuantity;
-        } else if (hoveredSlot.getItem().getItem() instanceof MaterialItem slotMaterial && canMergeQuantityStacks(cursorStack, hoveredSlot.getItem())) {
-            Integer slotQuantity = Quantity.getQuantity(hoveredSlot.getItem());
-            Integer slotMaxQuantity = slotMaterial.getMaxQuantity();
+            quantity = cursorQuantity.quantity();
+        } else if (hoveredSlot.getItem().getItem() instanceof MaterialItem && canMergeQuantityStacks(cursorStack, hoveredSlot.getItem())) {
+            Quantity slotQuantity = Quantity.stack(hoveredSlot.getItem()).get();
 
-            if (slotQuantity == null || slotMaxQuantity == null) return;
+            if (slotQuantity == null) return;
 
-            quantity = Math.min(cursorQuantity, slotMaxQuantity - slotQuantity);
+            quantity = Math.min(cursorQuantity.quantity(), slotQuantity.maxQuantity() - slotQuantity.quantity());
         } else {
             return;
         }
 
-        quantity = Math.min(quantity, cursorMaxQuantity);
+        quantity = Math.min(quantity, cursorQuantity.maxQuantity());
 
         if (quantity < 1) return;
 
@@ -78,7 +76,7 @@ public class QuantitySplitScreen extends Screen {
                 1,
                 0,
                 true
-        ){
+        ) {
             {
                 if (Double.isNaN(value)) value = 1.0;
             }
@@ -93,12 +91,12 @@ public class QuantitySplitScreen extends Screen {
                             new ServerBoundSplitQuantityPacket(slotIndex, splitAmount, this.cursorStack)
                     );
                     if (parent instanceof CreativeModeInventoryScreen cs) {
-                        int newQty = cursorQuantity - splitAmount;
+                        int newQty = cursorQuantity.quantity() - splitAmount;
                         if (newQty <= 0) {
                             cs.getMenu().setCarried(ItemStack.EMPTY);
                         } else {
                             ItemStack newCursor = cursorStack.copy();
-                            Quantity.setQuantity(newCursor, newQty, cursorMaxQuantity);
+                            Quantity.stack(newCursor).set(newQty, cursorQuantity.maxQuantity());
                             cs.getMenu().setCarried(newCursor);
                         }
                     }
@@ -133,6 +131,7 @@ public class QuantitySplitScreen extends Screen {
 
         if (tag != null) {
             tag.remove(Quantity.TAG);
+            tag.remove(Quantity.MAX_TAG);
 
             if (tag.isEmpty()) {
                 copy.setTag(null);

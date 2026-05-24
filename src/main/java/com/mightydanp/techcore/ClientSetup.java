@@ -18,7 +18,7 @@ public class ClientSetup {
         LOGGER.info("Tech Core client setup is starting");
 
         event.enqueueWork(() -> {
-            RegistriesHandler.getMaterials().forEach(m -> m.get().initItemProperties());
+            RegistriesHandler.getMaterialObjects().forEach(m -> m.get().initItemProperties());
         });
 
         LOGGER.info("Tech Core client setup has finished");
@@ -26,6 +26,6 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        RegistriesHandler.getMaterials().forEach(m -> m.get().initClientRenderLayers(event));
+        RegistriesHandler.getMaterialObjects().forEach(m -> m.get().initClientRenderLayers(event));
     }
 }

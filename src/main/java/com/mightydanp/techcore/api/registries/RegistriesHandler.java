@@ -121,14 +121,16 @@ public class RegistriesHandler {
         return MATERIALS.register(name, () -> mat);
     }
 
-    public static Collection<RegistryObject<Material>> getMaterials() {
+    public static Collection<RegistryObject<Material>> getMaterialObjects() {
         return MATERIALS.getEntries();
     }
 
     @SubscribeEvent
     public static void bootstrapMaterials(NewRegistryEvent event) {
+        List<Material> clone = new ArrayList<>(MATERIAL_LIST);
+
         for (Predicate<Material> condition : MATERIAL_INIT_STEPS) {
-            Iterator<Material> iterator = MATERIAL_LIST.iterator();
+            Iterator<Material> iterator = clone.iterator();
 
             while (iterator.hasNext()) {
                 Material material = iterator.next();
@@ -140,7 +142,7 @@ public class RegistriesHandler {
             }
         }
 
-        Iterator<Material> iterator = MATERIAL_LIST.iterator();
+        Iterator<Material> iterator = clone.iterator();
 
         while (iterator.hasNext()) {
             Material material = iterator.next();
@@ -160,5 +162,9 @@ public class RegistriesHandler {
 
         int insertIndex = Math.min(loadOrder, MATERIAL_INIT_STEPS.size());
         MATERIAL_INIT_STEPS.add(insertIndex, supplier);
+    }
+
+    public static List<Material> getMaterials() {
+        return MATERIAL_LIST;
     }
 }

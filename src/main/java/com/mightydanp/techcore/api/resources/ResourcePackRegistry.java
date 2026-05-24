@@ -24,7 +24,7 @@ public class ResourcePackRegistry {
         PackType type = event.getPackType();
 
         if (!clientInitialized) {
-            RegistriesHandler.getMaterials().forEach(material -> ResourcePackRegistry.init.add(material.get()));
+            RegistriesHandler.getMaterialObjects().forEach(material -> ResourcePackRegistry.init.add(material.get()));
 
             //RegistriesHandler.getMaterials().forEach(m -> m.get().initClient());
             init.forEach(BaseRegistries::initClient);

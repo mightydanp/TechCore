@@ -55,7 +55,7 @@ public class RegistriesHandler {
     private static final Supplier<IForgeRegistry<Material>> MATERIAL_REGISTRY = MATERIALS.makeRegistry(RegistryBuilder::new);
     private static final List<Material> MATERIAL_LIST = new ArrayList<>();
     private static final List<Predicate<Material>>  MATERIAL_INIT_STEPS = new ArrayList<>(){{
-        add(material -> material.stoneLayer.hasStoneLayer);
+        add(material -> material.stoneLayer.isStoneLayer);
     }};
 
     public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));

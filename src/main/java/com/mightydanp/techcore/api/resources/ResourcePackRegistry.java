@@ -3,6 +3,7 @@ package com.mightydanp.techcore.api.resources;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.materials.lib.MaterialRef;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.event.AddPackFindersEvent;
@@ -25,8 +26,8 @@ public class ResourcePackRegistry {
 
         if (!clientInitialized) {
             RegistriesHandler.getMaterialObjects().forEach(material -> ResourcePackRegistry.init.add(material.get()));
+            MaterialRef.initLanguages();
 
-            //RegistriesHandler.getMaterials().forEach(m -> m.get().initClient());
             init.forEach(BaseRegistries::initClient);
             init.forEach(BaseRegistries::initLanguages);
             clientInitialized = true;

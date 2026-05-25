@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public class StoneLayerComponent<A extends Material> extends Component<StoneLayerComponent<A>> {
-    public boolean hasStoneLayer;
+    public boolean isStoneLayer;
 
     public RockTypes.RockType rockType;
 
@@ -29,19 +29,19 @@ public class StoneLayerComponent<A extends Material> extends Component<StoneLaye
     public StoneLayerComponent<A> stoneLayer(Block existingStonelayerBlock, RockTypes.RockType rockType) {
         this.rockType = rockType;
         this.existingStonelayerBlock = existingStonelayerBlock;
-        hasStoneLayer = true;
+        isStoneLayer = true;
         return this;
     }
 
     public StoneLayerComponent<A> stoneLayer(RockTypes.RockType rockType) {
         this.rockType = rockType;
-        hasStoneLayer = true;
+        isStoneLayer = true;
         return this;
     }
 
     public static List<Material> getStoneLayerMaterials() {
         return RegistriesHandler.getMaterials().stream()
-                .filter(material -> material.stoneLayer.hasStoneLayer)
+                .filter(material -> material.stoneLayer.isStoneLayer)
                 .toList();
     }
 

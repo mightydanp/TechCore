@@ -100,7 +100,7 @@ public class TCCreativeModeTabs {
                                     var mat = matObj.get();
 
 
-                                    for (Supplier<Item> dust : mat.ore.dustItems) {
+                                    for (Supplier<Item> dust : mat.processed.dustItems) {
                                         if (dust != null) {
                                             DustItem dustItem = (DustItem) dust.get();
 
@@ -124,9 +124,10 @@ public class TCCreativeModeTabs {
                                             OreItem oreItem = (OreItem) ore.get();
 
                                             ProcessedStage.ProcessedStages[] processedStages = {
-                                                    ProcessedStage.ProcessedStages.CENTRIFUGED,
+                                                    ProcessedStage.ProcessedStages.NONE,
                                                     ProcessedStage.ProcessedStages.CRUSHED,
-                                                    ProcessedStage.ProcessedStages.PURIFIED
+                                                    ProcessedStage.ProcessedStages.PURIFIED,
+                                                    ProcessedStage.ProcessedStages.CENTRIFUGED,
                                             };
 
                                             for (ProcessedStage.ProcessedStages stage : processedStages) {

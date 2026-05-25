@@ -52,7 +52,7 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
         MAGNETIZED("magnetized", 0.04F),
         MIXED("mixed", 0.05F),
         PURIFIED("purified", 0.06F),
-        NONE("purified", 1F);
+        NONE("", 1F);
 
         public static final Codec<ProcessedStages> CODEC = Codec.STRING.xmap(
                 ProcessedStages::fromStage,

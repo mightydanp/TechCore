@@ -2,7 +2,6 @@ package com.mightydanp.techcore.materials;
 
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.materials.components.*;
-import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.Icons;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
@@ -19,6 +18,7 @@ public class Material implements BaseRegistries {
     public FluidComponent<Material> fluid;
     public OreComponent<Material> ore;
     public StoneLayerComponent<Material> stoneLayer;
+    public ProcessedComponent<Material> processed;
 
     private final List<Component<?>> components = new ArrayList<>();
 
@@ -32,6 +32,7 @@ public class Material implements BaseRegistries {
         fluid = addComponent(3, new FluidComponent<>(this));
         stoneLayer = addComponent(4, new StoneLayerComponent<>(this));
         ore = addComponent(5, new OreComponent<>(this));
+        processed = addComponent(6, new ProcessedComponent<>(this));
     }
 
     @Override
@@ -47,7 +48,6 @@ public class Material implements BaseRegistries {
     @Override
     public void initLanguages() {
         components.forEach(AbstractComponent::initLanguages);
-        MaterialRef.initLanguages();
     }
 
     public void initItemProperties() {

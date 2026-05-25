@@ -8,7 +8,6 @@ import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCo
 import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.materials.Material;
@@ -36,7 +35,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     public Supplier<Item> gem;
     public List<Supplier<Item>> oreItems =  new ArrayList<>();
-    public List<Supplier<Item>> dustItems = new ArrayList<>();
     //public Supplier<Item> ingot;
 
     public OreComponent(A material) {
@@ -84,13 +82,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 )));
             }
 
-            dustItems.add(RegistriesHandler.ITEMS.register(stoneName + "_" + material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
-                    .color(material.physical.getColor())
-                    .symbol(material.chemical.getSymbol())
-                    .symbol(material.chemical.getSymbol())
-                    .boilingPoint(material.thermal.getBoilingPoint())
-                    .meltingPoint(material.thermal.getMeltingPoint())
-            )));
         }
 
         return this;
@@ -104,11 +95,8 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         if (gem != null) initGemModels(modid, name);
 
         for (Supplier<Item> oreItem: oreItems) {
-            if (oreItem != null) initOreModels(modid, name);
-        }
-
-        for (Supplier<Item> dustItem: dustItems) {
-            if (dustItem != null) initDustModels(modid, name);
+            if (oreItem != null)
+                initOreModels(modid, name);
         }
 
         return this;
@@ -133,17 +121,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                             : 1f);
         }
 
-        for (Supplier<Item> dustItem: dustItems) {
-            registerItemProperty(dustItem,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                    (stack, level, entity, seed) ->
-                            ((DustItem) (dustItem.get())).getQuantityLevel(stack));
-
-            registerItemProperty(dustItem,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
-                    (stack, level, entity, seed) ->
-                            ((DustItem) (dustItem.get())).getPurityLevel(stack));
-        }
         return this;
     }
 
@@ -153,12 +130,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         for(int i = 0; i < oreItems.size(); i++) {
             int rockColor = sameRockMaterials.get(i).physical.getColor();
 
-            registerMultiItemColor(event, oreItems.get(i), material.physical.getColor(), rockColor);
-        }
-
-        for(int i = 0; i < dustItems.size(); i++) {
-            int rockColor = sameRockMaterials.get(i).physical.getColor();
-            registerBasicItemColor(event, dustItems.get(i), material.physical.getColor());
+            registerMultiItemColor(event, oreItems.get(i), rockColor, material.physical.getColor());
         }
 
         return this;
@@ -168,7 +140,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     public OreComponent<A> initLanguages(){
         String modid = CoreRef.MOD_ID;
         String name = material.name;
-
 
         AssetPackRegistries.safetyMSLT(false, gem,
                 new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_gem", LanguageContent.translateUpperCase(name) + " Gem")
@@ -182,14 +153,9 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             );
         }
 
-        for(int i = 0; i < dustItems.size(); i++) {
-            String rockName = sameRockMaterials.get(i).name;
-
-            AssetPackRegistries.safetyMSLT(false, dustItems.get(i),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase(rockName + "_" + name) + " Dust")
-            );
-
-        }
+        AssetPackRegistries.saveMSLT(false,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_ore", LanguageContent.translateUpperCase(name) + " Ore")
+        );
 
         return this;
     }
@@ -225,7 +191,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         addOreOverrides(mainBuilder, modid, "centrifuged", ProcessedStage.ProcessedStages.CENTRIFUGED.getValue());
         addOreOverrides(mainBuilder, modid, "crushed", ProcessedStage.ProcessedStages.CRUSHED.getValue());
         addOreOverrides(mainBuilder, modid, "purified", ProcessedStage.ProcessedStages.PURIFIED.getValue());
-        addOreOverrides(mainBuilder, modid, "raw", 1F);
+        addOreOverrides(mainBuilder, modid, "raw", ProcessedStage.ProcessedStages.NONE.getValue());
 
         for(int i = 0; i < oreItems.size(); i++) {
             String rockName = sameRockMaterials.get(i).name;
@@ -262,47 +228,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                 stage + "_small_ore",
                 stage + "_ore"
         };
-    }
-
-    private void initDustModels(String modid, String name) {
-        saveDustModels(modid, "impure_");
-        saveDustModels(modid, "");
-        saveDustModels(modid, "pure_");
-
-        TCItemModelBuilder mainBuilder = itemModelBuilder(modid, "dust");
-        addDustOverrides(mainBuilder, modid, "impure_", 0f);
-        addDustOverrides(mainBuilder, modid, "", 0.75f);
-        addDustOverrides(mainBuilder, modid, "pure_", 1.0f);
-
-
-        for(int i = 0; i < dustItems.size(); i++) {
-            String rockName = sameRockMaterials.get(i).name;
-            new ItemModelContent<>(modid, rockName + "_" + name + "_dust", null, mainBuilder).save(false);
-        }
-    }
-
-    private void saveDustModels(String modid, String prefix) {
-        String[] models = {prefix + "div72_dust", prefix + "tiny_dust", prefix + "small_dust", prefix + "full_dust"};
-        String[] layer0 = {"div72_dust", "tiny_dust", "small_dust", prefix.isEmpty() ? "dust" : prefix + "dust"};
-        String[] overlayBase = {"div72_dust", "tiny_dust", "small_dust", "dust"};
-
-        for (int i = 0; i < models.length; i++) {
-            String layer1 = prefix.isEmpty() ? null : prefix + overlayBase[i] + "_overlay";
-            saveItemModel(modid, "dust", models[i], layer0[i], layer1);
-        }
-    }
-
-    private void addDustOverrides(TCItemModelBuilder builder, String modid, String prefix, float purity) {
-        String[] models = {prefix + "div72_dust", prefix + "tiny_dust", prefix + "small_dust", prefix + "full_dust"};
-        float[] quantities = {0f, 0.25f, 0.50f, 1.0f};
-
-        for (int i = 0; i < models.length; i++) {
-            builder.override()
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), quantities[i])
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), purity)
-                    .model(uncheckedItemModel(modid, "dust", models[i]))
-                    .end();
-        }
     }
 
     private TCItemModelBuilder itemModelBuilder(String modid, String modelName) {

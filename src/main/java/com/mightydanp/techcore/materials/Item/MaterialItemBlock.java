@@ -80,13 +80,6 @@ public class MaterialItemBlock extends BlockItem {
     public void appendHoverText(@NotNull ItemStack itemStack, @Nullable Level level, @NotNull List<Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
         Temperature temperature = Temperature.fromStack(itemStack);
 
-        if (ProcessedStage.hasProcessedStage(itemStack)) {
-            ProcessedStage processedStage = ProcessedStage.fromStack(itemStack);
-            if (processedStage.processedStage() != ProcessedStage.ProcessedStages.fromStage("none")) {
-                tooltip.add(Component.translatable(MaterialRef.processed_stage_translatable).append(" : " + processedStage.processedStage().getStage()));
-            }
-        }
-
         if (symbol != null) {
             tooltip.add(Component.nullToEmpty(symbol));
         }

@@ -58,4 +58,14 @@ public class OreItem extends MaterialItem {
 
         return 1.0f;//full
     }
+
+    public float getPurityLevel(ItemStack itemStack) {
+        Purity purity = Purity.stack(itemStack).get();
+
+        if (purity == null) return 0.75f;
+
+        if (purity.purity() < 100) return 0.75f;//normal
+
+        return 1.0f;//pure
+    }
 }

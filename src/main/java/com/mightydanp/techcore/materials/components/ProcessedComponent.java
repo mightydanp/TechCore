@@ -15,15 +15,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProcessedComponent<A extends Material> extends Component<ProcessedComponent<A>> {
     private final A material;
 
     public Supplier<Item> dust;
-    public List<Supplier<Item>> dustItems = new ArrayList<>();
+
+    public Map<String, Supplier<Item>> impureDustItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> dustItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> pureDustItems = new LinkedHashMap<>();
 
     public ProcessedComponent(A material) {
         super("processed", "component");
@@ -33,24 +37,16 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
     @Override
     public ProcessedComponent<A> init() {
         if(material.ore.getOreType() == null) {
-            dust = RegistriesHandler.ITEMS.register(material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
-                    .color(material.physical.getColor())
-                    .symbol(material.chemical.getSymbol())
-                    .boilingPoint(material.thermal.getBoilingPoint())
-                    .meltingPoint(material.thermal.getMeltingPoint())
-            ));
+            dust = registerDustItem(material.name + "_dust");
         }
 
         if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null){
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String stoneName = stoneLayer.name;
 
-                dustItems.add(RegistriesHandler.ITEMS.register(stoneName + "_" + material.name + "_dust", () -> new DustItem(new MaterialItemProperties()
-                        .color(material.physical.getColor())
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-                )));
+                impureDustItems.put(stoneName, registerDustItem("impure_" + stoneName + "_" + material.name + "_dust"));
+                dustItems.put(stoneName, registerDustItem(stoneName + "_" + material.name + "_dust"));
+                pureDustItems.put(stoneName, registerDustItem("pure_" + stoneName + "_" + material.name + "_dust"));
             }
         }
 
@@ -69,49 +65,45 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
 
     @Override
     public ProcessedComponent<A> initItemProperties() {
-        if(material.ore.getOreType() == null) {
-            registerItemProperty(dust,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                    (stack, level, entity, seed) ->
-                            ((DustItem) dust.get()).getQuantityLevel(stack));
+        registerDustProperties(dust);
 
-            registerItemProperty(dust,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
-                    (stack, level, entity, seed) ->
-                            ((DustItem) dust.get()).getPurityLevel(stack));
-        }
-
-        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
-            for (Supplier<Item> dustItem : dustItems) {
-                registerItemProperty(dustItem,
-                        ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                        (stack, level, entity, seed) ->
-                                ((DustItem) dustItem.get()).getQuantityLevel(stack));
-
-                registerItemProperty(dustItem,
-                        ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "purity"),
-                        (stack, level, entity, seed) ->
-                                ((DustItem) dustItem.get()).getPurityLevel(stack));
-            }
-        }
+        registerDustProperties(impureDustItems);
+        registerDustProperties(dustItems);
+        registerDustProperties(pureDustItems);
 
         return this;
     }
 
+    private void registerDustProperties(Supplier<Item> dustItem) {
+        registerItemProperty(dustItem,
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
+                (stack, level, entity, seed) ->
+                        ((DustItem) dustItem.get()).getQuantityLevel(stack));
+    }
+
+    private void registerDustProperties(Map<String, Supplier<Item>> dustItems) {
+        for (Supplier<Item> dustItem : dustItems.values()) {
+            registerDustProperties(dustItem);
+        }
+    }
+
     @Override
     public ProcessedComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
-        if(material.ore.getOreType() == null) {
-            registerBasicItemColor(event, dust, material.physical.getColor());
-        }
+        registerBasicItemColor(event, dust, material.physical.getColor());
 
-
-        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
-            for (Supplier<Item> dustItem : dustItems) {
-                registerBasicItemColor(event, dustItem, material.physical.getColor());
-            }
-        }
+        registerDustColors(event, impureDustItems);
+        registerDustColors(event, dustItems);
+        registerDustColors(event, pureDustItems);
 
         return this;
+    }
+
+    private void registerDustColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> dustItems) {
+        for(int i=0; i < material.ore.sameRockMaterials.size(); i++) {
+            List<Supplier<Item>> dusts = dustItems.values().stream().toList();
+
+            registerMultiItemColor(event, dusts.get(i), material.physical.getColor(), material.ore.sameRockMaterials.get(i).physical.getColor());
+        }
     }
 
     @Override
@@ -119,16 +111,26 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
-        AssetPackRegistries.saveMSLT(false,
+
+        AssetPackRegistries.safetyMSLT(false, dust,
                 new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
         );
 
-        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
-            for (int i = 0; i < dustItems.size(); i++) {
-                String rockName = material.ore.sameRockMaterials.get(i).name;
 
-                AssetPackRegistries.safetyMSLT(false, dustItems.get(i),
+        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
+            for (Material stoneLayer : material.ore.sameRockMaterials) {
+                String rockName = stoneLayer.name;
+
+                AssetPackRegistries.safetyMSLT(false, impureDustItems.get(rockName),
+                        new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".impure_" + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase("Impure " + rockName + "_" + name) + " Dust")
+                );
+
+                AssetPackRegistries.safetyMSLT(false, dustItems.get(rockName),
                         new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase(rockName + "_" + name) + " Dust")
+                );
+
+                AssetPackRegistries.safetyMSLT(false, pureDustItems.get(rockName),
+                        new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".pure_" + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase("Pure " + rockName + "_" + name) + " Dust")
                 );
             }
         }
@@ -141,17 +143,24 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
         saveDustModels(modid, "");
         saveDustModels(modid, "pure_");
 
-        TCItemModelBuilder mainBuilder = itemModelBuilder(modid, "dust");
-        addDustOverrides(mainBuilder, modid, "impure_", 0f);
-        addDustOverrides(mainBuilder, modid, "", 0.75f);
-        addDustOverrides(mainBuilder, modid, "pure_", 1.0f);
-
-        new ItemModelContent<>(modid, name + "_dust", null, mainBuilder).save(false);
-
-        for (int i = 0; i < dustItems.size(); i++) {
-            String rockName = material.ore.sameRockMaterials.get(i).name;
-            new ItemModelContent<>(modid, rockName + "_" + name + "_dust", null, mainBuilder).save(false);
+        if (dust != null) {
+            saveStageDustItemModel(modid, "impure_" + name + "_dust", "impure_");
+            saveStageDustItemModel(modid, name + "_dust", "");
+            saveStageDustItemModel(modid, "pure_" + name + "_dust", "pure_");
         }
+
+        for (Material stoneLayer : material.ore.sameRockMaterials) {
+            String rockName = stoneLayer.name;
+            saveStageDustItemModel(modid, "impure_" + rockName + "_" + name + "_dust", "impure_");
+            saveStageDustItemModel(modid, rockName + "_" + name + "_dust", "");
+            saveStageDustItemModel(modid, "pure_" + rockName + "_" + name + "_dust", "pure_");
+        }
+    }
+
+    private void saveStageDustItemModel(String modid, String itemName, String prefix) {
+        TCItemModelBuilder builder = itemModelBuilder(modid, itemName);
+        addDustOverrides(builder, modid, prefix);
+        new ItemModelContent<>(modid, itemName, null, builder).save(false);
     }
 
     private void saveDustModels(String modid, String prefix) {
@@ -165,14 +174,13 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
         }
     }
 
-    private void addDustOverrides(TCItemModelBuilder builder, String modid, String prefix, float purity) {
+    private void addDustOverrides(TCItemModelBuilder builder, String modid, String prefix) {
         String[] models = {prefix + "div72_dust", prefix + "tiny_dust", prefix + "small_dust", prefix + "full_dust"};
         float[] quantities = {0f, 0.25f, 0.50f, 1.0f};
 
         for (int i = 0; i < models.length; i++) {
             builder.override()
                     .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), quantities[i])
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "purity"), purity)
                     .model(uncheckedItemModel(modid, "dust", models[i]))
                     .end();
         }
@@ -196,6 +204,15 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
         }
 
         model.end().save(false);
+    }
+
+    private Supplier<Item> registerDustItem(String itemName) {
+        return RegistriesHandler.ITEMS.register(itemName, () -> new DustItem(new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
     }
 
     private ResourceLocation iconTexture(String modid, String texture) {

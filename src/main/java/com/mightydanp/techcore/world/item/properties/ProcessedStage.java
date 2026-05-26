@@ -45,33 +45,26 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
     }
     
     public enum ProcessedStages{
-        CENTRIFUGED("centrifuged", 0.00F),
-        CRUSHED("crushed", 0.01F),
-        GROUND("ground", 0.02F),
-        MACERATED("macerated", 0.03F),
-        MAGNETIZED("magnetized", 0.04F),
-        MIXED("mixed", 0.05F),
-        PURIFIED("purified", 0.06F),
-        NONE("", 1F);
+        CENTRIFUGED("centrifuged"),
+        CRUSHED("crushed"),
+        GROUND("ground"),
+        MACERATED("macerated"),
+        MAGNETIZED("magnetized"),
+        MIXED("mixed"),
+        PURIFIED("purified"),
+        NONE("");
 
         public static final Codec<ProcessedStages> CODEC = Codec.STRING.xmap(
                 ProcessedStages::fromStage,
                 ProcessedStages::getStage);
 
         private final String stage;
-        private final float value;
-
-        ProcessedStages(String stage, float value){
+        ProcessedStages(String stage){
             this.stage = stage;
-            this.value = value;
         }
 
         public String getStage() {
             return stage;
-        }
-
-        public float getValue() {
-            return value;
         }
 
         public static ProcessedStages fromStage(String stage) {
@@ -83,12 +76,6 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
 
             return null;
             //throw new IllegalArgumentException("Unknown processed stage: " + stage);
-        }
-
-        public static float getProcessedStageLevel(ItemStack itemStack) {
-            ProcessedStage stage = ProcessedStage.fromStack(itemStack);
-
-            return stage.processedStage().getValue();
         }
     }
 }

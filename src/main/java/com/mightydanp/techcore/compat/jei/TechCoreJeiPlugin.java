@@ -6,7 +6,6 @@ import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.world.item.properties.ProcessedStage;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
@@ -33,11 +32,9 @@ public class TechCoreJeiPlugin implements IModPlugin {
         if (!(stack.getItem() instanceof OreItem oreItem)) return IIngredientSubtypeInterpreter.NONE;
 
         String quantity = Float.toString(oreItem.getQuantityLevel(stack));
-        String stage = ProcessedStage.hasProcessedStage(stack)
-                ? ProcessedStage.getProcessedStage(stack)
-                : "none";
+        String purity = Float.toString(oreItem.getPurityLevel(stack));
 
-        return "quantity=" + quantity + "|stage=" + stage;
+        return "quantity=" + quantity + "|purity=" + purity;
     };
 
     private static final IIngredientSubtypeInterpreter<ItemStack> DUST_SUBTYPE = (stack, context) -> {
@@ -63,13 +60,13 @@ public class TechCoreJeiPlugin implements IModPlugin {
         for (Material material : RegistriesHandler.getMaterials()) {
             addItem(gemItems, material.ore.gem);
 
-            for (Supplier<Item> oreItem : material.ore.oreItems) {
+            for (Supplier<Item> oreItem : material.ore.rawOreItems.values()) {
                 addItem(oreItems, oreItem);
             }
 
             addItem(dustItems, material.processed.dust);
 
-            for (Supplier<Item> dustItem : material.processed.dustItems) {
+            for (Supplier<Item> dustItem : material.processed.dustItems.values()) {
                 addItem(dustItems, dustItem);
             }
         }

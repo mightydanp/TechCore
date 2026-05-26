@@ -2,7 +2,10 @@ package com.mightydanp.techcore.materials.Item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
-import com.mightydanp.techcore.world.item.properties.*;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quality;
+import com.mightydanp.techcore.world.item.properties.Quantity;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +46,7 @@ public class MaterialItem extends Item {
         Quantity quantity = Quantity.stack(itemStack).get();
 
         if (quantity != null) {
-            return Math.round(13.0f * quantity.level());
+            return Math.round(13 * quantity.level());
         }
 
         return super.getBarWidth(itemStack);
@@ -78,13 +81,6 @@ public class MaterialItem extends Item {
     @Override
     public void appendHoverText(@NotNull ItemStack itemStack, @Nullable Level level, @NotNull List<Component> tooltip, @NotNull TooltipFlag tooltipFlag) {
         Temperature temperature = Temperature.fromStack(itemStack);
-
-        if (ProcessedStage.hasProcessedStage(itemStack)) {
-            ProcessedStage processedStage = ProcessedStage.fromStack(itemStack);
-            if (processedStage.processedStage() != ProcessedStage.ProcessedStages.fromStage("none")) {
-                tooltip.add(Component.translatable(MaterialRef.processed_stage_translatable).append(" : " + processedStage.processedStage().getStage()));
-            }
-        }
 
         if (symbol != null) {
             tooltip.add(Component.nullToEmpty(symbol));

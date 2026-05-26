@@ -14,14 +14,15 @@ import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.materials.properties.OreTypes;
 import com.mightydanp.techcore.materials.properties.RockTypes;
-import com.mightydanp.techcore.world.item.properties.ProcessedStage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class OreComponent<A extends Material> extends Component<OreComponent<A>> {
@@ -33,8 +34,12 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     private List<RockTypes.RockType> rockTypes = new ArrayList<>();
     private int maxDensity = 1;
 
-    public Supplier<Item> gem;
-    public List<Supplier<Item>> oreItems =  new ArrayList<>();
+    public Supplier<Item> chippedGem, flawedGem, gem, flawlessGem, legendaryGem;
+
+    public Map<String, Supplier<Item>> rawOreItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> centrifugedOreItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> crushedOreItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> purifiedOreItems = new LinkedHashMap<>();
     //public Supplier<Item> ingot;
 
     public OreComponent(A material) {
@@ -59,29 +64,23 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     @Override
     public OreComponent<A> init() {
-        //grade of the ore
         if (oreType == OreTypes.GEM.oreType()) {
-            gem = RegistriesHandler.ITEMS.register(material.name + "_gem", () -> new GemItem(new MaterialItemProperties()
-                    .color(material.physical.getColor())
-                    .symbol(material.chemical.getSymbol())
-                    .boilingPoint(material.thermal.getBoilingPoint())
-                    .meltingPoint(material.thermal.getMeltingPoint())
-            ));
+            chippedGem = registerGemItem("chipped_" + material.name + "_gem");
+            flawedGem = registerGemItem("flawed_" + material.name + "_gem");
+            gem = registerGemItem(material.name + "_gem");
+            flawlessGem = registerGemItem("flawless_" + material.name + "_gem");
+            legendaryGem = registerGemItem("legendary_" + material.name + "_gem");
         }
 
         for (Material stoneLayer : sameRockMaterials) {
             String stoneName = stoneLayer.name;
 
             if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
-
-                oreItems.add(RegistriesHandler.ITEMS.register(stoneName + "_" + material.name + "_ore", () -> new OreItem(new MaterialItemProperties()
-                        .color(material.physical.getColor())
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-                )));
+                rawOreItems.put(stoneName, registerOreItem("raw_" + stoneName + "_" + material.name + "_ore"));
+                centrifugedOreItems.put(stoneName, registerOreItem("centrifuged_" + stoneName + "_" + material.name + "_ore"));
+                crushedOreItems.put(stoneName, registerOreItem("crushed_" + stoneName + "_" + material.name + "_ore"));
+                purifiedOreItems.put(stoneName, registerOreItem("purified_" + stoneName + "_" + material.name + "_ore"));
             }
-
         }
 
         return this;
@@ -94,46 +93,78 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
         if (gem != null) initGemModels(modid, name);
 
-        for (Supplier<Item> oreItem: oreItems) {
-            if (oreItem != null)
-                initOreModels(modid, name);
+        if (!rawOreItems.isEmpty()) {
+            initOreModels(modid, name);
         }
 
         return this;
     }
 
     public OreComponent<A> initItemProperties(){
+        registerItemProperty(chippedGem,
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
+                (stack, level, entity, seed) ->
+                        ((GemItem) (chippedGem.get())).getGemQuality(stack));
+
+        registerItemProperty(flawedGem,
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
+                (stack, level, entity, seed) ->
+                        ((GemItem) (flawedGem.get())).getGemQuality(stack));
+
         registerItemProperty(gem,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
                 (stack, level, entity, seed) ->
                         ((GemItem) (gem.get())).getGemQuality(stack));
 
-        for (Supplier<Item> oreItem: oreItems) {
-            registerItemProperty(oreItem,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
-                    (stack, level, entity, seed) ->
-                            ((OreItem) (oreItem.get())).getQuantityLevel(stack));
+        registerItemProperty(flawlessGem,
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
+                (stack, level, entity, seed) ->
+                        ((GemItem) (flawlessGem.get())).getGemQuality(stack));
 
-            registerItemProperty(oreItem,
-                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "processed_stage"),
-                    (stack, level, entity, seed) -> ProcessedStage.hasProcessedStage(stack)
-                            ? ProcessedStage.ProcessedStages.getProcessedStageLevel(stack)
-                            : 1f);
-        }
+        registerItemProperty(legendaryGem,
+                ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
+                (stack, level, entity, seed) ->
+                        ((GemItem) (legendaryGem.get())).getGemQuality(stack));
+
+        registerOreQuantityProperty(rawOreItems);
+        registerOreQuantityProperty(centrifugedOreItems);
+        registerOreQuantityProperty(crushedOreItems);
+        registerOreQuantityProperty(purifiedOreItems);
 
         return this;
     }
 
-    public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
-        registerBasicItemColor(event, gem, material.physical.getColor());
-
-        for(int i = 0; i < oreItems.size(); i++) {
-            int rockColor = sameRockMaterials.get(i).physical.getColor();
-
-            registerMultiItemColor(event, oreItems.get(i), rockColor, material.physical.getColor());
+    private void registerOreQuantityProperty(Map<String, Supplier<Item>> oreItems) {
+        for (Supplier<Item> oreItem: oreItems.values()) {
+            registerItemProperty(oreItem,
+                    ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
+                    (stack, level, entity, seed) ->
+                            ((OreItem) (oreItem.get())).getQuantityLevel(stack));
         }
+    }
+
+    public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+        registerBasicItemColor(event, chippedGem, material.physical.getColor());
+        registerBasicItemColor(event, flawedGem, material.physical.getColor());
+        registerBasicItemColor(event, gem, material.physical.getColor());
+        registerBasicItemColor(event, flawlessGem, material.physical.getColor());
+        registerBasicItemColor(event, legendaryGem, material.physical.getColor());
+
+        registerOreColors(event, rawOreItems);
+        registerOreColors(event, centrifugedOreItems);
+        registerOreColors(event, crushedOreItems);
+        registerOreColors(event, purifiedOreItems);
 
         return this;
+    }
+
+    private void registerOreColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> oreItems) {
+        for (Material stoneLayer : sameRockMaterials) {
+            Supplier<Item> oreItem = oreItems.get(stoneLayer.name);
+            if (oreItem != null) {
+                registerMultiItemColor(event, oreItem, material.physical.getColor(), stoneLayer.physical.getColor());
+            }
+        }
     }
 
     @Override
@@ -141,41 +172,63 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
+        AssetPackRegistries.safetyMSLT(false, chippedGem,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".chipped_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Chipped Gem")
+        );
+
+        AssetPackRegistries.safetyMSLT(false, flawedGem,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".flawed_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Flawed Gem")
+        );
+
         AssetPackRegistries.safetyMSLT(false, gem,
                 new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_gem", LanguageContent.translateUpperCase(name) + " Gem")
         );
 
-        for(int i = 0; i < oreItems.size(); i++) {
-            String rockName = sameRockMaterials.get(i).name;
+        AssetPackRegistries.safetyMSLT(false, flawlessGem,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".flawless_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Flawless Gem")
+        );
 
-            AssetPackRegistries.safetyMSLT(false, oreItems.get(i),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_ore", LanguageContent.translateUpperCase(rockName + "_" + name) + " Ore")
+        AssetPackRegistries.safetyMSLT(false, legendaryGem,
+                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".legendary_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Legendary Gem")
+        );
+
+        for (Material stoneLayer : sameRockMaterials) {
+            String rockName = stoneLayer.name;
+            String translatedName = LanguageContent.translateUpperCase(rockName + "_" + name);
+
+            AssetPackRegistries.safetyMSLT(false, rawOreItems.get(rockName),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".raw_" + rockName + "_" + name + "_ore", translatedName + " Raw Ore")
+            );
+
+            AssetPackRegistries.safetyMSLT(false, centrifugedOreItems.get(rockName),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".centrifuged_" + rockName + "_" + name + "_ore", translatedName + " Centrifuged Ore")
+            );
+
+            AssetPackRegistries.safetyMSLT(false, crushedOreItems.get(rockName),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".crushed_" + rockName + "_" + name + "_ore", translatedName + " Crushed Ore")
+            );
+
+            AssetPackRegistries.safetyMSLT(false, purifiedOreItems.get(rockName),
+                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".purified_" + rockName + "_" + name + "_ore", translatedName + " Purified Ore")
             );
         }
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_ore", LanguageContent.translateUpperCase(name) + " Ore")
-        );
 
         return this;
     }
 
     private void initGemModels(String modid, String name) {
+        String[] items = {"chipped_" + name + "_gem", "flawed_" + name + "_gem", name + "_gem", "flawless_" + name + "_gem", "legendary_" + name + "_gem"};
         String[] models = {"chipped_gem", "flawed_gem", "gem", "flawless_gem", "legendary_gem"};
-        float[] qualities = {0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
 
         for (String model : models) {
             saveItemModel(modid, "gem", model, model, null);
         }
 
-        TCItemModelBuilder mainBuilder = itemModelBuilder(modid, "gem");
-        mainBuilder.texture("layer0", iconTexture(modid, "chipped_gem"));
-
         for (int i = 0; i < models.length; i++) {
-            addOverride(mainBuilder, modid, "gem_quality", qualities[i], "gem", models[i]);
+            TCItemModelBuilder builder = itemModelBuilder(modid, items[i]);
+            builder.texture("layer0", iconTexture(modid, models[i]));
+            new ItemModelContent<>(modid, items[i], null, builder).save(false);
         }
-
-        new ItemModelContent<>(modid, name + "_gem", null, mainBuilder).save(false);
     }
 
     private void initOreModels(String modid, String name) {
@@ -185,17 +238,12 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             saveOreModels(modid, stage);
         }
 
-        TCItemModelBuilder mainBuilder = itemModelBuilder(modid, "ore");
-
-
-        addOreOverrides(mainBuilder, modid, "centrifuged", ProcessedStage.ProcessedStages.CENTRIFUGED.getValue());
-        addOreOverrides(mainBuilder, modid, "crushed", ProcessedStage.ProcessedStages.CRUSHED.getValue());
-        addOreOverrides(mainBuilder, modid, "purified", ProcessedStage.ProcessedStages.PURIFIED.getValue());
-        addOreOverrides(mainBuilder, modid, "raw", ProcessedStage.ProcessedStages.NONE.getValue());
-
-        for(int i = 0; i < oreItems.size(); i++) {
-            String rockName = sameRockMaterials.get(i).name;
-            new ItemModelContent<>(modid, rockName + "_" + name + "_ore", null, mainBuilder).save(false);
+        for (Material stoneLayer : sameRockMaterials) {
+            String rockName = stoneLayer.name;
+            saveStageOreItemModel(modid, "raw_" + rockName + "_" + name + "_ore", "raw");
+            saveStageOreItemModel(modid, "centrifuged_" + rockName + "_" + name + "_ore", "centrifuged");
+            saveStageOreItemModel(modid, "crushed_" + rockName + "_" + name + "_ore", "crushed");
+            saveStageOreItemModel(modid, "purified_" + rockName + "_" + name + "_ore", "purified");
         }
     }
 
@@ -205,19 +253,21 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         }
     }
 
-    private void addOreOverrides(TCItemModelBuilder builder, String modid, String stage, Float processedStage) {
+    private void saveStageOreItemModel(String modid, String itemName, String stage) {
+        TCItemModelBuilder builder = itemModelBuilder(modid, itemName);
+        addOreOverrides(builder, modid, stage);
+        new ItemModelContent<>(modid, itemName, null, builder).save(false);
+    }
+
+    private void addOreOverrides(TCItemModelBuilder builder, String modid, String stage) {
         String[] models = oreModels(stage);
         float[] quantities = {0f, 0.25f, 0.50f, 1f};
 
         for (int i = 0; i < models.length; i++) {
-            var override = builder.override()
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), quantities[i]);
-
-            if (processedStage != null) {
-                override.predicate(ResourceLocation.fromNamespaceAndPath(modid, "processed_stage"), processedStage);
-            }
-
-            override.model(uncheckedItemModel(modid, "ore", models[i])).end();
+            builder.override()
+                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), quantities[i])
+                    .model(uncheckedItemModel(modid, "ore", models[i]))
+                    .end();
         }
     }
 
@@ -250,11 +300,22 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         model.end().save(false);
     }
 
-    private void addOverride(TCItemModelBuilder builder, String modid, String property, float value, String folder, String model) {
-        builder.override()
-                .predicate(ResourceLocation.fromNamespaceAndPath(modid, property), value)
-                .model(uncheckedItemModel(modid, folder, model))
-                .end();
+    private Supplier<Item> registerGemItem(String itemName) {
+        return RegistriesHandler.ITEMS.register(itemName, () -> new GemItem(new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
+    }
+
+    private Supplier<Item> registerOreItem(String itemName) {
+        return RegistriesHandler.ITEMS.register(itemName, () -> new OreItem(new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
     }
 
     private ResourceLocation iconTexture(String modid, String texture) {

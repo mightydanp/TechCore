@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class TCModelBuilder<A> extends ModelFile {
+public class ModelBuilder<A> extends ModelFile {
 
     @Nullable
     protected ModelFile parent;
@@ -44,17 +44,17 @@ public class TCModelBuilder<A> extends ModelFile {
     @Nullable
     private final A parentRef;
 
-    public TCModelBuilder(ResourceLocation location) {
+    public ModelBuilder(ResourceLocation location) {
         super(location);
         this.parentRef = null;
     }
 
-    public TCModelBuilder(ResourceLocation location, @Nullable A parentRef) {
+    public ModelBuilder(ResourceLocation location, @Nullable A parentRef) {
         super(location);
         this.parentRef = parentRef;
     }
 
-    public TCModelBuilder<A> builder(){
+    public ModelBuilder<A> builder(){
         return this;
     }
 
@@ -71,7 +71,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * @throws NullPointerException  if {@code parent} is {@code null}
      * @throws IllegalStateException if {@code parent} does not {@link ModelFile#assertExistence() exist}
      */
-    public TCModelBuilder<A> parent(ModelFile parent) {
+    public ModelBuilder<A> parent(ModelFile parent) {
         this.parent = parent;
         return this;
     }
@@ -83,7 +83,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * @return this builder
      * @throws NullPointerException if {@code parent} is {@code null}
      */
-    public TCModelBuilder<A> parent(ResourceLocation resourceLocation) {
+    public ModelBuilder<A> parent(ResourceLocation resourceLocation) {
         Preconditions.checkNotNull(resourceLocation, "resourceLocation must not be null");
         this.parent(new ModelFile.UncheckedModelFile(resourceLocation));
         return this;
@@ -96,25 +96,25 @@ public class TCModelBuilder<A> extends ModelFile {
      * @return this builder
      * @throws NullPointerException if {@code parent} is {@code null}
      */
-    public TCModelBuilder<A> parent(ModelContent<A> modelContent) {
+    public ModelBuilder<A> parent(ModelContent<A> modelContent) {
         Preconditions.checkNotNull(modelContent, "modelContent must not be null");
         this.parent(modelContent.model());
         return this;
     }
 
     /**
-     * Set the texture for TCModelBuilder<A> given dictionary key.
+     * Set the texture for ModelBuilder<A> given dictionary key.
      *
      * @param key     the texture key
      * @param texture the texture, can be another key e.g. {@code "#all"}
      * @return this builder
      * @throws NullPointerException  if {@code key} is {@code null}
      * @throws NullPointerException  if {@code texture} is {@code null}
-     * @throws IllegalStateException if {@code texture} is not TCModelBuilder<A> key (does not start
+     * @throws IllegalStateException if {@code texture} is not ModelBuilder<A> key (does not start
      *                               with {@code '#'}) and does not exist in any
      *                               known resource pack
      */
-    public TCModelBuilder<A> texture(String key, String texture) {
+    public ModelBuilder<A> texture(String key, String texture) {
         Preconditions.checkNotNull(key, "Key must not be null");
         Preconditions.checkNotNull(texture, "Texture must not be null");
         if (texture.charAt(0) == '#') {
@@ -132,18 +132,18 @@ public class TCModelBuilder<A> extends ModelFile {
     }
 
     /**
-     * Set the texture for TCModelBuilder<A> given dictionary key.
+     * Set the texture for ModelBuilder<A> given dictionary key.
      *
      * @param key     the texture key
      * @param texture the texture
      * @return this builder
      * @throws NullPointerException  if {@code key} is {@code null}
      * @throws NullPointerException  if {@code texture} is {@code null}
-     * @throws IllegalStateException if {@code texture} is not TCModelBuilder<A> key (does not start
+     * @throws IllegalStateException if {@code texture} is not ModelBuilder<A> key (does not start
      *                               with {@code '#'}) and does not exist in any
      *                               known resource pack
      */
-    public TCModelBuilder<A> texture(String key, ResourceLocation texture) {
+    public ModelBuilder<A> texture(String key, ResourceLocation texture) {
         Preconditions.checkNotNull(key, "Key must not be null");
         Preconditions.checkNotNull(texture, "Texture must not be null");
         this.textures.put(key, texture.toString());
@@ -154,7 +154,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * Set the render type for this model. Any render types to be used must be registered via
      * {@link net.minecraftforge.client.event.RegisterNamedRenderTypesEvent RegisterNamedRenderTypesEvent}.
      * <p>
-     * Consider using {@linkplain #renderType(String, String)} if you need to set TCModelBuilder<A> render type for
+     * Consider using {@linkplain #renderType(String, String)} if you need to set ModelBuilder<A> render type for
      * {@linkplain net.minecraft.client.GraphicsStatus#FAST fast graphics}.
      *
      * @param renderType the render type
@@ -163,7 +163,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * @throws NullPointerException if {@code renderType} is {@code null}
      * @see #renderType(String, String)
      */
-    public TCModelBuilder<A> renderType(String renderType) {
+    public ModelBuilder<A> renderType(String renderType) {
         Preconditions.checkNotNull(renderType, "Render type must not be null");
         return renderType(ResourceLocation.withDefaultNamespace(renderType));
     }
@@ -178,7 +178,7 @@ public class TCModelBuilder<A> extends ModelFile {
      *
      * @throws NullPointerException if {@code renderType} is {@code null}
      */
-    public TCModelBuilder<A> renderType(String renderType, String renderTypeFast) {
+    public ModelBuilder<A> renderType(String renderType, String renderTypeFast) {
         Preconditions.checkNotNull(renderType, "Render type must not be null");
         Preconditions.checkNotNull(renderTypeFast, "Render type for fast graphics must not be null");
         return renderType(ResourceLocation.withDefaultNamespace(renderType), ResourceLocation.withDefaultNamespace(renderTypeFast));
@@ -188,7 +188,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * Set the render type for this model. Any render types to be used must be registered via
      * {@link net.minecraftforge.client.event.RegisterNamedRenderTypesEvent RegisterNamedRenderTypesEvent}.
      * <p>
-     * Consider using {@linkplain #renderType(ResourceLocation, ResourceLocation)} if you need to set TCModelBuilder<A> render type for
+     * Consider using {@linkplain #renderType(ResourceLocation, ResourceLocation)} if you need to set ModelBuilder<A> render type for
      * {@linkplain net.minecraft.client.GraphicsStatus#FAST fast graphics}.
      *
      * @param renderType the render type
@@ -197,7 +197,7 @@ public class TCModelBuilder<A> extends ModelFile {
      * @throws NullPointerException if {@code renderType} is {@code null}
      * @see #renderType(ResourceLocation, ResourceLocation)
      */
-    public TCModelBuilder<A> renderType(ResourceLocation renderType) {
+    public ModelBuilder<A> renderType(ResourceLocation renderType) {
         Preconditions.checkNotNull(renderType, "Render type must not be null");
         this.renderType = renderType.toString();
         return this;
@@ -213,7 +213,7 @@ public class TCModelBuilder<A> extends ModelFile {
      *
      * @throws NullPointerException if {@code renderType} is {@code null}
      */
-    public TCModelBuilder<A> renderType(ResourceLocation renderType, ResourceLocation renderTypeFast) {
+    public ModelBuilder<A> renderType(ResourceLocation renderType, ResourceLocation renderTypeFast) {
         Preconditions.checkNotNull(renderType, "Render type must not be null");
         Preconditions.checkNotNull(renderTypeFast, "Render type for fast graphics must not be null");
         this.renderType = renderType.toString();
@@ -225,12 +225,12 @@ public class TCModelBuilder<A> extends ModelFile {
         return transforms;
     }
 
-    public TCModelBuilder<A> ao(boolean ao) {
+    public ModelBuilder<A> ao(boolean ao) {
         this.ambientOcclusion = ao;
         return this;
     }
 
-    public TCModelBuilder<A> guiLight(BlockModel.GuiLight light) {
+    public ModelBuilder<A> guiLight(BlockModel.GuiLight light) {
         this.guiLight = light;
         return this;
     }
@@ -324,7 +324,7 @@ public class TCModelBuilder<A> extends ModelFile {
 
         if (!this.elements.isEmpty()) {
             JsonArray elements = new JsonArray();
-            this.elements.stream().map(TCModelBuilder.ElementBuilder::build).forEach(part -> {
+            this.elements.stream().map(ModelBuilder.ElementBuilder::build).forEach(part -> {
                 JsonObject partObj = new JsonObject();
                 partObj.add("from", serializeVector3f(part.from));
                 partObj.add("to", serializeVector3f(part.to));
@@ -489,7 +489,7 @@ public class TCModelBuilder<A> extends ModelFile {
         }
 
         /**
-         * Modify all <em>possible</em> faces dynamically using TCModelBuilder<A> function, creating new
+         * Modify all <em>possible</em> faces dynamically using ModelBuilder<A> function, creating new
          * faces as necessary.
          *
          * @param action the function to apply to each direction
@@ -503,7 +503,7 @@ public class TCModelBuilder<A> extends ModelFile {
         }
 
         /**
-         * Modify all <em>existing</em> faces dynamically using TCModelBuilder<A> function.
+         * Modify all <em>existing</em> faces dynamically using ModelBuilder<A> function.
          *
          * @param action the function to apply to each direction
          * @return this builder
@@ -539,7 +539,7 @@ public class TCModelBuilder<A> extends ModelFile {
         }
 
         /**
-         * Create TCModelBuilder<A> typical cube element, creating new faces as needed, applying the
+         * Create ModelBuilder<A> typical cube element, creating new faces as needed, applying the
          * given texture, and setting the cullface.
          *
          * @param texture the texture
@@ -592,7 +592,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param calc whether to calculate normals
          * @return this builder
          */
-        public TCModelBuilder<A>.ElementBuilder calculateNormals(boolean calc) {
+        public ModelBuilder<A>.ElementBuilder calculateNormals(boolean calc) {
             this.calculateNormals = calc;
             return this;
         }
@@ -703,7 +703,7 @@ public class TCModelBuilder<A> extends ModelFile {
 
             BlockElementFace build() {
                 if (this.texture == null) {
-                    throw new IllegalStateException("A model face must have TCModelBuilder<A> texture");
+                    throw new IllegalStateException("A model face must have ModelBuilder<A> texture");
                 }
                 return new BlockElementFace(cullface, tintindex, texture, new BlockFaceUV(uvs, rotation.rotation), new ForgeFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion, this.calculateNormals));
             }
@@ -782,7 +782,7 @@ public class TCModelBuilder<A> extends ModelFile {
         private final Map<ItemDisplayContext, TransformVecBuilder> transforms = new LinkedHashMap<>();
 
         /**
-         * Begin building TCModelBuilder<A> new transform for the given perspective.
+         * Begin building ModelBuilder<A> new transform for the given perspective.
          *
          * @param type the perspective to create or return the builder for
          * @return the builder for the given perspective
@@ -875,7 +875,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code translation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder translation(Vector3f translation)
+        public ModelBuilder<A>.RootTransformsBuilder translation(Vector3f translation)
         {
             this.translation = Preconditions.checkNotNull(translation, "Translation must not be null");
             return this;
@@ -889,7 +889,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param z z translation
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder translation(float x, float y, float z)
+        public ModelBuilder<A>.RootTransformsBuilder translation(float x, float y, float z)
         {
             return translation(new Vector3f(x, y, z));
         }
@@ -901,7 +901,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code rotation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder rotation(Quaternionf rotation)
+        public ModelBuilder<A>.RootTransformsBuilder rotation(Quaternionf rotation)
         {
             this.leftRotation = Preconditions.checkNotNull(rotation, "Rotation must not be null");
             return this;
@@ -916,7 +916,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param isDegrees whether the rotation is in degrees or radians
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder rotation(float x, float y, float z, boolean isDegrees)
+        public ModelBuilder<A>.RootTransformsBuilder rotation(float x, float y, float z, boolean isDegrees)
         {
             return rotation(TransformationHelper.quatFromXYZ(x, y, z, isDegrees));
         }
@@ -928,7 +928,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code leftRotation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder leftRotation(Quaternionf leftRotation)
+        public ModelBuilder<A>.RootTransformsBuilder leftRotation(Quaternionf leftRotation)
         {
             return rotation(leftRotation);
         }
@@ -942,7 +942,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param isDegrees whether the rotation is in degrees or radians
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder leftRotation(float x, float y, float z, boolean isDegrees)
+        public ModelBuilder<A>.RootTransformsBuilder leftRotation(float x, float y, float z, boolean isDegrees)
         {
             return leftRotation(TransformationHelper.quatFromXYZ(x, y, z, isDegrees));
         }
@@ -954,7 +954,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code rightRotation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder rightRotation(Quaternionf rightRotation)
+        public ModelBuilder<A>.RootTransformsBuilder rightRotation(Quaternionf rightRotation)
         {
             this.rightRotation = Preconditions.checkNotNull(rightRotation, "Rotation must not be null");
             return this;
@@ -969,7 +969,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param isDegrees whether the rotation is in degrees or radians
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder rightRotation(float x, float y, float z, boolean isDegrees)
+        public ModelBuilder<A>.RootTransformsBuilder rightRotation(float x, float y, float z, boolean isDegrees)
         {
             return rightRotation(TransformationHelper.quatFromXYZ(x, y, z, isDegrees));
         }
@@ -981,7 +981,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code rightRotation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder postRotation(Quaternionf postRotation)
+        public ModelBuilder<A>.RootTransformsBuilder postRotation(Quaternionf postRotation)
         {
             return rightRotation(postRotation);
         }
@@ -995,7 +995,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param isDegrees whether the rotation is in degrees or radians
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder postRotation(float x, float y, float z, boolean isDegrees)
+        public ModelBuilder<A>.RootTransformsBuilder postRotation(float x, float y, float z, boolean isDegrees)
         {
             return postRotation(TransformationHelper.quatFromXYZ(x, y, z, isDegrees));
         }
@@ -1006,7 +1006,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param scale the scale
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder scale(float scale)
+        public ModelBuilder<A>.RootTransformsBuilder scale(float scale)
         {
             return scale(new Vector3f(scale, scale, scale));
         }
@@ -1019,7 +1019,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @param zScale z scale
          * @return this builder
          */
-        public TCModelBuilder<A>.RootTransformsBuilder scale(float xScale, float yScale, float zScale)
+        public ModelBuilder<A>.RootTransformsBuilder scale(float xScale, float yScale, float zScale)
         {
             return scale(new Vector3f(xScale, yScale, zScale));
         }
@@ -1031,7 +1031,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code scale} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder scale(Vector3f scale)
+        public ModelBuilder<A>.RootTransformsBuilder scale(Vector3f scale)
         {
             this.scale = Preconditions.checkNotNull(scale, "Scale must not be null");
             return this;
@@ -1044,7 +1044,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code transformation} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder transform(Transformation transformation)
+        public ModelBuilder<A>.RootTransformsBuilder transform(Transformation transformation)
         {
             Preconditions.checkNotNull(transformation, "Transformation must not be null");
             this.translation = transformation.getTranslation();
@@ -1061,7 +1061,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @return this builder
          * @throws NullPointerException if {@code origin} is {@code null}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder origin(Vector3f origin)
+        public ModelBuilder<A>.RootTransformsBuilder origin(Vector3f origin)
         {
             this.originVec = Preconditions.checkNotNull(origin, "Origin must not be null");
             this.origin = null;
@@ -1076,7 +1076,7 @@ public class TCModelBuilder<A> extends ModelFile {
          * @throws NullPointerException if {@code origin} is {@code null}
          * @throws IllegalArgumentException if {@code origin} is not {@code center}, {@code corner} or {@code opposing-corner}
          */
-        public TCModelBuilder<A>.RootTransformsBuilder origin(TransformationHelper.TransformOrigin origin)
+        public ModelBuilder<A>.RootTransformsBuilder origin(TransformationHelper.TransformOrigin origin)
         {
             this.origin = Preconditions.checkNotNull(origin, "Origin must not be null");
             this.originVec = null;
@@ -1088,8 +1088,8 @@ public class TCModelBuilder<A> extends ModelFile {
          *
          * @return the parent block model builder
          */
-        public TCModelBuilder<A> end() {
-            return TCModelBuilder.this;
+        public ModelBuilder<A> end() {
+            return ModelBuilder.this;
         }
 
         public JsonObject toJson() {
@@ -1141,12 +1141,12 @@ public class TCModelBuilder<A> extends ModelFile {
 
 
     public enum ExistingBlockModels {
-        block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/block"))),
-        cube_all(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_all"))),
-        cube_column(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column"))),
-        cube_column_horizontal(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column_horizontal"))),
-        leaves(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/leaves"))),
-        thin_block(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("block/thin_block")));
+        block(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/block"))),
+        cube_all(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_all"))),
+        cube_column(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column"))),
+        cube_column_horizontal(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/cube_column_horizontal"))),
+        leaves(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/leaves"))),
+        thin_block(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("block/thin_block")));
 
         public final ModelFile model;
 
@@ -1156,7 +1156,7 @@ public class TCModelBuilder<A> extends ModelFile {
     }
 
     public enum ExistingItemModels {
-        item_generated(new TCModelBuilder<>(ResourceLocation.withDefaultNamespace("item/generated")));
+        item_generated(new ModelBuilder<>(ResourceLocation.withDefaultNamespace("item/generated")));
         public final ModelFile model;
 
         ExistingItemModels(ModelFile model) {

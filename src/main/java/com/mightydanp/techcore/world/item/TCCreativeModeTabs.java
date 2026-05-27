@@ -93,7 +93,7 @@ public class TCCreativeModeTabs {
 
                                     addDustStacks(output, mat.processed.impureDustItems.values(), 25);
                                     addDustStacks(output, mat.processed.dustItems.values(), Purity.DEFAULT);
-                                    addDustStacks(output, mat.processed.pureDustItems.values(), Purity.MAX);
+                                    addDustStack(output, mat.processed.pureDust, Purity.MAX);
                                 });
                             })
                             .build()

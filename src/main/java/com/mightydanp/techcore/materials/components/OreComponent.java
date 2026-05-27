@@ -2,11 +2,10 @@ package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.TCItemModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
 import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.contents.model.MCItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.contents.model.material.item.component.OreItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.GemItem;
 import com.mightydanp.techcore.materials.Item.OreItem;
@@ -144,11 +143,11 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     }
 
     public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
-        registerBasicItemColor(event, chippedGem, material.physical.getColor());
-        registerBasicItemColor(event, flawedGem, material.physical.getColor());
-        registerBasicItemColor(event, gem, material.physical.getColor());
-        registerBasicItemColor(event, flawlessGem, material.physical.getColor());
-        registerBasicItemColor(event, legendaryGem, material.physical.getColor());
+        registerItemColor(event, chippedGem, material.physical.getColor());
+        registerItemColor(event, flawedGem, material.physical.getColor());
+        registerItemColor(event, gem, material.physical.getColor());
+        registerItemColor(event, flawlessGem, material.physical.getColor());
+        registerItemColor(event, legendaryGem, material.physical.getColor());
 
         registerOreColors(event, rawOreItems);
         registerOreColors(event, centrifugedOreItems);
@@ -162,7 +161,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         for (Material stoneLayer : sameRockMaterials) {
             Supplier<Item> oreItem = oreItems.get(stoneLayer.name);
             if (oreItem != null) {
-                registerMultiItemColor(event, oreItem, material.physical.getColor(), stoneLayer.physical.getColor());
+                registerItemColor(event, oreItem, material.physical.getColor(), stoneLayer.physical.getColor());
             }
         }
     }
@@ -221,13 +220,13 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         String[] models = {"chipped_gem", "flawed_gem", "gem", "flawless_gem", "legendary_gem"};
 
         for (String model : models) {
-            saveItemModel(modid, "gem", model, model, null);
+            new OreItemModelContent(modid, model, "gem")
+                    .saveGemModel(material.icon, model);
         }
 
         for (int i = 0; i < models.length; i++) {
-            TCItemModelBuilder builder = itemModelBuilder(modid, items[i]);
-            builder.texture("layer0", iconTexture(modid, models[i]));
-            new ItemModelContent<>(modid, items[i], null, builder).save(false);
+            new OreItemModelContent(modid, items[i], null)
+                    .saveGemItemModel(material.icon, models[i]);
         }
     }
 
@@ -235,60 +234,26 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         String[] stages = {"raw", "centrifuged", "crushed", "purified"};
 
         for (String stage : stages) {
-            saveOreModels(modid, stage);
+            new OreItemModelContent(modid, stage + "_" + name + "_ore", "ore")
+                    .saveOreItemModel(material.icon, stage);
         }
 
         for (Material stoneLayer : sameRockMaterials) {
             String rockName = stoneLayer.name;
-            saveStageOreItemModel(modid, "raw_" + rockName + "_" + name + "_ore", "raw");
-            saveStageOreItemModel(modid, "centrifuged_" + rockName + "_" + name + "_ore", "centrifuged");
-            saveStageOreItemModel(modid, "crushed_" + rockName + "_" + name + "_ore", "crushed");
-            saveStageOreItemModel(modid, "purified_" + rockName + "_" + name + "_ore", "purified");
+
+            new OreItemModelContent(modid, "raw_" + rockName + "_" + name + "_ore", null)
+                    .saveStageOreItemModel("raw");
+            new OreItemModelContent(modid, "centrifuged_" + rockName + "_" + name + "_ore", null)
+                    .saveStageOreItemModel("centrifuged");
+            new OreItemModelContent(modid, "crushed_" + rockName + "_" + name + "_ore", null)
+                    .saveStageOreItemModel("crushed");
+            new OreItemModelContent(modid, "purified_" + rockName + "_" + name + "_ore", null)
+                    .saveStageOreItemModel("purified");
         }
-    }
-
-    private void saveOreModels(String modid, String stage) {
-        for (String model : oreModels(stage)) {
-            saveItemModel(modid, "ore", model, model, model + "_overlay");
-        }
-    }
-
-    private void saveStageOreItemModel(String modid, String itemName, String stage) {
-        TCItemModelBuilder builder = itemModelBuilder(modid, itemName);
-        addOreOverrides(builder, modid, stage);
-        new ItemModelContent<>(modid, itemName, null, builder).save(false);
-    }
-
-    private void addOreOverrides(TCItemModelBuilder builder, String modid, String stage) {
-        String[] models = oreModels(stage);
-        float[] quantities = {0f, 0.25f, 0.50f, 1f};
-
-        for (int i = 0; i < models.length; i++) {
-            builder.override()
-                    .predicate(ResourceLocation.fromNamespaceAndPath(modid, "quantity"), quantities[i])
-                    .model(uncheckedItemModel(modid, "ore", models[i]))
-                    .end();
-        }
-    }
-
-    private String[] oreModels(String stage) {
-        return new String[] {
-                stage + "_div72_ore",
-                stage + "_tiny_ore",
-                stage + "_small_ore",
-                stage + "_ore"
-        };
-    }
-
-    private TCItemModelBuilder itemModelBuilder(String modid, String modelName) {
-        TCItemModelBuilder builder = new TCItemModelBuilder(
-                ResourceLocation.fromNamespaceAndPath(modid, "models/item/" + modelName + ".json"));
-        builder.parent(new ModelFile.UncheckedModelFile("item/generated"));
-        return builder;
     }
 
     private void saveItemModel(String modid, String folder, String modelName, String layer0, String layer1) {
-        var model = new TCItemModelContent(modid, modelName, folder)
+        var model = new MCItemModelContent(modid, modelName, folder)
                 .model()
                 .parent(new ModelFile.UncheckedModelFile("item/generated"))
                 .texture("layer0", iconTexture(modid, layer0));
@@ -320,10 +285,6 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     private ResourceLocation iconTexture(String modid, String texture) {
         return ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/" + texture);
-    }
-
-    private ModelFile.UncheckedModelFile uncheckedItemModel(String modid, String folder, String model) {
-        return new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid, "item/" + folder + "/" + model));
     }
 
     public OreComponent<A> setMaxDensity(int maxDensity) {

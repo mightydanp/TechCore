@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.api.resources.assets.contents.model;
 
 import com.google.gson.JsonObject;
-import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
+import com.mightydanp.techcore.api.resources.assets.contents.ModelBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -14,7 +14,7 @@ public class ModelContent<A> {
     protected static final ExistingFileHelper.ResourceType MODEL = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".json", "models");
 
     protected static final ExistingFileHelper.ResourceType MODEL_WITH_EXTENSION = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, "", "models");
-    private final TCModelBuilder<A> model;
+    private ModelBuilder<A> model;
 
     private final String modid;
 
@@ -28,7 +28,7 @@ public class ModelContent<A> {
         this.name = name;
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
+        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
     }
 
     @SuppressWarnings("unchecked")
@@ -37,10 +37,10 @@ public class ModelContent<A> {
         this.modid = resourceLocation.getNamespace();
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new TCModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
+        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
     }
 
-    protected ModelContent(String modid, String name, String modelType, String organizationPath, TCModelBuilder<A> builder) {
+    protected ModelContent(String modid, String name, String modelType, String organizationPath, ModelBuilder<A> builder) {
         this.modid = modid;
         this.name = name;
         this.modelType = modelType;
@@ -56,8 +56,12 @@ public class ModelContent<A> {
         return name;
     }
 
-    public TCModelBuilder<A> model() {
+    public ModelBuilder<A> model() {
         return model;
+    }
+
+    protected void model(ModelBuilder<A> builder) {
+        this.model = builder;
     }
 
     public String getModelType() {
@@ -93,33 +97,33 @@ public class ModelContent<A> {
         return ResourceLocation.fromNamespaceAndPath(modid, name);
     }
 
-    public TCModelBuilder<A> withExistingParent(String parent) {
+    public ModelBuilder<A> withExistingParent(String parent) {
         return withExistingParent(mcLoc(parent));
     }
 
-    public TCModelBuilder<A> withExistingParent(ResourceLocation parent) {
+    public ModelBuilder<A> withExistingParent(ResourceLocation parent) {
         return model.parent(getFile(parent));
     }
 
-    public TCModelBuilder<A> singleTexture(String parent, ResourceLocation texture) {
+    public ModelBuilder<A> singleTexture(String parent, ResourceLocation texture) {
         return singleTexture(mcLoc(parent), texture);
     }
 
-    public TCModelBuilder<A> singleTexture(ResourceLocation parent, ResourceLocation texture) {
+    public ModelBuilder<A> singleTexture(ResourceLocation parent, ResourceLocation texture) {
         return singleTexture(parent, "texture", texture);
     }
 
-    public TCModelBuilder<A> singleTexture(String parent, String textureKey, ResourceLocation texture) {
+    public ModelBuilder<A> singleTexture(String parent, String textureKey, ResourceLocation texture) {
         return singleTexture(mcLoc(parent), textureKey, texture);
     }
 
-    public TCModelBuilder<A> singleTexture(ResourceLocation parent, String textureKey, ResourceLocation texture) {
+    public ModelBuilder<A> singleTexture(ResourceLocation parent, String textureKey, ResourceLocation texture) {
         return withExistingParent(parent)
                 .texture(textureKey, texture);
     }
 
-    public TCModelBuilder<A> singleTextureMap(ResourceLocation parent, Map<String, String> map) {
-        TCModelBuilder<A> model = withExistingParent(parent);
+    public ModelBuilder<A> singleTextureMap(ResourceLocation parent, Map<String, String> map) {
+        ModelBuilder<A> model = withExistingParent(parent);
 
         map.forEach(model::texture);
 
@@ -129,6 +133,10 @@ public class ModelContent<A> {
     public void resourceTextureMap(ResourceLocation parent, Map<String, ResourceLocation> map) {
         model.parent(parent);
         map.forEach(model::texture);
+    }
+
+    public ModelFile.UncheckedModelFile uncheckedItemModel(String folder, String model) {
+        return new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath(modid(), "item/" + folder + "/" + model));
     }
     //------------------------------------------------------------------------------------------------------------------
 

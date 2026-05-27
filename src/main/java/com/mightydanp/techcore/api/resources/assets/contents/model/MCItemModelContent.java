@@ -5,134 +5,132 @@ import net.minecraftforge.client.model.generators.ModelFile;
 
 import java.util.Map;
 
-public class TCItemModelContent extends ItemModelContent<TCItemModelContent> {
+public class MCItemModelContent extends ItemModelContent<MCItemModelContent> {
     public static final String ITEM_FOLDER = "item";
 
-    public TCItemModelContent(String modid, String modelName, String parentFolder) {
+    public MCItemModelContent(String modid, String modelName, String parentFolder) {
         super(modid, modelName, parentFolder);
     }
 
-    public TCItemModelContent(ResourceLocation resourceLocation, String parentFolder) {
+    public MCItemModelContent(ResourceLocation resourceLocation, String parentFolder) {
         super(resourceLocation, parentFolder);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcItem(Map<Integer, ResourceLocation> textureMap) {
-        ItemModelContent<TCItemModelContent> model = new TCItemModelContent(modid(), name(), "")
-                .model().parent(new ModelFile.UncheckedModelFile("item/generated")).end();
+    public MCItemModelContent saveItem(Map<Integer, ResourceLocation> textureMap) {
+        ItemModelContent<MCItemModelContent> model = this.model().parent(new ModelFile.UncheckedModelFile("item/generated")).end();
 
         textureMap.forEach((integer, resourceLocation) -> model.model().texture("texture_" + integer, resourceLocation));
 
         return model.save(false).end();
 
-
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcBlockItem(TCBlockModelContent modelContent) {
-        return new TCItemModelContent(modid(), name(), "")
+    public MCItemModelContent saveBlockItem(MCBlockModelContent modelContent) {
+        return this
                 .model().parent(modelContent.model()).end()
                 .save(false).end();
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcBoat(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcBoat(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcButton(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcButton(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcChestBoat(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcChestBoat(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcDoor(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcDoor(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFence(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcFence(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcFenceGate(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcFenceGate(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcHangingSign(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcHangingSign(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLeaves(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcLeaves(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcLog(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcLog(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPane(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcPane(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPlanks(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcPlanks(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcPressurePlate(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcPressurePlate(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSapling(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcSapling(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSign(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcSign(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcSlab(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcSlab(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcStairs(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcStairs(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcStick(Map<Integer, ResourceLocation> textureMap) {
-        return tcItem(textureMap);
+    public MCItemModelContent mcStick(Map<Integer, ResourceLocation> textureMap) {
+        return saveItem(textureMap);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcTrapDoor(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcTrapDoor(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcWall(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcWall(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public TCItemModelContent tcWood(TCBlockModelContent modelContent) {
-        return tcBlockItem(modelContent);
+    public MCItemModelContent mcWood(MCBlockModelContent modelContent) {
+        return saveBlockItem(modelContent);
     }
     //------------------------------------------------------------------------------------------------------------------
 

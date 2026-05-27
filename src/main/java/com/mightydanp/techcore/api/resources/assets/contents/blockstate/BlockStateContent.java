@@ -2,9 +2,9 @@ package com.mightydanp.techcore.api.resources.assets.contents.blockstate;
 
 import com.google.gson.JsonObject;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.TCModelBuilder;
+import com.mightydanp.techcore.api.resources.assets.contents.ModelBuilder;
 import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.TCItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.contents.model.MCItemModelContent;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -114,7 +114,7 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         return ResourceLocation.fromNamespaceAndPath(rl.getNamespace(), rl.getPath() + suffix);
     }
 
-    public TCModelBuilder<? extends BlockModelContent<?>> cubeAll(Block block) {
+    public ModelBuilder<? extends BlockModelContent<?>> cubeAll(Block block) {
         BlockModelContent<?> modelContent = new BlockModelContent<>(modid(), name(), "");
         modelContent.cubeAll(blockTexture(block));
 
@@ -125,11 +125,11 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         simpleBlock(block, cubeAll(block));
     }
 
-    public void simpleBlock(Block block, Function<TCModelBuilder<?>, ConfiguredModel[]> expander) throws Exception {
+    public void simpleBlock(Block block, Function<ModelBuilder<?>, ConfiguredModel[]> expander) throws Exception {
         simpleBlock(block, expander.apply(cubeAll(block)));
     }
 
-    public void simpleBlock(Block block, TCModelBuilder<?> model) throws Exception {
+    public void simpleBlock(Block block, ModelBuilder<?> model) throws Exception {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
@@ -137,12 +137,12 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
-    public void simpleBlockItem(Block block, TCModelBuilder<?> model) {
-        TCItemModelContent itemModel = new TCItemModelContent(modid(), name(), "");
+    public void simpleBlockItem(Block block, ModelBuilder<?> model) {
+        MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
         itemModel.model().parent(model);
     }
 
-    public void simpleBlockWithItem(Block block, TCModelBuilder<?> model) throws Exception {
+    public void simpleBlockWithItem(Block block, ModelBuilder<?> model) throws Exception {
         simpleBlock(block, model);
         simpleBlockItem(block, model);
     }

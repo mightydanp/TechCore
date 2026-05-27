@@ -10,13 +10,7 @@ public class Component<A extends Component<A>> extends AbstractComponent<A> {
         super(prefix, suffix);
     }
 
-    public void registerBasicItemColor(RegisterColorHandlersEvent.Item event, Supplier<Item> item, int color) {
-        if (item != null) {
-            event.register((stack, tintIndex) -> tintIndex == 0 ? color : -1, item.get());
-        }
-    }
-
-    public void registerMultiItemColor(RegisterColorHandlersEvent.Item event, Supplier<Item> item, int... layer) {
+    public void registerItemColor(RegisterColorHandlersEvent.Item event, Supplier<Item> item, int... layer) {
         if (item != null) {
             event.register((stack, tintIndex) -> tintIndex >= 0 && tintIndex < layer.length ? layer[tintIndex] : -1
             , item.get());

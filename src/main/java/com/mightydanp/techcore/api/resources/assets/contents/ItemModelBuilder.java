@@ -4,17 +4,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ModelFile;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TCItemModelBuilder extends TCModelBuilder<TCItemModelBuilder> {
+public class ItemModelBuilder<A> extends ModelBuilder<A> {
     private final List<OverrideBuilder> overrides = new ArrayList<>();
 
-    public TCItemModelBuilder(ResourceLocation location) {
+    public ItemModelBuilder(ResourceLocation location) {
         super(location);
+    }
+
+    public ItemModelBuilder(ResourceLocation location, @Nullable A parentRef) {
+        super(location, parentRef);
     }
 
     public OverrideBuilder override() {
@@ -48,8 +53,8 @@ public class TCItemModelBuilder extends TCModelBuilder<TCItemModelBuilder> {
             return this;
         }
 
-        public TCItemModelBuilder end() {
-            return TCItemModelBuilder.this;
+        public ItemModelBuilder<A> end() {
+            return ItemModelBuilder.this;
         }
 
         JsonObject toJson() {

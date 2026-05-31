@@ -47,3 +47,74 @@ reobfArtifact()
 java {
     withSourcesJar()
 }
+
+tasks.register('findAndExtractMcSources') {
+    doLast {
+        def cache = new File(System.getProperty("user.home"), ".gradle/caches")
+        def outDir = file("$rootDir/mc-sources")
+
+        def jars = fileTree(cache) {
+            include '**/*.jar'
+        }.files.findAll { f ->
+            def n = f.name.toLowerCase()
+            def p = f.absolutePath.toLowerCase()
+
+            // Reject obvious non-Minecraft-source jars.
+            if (p.contains('/transforms/')) return false
+            if (n.contains('minecraftdev')) return false
+            if (n.contains('forgegradle')) return false
+            if (n.contains('mclanguage')) return false
+            if (n.contains('javafmllanguage')) return false
+            if (n.contains('fmlcore')) return false
+            if (n.contains('fmlloader')) return false
+            if (n.contains('forgespi')) return false
+            if (n.contains('netty')) return false
+            if (n.contains('asm')) return false
+
+            return true
+        }.findAll { f ->
+            try {
+                def zf = new java.util.zip.ZipFile(f)
+                try {
+                    return zf.getEntry('net/minecraft/client/Minecraft.java') != null ||
+                            zf.getEntry('net/minecraft/world/level/Level.java') != null ||
+                            zf.getEntry('net/minecraft/client/Minecraft.class') != null ||
+                            zf.getEntry('net/minecraft/world/level/Level.class') != null
+                } finally {
+                    zf.close()
+                }
+            } catch (Throwable ignored) {
+                return false
+            }
+        }.sort { a, b ->
+            b.lastModified() <=> a.lastModified()
+        }
+
+        if (jars.isEmpty()) {
+            throw new GradleException(
+                    "No jar in ~/.gradle/caches contains net/minecraft sources/classes. " +
+                            "Run ForgeGradle's source/decompile task first."
+            )
+        }
+
+        println "Minecraft candidate jars:"
+        jars.eachWithIndex { f, i ->
+            println "${i}: ${f.absolutePath}"
+        }
+
+        def selected = jars.first()
+        println ""
+        println "Extracting:"
+        println selected.absolutePath
+
+        delete outDir
+        copy {
+            from zipTree(selected)
+            into outDir
+        }
+
+        println ""
+        println "Extracted to:"
+        println outDir.absolutePath
+    }
+}

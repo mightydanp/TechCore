@@ -6,7 +6,7 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public enum OreTypeStates implements StringRepresentable {
-    SMALL(new OreTypeState("small")),
+    SPARE(new OreTypeState("sparse")),
     NORMAL(new OreTypeState("normal")),
     DENSE(new OreTypeState("dense"));
 

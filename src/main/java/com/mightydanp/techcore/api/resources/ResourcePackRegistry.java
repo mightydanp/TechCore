@@ -2,6 +2,7 @@ package com.mightydanp.techcore.api.resources;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
+import com.mightydanp.techcore.api.resources.assets.contents.model.material.MaterialResources;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import net.minecraft.server.packs.PackType;
@@ -22,9 +23,9 @@ public class ResourcePackRegistry {
 
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event) {
-        PackType type = event.getPackType();
-
         if (!clientInitialized) {
+            MaterialResources.init();
+
             RegistriesHandler.getMaterialObjects().forEach(material -> ResourcePackRegistry.init.add(material.get()));
             MaterialRef.initLanguages();
 

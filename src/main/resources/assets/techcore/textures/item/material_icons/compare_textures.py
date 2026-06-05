@@ -3,18 +3,27 @@ from PIL import Image
 import hashlib
 from collections import defaultdict
 
-root = Path(r"D:\Games\Minecraft\Coding\Tech-Ascension-Workspace\TechCore\src\main\resources\assets\techcore\textures\item\material_icons")
+root = Path("/mnt/storage/Games/Minecraft/Coding/Tech-Ascension-Workspace/TechCore/src/main/resources/assets/techcore/textures/item/material_icons/")
 
-def texture_hash(path):
+if not root.exists():
+    raise FileNotFoundError(f"Folder does not exist: {root}")
+
+if not root.is_dir():
+    raise NotADirectoryError(f"Path is not a folder: {root}")
+
+
+def texture_hash(path: Path) -> str:
     with Image.open(path) as img:
         img = img.convert("RGBA")
-        size = img.size
+        width, height = img.size
         data = img.tobytes()
-        return hashlib.sha256(
-            size[0].to_bytes(4, "big") +
-            size[1].to_bytes(4, "big") +
-            data
-        ).hexdigest()
+
+    return hashlib.sha256(
+        width.to_bytes(4, "big") +
+        height.to_bytes(4, "big") +
+        data
+    ).hexdigest()
+
 
 texture_map = defaultdict(list)
 
@@ -27,6 +36,7 @@ for subfolder in root.iterdir():
             except Exception as e:
                 print(f"Skipped {file}: {e}")
 
+
 folder_groups = defaultdict(list)
 
 for h, items in texture_map.items():
@@ -35,9 +45,10 @@ for h, items in texture_map.items():
     if len(folders) > 1:
         folder_groups[folders].append(items)
 
+
 output_file = root / "texture_report.txt"
 
-with open(output_file, "w", encoding="utf-8") as f:
+with output_file.open("w", encoding="utf-8") as f:
     f.write("=== Folder Matches ===\n\n")
 
     if not folder_groups:
@@ -50,11 +61,15 @@ with open(output_file, "w", encoding="utf-8") as f:
                 for _, file in tex:
                     all_texture_names.add(file.name)
 
-            f.write(f"{', '.join(group)} share {len(all_texture_names)} texture name(s)\n\n")
+            f.write(
+                f"{', '.join(group)} share "
+                f"{len(all_texture_names)} texture name(s)\n\n"
+            )
 
             for texture_name in sorted(all_texture_names):
                 f.write(f"  {texture_name}\n")
 
             f.write("\n" + "-" * 60 + "\n\n")
+
 
 print(f"Report written to: {output_file}")

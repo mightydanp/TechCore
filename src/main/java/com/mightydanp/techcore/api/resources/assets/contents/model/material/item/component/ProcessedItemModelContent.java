@@ -13,14 +13,11 @@ public class ProcessedItemModelContent extends MaterialItemModelContent {
     }
 
     public ProcessedItemModelContent saveDustItemModel(Icons.Icon icon, String prefix) {
-        String[] models = {prefix + "div72_dust", prefix + "tiny_dust", prefix + "small_dust", prefix + "full_dust"
-        };
+        String[] models = {prefix + "div72_dust", prefix + "tiny_dust", prefix + "small_dust", prefix + "full_dust"};
 
-        String[] layer0 = {"div72_dust", "tiny_dust", "small_dust", prefix.isEmpty() ? "dust" : prefix + "dust"
-        };
+        String[] layer0 = {"div72_dust", "tiny_dust", "small_dust", "dust"};
 
-        String[] overlayBase = {"div72_dust", "tiny_dust", "small_dust", "dust"
-        };
+        String[] overlayBase = {"div72_dust", "tiny_dust", "small_dust", "dust"};
 
         for (int i = 0; i < models.length; i++) {
             if (prefix.isEmpty()) {

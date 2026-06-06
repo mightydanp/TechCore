@@ -1,23 +1,6 @@
 === Folder Matches ===
 
-diamond, dull share 12 texture name(s)
-
-  div72_impure_dust_overlay.png
-  div72_pure_dust_overlay.png
-  impure_div72_dust_overlay.png
-  impure_small_dust_overlay.png
-  impure_tiny_dust_overlay.png
-  pure_div72_dust_overlay.png
-  pure_small_dust_overlay.png
-  pure_tiny_dust_overlay.png
-  small_impure_dust_overlay.png
-  small_pure_dust_overlay.png
-  tiny_impure_dust_overlay.png
-  tiny_pure_dust_overlay.png
-
-------------------------------------------------------------
-
-diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 242 texture name(s)
+default, diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 240 texture name(s)
 
   arrow_head_overlay.png
   axe_head.png
@@ -26,6 +9,7 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
   bending_cylinder_small.png
   berry.png
   berry_overlay.png
+  billet_overlay.png
   blossom.png
   blossom_overlay.png
   bolt.png
@@ -48,7 +32,6 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
   centrifuged_tiny_ore_overlay.png
   chain.png
   chain_overlay.png
-  chainsaw_head.png
   chainsaw_head_overlay.png
   chemtube.png
   chemtube_overlay.png
@@ -151,7 +134,6 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
   nugget_overlay.png
   pickaxe_head.png
   pickaxe_head_gem.png
-  pickaxe_head_gem_overlay.png
   pickaxe_head_overlay.png
   pincers_handle.png
   pincers_head.png
@@ -185,7 +167,6 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
   purified_ore_overlay.png
   purified_small_ore.png
   purified_small_ore_overlay.png
-  purified_tiny_ore.png
   purified_tiny_ore_overlay.png
   quadruple_ingot.png
   quadruple_ingot_overlay.png
@@ -264,7 +245,7 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
 
 ------------------------------------------------------------
 
-diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, rough, ruby, shiny share 6 texture name(s)
+default, diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, rough, ruby, shiny share 6 texture name(s)
 
   chipped_gem.png
   div72_dust.png
@@ -275,10 +256,137 @@ diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignit
 
 ------------------------------------------------------------
 
-diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, redstone, rough, ruby, shiny share 2 texture name(s)
+default, diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, redstone, rough, ruby, shiny share 2 texture name(s)
 
   rock.png
   rock_overlay.png
+
+------------------------------------------------------------
+
+default, diamond, emerald, flint, gem_horizontal, gem_vertical, lapis, lignite, redstone, ruby share 8 texture name(s)
+
+  raw_div72_ore.png
+  raw_div72_ore_overlay.png
+  raw_ore.png
+  raw_ore_overlay.png
+  raw_small_ore.png
+  raw_small_ore_overlay.png
+  raw_tiny_ore.png
+  raw_tiny_ore_overlay.png
+
+------------------------------------------------------------
+
+default, dull share 5 texture name(s)
+
+  dust.png
+  impure_dust.png
+  pure_dust.png
+  small_dust.png
+  tiny_dust.png
+
+------------------------------------------------------------
+
+default, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 6 texture name(s)
+
+  impure_div72_dust_overlay.png
+  impure_small_dust_overlay.png
+  impure_tiny_dust_overlay.png
+  pure_div72_dust_overlay.png
+  pure_small_dust_overlay.png
+  pure_tiny_dust_overlay.png
+
+------------------------------------------------------------
+
+default, dull, fine, flint, lapis, lignite, metallic, quartz, redstone, rough share 8 texture name(s)
+
+  arrow_head.png
+  dull_arrow_head.png
+  dull_sword_head.png
+  large_bullet_overlay.png
+  medium_bullet_overlay.png
+  small_bullet_overlay.png
+  small_gear.png
+  sword_head.png
+
+------------------------------------------------------------
+
+default, dull, fine, flint, lapis, lignite, quartz, redstone, rough share 1 texture name(s)
+
+  nugget.png
+
+------------------------------------------------------------
+
+default, dull, fine, lapis, metallic, redstone, rough, shiny share 1 texture name(s)
+
+  scrap.png
+
+------------------------------------------------------------
+
+default, dull, fine, quartz, redstone, rough share 4 texture name(s)
+
+  hammer_wedge_handle.png
+  pickaxe_wedge_handle.png
+  wedge.png
+  wedge_handle.png
+
+------------------------------------------------------------
+
+default, dull, fine, rough, ruby, shiny share 1 texture name(s)
+
+  gem.png
+
+------------------------------------------------------------
+
+default, dull, flint share 2 texture name(s)
+
+  gem_plate.png
+  plate.png
+
+------------------------------------------------------------
+
+default, dull, metallic share 1 texture name(s)
+
+  gear.png
+
+------------------------------------------------------------
+
+default, dull, metallic, shiny share 7 texture name(s)
+
+  dense_plate.png
+  double_plate.png
+  plate.png
+  quadruple_plate.png
+  quintuple_plate.png
+  tiny_plate.png
+  triple_plate.png
+
+------------------------------------------------------------
+
+default, dull, quartz share 2 texture name(s)
+
+  hammer_wedge.png
+  pickaxe_wedge.png
+
+------------------------------------------------------------
+
+default, fine, flint, lapis, lignite, quartz, redstone, rough share 1 texture name(s)
+
+  ingot.png
+
+------------------------------------------------------------
+
+default, flint, lapis, lignite, metallic share 1 texture name(s)
+
+  rod.png
+
+------------------------------------------------------------
+
+diamond, dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 4 texture name(s)
+
+  centrifuged_tiny_ore.png
+  chainsaw_head.png
+  pickaxe_head_gem_overlay.png
+  purified_tiny_ore.png
 
 ------------------------------------------------------------
 
@@ -299,19 +407,6 @@ diamond, emerald, flint, gem_horizontal, gem_vertical, ruby share 1 texture name
 
 ------------------------------------------------------------
 
-diamond, emerald, gem_horizontal, gem_vertical, lapis, redstone share 8 texture name(s)
-
-  raw_div72_ore.png
-  raw_div72_ore_overlay.png
-  raw_ore.png
-  raw_ore_overlay.png
-  raw_small_ore.png
-  raw_small_ore_overlay.png
-  raw_tiny_ore.png
-  raw_tiny_ore_overlay.png
-
-------------------------------------------------------------
-
 diamond, emerald, gem_horizontal, gem_vertical, metallic, ruby, shiny share 5 texture name(s)
 
   gem_plate.png
@@ -322,7 +417,7 @@ diamond, emerald, gem_horizontal, gem_vertical, metallic, ruby, shiny share 5 te
 
 ------------------------------------------------------------
 
-diamond, emerald, gem_horizontal, gem_vertical, ruby, shiny share 32 texture name(s)
+diamond, emerald, gem_horizontal, gem_vertical, ruby, shiny share 31 texture name(s)
 
   arrow_head.png
   arrow_head_overlay.png
@@ -341,7 +436,6 @@ diamond, emerald, gem_horizontal, gem_vertical, ruby, shiny share 32 texture nam
   medium_bullet_overlay.png
   nugget.png
   nugget_overlay.png
-  pickaxe_wedge_handle - Copy.png
   pickaxe_wedge_handle.png
   pure_dust.png
   rod.png
@@ -366,88 +460,9 @@ diamond, gem_vertical, shiny share 2 texture name(s)
 
 ------------------------------------------------------------
 
-dull, emerald, fine, flint, gem_horizontal, gem_vertical, lapis, lignite, metallic, quartz, redstone, rough, ruby, shiny share 6 texture name(s)
+dull, fine, quartz, redstone, rough share 1 texture name(s)
 
-  impure_div72_dust_overlay.png
-  impure_small_dust_overlay.png
-  impure_tiny_dust_overlay.png
-  pure_div72_dust_overlay.png
-  pure_small_dust_overlay.png
-  pure_tiny_dust_overlay.png
-
-------------------------------------------------------------
-
-dull, fine, flint, lapis, lignite, metallic, quartz, redstone, rough share 8 texture name(s)
-
-  arrow_head.png
-  dull_arrow_head.png
-  dull_sword_head.png
-  large_bullet_overlay.png
-  medium_bullet_overlay.png
-  small_bullet_overlay.png
-  small_gear.png
-  sword_head.png
-
-------------------------------------------------------------
-
-dull, fine, flint, lapis, lignite, quartz, redstone, rough share 1 texture name(s)
-
-  nugget.png
-
-------------------------------------------------------------
-
-dull, fine, lapis, metallic, redstone, rough, shiny share 1 texture name(s)
-
-  scrap.png
-
-------------------------------------------------------------
-
-dull, fine, quartz, redstone, rough share 6 texture name(s)
-
-  hammer_wedge_handle.png
-  handle.png
-  pickaxe_wedge_handle.png
   rod.png
-  wedge.png
-  wedge_handle.png
-
-------------------------------------------------------------
-
-dull, fine, rough, ruby, shiny share 1 texture name(s)
-
-  gem.png
-
-------------------------------------------------------------
-
-dull, flint share 2 texture name(s)
-
-  gem_plate.png
-  plate.png
-
-------------------------------------------------------------
-
-dull, metallic share 1 texture name(s)
-
-  gear.png
-
-------------------------------------------------------------
-
-dull, metallic, shiny share 7 texture name(s)
-
-  dense_plate.png
-  double_plate.png
-  plate.png
-  quadruple_plate.png
-  quintuple_plate.png
-  tiny_plate.png
-  triple_plate.png
-
-------------------------------------------------------------
-
-dull, quartz share 2 texture name(s)
-
-  hammer_wedge.png
-  pickaxe_wedge.png
 
 ------------------------------------------------------------
 
@@ -458,19 +473,9 @@ emerald, gem_horizontal share 2 texture name(s)
 
 ------------------------------------------------------------
 
-fine, flint, lapis, lignite, quartz, redstone, rough share 2 texture name(s)
+fine, flint, lapis, lignite, quartz, redstone, rough share 1 texture name(s)
 
   gear.png
-  ingot.png
-
-------------------------------------------------------------
-
-fine, flint, lignite, rough share 4 texture name(s)
-
-  raw_div72_ore.png
-  raw_ore.png
-  raw_small_ore.png
-  raw_tiny_ore.png
 
 ------------------------------------------------------------
 
@@ -491,11 +496,19 @@ fine, lapis, quartz share 5 texture name(s)
 
 ------------------------------------------------------------
 
-flint, lapis, lignite, metallic share 5 texture name(s)
+fine, rough share 4 texture name(s)
+
+  raw_div72_ore.png
+  raw_ore.png
+  raw_small_ore.png
+  raw_tiny_ore.png
+
+------------------------------------------------------------
+
+flint, lapis, lignite, metallic share 4 texture name(s)
 
   hammer_wedge_handle.png
   pickaxe_wedge_handle.png
-  rod.png
   wedge.png
   wedge_handle.png
 

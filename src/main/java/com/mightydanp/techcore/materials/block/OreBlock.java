@@ -43,7 +43,7 @@ public class OreBlock extends MaterialBlock {
         String oreState = worldIn.getBlockState(pos).getValue(oreTypeStateProperty).toString();
 
 
-        if(oreState.equals(OreTypeStates.SMALL.toString()) || oreState.equals(OreTypeStates.NORMAL.toString())){
+        if(oreState.equals(OreTypeStates.SPARE.toString()) || oreState.equals(OreTypeStates.NORMAL.toString())){
             if(state.getValue(densityProperty) > maxDensity) {
                 worldIn.setBlock(pos, state.setValue(densityProperty, state.getValue(densityProperty) - 1), 2);
             }else{

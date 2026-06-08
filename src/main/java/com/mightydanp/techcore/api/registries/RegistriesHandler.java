@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 public class RegistriesHandler {
     private static boolean initialized;
 
-    private static final Map<ResourceLocation, registryHolder> additionalRegistries = new HashMap<>();
-    private static final Map<ResourceLocation, finalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
+    private static final Map<ResourceLocation, RegistryHolder> additionalRegistries = new HashMap<>();
+    private static final Map<ResourceLocation, FinalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, CoreRef.MOD_ID);
@@ -84,7 +84,7 @@ public class RegistriesHandler {
 
 
         // Snapshot to avoid ConcurrentModificationException while finalizing dynamic registries.
-        Map<ResourceLocation, registryHolder> snapshot = new HashMap<>(additionalRegistries);
+        Map<ResourceLocation, RegistryHolder> snapshot = new HashMap<>(additionalRegistries);
         additionalRegistries.clear();
 
         snapshot.forEach((name, holder) -> {
@@ -93,16 +93,16 @@ public class RegistriesHandler {
             DeferredRegister<?> register = DeferredRegister.create(holder.key().key(), name.getNamespace());
             register.register(bus);
 
-            finalizedDeferredRegister.put(name, new finalizedRegistryHolder(key, register));
+            finalizedDeferredRegister.put(name, new FinalizedRegistryHolder(key, register));
 
         });
     }
 
-    public void addDeferredRegister(ResourceLocation name, registryHolder holder) {
+    public void addDeferredRegister(ResourceLocation name, RegistryHolder holder) {
         additionalRegistries.put(name, holder);
     }
 
-    public finalizedRegistryHolder getDeferredRegister(ResourceLocation name) {
+    public FinalizedRegistryHolder getDeferredRegister(ResourceLocation name) {
         if (!additionalRegistries.containsKey(name)) {
             return finalizedDeferredRegister.get(name);
         }
@@ -110,10 +110,10 @@ public class RegistriesHandler {
         throw new IllegalStateException("DeferredRegister : " + name + " : has not been finalized yet. Ensure init() has been called before accessing registries.");
     }
 
-    public record registryHolder(Registry<?> key) {
+    public record RegistryHolder(Registry<?> key) {
     }
 
-    public record finalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey, DeferredRegister<?> registry) {}
+    public record FinalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey, DeferredRegister<?> registry) {}
 
     public static Supplier<Material> registerMaterial(String name, Supplier<Material> supplier) {
         Material mat = supplier.get();

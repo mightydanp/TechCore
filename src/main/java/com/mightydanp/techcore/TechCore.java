@@ -3,7 +3,6 @@ package com.mightydanp.techcore;
 import com.mightydanp.techcore.client.config.ConfigRegistries;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.guitab.event.ScreenTabEvent;
 import com.mightydanp.techcore.registries.Registries;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;

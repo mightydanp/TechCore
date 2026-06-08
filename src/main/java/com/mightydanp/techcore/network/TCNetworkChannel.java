@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.network;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.network.protocol.game.ClientBoundSplitQuantityResultPacket;
 import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
@@ -31,6 +32,14 @@ public class TCNetworkChannel {
                 ServerBoundSplitQuantityPacket::encode,
                 ServerBoundSplitQuantityPacket::decode,
                 ServerBoundSplitQuantityPacket::handle
+        );
+
+        INSTANCE.registerMessage(
+                nextId(),
+                ClientBoundSplitQuantityResultPacket.class,
+                ClientBoundSplitQuantityResultPacket::encode,
+                ClientBoundSplitQuantityResultPacket::decode,
+                ClientBoundSplitQuantityResultPacket::handle
         );
 
 

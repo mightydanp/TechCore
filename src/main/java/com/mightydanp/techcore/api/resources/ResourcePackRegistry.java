@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ResourcePackRegistry {
     public static final ResourcePack PACK = new ResourcePack(CoreRef.MOD_ID, "dynamic", true, Pack.Position.TOP, true);
 
-    public static List<BaseRegistries> init = new CopyOnWriteArrayList<>();
+    private static List<BaseRegistries<?>> init = new CopyOnWriteArrayList<>();
     private static boolean clientInitialized = false;
 
     @SubscribeEvent
@@ -40,5 +40,9 @@ public class ResourcePackRegistry {
         } else if (event.getPackType() == PackType.SERVER_DATA) {
             event.addRepositorySource(consumer -> consumer.accept(PACK.createDataPack()));
         }
+    }
+
+    public static void addInit(BaseRegistries<?> registry) {
+        init.add(registry);
     }
 }

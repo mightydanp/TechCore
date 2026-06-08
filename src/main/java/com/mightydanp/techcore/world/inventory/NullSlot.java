@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public class NullSlot extends Slot {
     private int removeCount;
 
-    public NullSlot(Player player, int slot, int xPosition, int yPosition) {
+    public NullSlot(@NotNull Player player, int slot, int xPosition, int yPosition) {
         super(player.getInventory(), slot, xPosition, yPosition);
     }
 

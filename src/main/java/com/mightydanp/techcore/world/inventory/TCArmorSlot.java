@@ -39,7 +39,7 @@ public class TCArmorSlot extends Slot {
         return 1;
     }
 
-    public boolean mayPlace(ItemStack stack) {
+    public boolean mayPlace(@NotNull ItemStack stack) {
         return stack.canEquip(this.slot, this.owner);
     }
 

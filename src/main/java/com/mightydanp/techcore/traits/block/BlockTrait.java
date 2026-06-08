@@ -4,6 +4,8 @@ import com.mightydanp.techcore.traits.Trait;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockTrait extends Trait<BlockTrait> {
     private int color = 0;
@@ -31,7 +33,8 @@ public class BlockTrait extends Trait<BlockTrait> {
         ).apply(instance, BlockTrait::new));
     }
 
-    public static BlockTrait getInstance() {
+    @Contract(" -> new")
+    public static @NotNull BlockTrait getInstance() {
         return new BlockTrait();
     }
 

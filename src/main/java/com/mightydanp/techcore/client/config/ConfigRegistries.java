@@ -10,11 +10,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ConfigRegistries {
 
-    public static void registerConfigs(FMLJavaModLoadingContext context) {
+    public static void registerConfigs(@NotNull FMLJavaModLoadingContext context) {
         TechCore.LOGGER.info("Tech Core config registry is starting.");
 
         context.registerConfig(ModConfig.Type.CLIENT, MaterialConfig.SPEC, CoreRef.MOD_ID + "-material.toml");
@@ -27,7 +28,7 @@ public class ConfigRegistries {
     }
 
     @SubscribeEvent
-    public static void onLoad(final ModConfigEvent event) {
+    public static void onLoad(final @NotNull ModConfigEvent event) {
         TechCore.LOGGER.info("Tech Core configs are loading.");
 
         if (event.getConfig().getSpec() == ClientConfig.SPEC) ClientConfig.load();

@@ -2,20 +2,29 @@ package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.MCItemModelContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.material.item.component.OreItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.blockstate.component.OreBlockStateComponent;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageCodes;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.block.BlockModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.block.component.OreBlockModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.item.component.OreItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.GemItem;
+import com.mightydanp.techcore.materials.Item.OreBlockItem;
 import com.mightydanp.techcore.materials.Item.OreItem;
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
-import com.mightydanp.techcore.materials.properties.OreTypes;
-import com.mightydanp.techcore.materials.properties.RockTypes;
+import com.mightydanp.techcore.materials.block.BedrockOre;
+import com.mightydanp.techcore.materials.block.DenseOre;
+import com.mightydanp.techcore.materials.block.OreBlock;
+import com.mightydanp.techcore.materials.properties.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class OreComponent<A extends Material> extends Component<OreComponent<A>> {
-    private final A material;
-
+public class OreComponent<A extends Material> extends Component<A, OreComponent<A>>{
     public List<Material> sameRockMaterials = new ArrayList<>();
 
     private OreTypes.OreType oreType;
@@ -39,11 +46,20 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
     public Map<String, Supplier<Item>> centrifugedOreItems = new LinkedHashMap<>();
     public Map<String, Supplier<Item>> crushedOreItems = new LinkedHashMap<>();
     public Map<String, Supplier<Item>> purifiedOreItems = new LinkedHashMap<>();
-    //public Supplier<Item> ingot;
+
+    public Map<String, Supplier<Item>> sparseOreBlockItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> oreBlockItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> denseOreBlockItems = new LinkedHashMap<>();
+    public Map<String, Supplier<Item>> bedrockOreBlockItems = new LinkedHashMap<>();
+
+    public Map<String, Supplier<Block>> sparseOreBlocks = new LinkedHashMap<>();
+    public Map<String, Supplier<Block>> oreBlocks = new LinkedHashMap<>();
+    public Map<String, Supplier<Block>> denseOreBlocks = new LinkedHashMap<>();
+    public Map<String, Supplier<Block>> bedrockOreBlocks = new LinkedHashMap<>();
+
 
     public OreComponent(A material) {
-        super("ore", "component");
-        this.material = material;
+        super("ore", "component", material);
     }
 
     public OreComponent<A> setOre(OreTypes.OreType oreType , int maxDensity, RockTypes.RockType... rockTypes) {
@@ -61,44 +77,229 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         return this;
     }
 
+    public OreComponent<A> setMaxDensity(int maxDensity) {
+        this.maxDensity = maxDensity;
+        return this;
+    }
+
     @Override
     public OreComponent<A> init() {
         if (oreType == OreTypes.GEM.oreType()) {
-            chippedGem = registerGemItem("chipped_" + material.name + "_gem");
-            flawedGem = registerGemItem("flawed_" + material.name + "_gem");
+            String name = material.name + "_gem";
+
+            chippedGem = registerGemItem("chipped_" + name);
+            flawedGem = registerGemItem("flawed_" + name);
             gem = registerGemItem(material.name + "_gem");
-            flawlessGem = registerGemItem("flawless_" + material.name + "_gem");
-            legendaryGem = registerGemItem("legendary_" + material.name + "_gem");
+            flawlessGem = registerGemItem("flawless_" + name);
+            legendaryGem = registerGemItem("legendary_" + name);
         }
 
         for (Material stoneLayer : sameRockMaterials) {
             String stoneName = stoneLayer.name;
 
             if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
-                rawOreItems.put(stoneName, registerOreItem("raw_" + stoneName + "_" + material.name + "_ore"));
-                centrifugedOreItems.put(stoneName, registerOreItem("centrifuged_" + stoneName + "_" + material.name + "_ore"));
-                crushedOreItems.put(stoneName, registerOreItem("crushed_" + stoneName + "_" + material.name + "_ore"));
-                purifiedOreItems.put(stoneName, registerOreItem("purified_" + stoneName + "_" + material.name + "_ore"));
+                String name = stoneName + "_" + material.name + "_ore";
+
+                rawOreItems.put(stoneName, registerOreItem("raw_" + name));
+                centrifugedOreItems.put(stoneName, registerOreItem("centrifuged_" + name));
+                crushedOreItems.put(stoneName, registerOreItem("crushed_" + name));
+                purifiedOreItems.put(stoneName, registerOreItem("purified_" + name));
+
+                registerSparseOreBlock(stoneName, name);
+                registerOreBlock(stoneName, name);
+                registerDenseOreBlock(stoneName, name);
+                registerBedrockOreBlock(stoneName, name);
+
             }
         }
 
         return this;
     }
 
+    ///Register
+
+    private void registerSparseOreBlock(String stoneName, String baseName) {
+        String blockName = "sparse_" + baseName;
+        Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new OreBlock(
+                MaterialBlockProperties.of()
+                        .strength(3.0f, 3.0f)
+                        .requiresCorrectToolForDrops()
+        ));
+
+        sparseOreBlocks.put(stoneName, block);
+        sparseOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
+    }
+
+    private void registerOreBlock(String stoneName, String baseName) {
+        Supplier<Block> block = RegistriesHandler.BLOCKS.register(baseName, () -> new OreBlock(
+                MaterialBlockProperties.of()
+                        .strength(3.0f, 3.0f)
+                        .requiresCorrectToolForDrops()
+        ));
+
+        oreBlocks.put(stoneName, block);
+        oreBlockItems.put(stoneName, registerOreBlockItem(baseName, block));
+    }
+
+    private void registerDenseOreBlock(String stoneName, String baseName) {
+        String blockName = "dense_" + baseName;
+        Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new DenseOre(
+                MaterialBlockProperties.of()
+                        .strength(3.0f, 3.0f)
+                        .requiresCorrectToolForDrops(),
+                maxDensity
+        ));
+
+        denseOreBlocks.put(stoneName, block);
+        denseOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
+    }
+
+    private void registerBedrockOreBlock(String stoneName, String baseName) {
+        String blockName = "bedrock_" + baseName;
+        Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new BedrockOre(
+                MaterialBlockProperties.of()
+                        .strength(3.0f, 3.0f)
+                        .requiresCorrectToolForDrops()
+        ));
+
+        bedrockOreBlocks.put(stoneName, block);
+        bedrockOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
+    }
+
+
+    private Supplier<Item> registerOreBlockItem(String itemName, Supplier<Block> block) {
+        return RegistriesHandler.BLOCK_ITEMS.register(itemName, () -> new OreBlockItem(block.get(), new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
+    }
+
+    private Supplier<Item> registerGemItem(String itemName) {
+        return RegistriesHandler.ITEMS.register(itemName, () -> new GemItem(new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
+    }
+
+    private Supplier<Item> registerOreItem(String itemName) {
+        return RegistriesHandler.ITEMS.register(itemName, () -> new OreItem(new MaterialItemProperties()
+                .color(material.physical.getColor())
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint())
+        ));
+    }
+
+    ///
     @Override
     public OreComponent<A> initClient() {
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
-        if (gem != null) initGemModels(modid, name);
+        if (gem != null) initGemModels(modid, name, gem);
 
-        if (!rawOreItems.isEmpty()) {
-            initOreModels(modid, name);
-        }
+        initRawOreModels(modid, name, rawOreItems);
+        initOreBlockModels(modid, name);
 
         return this;
     }
 
+    ///Models
+
+    private void initGemModels(String modid, String name, Supplier<Item> item) {
+        if(item != null) {
+            String[] items = {"chipped_" + name + "_gem", "flawed_" + name + "_gem", name + "_gem", "flawless_" + name + "_gem", "legendary_" + name + "_gem"};
+            String[] models = {"chipped_gem", "flawed_gem", "gem", "flawless_gem", "legendary_gem"};
+
+            for (String model : models) {
+                new OreItemModelContent(modid, model, "gem")
+                        .saveGemModel(material.icon, model);
+            }
+
+            for (int i = 0; i < models.length; i++) {
+                new OreItemModelContent(modid, items[i], null)
+                        .saveGemItemModel(material.icon, models[i]);
+            }
+        }
+    }
+
+    private void initRawOreModels(String modid, String name, @NotNull Map<String, Supplier<Item>> items) {
+        if(!items.isEmpty()) {
+            String[] stages = {"raw", "centrifuged", "crushed", "purified"};
+
+            for (String stage : stages) {
+                new OreItemModelContent(modid, stage + "_" + name + "_ore", "ore")
+                        .saveOreItemModel(material.icon, stage);
+            }
+
+            for (Material stoneLayer : sameRockMaterials) {
+                String rockName = stoneLayer.name;
+
+                new OreItemModelContent(modid, "raw_" + rockName + "_" + name + "_ore", null)
+                        .saveStageOreItemModel("raw");
+                new OreItemModelContent(modid, "centrifuged_" + rockName + "_" + name + "_ore", null)
+                        .saveStageOreItemModel("centrifuged");
+                new OreItemModelContent(modid, "crushed_" + rockName + "_" + name + "_ore", null)
+                        .saveStageOreItemModel("crushed");
+                new OreItemModelContent(modid, "purified_" + rockName + "_" + name + "_ore", null)
+                        .saveStageOreItemModel("purified");
+            }
+        }
+    }
+
+    private void initOreBlockModels(String modid, String name) {
+        List<Map<String, Supplier<Block>>> blockMaps = List.of(sparseOreBlocks, oreBlocks, denseOreBlocks, bedrockOreBlocks);
+        String[] stages = {"sparse", "ore", "dense", "bedrock"};
+        String[] textureVariants = {"sparse_ore", "ore", "dense_ore", "bedrock_ore"};
+
+        for (Material stoneLayer : sameRockMaterials) {
+            Block stoneBaseBlock = getOreBaseBlock(stoneLayer);
+            if (stoneBaseBlock == null) continue;
+
+            for (int i = 0; i < stages.length; i++) {
+                String stage = stages[i];
+                Supplier<Block> oreBlock = blockMaps.get(i).get(stoneLayer.name);
+
+                if (oreBlock == null) continue;
+
+                Block baseBlock = "bedrock".equals(stage) ? Blocks.BEDROCK : stoneBaseBlock;
+
+                String blockName = "ore".equals(stage)
+                        ? stoneLayer.name + "_" + name + "_ore"
+                        : stage + "_" + stoneLayer.name + "_" + name + "_ore";
+
+                saveOreBlockAssets(modid, blockName, stage, baseBlock, oreBlock);
+            }
+        }
+
+    }
+
+    @Contract(pure = true)
+    private Block getOreBaseBlock(@NotNull Material stoneLayer) {
+        return stoneLayer.stoneLayer.existingStonelayerBlock != null
+                ? stoneLayer.stoneLayer.existingStonelayerBlock
+                : stoneLayer.stoneLayer.layerBlock;
+    }
+
+    private void saveOreBlockAssets(String modid, String blockName, @NotNull String textureVariant, Block baseBlock, @NotNull Supplier<Block> oreBlock) {
+        ResourceLocation baseTexture = new OreBlockStateComponent(modid, blockName).blockTexture(baseBlock);
+
+        new OreBlockModelContent(modid, blockName, "ore")
+                .saveOreBlockModel(material.icon, blockName, baseTexture, textureVariant.matches("ore") ? textureVariant : textureVariant + "_ore");
+
+        new OreBlockStateComponent(modid, blockName)
+                .saveOreBlockState(oreBlock.get());
+
+        new OreItemModelContent(modid, blockName, null)
+                .saveOreBlockItemModel("ore/" + blockName);
+    }
+
+    ///
+    @Override
     public OreComponent<A> initItemProperties(){
         registerItemProperty(chippedGem,
                 ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "gem_quality"),
@@ -133,7 +334,7 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         return this;
     }
 
-    private void registerOreQuantityProperty(Map<String, Supplier<Item>> oreItems) {
+    private void registerOreQuantityProperty(@NotNull Map<String, Supplier<Item>> oreItems) {
         for (Supplier<Item> oreItem: oreItems.values()) {
             registerItemProperty(oreItem,
                     ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "quantity"),
@@ -141,7 +342,8 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
                             ((OreItem) (oreItem.get())).getQuantityLevel(stack));
         }
     }
-
+    ///
+    @Override
     public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
         registerItemColor(event, chippedGem, material.physical.getColor());
         registerItemColor(event, flawedGem, material.physical.getColor());
@@ -154,6 +356,11 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
         registerOreColors(event, crushedOreItems);
         registerOreColors(event, purifiedOreItems);
 
+        registerOreColors(event, sparseOreBlockItems);
+        registerOreColors(event, oreBlockItems);
+        registerOreColors(event, denseOreBlockItems);
+        registerOreColors(event, bedrockOreBlockItems);
+
         return this;
     }
 
@@ -165,131 +372,70 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
             }
         }
     }
+    ///
 
+    @Override
+    public OreComponent<A> initBlockProperties(RegisterColorHandlersEvent.Block event) {
+        registerOreBlockColors(event, sparseOreBlocks);
+        registerOreBlockColors(event, oreBlocks);
+        registerOreBlockColors(event, denseOreBlocks);
+        registerOreBlockColors(event, bedrockOreBlocks);
+
+        return this;
+    }
+
+    private void registerOreBlockColors(RegisterColorHandlersEvent.Block event, @NotNull Map<String, Supplier<Block>> oreBlocks) {
+        for (Supplier<Block> oreBlock : oreBlocks.values()) {
+            registerBlockColor(event, oreBlock, material.physical.getColor());
+        }
+    }
+
+    ///
     @Override
     public OreComponent<A> initLanguages(){
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
-        AssetPackRegistries.safetyMSLT(false, chippedGem,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".chipped_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Chipped Gem")
-        );
-
-        AssetPackRegistries.safetyMSLT(false, flawedGem,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".flawed_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Flawed Gem")
-        );
-
-        AssetPackRegistries.safetyMSLT(false, gem,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_gem", LanguageContent.translateUpperCase(name) + " Gem")
-        );
-
-        AssetPackRegistries.safetyMSLT(false, flawlessGem,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".flawless_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Flawless Gem")
-        );
-
-        AssetPackRegistries.safetyMSLT(false, legendaryGem,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".legendary_" + name + "_gem", LanguageContent.translateUpperCase(name) + " Legendary Gem")
-        );
+        AssetPackRegistries.registerSafetyLanguage(chippedGem, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER, "chipped_" + name + "_gem", "Chipped " + LanguageContent.toDisplayName(name) + " Gem");
+        AssetPackRegistries.registerSafetyLanguage(flawedGem, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER, "flawed_" + name + "_gem", "Flawed " +LanguageContent.toDisplayName(name) + " Gem");
+        AssetPackRegistries.registerSafetyLanguage(gem, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER, name + "_gem", LanguageContent.toDisplayName(name) + " Gem");
+        AssetPackRegistries.registerSafetyLanguage(flawlessGem, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER, "flawless_" + name + "_gem", "Flawless " + LanguageContent.toDisplayName(name) + " Gem");
+        AssetPackRegistries.registerSafetyLanguage(legendaryGem, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER, "legendary_" + name + "_gem", "Legendary " + LanguageContent.toDisplayName(name) + " Gem");
 
         for (Material stoneLayer : sameRockMaterials) {
             String rockName = stoneLayer.name;
-            String translatedName = LanguageContent.translateUpperCase(rockName + "_" + name);
+            String translatedName = LanguageContent.toDisplayName(rockName + "_" + name);
+            String blockName = rockName + "_" + name + "_ore";
 
-            AssetPackRegistries.safetyMSLT(false, rawOreItems.get(rockName),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".raw_" + rockName + "_" + name + "_ore", translatedName + " Raw Ore")
-            );
+            AssetPackRegistries.registerSafetyLanguage(rawOreItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                    "raw_" + blockName, "Raw " + translatedName + " Ore");
+            AssetPackRegistries.registerSafetyLanguage(centrifugedOreItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                    "centrifuged_" + blockName, "Centrifuged " + translatedName + " Ore");
+            AssetPackRegistries.registerSafetyLanguage(crushedOreItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                    "crushed_" + blockName, "Crushed " + translatedName + " Ore");
+            AssetPackRegistries.registerSafetyLanguage(purifiedOreItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                    "purified_" + blockName, "Purified " + translatedName + " Ore");
 
-            AssetPackRegistries.safetyMSLT(false, centrifugedOreItems.get(rockName),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".centrifuged_" + rockName + "_" + name + "_ore", translatedName + " Centrifuged Ore")
-            );
+            AssetPackRegistries.registerSafetyLanguage(sparseOreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                    "sparse_" + blockName, "Sparse " + translatedName + " Ore");
 
-            AssetPackRegistries.safetyMSLT(false, crushedOreItems.get(rockName),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".crushed_" + rockName + "_" + name + "_ore", translatedName + " Crushed Ore")
-            );
+            AssetPackRegistries.registerSafetyLanguage(oreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                    blockName, translatedName + " Ore");
 
-            AssetPackRegistries.safetyMSLT(false, purifiedOreItems.get(rockName),
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".purified_" + rockName + "_" + name + "_ore", translatedName + " Purified Ore")
-            );
+            AssetPackRegistries.registerSafetyLanguage(denseOreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                    "dense_" + blockName, "Dense " + translatedName + " Ore");
+
+            AssetPackRegistries.registerSafetyLanguage(bedrockOreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                    "bedrock_" + blockName, "Bedrock " + translatedName + " Ore");
         }
 
         return this;
     }
 
-    private void initGemModels(String modid, String name) {
-        String[] items = {"chipped_" + name + "_gem", "flawed_" + name + "_gem", name + "_gem", "flawless_" + name + "_gem", "legendary_" + name + "_gem"};
-        String[] models = {"chipped_gem", "flawed_gem", "gem", "flawless_gem", "legendary_gem"};
+    ///
 
-        for (String model : models) {
-            new OreItemModelContent(modid, model, "gem")
-                    .saveGemModel(material.icon, model);
-        }
-
-        for (int i = 0; i < models.length; i++) {
-            new OreItemModelContent(modid, items[i], null)
-                    .saveGemItemModel(material.icon, models[i]);
-        }
-    }
-
-    private void initOreModels(String modid, String name) {
-        String[] stages = {"raw", "centrifuged", "crushed", "purified"};
-
-        for (String stage : stages) {
-            new OreItemModelContent(modid, stage + "_" + name + "_ore", "ore")
-                    .saveOreItemModel(material.icon, stage);
-        }
-
-        for (Material stoneLayer : sameRockMaterials) {
-            String rockName = stoneLayer.name;
-
-            new OreItemModelContent(modid, "raw_" + rockName + "_" + name + "_ore", null)
-                    .saveStageOreItemModel("raw");
-            new OreItemModelContent(modid, "centrifuged_" + rockName + "_" + name + "_ore", null)
-                    .saveStageOreItemModel("centrifuged");
-            new OreItemModelContent(modid, "crushed_" + rockName + "_" + name + "_ore", null)
-                    .saveStageOreItemModel("crushed");
-            new OreItemModelContent(modid, "purified_" + rockName + "_" + name + "_ore", null)
-                    .saveStageOreItemModel("purified");
-        }
-    }
-
-    private void saveItemModel(String modid, String folder, String modelName, String layer0, String layer1) {
-        var model = new MCItemModelContent(modid, modelName, folder)
-                .model()
-                .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                .texture("layer0", iconTexture(modid, layer0));
-
-        if (layer1 != null) {
-            model.texture("layer1", iconTexture(modid, layer1));
-        }
-
-        model.end().save(false);
-    }
-
-    private Supplier<Item> registerGemItem(String itemName) {
-        return RegistriesHandler.ITEMS.register(itemName, () -> new GemItem(new MaterialItemProperties()
-                .color(material.physical.getColor())
-                .symbol(material.chemical.getSymbol())
-                .boilingPoint(material.thermal.getBoilingPoint())
-                .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private Supplier<Item> registerOreItem(String itemName) {
-        return RegistriesHandler.ITEMS.register(itemName, () -> new OreItem(new MaterialItemProperties()
-                .color(material.physical.getColor())
-                .symbol(material.chemical.getSymbol())
-                .boilingPoint(material.thermal.getBoilingPoint())
-                .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private ResourceLocation iconTexture(String modid, String texture) {
-        return ResourceLocation.fromNamespaceAndPath(modid, "item/material_icons/" + material.icon.label() + "/" + texture);
-    }
-
-    public OreComponent<A> setMaxDensity(int maxDensity) {
-        this.maxDensity = maxDensity;
-        return this;
+    public boolean hasOreBlocks() {
+        return !sparseOreBlocks.isEmpty() || !oreBlocks.isEmpty() || !denseOreBlocks.isEmpty() || !bedrockOreBlocks.isEmpty();
     }
 
     public OreTypes.OreType getOreType() {
@@ -298,9 +444,5 @@ public class OreComponent<A extends Material> extends Component<OreComponent<A>>
 
     public int getMaxDensity() {
         return maxDensity;
-    }
-
-    public A end(){
-        return material;
     }
 }

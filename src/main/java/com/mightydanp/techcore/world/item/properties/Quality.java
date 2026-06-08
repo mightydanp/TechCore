@@ -5,6 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record Quality(int quality) {
     public static final String TAG = "quality";
@@ -20,7 +23,8 @@ public record Quality(int quality) {
         quality = Mth.clamp(quality, MIN, MAX);
     }
 
-    public static Stack stack(ItemStack stack) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Stack stack(ItemStack stack) {
         return new Stack(stack);
     }
 
@@ -36,7 +40,7 @@ public record Quality(int quality) {
             return tag != null && tag.contains(TAG);
         }
 
-        public Quality get() {
+        public @Nullable Quality get() {
             CompoundTag tag = stack.getTag();
             return tag != null && tag.contains(TAG) ? new Quality(tag.getInt(TAG)) : null;
         }
@@ -46,7 +50,8 @@ public record Quality(int quality) {
             return value == null ? fallback : value;
         }
 
-        public Stack set(Quality quality) {
+        @Contract("_ -> this")
+        public Stack set(@NotNull Quality quality) {
             stack.getOrCreateTag().putInt(TAG, quality.quality());
             return this;
         }

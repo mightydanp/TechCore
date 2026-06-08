@@ -8,7 +8,7 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Material implements BaseRegistries {
+public class Material implements BaseRegistries<Material> {
     public String name;
     public Icons.Icon icon;
 
@@ -20,7 +20,7 @@ public class Material implements BaseRegistries {
     public StoneLayerComponent<Material> stoneLayer;
     public ProcessedComponent<Material> processed;
 
-    private final List<Component<?>> components = new ArrayList<>();
+    private final List<Component<?, ?>> components = new ArrayList<>();
 
     public Material(String name, Icons.Icon icon){
         this.name = name;
@@ -36,29 +36,45 @@ public class Material implements BaseRegistries {
     }
 
     @Override
-    public void init(){
+    public Material init(){
         components.forEach(AbstractComponent::init);
+        return this;
     }
 
     @Override
-    public void initClient(){
+    public Material initClient(){
         components.forEach(AbstractComponent::initClient);
+        return this;
     }
 
     @Override
-    public void initLanguages() {
+    public Material initLanguages() {
         components.forEach(AbstractComponent::initLanguages);
+        return this;
     }
 
-    public void initItemProperties() {
+    @Override
+    public Material initItemProperties() {
         components.forEach(AbstractComponent::initItemProperties);
+        return this;
     }
 
-    public void initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
+    @Override
+    public Material initBlockProperties(RegisterColorHandlersEvent.Block event) {
+        components.forEach(component -> component.initBlockProperties(event));
+
+        return this;
+    }
+
+
+    @Override
+    public Material initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         components.forEach(component -> component.initClientRenderLayers(event));
+
+        return this;
     }
 
-    public <A extends Component<?>> A addComponent(int loadOrder, A component) {
+    public <A extends Component<?, ?>> A addComponent(int loadOrder, A component) {
         if (loadOrder < 0) {
             throw new IllegalArgumentException("loadOrder cannot be negative: " + loadOrder);
         }
@@ -69,7 +85,7 @@ public class Material implements BaseRegistries {
         return component;
     }
 
-    public <A extends Component<?>> A addComponent(A component) {
+    public <A extends Component<?, ?>> A addComponent(A component) {
         return addComponent(components.size(), component);
     }
 }

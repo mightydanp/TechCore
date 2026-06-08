@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public class BackSlotButton extends Slot {
     public final Player player;
 
-    public BackSlotButton(Player player, int slot, int x, int y) {
+    public BackSlotButton(@NotNull Player player, int slot, int x, int y) {
         super(player.getInventory(), slot, x, y);
         this.player = player;
     }

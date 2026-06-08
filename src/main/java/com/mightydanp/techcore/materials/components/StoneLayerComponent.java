@@ -6,11 +6,13 @@ import com.mightydanp.techcore.materials.properties.RockTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
 
-public class StoneLayerComponent<A extends Material> extends Component<StoneLayerComponent<A>> {
+public class StoneLayerComponent<A extends Material> extends Component<A, StoneLayerComponent<A>> {
     public boolean isStoneLayer;
 
     public RockTypes.RockType rockType;
@@ -19,11 +21,8 @@ public class StoneLayerComponent<A extends Material> extends Component<StoneLaye
     public Block layerBlock, smoothSlabBlock;
     public Item layerItemBlock, smoothSlabItemBlock;
 
-    private final A material;
-
     public StoneLayerComponent(A material) {
-        super("stone_layer", "component");
-        this.material = material;
+        super("stone_layer", "component", material);
     }
 
     public StoneLayerComponent<A> stoneLayer(Block existingStonelayerBlock, RockTypes.RockType rockType) {
@@ -39,7 +38,7 @@ public class StoneLayerComponent<A extends Material> extends Component<StoneLaye
         return this;
     }
 
-    public static List<Material> getStoneLayerMaterials() {
+    public static @NotNull @Unmodifiable List<Material> getStoneLayerMaterials() {
         return RegistriesHandler.getMaterials().stream()
                 .filter(material -> material.stoneLayer.isStoneLayer)
                 .toList();
@@ -68,9 +67,5 @@ public class StoneLayerComponent<A extends Material> extends Component<StoneLaye
     @Override
     public StoneLayerComponent<A> initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         return super.initClientRenderLayers(event);
-    }
-
-    public A end(){
-        return material;
     }
 }

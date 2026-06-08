@@ -1,7 +1,6 @@
 package com.mightydanp.techcore.client.gui.screens.split;
 
 import com.mightydanp.techcore.client.ref.ScreenRef;
-import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.network.TCNetworkChannel;
 import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
 import com.mightydanp.techcore.world.item.properties.Quantity;
@@ -10,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
@@ -26,22 +24,22 @@ public class QuantitySplitScreen extends Screen {
     private final Slot hoveredSlot;
 
     private final int slotIndex;
+    private final int clientSlotIndex;
 
     private ForgeSlider slider;
     private Runnable pendingCloseAction = null;
 
-    public QuantitySplitScreen(Screen parent, ItemStack cursorStack, Slot hoverSlot, int slotIndex) {
-        super(Component.translatable(ScreenRef.quantity_split_screen));
+    public QuantitySplitScreen(Screen parent, ItemStack cursorStack, Slot hoverSlot, int slotIndex, int clientSlotIndex) {
+        super(Component.translatable(ScreenRef.quantity_split_screen_translatable));
         this.parent = parent;
         this.cursorStack = cursorStack;
         this.hoveredSlot = hoverSlot;
         this.slotIndex = slotIndex;
+        this.clientSlotIndex = clientSlotIndex;
     }
 
     @Override
     protected void init() {
-        if (!(cursorStack.getItem() instanceof MaterialItem)) return;
-
         Quantity cursorQuantity = Quantity.stack(cursorStack).get();
 
         if (cursorQuantity == null) return;
@@ -49,7 +47,7 @@ public class QuantitySplitScreen extends Screen {
         int quantity;
         if (!hoveredSlot.hasItem()) {
             quantity = cursorQuantity.quantity();
-        } else if (hoveredSlot.getItem().getItem() instanceof MaterialItem && canMergeQuantityStacks(cursorStack, hoveredSlot.getItem())) {
+        } else if (canMergeQuantityStacks(cursorStack, hoveredSlot.getItem())) {
             Quantity slotQuantity = Quantity.stack(hoveredSlot.getItem()).get();
 
             if (slotQuantity == null) return;
@@ -68,7 +66,7 @@ public class QuantitySplitScreen extends Screen {
                 this.height / 2 - 10,
                 150,
                 20,
-                Component.translatable(ScreenRef.quantity_split_amount),
+                Component.translatable(ScreenRef.quantity_split_amount_translatable),
                 Component.empty(),
                 1,
                 quantity,
@@ -86,20 +84,18 @@ public class QuantitySplitScreen extends Screen {
         addRenderableWidget(Button.builder(
                 Component.literal("✔").withStyle(ChatFormatting.GREEN),
                 btn -> {
+                    // Gets the amount selected by the slider.
                     int splitAmount = slider.getValueInt();
+
+                    // Sends both indexes to the server:
+                    // slotIndex is the real server container slot.
+                    // clientSlotIndex is the open client menu slot that should be updated by the server response.
                     TCNetworkChannel.INSTANCE.sendToServer(
-                            new ServerBoundSplitQuantityPacket(slotIndex, splitAmount, this.cursorStack)
+                            new ServerBoundSplitQuantityPacket(slotIndex, clientSlotIndex, splitAmount, this.cursorStack)
                     );
-                    if (parent instanceof CreativeModeInventoryScreen cs) {
-                        int newQty = cursorQuantity.quantity() - splitAmount;
-                        if (newQty <= 0) {
-                            cs.getMenu().setCarried(ItemStack.EMPTY);
-                        } else {
-                            ItemStack newCursor = cursorStack.copy();
-                            Quantity.stack(newCursor).set(newQty, cursorQuantity.maxQuantity());
-                            cs.getMenu().setCarried(newCursor);
-                        }
-                    }
+
+                    // Closes after mouse release. The client cursor/slot is not changed here;
+                    // it waits for the server's accepted split result packet.
                     pendingCloseAction = this::onClose;
                 }).bounds(
                 this.width / 2 + 5,    // x — 5px right of center
@@ -125,7 +121,7 @@ public class QuantitySplitScreen extends Screen {
         return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
     }
 
-    private static ItemStack withoutQuantity(ItemStack stack) {
+    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
         ItemStack copy = stack.copy();
         CompoundTag tag = copy.getTag();
 
@@ -198,5 +194,10 @@ public class QuantitySplitScreen extends Screen {
     @Override
     public void onClose() {
         Minecraft.getInstance().setScreen(parent);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 }

@@ -6,11 +6,13 @@ import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 public final class TemperatureClientRender {
     private TemperatureClientRender() {}
 
-    public static boolean shouldRender(ItemStack stack, ItemDisplayContext context) {
+    public static boolean shouldRender(@NotNull ItemStack stack, ItemDisplayContext context) {
         if (stack.isEmpty()) return false;
 
         if (stack.is(TechCoreItemTags.DISABLE_TEMPERATURE_RENDER)) return false;
@@ -22,7 +24,8 @@ public final class TemperatureClientRender {
         return shouldRenderInContext(context);
     }
 
-    private static boolean shouldRenderInContext(ItemDisplayContext context) {
+    @Contract(pure = true)
+    private static boolean shouldRenderInContext(@NotNull ItemDisplayContext context) {
         return switch (context) {
             case GUI,
                  GROUND,

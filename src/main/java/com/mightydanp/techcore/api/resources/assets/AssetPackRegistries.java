@@ -1,15 +1,18 @@
 package com.mightydanp.techcore.api.resources.assets;
 
 import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
-import com.mightydanp.techcore.api.resources.assets.contents.blockstate.BlockStateContent;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.BlockModelContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.ItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.blockstate.BlockStateContent;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.block.BlockModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class AssetPackRegistries {
     public static Map<ResourceLocation, BlockStateContent<?>> blockState = new ConcurrentHashMap<>();
@@ -41,7 +44,7 @@ public class AssetPackRegistries {
                 b.json()));
     }
 
-    public static boolean saveBlockState(BlockStateContent<?> content, boolean override) {
+    public static boolean saveBlockState(@NotNull BlockStateContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && AssetPackRegistries.blockState.containsKey(resourceLocation)) {
@@ -61,7 +64,7 @@ public class AssetPackRegistries {
         return blockState.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new BlockStateContent<>(modid, name));
     }
 
-    public static boolean saveBlockModel(BlockModelContent<?> content, boolean override) {
+    public static boolean saveBlockModel(@NotNull BlockModelContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && AssetPackRegistries.blockModel.containsKey(resourceLocation)) {
@@ -80,7 +83,7 @@ public class AssetPackRegistries {
         return blockModel.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new BlockModelContent<>(modid, name, ""));
     }
 
-    public static boolean saveItemModel(ItemModelContent<?> content, boolean override) {
+    public static boolean saveItemModel(@NotNull ItemModelContent<?> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && AssetPackRegistries.itemModel.containsKey(resourceLocation)) {
@@ -99,7 +102,7 @@ public class AssetPackRegistries {
         return itemModel.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new ItemModelContent<>(modid, name, ""));
     }
 
-    public static boolean saveLanguage(LanguageContent content, boolean override) {
+    public static boolean saveLanguage(@NotNull LanguageContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && AssetPackRegistries.language.containsKey(resourceLocation)) {
@@ -133,5 +136,27 @@ public class AssetPackRegistries {
         if(object != null) {
             AssetPackRegistries.saveMSLT(override, translations);
         }
+    }
+
+    public static void registerSafetyLanguage(Supplier<Item> item, String modid, String language, String folder, String name) {
+        registerSafetyLanguage(item, modid, language, folder, name, LanguageContent.toDisplayName(name));
+    }
+
+    public static void registerSafetyLanguage(Supplier<Item> item, String modid, String language, String folder, String name, String translatedName) {
+        AssetPackRegistries.safetyMSLT(false, item,
+                new LanguageContent.translation(modid, language,
+                        folder + "." + modid + "." + name, translatedName)
+        );
+    }
+
+    public static void registerLanguage(String modid, String language, String folder, String name) {
+        registerLanguage(modid, language, folder, name, LanguageContent.toDisplayName(name));
+    }
+
+    public static void registerLanguage(String modid, String language, String folder, String name, String translatedName) {
+        AssetPackRegistries.saveMSLT(false,
+                new LanguageContent.translation(modid, language,
+                        folder + "." + modid + "." + name, translatedName)
+        );
     }
 }

@@ -54,7 +54,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
 
     private final List<String> inventorySecretary = new ArrayList<>();
 
-    public TCPlayerInventoryMenu(int windowId, Inventory playerInventory) {
+    public TCPlayerInventoryMenu(int windowId, @NotNull Inventory playerInventory) {
         super(MenuRegistries.TC_PLAYER_INVENTORY_MENU.get(), windowId);
         this.player = playerInventory.player;
         int i1;
@@ -205,7 +205,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
         return itemstack;
     }
 
-    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, Slot slot) {
+    public boolean canTakeItemForPickAll(@NotNull ItemStack stack, @NotNull Slot slot) {
         return slot.container != this.resultSlots && super.canTakeItemForPickAll(stack, slot);
     }
 

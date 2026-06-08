@@ -1,6 +1,6 @@
 package com.mightydanp.techcore.network.protocol.game;
 
-import com.mightydanp.techcore.materials.Item.MaterialItem;
+import com.mightydanp.techcore.network.TCNetworkChannel;
 import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,36 +8,56 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ServerBoundSplitQuantityPacket {
     public int slotIndex;
+    public int clientSlotIndex;
     public int amount;
     public ItemStack cursorStack;
 
-    public ServerBoundSplitQuantityPacket(int slotIndex, int amount, ItemStack cursorStack) {
+    public ServerBoundSplitQuantityPacket(int slotIndex, int clientSlotIndex, int amount, ItemStack cursorStack) {
         this.slotIndex = slotIndex;
+        this.clientSlotIndex = clientSlotIndex;
         this.amount = amount;
         this.cursorStack = cursorStack;
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(@NotNull FriendlyByteBuf buffer) {
+        // Writes the real server slot index.
         buffer.writeInt(this.slotIndex);
+
+        // Writes the client menu slot index that the result packet should update.
+        buffer.writeInt(this.clientSlotIndex);
+
+        // Writes the amount being split.
         buffer.writeInt(this.amount);
+
+        // Writes the cursor stack the client is trying to split.
         buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
     }
 
-    public static ServerBoundSplitQuantityPacket decode(FriendlyByteBuf buffer) {
+    public static @NotNull ServerBoundSplitQuantityPacket decode(@NotNull FriendlyByteBuf buffer) {
+        // Reads the real server slot index.
         int slotIndex = buffer.readInt();
+
+        // Reads the client menu slot index that the result packet should update.
+        int clientSlotIndex = buffer.readInt();
+
+        // Reads the amount being split.
         int amount = buffer.readInt();
+
+        // Reads the cursor stack the client is trying to split.
         ItemStack itemStack = buffer.readItem();
 
-        return new ServerBoundSplitQuantityPacket(slotIndex, amount, itemStack);
+        return new ServerBoundSplitQuantityPacket(slotIndex, clientSlotIndex, amount, itemStack);
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+    public void handle(@NotNull Supplier<NetworkEvent.Context> contextSupplier) {
         contextSupplier.get().enqueueWork(() -> {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player == null) return;
@@ -46,44 +66,44 @@ public class ServerBoundSplitQuantityPacket {
             Slot slot = player.containerMenu.slots.get(slotIndex);
 
             if (slot.hasItem()) {
-                if (slot.getItem().getItem() instanceof MaterialItem && cursorStack.getItem() instanceof MaterialItem) {
+                Quantity currentSlotQty = Quantity.stack(slot.getItem()).get();
+                Quantity currentCursorQty = Quantity.stack(cursorStack).get();
 
+                // If either stack does not have quantity data, do not handle the custom split.
+                if (currentSlotQty != null && currentCursorQty != null) {
                     if (!canMergeQuantityStacks(cursorStack, slot.getItem())) return;
 
+                    int availableSpace = currentSlotQty.maxQuantity() - currentSlotQty.quantity();
 
-                    Quantity currentSlotQty = Quantity.stack(slot.getItem()).get();
-                    Quantity currentCursorQty = Quantity.stack(cursorStack).get();
+                    if (currentCursorQty.quantity() >= this.amount && availableSpace >= this.amount) {
+                        ItemStack cursorCopy = cursorStack.copy();
+                        ItemStack slotCopy = slot.getItem().copy();
 
-                    if (currentSlotQty != null && currentCursorQty != null) {
-                        int availableSpace = currentSlotQty.maxQuantity() - currentSlotQty.quantity();
+                        Quantity.stack(slotCopy).set(currentSlotQty.quantity() + this.amount, currentSlotQty.maxQuantity());
+                        Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
+                        slot.set(slotCopy);
+                        slot.setChanged();
 
-                        if (currentCursorQty.quantity() >= this.amount && availableSpace >= this.amount) {
-                            ItemStack cursorCopy = cursorStack.copy();
-                            ItemStack slotCopy = slot.getItem().copy();
-
-                            Quantity.stack(slotCopy).set(currentSlotQty.quantity() + this.amount, currentSlotQty.maxQuantity());
-                            Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
-                            slot.set(slotCopy);
-
-                            applyAndUpdateCursor(player, cursorCopy);
-                        }
+                        applyAndUpdateCursor(player, cursorCopy);
+                        sendAcceptedResult(player, slotCopy, cursorCopy);
                     }
                 }
             } else {
-                if (cursorStack.getItem() instanceof MaterialItem) {
-                    Quantity currentCursorQty = Quantity.stack(cursorStack).get();
+                Quantity currentCursorQty = Quantity.stack(cursorStack).get();
 
-                    if (currentCursorQty != null && currentCursorQty.quantity() >= this.amount) {
-                        ItemStack cursorCopy = cursorStack.copy();
-                        ItemStack slotCopy = cursorStack.copy();
+                // If the cursor stack does not have quantity data, do not handle the custom split.
+                if (currentCursorQty != null && currentCursorQty.quantity() >= this.amount) {
+                    ItemStack cursorCopy = cursorStack.copy();
+                    ItemStack slotCopy = cursorStack.copy();
 
-                        Quantity.stack(slotCopy).set(this.amount, currentCursorQty.maxQuantity());
-                        Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
+                    Quantity.stack(slotCopy).set(this.amount, currentCursorQty.maxQuantity());
+                    Quantity.stack(cursorCopy).set(currentCursorQty.quantity() - this.amount, currentCursorQty.maxQuantity());
 
-                        slot.set(slotCopy);
+                    slot.set(slotCopy);
+                    slot.setChanged();
 
-                        applyAndUpdateCursor(player, cursorCopy);
-                    }
+                    applyAndUpdateCursor(player, cursorCopy);
+                    sendAcceptedResult(player, slotCopy, cursorCopy);
                 }
             }
         });
@@ -104,6 +124,23 @@ public class ServerBoundSplitQuantityPacket {
         }
     }
 
+    private void sendAcceptedResult(ServerPlayer player, ItemStack slotCopy, ItemStack cursorCopy) {
+        // The client should receive an empty cursor stack when the remaining quantity is zero.
+        ItemStack clientCursorStack = cursorCopy;
+        Quantity cursorQuantity = Quantity.stack(cursorCopy).get();
+
+        // If the cursor quantity is zero or less, send ItemStack.EMPTY to the client.
+        if (cursorQuantity != null && cursorQuantity.quantity() <= 0) {
+            clientCursorStack = ItemStack.EMPTY;
+        }
+
+        // Sends the server-accepted slot and cursor stacks back to the same player.
+        TCNetworkChannel.INSTANCE.send(
+                PacketDistributor.PLAYER.with(() -> player),
+                new ClientBoundSplitQuantityResultPacket(clientSlotIndex, slotCopy, clientCursorStack)
+        );
+    }
+
     private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
         if (!ItemStack.isSameItem(cursorStack, slotStack)) {
             return false;
@@ -112,7 +149,7 @@ public class ServerBoundSplitQuantityPacket {
         return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
     }
 
-    private static ItemStack withoutQuantity(ItemStack stack) {
+    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
         ItemStack copy = stack.copy();
         CompoundTag tag = copy.getTag();
 

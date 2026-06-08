@@ -30,7 +30,7 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
 
     private final ResourceKey<? extends Registry<A>> resourceKey;
 
-    public TraitProvider(PackOutput output, String modId, ResourceKey<? extends Registry<A>> resourceKey, ExistingFileHelper fileHelper, CompletableFuture<HolderLookup.Provider> registries) {
+    public TraitProvider(@NotNull PackOutput output, String modId, ResourceKey<? extends Registry<A>> resourceKey, ExistingFileHelper fileHelper, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
         this.resourceKey = resourceKey;
         this.fileHelper = fileHelper;
@@ -68,7 +68,7 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
         return modId + " " + resourceKey.location().getPath() + " traits";
     }
 
-    public static String getDir(ResourceKey<? extends Registry<?>> resourceKey) {
+    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
         return "traits/" + resourceKey.location().getNamespace();
     }
 }

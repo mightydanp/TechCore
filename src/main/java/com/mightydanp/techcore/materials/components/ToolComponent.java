@@ -2,16 +2,13 @@ package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.materials.Material;
 
-public class ToolComponent<A extends Material> extends Component<ToolComponent<A>> {
+public class ToolComponent<A extends Material> extends Component<A, ToolComponent<A>> {
     private Integer durability = null;
     private Integer attackSpeed = null;
     private Float attackDamage = null;
 
-    private final A material;
-
     public ToolComponent(A material) {
-        super("tool", "component");
-        this.material = material;
+        super("tool", "component", material);
     }
 
     public ToolComponent<A> setDurability(int durability) {
@@ -39,9 +36,5 @@ public class ToolComponent<A extends Material> extends Component<ToolComponent<A
 
     public Float getAttackDamage() {
         return attackDamage;
-    }
-
-    public A end(){
-        return material;
     }
 }

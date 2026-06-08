@@ -7,6 +7,7 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.jetbrains.annotations.NotNull;
 
 import static com.mightydanp.techcore.TechCore.LOGGER;
 
@@ -14,7 +15,7 @@ import static com.mightydanp.techcore.TechCore.LOGGER;
 public class ClientSetup {
 
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
+    public static void onClientSetup(@NotNull FMLClientSetupEvent event) {
         LOGGER.info("Tech Core client setup is starting");
 
         event.enqueueWork(() -> {
@@ -27,5 +28,10 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
         RegistriesHandler.getMaterialObjects().forEach(m -> m.get().initClientRenderLayers(event));
+    }
+
+    @SubscribeEvent
+    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+        RegistriesHandler.getMaterialObjects().forEach(m -> m.get().initBlockProperties(event));
     }
 }

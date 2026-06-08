@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,11 +47,12 @@ public class ScreenTabButton extends Button {
     private static final int SHEET_W = 256;
     private static final int SHEET_H = 256;
 
-    public static ScreenTabButton create(int registryButtonNumber, ScreenTab screenTab, Player player, Screen screen, int x, int y) {
+    @Contract("_, _, _, _, _, _ -> new")
+    public static @NotNull ScreenTabButton create(int registryButtonNumber, ScreenTab screenTab, Player player, Screen screen, int x, int y) {
         return new ScreenTabButton(registryButtonNumber, screenTab, player, screen, x, y);
     }
 
-    private ScreenTabButton(int registryButtonNumber, ScreenTab screenTab, Player player, Screen screen, int x, int y) {
+    private ScreenTabButton(int registryButtonNumber, @NotNull ScreenTab screenTab, Player player, Screen screen, int x, int y) {
         super(x, y, ScreenTabBase.TAB_WIDTH, ScreenTabBase.TAB_HEIGHT, screenTab.narration, button -> {
         }, DEFAULT_NARRATION);
         this.screenTab = screenTab;

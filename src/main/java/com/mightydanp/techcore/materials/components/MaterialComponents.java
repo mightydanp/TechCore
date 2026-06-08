@@ -1,29 +1,15 @@
 package com.mightydanp.techcore.materials.components;
 
 public enum MaterialComponents {
+    ;
 
-    BLOCK_GEM(new Component<>("block_", "_gem")),
-    BLOCK_METAL(new Component<>("block_", "_metal")),
-    DUST(new Component<>("", "_dust")),
-    FLUID(new Component<>("", "_fluid")),
-    GAS(new Component<>("", "_gas")),
-    GEM(new Component<>("", "_gem")),
-    HARDENED_INGOT(new Component<>("hardened_", "_ingot")),
-    HOT_INGOT(new Component<>("hot_", "_ingot")),
-    INGOT(new Component<>("", "_ingot")),
-    ORE(new Component<>("", "_ore")),
-    SMALL_ORE(new Component<>("small_", "_ore")),
-    SOFTENED_INGOT(new Component<>("softened_", "_ingot")),
-    STONE_LAYER(new Component<>("stone_", "_layer")),
-    TOOL(new Component<>("", "_tool"));
+    private final Component<?, ?> component;
 
-    private final Component<?> component;
-
-    MaterialComponents(Component<?> component) {
+    MaterialComponents(Component<?, ?> component) {
         this.component = component;
     }
 
-    public Component<?> component() {
+    public Component<?, ?> component() {
         return component;
     }
 

@@ -47,4 +47,9 @@ public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     public A initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         return (A)this;
     }
+
+    @SuppressWarnings("unchecked")
+    public A initBlockProperties(RegisterColorHandlersEvent.Block event) {
+        return (A)this;
+    }
 }

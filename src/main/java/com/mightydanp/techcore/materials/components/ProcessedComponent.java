@@ -2,32 +2,31 @@ package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
-import com.mightydanp.techcore.api.resources.assets.contents.model.material.item.component.ProcessedItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageCodes;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
+import com.mightydanp.techcore.api.resources.assets.content.model.item.component.ProcessedItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Item.DustItem;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ProcessedComponent<A extends Material> extends Component<ProcessedComponent<A>> {
-    private final A material;
-
+public class ProcessedComponent<A extends Material> extends Component<A, ProcessedComponent<A>> {
     public Supplier<Item> dust, pureDust;
 
     public Map<String, Supplier<Item>> impureDustItems = new LinkedHashMap<>();
     public Map<String, Supplier<Item>> dustItems = new LinkedHashMap<>();
 
     public ProcessedComponent(A material) {
-        super("processed", "component");
-        this.material = material;
+        super("processed", "component", material);
     }
 
     @Override
@@ -76,7 +75,7 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
                         ((DustItem) dustItem.get()).getQuantityLevel(stack));
     }
 
-    private void registerDustProperties(Map<String, Supplier<Item>> dustItems) {
+    private void registerDustProperties(@NotNull Map<String, Supplier<Item>> dustItems) {
         for (Supplier<Item> dustItem : dustItems.values()) {
             registerDustProperties(dustItem);
         }
@@ -106,32 +105,27 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
         String modid = CoreRef.MOD_ID;
         String name = material.name;
 
-
-        AssetPackRegistries.safetyMSLT(false, dust,
-                new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + name + "_dust", LanguageContent.translateUpperCase(name) + " Dust")
-        );
-
+        AssetPackRegistries.registerSafetyLanguage(dust, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                name + "_dust", LanguageContent.toDisplayName(name) + " Dust");
 
         if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String rockName = stoneLayer.name;
 
-                AssetPackRegistries.safetyMSLT(false, impureDustItems.get(rockName),
-                        new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".impure_" + rockName + "_" + name + "_dust", "Impure " + LanguageContent.translateUpperCase(rockName + "_" + name) + " Dust")
-                );
+                AssetPackRegistries.registerSafetyLanguage(impureDustItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                        "impure_" + rockName + "_" + name + "_dust", "Impure " + LanguageContent.toDisplayName(rockName + "_" + name) + " Dust");
 
-                AssetPackRegistries.safetyMSLT(false, dustItems.get(rockName),
-                        new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + "." + rockName + "_" + name + "_dust", LanguageContent.translateUpperCase(rockName + "_" + name) + " Dust")
-                );
+                AssetPackRegistries.registerSafetyLanguage(dustItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                        rockName + "_" + name + "_dust", LanguageContent.toDisplayName(rockName + "_" + name) + " Dust");
             }
 
-            AssetPackRegistries.safetyMSLT(false, pureDust,
-                    new LanguageContent.translation(modid, LanguageCodes.english, "item." + modid + ".pure_" + name + "_dust", "Pure " + LanguageContent.translateUpperCase(name) + " Dust")
-            );
+            AssetPackRegistries.registerSafetyLanguage(pureDust, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
+                    "pure_" + name + "_dust", "Pure " + LanguageContent.toDisplayName(name) + " Dust");
         }
 
         return this;
     }
+
 
     private void initDustModels(String modid, String name) {
         if (this.dust != null) {
@@ -165,9 +159,5 @@ public class ProcessedComponent<A extends Material> extends Component<ProcessedC
                 .boilingPoint(material.thermal.getBoilingPoint())
                 .meltingPoint(material.thermal.getMeltingPoint())
         ));
-    }
-
-    public A end() {
-        return material;
     }
 }

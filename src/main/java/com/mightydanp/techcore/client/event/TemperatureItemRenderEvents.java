@@ -9,6 +9,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(
         modid = CoreRef.MOD_ID,
@@ -20,7 +21,7 @@ public final class TemperatureItemRenderEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onRenderItemDuring(RenderItemEvent.During event) {
+    public static void onRenderItemDuring(RenderItemEvent.@NotNull During event) {
         ItemStack stack = event.getStack();
 
         if (!TemperatureClientRender.shouldRender(stack, event.getDisplayContext())) {

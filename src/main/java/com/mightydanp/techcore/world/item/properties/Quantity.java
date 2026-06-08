@@ -5,6 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record Quantity(int quantity, int maxQuantity) {
     public static final String TAG = "quantity";
@@ -25,7 +28,8 @@ public record Quantity(int quantity, int maxQuantity) {
         return maxQuantity <= 0 ? 0.0f : (float) quantity / maxQuantity;
     }
 
-    public static Stack stack(ItemStack stack) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Stack stack(ItemStack stack) {
         return new Stack(stack);
     }
 
@@ -41,7 +45,7 @@ public record Quantity(int quantity, int maxQuantity) {
             return tag != null && tag.contains(TAG);
         }
 
-        public Quantity get() {
+        public @Nullable Quantity get() {
             CompoundTag tag = stack.getTag();
             if (tag == null || !tag.contains(TAG)) return null;
 

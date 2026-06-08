@@ -29,10 +29,11 @@ public enum RockTypes {
     }
 
     public record RockType(String name){
-        public static final Codec<OreTypeStates.OreTypeState> CODEC = RecordCodecBuilder.create(instance ->
+        public static final Codec<RockType> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
-                        Codec.STRING.fieldOf("name").forGetter(OreTypeStates.OreTypeState::name)
-                ).apply(instance, OreTypeStates.OreTypeState::new)
+                        Codec.STRING.fieldOf("name").forGetter(RockType::name)
+                ).apply(instance, RockType::new)
         );
     }
+
 }

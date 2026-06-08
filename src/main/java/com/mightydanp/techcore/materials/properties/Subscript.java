@@ -1,5 +1,7 @@
 package com.mightydanp.techcore.materials.properties;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum Subscript {
     ZERO(0, '₀'),
     ONE(1, '₁'),
@@ -29,7 +31,7 @@ public enum Subscript {
         return unicode;
     }
 
-    public static String convertNumber(int number) {
+    public static @NotNull String convertNumber(int number) {
         return String.valueOf(number).chars()                          // Convert number to stream of chars
                 .mapToObj(c -> Subscript.values()[c - '0'].unicode)    // Map each char to subscript unicode
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)  // Collect to string

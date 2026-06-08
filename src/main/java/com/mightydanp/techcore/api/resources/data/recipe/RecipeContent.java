@@ -21,6 +21,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,7 @@ public class RecipeContent {
         this.name = name;
     }
 
-    public RecipeContent(ResourceLocation resourceLocation) {
+    public RecipeContent(@NotNull ResourceLocation resourceLocation) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
     }
@@ -91,7 +93,7 @@ public class RecipeContent {
     }
 
     @SuppressWarnings("ALL")
-    public static ResourceLocation getDefaultRecipeId(ItemLike itemLike) {
+    public static @NotNull ResourceLocation getDefaultRecipeId(@NotNull ItemLike itemLike) {
         return BuiltInRegistries.ITEM.getKey(itemLike.asItem());
     }
 
@@ -130,7 +132,7 @@ public class RecipeContent {
         oreCooking(p_248775_, RecipeSerializer.BLASTING_RECIPE, p_251504_, p_248846_, p_249735_, p_248783_, p_250303_, p_251984_, "_from_blasting");
     }
 
-    protected static void oreCooking(Consumer<FinishedRecipe> p_250791_, RecipeSerializer<? extends AbstractCookingRecipe> p_251817_, List<ItemLike> p_249619_, RecipeCategory p_251154_, ItemLike p_250066_, float p_251871_, int p_251316_, String p_251450_, String p_249236_) {
+    protected static void oreCooking(Consumer<FinishedRecipe> p_250791_, RecipeSerializer<? extends AbstractCookingRecipe> p_251817_, @NotNull List<ItemLike> p_249619_, RecipeCategory p_251154_, ItemLike p_250066_, float p_251871_, int p_251316_, String p_251450_, String p_249236_) {
         for(ItemLike itemlike : p_249619_) {
             SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), p_251154_, p_250066_, p_251871_, p_251316_, p_251817_).group(p_251450_).unlockedBy(getHasName(itemlike), has(itemlike)).save(p_250791_, getItemName(p_250066_) + p_249236_ + "_" + getItemName(itemlike));
         }
@@ -177,21 +179,21 @@ public class RecipeContent {
         ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, p_236373_).requires(Blocks.CHEST).requires(p_236374_).group("chest_boat").unlockedBy("has_boat", has(ItemTags.BOATS)).save(p_236372_);
     }
 
-    protected static RecipeBuilder buttonBuilder(ItemLike p_176659_, Ingredient p_176660_) {
+    protected static @NotNull RecipeBuilder buttonBuilder(ItemLike p_176659_, Ingredient p_176660_) {
         return ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, p_176659_).requires(p_176660_);
     }
 
-    protected static RecipeBuilder doorBuilder(ItemLike p_176671_, Ingredient p_176672_) {
+    protected static @NotNull RecipeBuilder doorBuilder(ItemLike p_176671_, Ingredient p_176672_) {
         return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176671_, 3).define('#', p_176672_).pattern("##").pattern("##").pattern("##");
     }
 
-    protected static RecipeBuilder fenceBuilder(ItemLike p_176679_, Ingredient p_176680_) {
+    protected static @NotNull RecipeBuilder fenceBuilder(ItemLike p_176679_, Ingredient p_176680_) {
         int i = p_176679_ == Blocks.NETHER_BRICK_FENCE ? 6 : 3;
         Item item = p_176679_ == Blocks.NETHER_BRICK_FENCE ? Items.NETHER_BRICK : Items.STICK;
         return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_176679_, i).define('W', p_176680_).define('#', item).pattern("W#W").pattern("W#W");
     }
 
-    protected static RecipeBuilder fenceGateBuilder(ItemLike p_176685_, Ingredient p_176686_) {
+    protected static @NotNull RecipeBuilder fenceGateBuilder(ItemLike p_176685_, Ingredient p_176686_) {
         return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176685_).define('#', Items.STICK).define('W', p_176686_).pattern("#W#").pattern("#W#");
     }
 
@@ -199,7 +201,7 @@ public class RecipeContent {
         pressurePlateBuilder(RecipeCategory.REDSTONE, p_176692_, Ingredient.of(p_176693_)).unlockedBy(getHasName(p_176693_), has(p_176693_)).save(p_176691_);
     }
 
-    protected static RecipeBuilder pressurePlateBuilder(RecipeCategory p_251447_, ItemLike p_251989_, Ingredient p_249211_) {
+    protected static @NotNull RecipeBuilder pressurePlateBuilder(RecipeCategory p_251447_, ItemLike p_251989_, Ingredient p_249211_) {
         return ShapedRecipeBuilder.shaped(p_251447_, p_251989_).define('#', p_249211_).pattern("##");
     }
 
@@ -207,19 +209,19 @@ public class RecipeContent {
         slabBuilder(p_251848_, p_249368_, Ingredient.of(p_252133_)).unlockedBy(getHasName(p_252133_), has(p_252133_)).save(p_248880_);
     }
 
-    protected static RecipeBuilder slabBuilder(RecipeCategory p_251707_, ItemLike p_251284_, Ingredient p_248824_) {
+    protected static @NotNull RecipeBuilder slabBuilder(RecipeCategory p_251707_, ItemLike p_251284_, Ingredient p_248824_) {
         return ShapedRecipeBuilder.shaped(p_251707_, p_251284_, 6).define('#', p_248824_).pattern("###");
     }
 
-    protected static RecipeBuilder stairBuilder(ItemLike p_176711_, Ingredient p_176712_) {
+    protected static @NotNull RecipeBuilder stairBuilder(ItemLike p_176711_, Ingredient p_176712_) {
         return ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_176711_, 4).define('#', p_176712_).pattern("#  ").pattern("## ").pattern("###");
     }
 
-    protected static RecipeBuilder trapdoorBuilder(ItemLike p_176721_, Ingredient p_176722_) {
+    protected static @NotNull RecipeBuilder trapdoorBuilder(ItemLike p_176721_, Ingredient p_176722_) {
         return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, p_176721_, 2).define('#', p_176722_).pattern("###").pattern("###");
     }
 
-    protected static RecipeBuilder signBuilder(ItemLike p_176727_, Ingredient p_176728_) {
+    protected static @NotNull RecipeBuilder signBuilder(ItemLike p_176727_, Ingredient p_176728_) {
         return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_176727_, 3).group("sign").define('#', p_176728_).define('X', Items.STICK).pattern("###").pattern("###").pattern(" X ");
     }
 
@@ -227,7 +229,7 @@ public class RecipeContent {
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, p_252355_, 6).group("hanging_sign").define('#', p_250437_).define('X', Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", has(p_250437_)).save(p_250663_);
     }
 
-    protected static void colorBlockWithDye(Consumer<FinishedRecipe> p_289666_, List<Item> p_289675_, List<Item> p_289672_, String p_289641_) {
+    protected static void colorBlockWithDye(Consumer<FinishedRecipe> p_289666_, @NotNull List<Item> p_289675_, List<Item> p_289672_, String p_289641_) {
         for(int i = 0; i < p_289675_.size(); ++i) {
             Item item = p_289675_.get(i);
             Item item1 = p_289672_.get(i);
@@ -276,7 +278,7 @@ public class RecipeContent {
         wallBuilder(p_251148_, p_250499_, Ingredient.of(p_249970_)).unlockedBy(getHasName(p_249970_), has(p_249970_)).save(p_251034_);
     }
 
-    protected static RecipeBuilder wallBuilder(RecipeCategory p_249083_, ItemLike p_250754_, Ingredient p_250311_) {
+    protected static @NotNull RecipeBuilder wallBuilder(RecipeCategory p_249083_, ItemLike p_250754_, Ingredient p_250311_) {
         return ShapedRecipeBuilder.shaped(p_249083_, p_250754_, 6).define('#', p_250311_).pattern("###").pattern("###");
     }
 
@@ -284,7 +286,7 @@ public class RecipeContent {
         polishedBuilder(p_248719_, p_250032_, Ingredient.of(p_250021_)).unlockedBy(getHasName(p_250021_), has(p_250021_)).save(p_251348_);
     }
 
-    protected static RecipeBuilder polishedBuilder(RecipeCategory p_249131_, ItemLike p_251242_, Ingredient p_251412_) {
+    protected static @NotNull RecipeBuilder polishedBuilder(RecipeCategory p_249131_, ItemLike p_251242_, Ingredient p_251412_) {
         return ShapedRecipeBuilder.shaped(p_249131_, p_251242_, 4).define('S', p_251412_).pattern("SS").pattern("SS");
     }
 
@@ -292,7 +294,7 @@ public class RecipeContent {
         cutBuilder(p_252306_, p_249686_, Ingredient.of(p_251100_)).unlockedBy(getHasName(p_251100_), has(p_251100_)).save(p_248712_);
     }
 
-    protected static ShapedRecipeBuilder cutBuilder(RecipeCategory p_250895_, ItemLike p_251147_, Ingredient p_251563_) {
+    protected static @NotNull ShapedRecipeBuilder cutBuilder(RecipeCategory p_250895_, ItemLike p_251147_, Ingredient p_251563_) {
         return ShapedRecipeBuilder.shaped(p_250895_, p_251147_, 4).define('#', p_251563_).pattern("##").pattern("##");
     }
 
@@ -304,7 +306,7 @@ public class RecipeContent {
         ShapedRecipeBuilder.shaped(p_248788_, p_251925_).define('#', p_252242_).pattern("#").pattern("#").unlockedBy(getHasName(p_252242_), has(p_252242_)).save(p_249200_);
     }
 
-    protected static ShapedRecipeBuilder chiseledBuilder(RecipeCategory p_251755_, ItemLike p_249782_, Ingredient p_250087_) {
+    protected static @NotNull ShapedRecipeBuilder chiseledBuilder(RecipeCategory p_251755_, ItemLike p_249782_, Ingredient p_250087_) {
         return ShapedRecipeBuilder.shaped(p_251755_, p_249782_).define('#', p_250087_).pattern("#").pattern("#");
     }
 
@@ -365,7 +367,7 @@ public class RecipeContent {
         HoneycombItem.WAXABLES.get().forEach((p_248022_, p_248023_) -> ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_248023_).requires(p_248022_).requires(Items.HONEYCOMB).group(getItemName(p_248023_)).unlockedBy(getHasName(p_248022_), has(p_248022_)).save(p_176611_, getConversionRecipeName(p_248023_, Items.HONEYCOMB)));
     }
 
-    protected static void generateRecipes(Consumer<FinishedRecipe> p_176581_, BlockFamily p_176582_) {
+    protected static void generateRecipes(Consumer<FinishedRecipe> p_176581_, @NotNull BlockFamily p_176582_) {
         p_176582_.getVariants().forEach((p_176529_, p_176530_) -> {
             BiFunction<ItemLike, ItemLike, RecipeBuilder> bifunction = SHAPE_BUILDERS.get(p_176529_);
             ItemLike itemlike = getBaseBlock(p_176582_, p_176529_);
@@ -395,52 +397,58 @@ public class RecipeContent {
         }
     }
 
-    protected static EnterBlockTrigger.TriggerInstance insideOf(Block p_125980_) {
+    @Contract(value = "_ -> new", pure = true)
+    protected static EnterBlockTrigger.@NotNull TriggerInstance insideOf(Block p_125980_) {
         return new EnterBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, p_125980_, StatePropertiesPredicate.ANY);
     }
 
-    protected static InventoryChangeTrigger.TriggerInstance has(MinMaxBounds.Ints p_176521_, ItemLike p_176522_) {
+    @Contract("_, _ -> new")
+    protected static InventoryChangeTrigger.@NotNull TriggerInstance has(MinMaxBounds.Ints p_176521_, ItemLike p_176522_) {
         return inventoryTrigger(ItemPredicate.Builder.item().of(p_176522_).withCount(p_176521_).build());
     }
 
-    protected static InventoryChangeTrigger.TriggerInstance has(ItemLike p_125978_) {
+    @Contract("_ -> new")
+    protected static InventoryChangeTrigger.@NotNull TriggerInstance has(ItemLike p_125978_) {
         return inventoryTrigger(ItemPredicate.Builder.item().of(p_125978_).build());
     }
 
-    protected static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> p_206407_) {
+    @Contract("_ -> new")
+    protected static InventoryChangeTrigger.@NotNull TriggerInstance has(TagKey<Item> p_206407_) {
         return inventoryTrigger(ItemPredicate.Builder.item().of(p_206407_).build());
     }
 
-    protected static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... p_126012_) {
+    @Contract(value = "_ -> new", pure = true)
+    protected static InventoryChangeTrigger.@NotNull TriggerInstance inventoryTrigger(ItemPredicate... p_126012_) {
         return new InventoryChangeTrigger.TriggerInstance(ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, p_126012_);
     }
 
-    protected static String getHasName(ItemLike p_176603_) {
+    protected static @NotNull String getHasName(ItemLike p_176603_) {
         return "has_" + getItemName(p_176603_);
     }
 
     @SuppressWarnings("ALL")
-    protected static String getItemName(ItemLike p_176633_) {
+    protected static @NotNull String getItemName(@NotNull ItemLike p_176633_) {
         return BuiltInRegistries.ITEM.getKey(p_176633_.asItem()).getPath();
     }
 
-    protected static String getSimpleRecipeName(ItemLike p_176645_) {
+    protected static @NotNull String getSimpleRecipeName(ItemLike p_176645_) {
         return getItemName(p_176645_);
     }
 
-    protected static String getConversionRecipeName(ItemLike p_176518_, ItemLike p_176519_) {
+    protected static @NotNull String getConversionRecipeName(ItemLike p_176518_, ItemLike p_176519_) {
         return getItemName(p_176518_) + "_from_" + getItemName(p_176519_);
     }
 
-    protected static String getSmeltingRecipeName(ItemLike p_176657_) {
+    protected static @NotNull String getSmeltingRecipeName(ItemLike p_176657_) {
         return getItemName(p_176657_) + "_from_smelting";
     }
 
-    protected static String getBlastingRecipeName(ItemLike p_176669_) {
+    protected static @NotNull String getBlastingRecipeName(ItemLike p_176669_) {
         return getItemName(p_176669_) + "_from_blasting";
     }
 
-    public final String getName() {
+    @Contract(pure = true)
+    public final @NotNull String getName() {
         return "Recipes";
     }
 }

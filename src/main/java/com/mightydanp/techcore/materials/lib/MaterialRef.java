@@ -1,101 +1,52 @@
 package com.mightydanp.techcore.materials.lib;
 
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageCodes;
-import com.mightydanp.techcore.api.resources.assets.contents.language.LanguageContent;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageCodes;
+import com.mightydanp.techcore.api.resources.assets.content.language.LanguageContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 
+import java.util.List;
+
 public class MaterialRef {
-    public static String temperature_translatable = CoreRef.MOD_ID+ "." + "temperature";
-    public static String quantity_translatable = CoreRef.MOD_ID+ "." + "quantity";
-    public static String quality_translatable = CoreRef.MOD_ID+ "." + "quality";
-    public static String purity_translatable = CoreRef.MOD_ID + "." + "purity";
-    public static String processed_stage_translatable = CoreRef.MOD_ID+ "." + "process_stage";
+    public static final String folder = "material";
 
-    public static String melting_point_translatable = CoreRef.MOD_ID + "." + "melting_point";
-    public static String boiling_point_translatable = CoreRef.MOD_ID + "." + "boiling_point";
+    public static final String temperature = "temperature";
+    public static final String quantity = "quantity";
+    public static final String quality = "quality";
+    public static final String purity = "purity";
+    public static final String processed_stage = "process_stage";
+    public static final String melting_point = "melting_point";
+    public static final String boiling_point = "boiling_point";
+    public static final String gem_state = "gem_state";
+    public static final String chipped = "chipped";
+    public static final String flawed = "flawed";
+    public static final String gem = "gem";
+    public static final String flawless = "flawless";
+    public static final String legendary = "legendary";
 
-    public static String gem_state_translatable = CoreRef.MOD_ID + "." + "gem_state";
+    private static final List<String> english_Translations = List.of(
+            temperature, quantity, quality, purity, processed_stage, melting_point, boiling_point, gem_state, chipped, flawed, gem, flawless, legendary
+    );
 
-    public static String chipped_translatable = CoreRef.MOD_ID + "." + "chipped";
-    public static String flawed_translatable = CoreRef.MOD_ID + "." + "flawed";
-    public static String gem_translatable = CoreRef.MOD_ID + "." + "gem";
-    public static String flawless_translatable = CoreRef.MOD_ID + "." + "flawless";
-    public static String legendary_translatable = CoreRef.MOD_ID + "." + "legendary";
+    public static final String temperature_translatable = LanguageContent.grabTranslatable(folder, temperature);
+    public static final String quantity_translatable = LanguageContent.grabTranslatable(folder, quantity);
+    public static final String quality_translatable = LanguageContent.grabTranslatable(folder, quality);
+    public static final String purity_translatable = LanguageContent.grabTranslatable(folder, purity);
+    public static final String processed_stage_translatable = LanguageContent.grabTranslatable(folder, processed_stage);
+    public static final String melting_point_translatable = LanguageContent.grabTranslatable(folder, melting_point);
+    public static final String boiling_point_translatable = LanguageContent.grabTranslatable(folder, boiling_point);
+    public static final String gem_state_translatable = LanguageContent.grabTranslatable(folder, gem_state);
+    public static final String chipped_translatable = LanguageContent.grabTranslatable(folder, chipped);
+    public static final String flawed_translatable = LanguageContent.grabTranslatable(folder, flawed);
+    public static final String gem_translatable = LanguageContent.grabTranslatable(folder, gem);
+    public static final String flawless_translatable = LanguageContent.grabTranslatable(folder, flawless);
+    public static final String legendary_translatable = LanguageContent.grabTranslatable(folder, legendary);
 
-    //English Translation
-    public static String temperature_english_translation = "Temperature";
-    public static String quantity_english_translation = "Quantity";
-    public static String quality_english_translation = "Quality";
-    public static String purity_english_translation = "Purity";
-    public static String processed_stage_english_translation = "Processed Stage";
-
-    public static String melting_point_english_translation = "Melting Point";
-    public static String boiling_point_english_translation = "Boiling Point";
-
-    public static String gem_state_english_translation = "Gem State";
-
-    public static String chipped_english_translation = "Chipped";
-    public static String flawed_english_translation = "Flawed";
-    public static String gem_english_translation = "Gem";
-    public static String flawless_english_translation = "Flawless";
-    public static String legendary_english_translation = "Legendary";
-
-
-    public static void initLanguages(){
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, temperature_translatable, temperature_english_translation)
-        );
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, quantity_translatable, quantity_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, quality_translatable, quality_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, purity_translatable, purity_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, processed_stage_translatable, processed_stage_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, melting_point_translatable, melting_point_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, boiling_point_translatable, boiling_point_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, boiling_point_translatable, boiling_point_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, gem_state_translatable, gem_state_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, chipped_translatable, chipped_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, flawed_translatable, flawed_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, gem_translatable, gem_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, flawless_translatable, flawless_english_translation)
-        );
-
-        AssetPackRegistries.saveMSLT(false,
-                new LanguageContent.translation(CoreRef.MOD_ID, LanguageCodes.english, legendary_translatable, legendary_english_translation)
-        );
+    public static void initLanguages() {
+        for (String name : english_Translations) {
+            AssetPackRegistries.registerLanguage(CoreRef.MOD_ID, LanguageCodes.english, folder, name);
+        }
     }
 }
+    
+

@@ -1,8 +1,9 @@
 package com.mightydanp.techcore.materials.components;
 
+import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.PureSubstances;
 
-public class ChemicalComponent<A> extends Component<ChemicalComponent<A>> {
+public class ChemicalComponent<A extends Material> extends Component<A, ChemicalComponent<A>>{
     private PureSubstances.PureSubstance type;
     private int atomicNumber;
     private String symbol;
@@ -12,11 +13,8 @@ public class ChemicalComponent<A> extends Component<ChemicalComponent<A>> {
     private float atomicMass;
     private String chemicalFormula;
 
-    private final A material;
-
     public ChemicalComponent(A material) {
-        super("chemical", "component");
-        this.material = material;
+        super("chemical", "component", material);
     }
 
     public ChemicalComponent<A> setType(PureSubstances.PureSubstance type) {
@@ -89,9 +87,5 @@ public class ChemicalComponent<A> extends Component<ChemicalComponent<A>> {
 
     public String getChemicalFormula() {
         return chemicalFormula;
-    }
-
-    public A end(){
-        return material;
     }
 }

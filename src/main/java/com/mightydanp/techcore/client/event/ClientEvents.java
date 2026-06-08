@@ -2,7 +2,6 @@ package com.mightydanp.techcore.client.event;
 
 import com.mightydanp.techcore.client.gui.screens.split.QuantitySplitScreen;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.MaterialItem;
 import com.mightydanp.techcore.network.TCNetworkChannel;
 import com.mightydanp.techcore.network.protocol.game.ServerBoundSplitQuantityPacket;
 import com.mightydanp.techcore.world.item.properties.Quantity;
@@ -16,12 +15,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientEvents {
 
     @SubscribeEvent
-    public static void splitEvent(ScreenEvent.MouseButtonPressed.Pre event) {
+    public static void splitEvent(ScreenEvent.MouseButtonPressed.@NotNull Pre event) {
         // Checks if the screen is an AbstractContainerScreen
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen)) return;
 
@@ -29,10 +29,6 @@ public class ClientEvents {
         if (event.getButton() != 1) return;
 
         ItemStack heldStack = containerScreen.getMenu().getCarried();
-
-        // Change this for splitting other things
-        if (!(heldStack.getItem() instanceof MaterialItem)) return;
-
 
         // Get the slot currently under the mouse and check if you can place it in that slot
         Slot hoveredSlot = containerScreen.hoveredSlot;
@@ -53,18 +49,18 @@ public class ClientEvents {
 
         int maxAmount = heldQuantity.quantity();
 
-        // If the hovered slot doesn't have an item then the max quantity the itemstack can have is the quantity in the held
-        if (hoveredSlot.hasItem() && hoveredStack.getItem() instanceof MaterialItem) {
+        // If the hovered slot already has an item, validate it before canceling vanilla behavior
+        if (hoveredSlot.hasItem()) {
+            // Grabs the quantity in the hovered slot itemstack
+            Quantity slotQuantity = Quantity.stack(hoveredStack).get();
+
+            // If the hovered itemstack does not have quantity data — let vanilla handle it
+            if (slotQuantity == null) return;
+
             if (!canMergeQuantityStacks(heldStack, hoveredStack)) return;
 
             // If the held itemstack is not the same name as the hovered slot itemstack do nothing
             if (!heldStack.getHoverName().getString().equals(hoveredStack.getHoverName().getString())) return;
-
-            // Grabs the quantity in the hovered slot itemstack
-            Quantity slotQuantity = Quantity.stack(hoveredStack).get();
-
-            // If — let vanilla handle it
-            if (slotQuantity == null) return;
 
             // If the slots itemstack is its max quantity it can have return nothing
             if (slotQuantity.quantity() >= slotQuantity.maxQuantity()) return;
@@ -73,43 +69,28 @@ public class ClientEvents {
             maxAmount = Math.min(heldQuantity.quantity(), slotQuantity.maxQuantity() - slotQuantity.quantity());
         }
 
-        // Get the slot index from the hovered slot
+        // Get the slot index the server must use for player.containerMenu.slots.
         int serverSlotIndex = getServerSlotIndex(containerScreen, hoveredSlot);
 
-        // If the slot index is negative do nothing
+        // If the server slot index is negative do nothing
         if (serverSlotIndex < 0) return;
+
+        // Get the slot index the client response must use for the currently open client menu.
+        int clientSlotIndex = containerScreen.getMenu().slots.indexOf(hoveredSlot);
+
+        // If the client slot could not be found do nothing
+        if (clientSlotIndex < 0) return;
 
         // Cancel vanilla click handling because this interaction is handled here.
         event.setCanceled(true);
 
         // If player is shifting or the amount that can be given is one
         if (Screen.hasShiftDown() || heldQuantity.quantity() == 1) {
-            // Server handles the splitting.
-            TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitQuantityPacket(serverSlotIndex, maxAmount, heldStack));
-
-            // If you are in the creative inventory screen
-            if (containerScreen instanceof CreativeModeInventoryScreen) {
-                // Takes away the max amount that can be given from the held itemstack quantity
-                int newQuantity = heldQuantity.quantity() - maxAmount;
-
-                // If the new quantity of the held itemstack is 0 or negative
-                if (newQuantity <= 0) {
-                    // Sets the carried itemstack to empty
-                    containerScreen.getMenu().setCarried(ItemStack.EMPTY);
-                } else {
-                    //grabs a copy of the held itemstack
-                    ItemStack newHeld = heldStack.copy();
-
-                    //sets the quantity of the copied itemstack
-                    Quantity.stack(newHeld).set(newQuantity, heldQuantity.maxQuantity());
-
-                    //sets the carried item to the copy
-                    containerScreen.getMenu().setCarried(newHeld);
-                }
-            }
+            // Server handles the splitting. The client waits for the accepted result packet before changing cursor or slot state.
+            TCNetworkChannel.INSTANCE.sendToServer(new ServerBoundSplitQuantityPacket(serverSlotIndex, clientSlotIndex, maxAmount, heldStack));
         } else {
             //opens the quantity split screen
-            Minecraft.getInstance().setScreen(new QuantitySplitScreen(containerScreen, heldStack, hoveredSlot, serverSlotIndex));
+            Minecraft.getInstance().setScreen(new QuantitySplitScreen(containerScreen, heldStack, hoveredSlot, serverSlotIndex, clientSlotIndex));
         }
     }
 
@@ -122,8 +103,9 @@ public class ClientEvents {
 
         //if the creative inventory screen is open
         if (creativeScreen.isInventoryOpen()) {
-            //return the hovered slot's container slot int
-            return hoveredSlot.getContainerSlot();
+            //creative inventory wraps player inventory slots, so convert the backing player inventory slot
+            //to the matching server InventoryMenu slot index
+            return getInventoryMenuSlotIndex(hoveredSlot.getContainerSlot());
         }
 
         //if the hovered slots index of greater than or equals 45 and the hovered slots index is less than 54
@@ -133,6 +115,36 @@ public class ClientEvents {
         }
 
         // Creative screen slot could not be mapped to a server slot.
+        return -1;
+    }
+
+    private static int getInventoryMenuSlotIndex(int containerSlot) {
+        // Player inventory hotbar slots are container slots 0-8, but server menu slots 36-44.
+        if (containerSlot >= 0 && containerSlot < 9) {
+            return 36 + containerSlot;
+        }
+
+        // Player inventory main slots are container slots 9-35 and server menu slots 9-35.
+        if (containerSlot >= 9 && containerSlot < 36) {
+            return containerSlot;
+        }
+
+        // Player inventory armor slots are container slots 36-39, but server menu slots 8-5.
+        if (containerSlot >= 36 && containerSlot < 40) {
+            return 44 - containerSlot;
+        }
+
+        // Player inventory offhand is container slot 40, but server menu slot 45.
+        if (containerSlot == 40) {
+            return 45;
+        }
+
+        // Some creative wrapped slots already report their server menu slot index.
+        if (containerSlot >= 41 && containerSlot <= 45) {
+            return containerSlot;
+        }
+
+        // Unknown player inventory slot.
         return -1;
     }
 

@@ -51,23 +51,23 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
         return registryKey;
     }
 
-    public JsonObject json(Codec<A> codec, A builder) {
+    public JsonObject json(@NotNull Codec<A> codec, A builder) {
         return codec.encodeStart(JsonOps.INSTANCE, builder)
                 .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to encode: " + msg); })
                 .getAsJsonObject();
     }
 
-    public A trait(Codec<A> codec, JsonObject jsonObject) {
+    public A trait(@NotNull Codec<A> codec, JsonObject jsonObject) {
         return codec.decode(JsonOps.INSTANCE, jsonObject)
                 .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to decode: " + msg); })
                 .getFirst();
     }
 
-    public static String prefixNamespace(ResourceLocation registryKey) {
+    public static @NotNull String prefixNamespace(@NotNull ResourceLocation registryKey) {
         return registryKey.getNamespace().equals("minecraft") ? registryKey.getPath() : registryKey.getNamespace() + "/" + registryKey.getPath();
     }
 
-    public static String getDir(ResourceKey<? extends Registry<?>> resourceKey) {
+    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
         return "traits/" + prefixNamespace(resourceKey.location());
     }
 

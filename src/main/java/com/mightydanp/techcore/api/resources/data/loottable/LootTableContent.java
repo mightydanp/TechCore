@@ -11,6 +11,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 
@@ -26,7 +27,7 @@ public class LootTableContent {
         this.name = name;
     }
 
-    public LootTableContent(ResourceLocation resourceLocation) {
+    public LootTableContent(@NotNull ResourceLocation resourceLocation) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
     }
@@ -53,11 +54,11 @@ public class LootTableContent {
 
     }
 
-    public static LootTable standardDropTable(Block b) {
+    public static @NotNull LootTable standardDropTable(Block b) {
         return LootTable.lootTable().withPool(createStandardDrops(b)).build();
     }
 
-    public static LootPool.Builder createStandardDrops(ItemLike itemProvider) {
+    public static LootPool.@NotNull Builder createStandardDrops(ItemLike itemProvider) {
         return LootPool.lootPool().setRolls(ConstantValue.exactly(1)).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(itemProvider));
     }
 }

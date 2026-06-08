@@ -11,6 +11,7 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -25,7 +26,7 @@ public class MenuRegistries {
 
     // Client setup method instead of RegisterMenuScreensEvent
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
+    public static void onClientSetup(@NotNull FMLClientSetupEvent event) {
         // Schedule for client thread
         event.enqueueWork(() -> {
             MenuScreens.register(TC_PLAYER_INVENTORY_MENU.get(), TCPlayerInventoryScreen::new);

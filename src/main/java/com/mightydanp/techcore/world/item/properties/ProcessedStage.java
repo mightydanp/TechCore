@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage) {
     public static final String TAG = "processed_stage";
@@ -11,20 +13,20 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
     public static final Codec<ProcessedStage> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     ItemStack.CODEC.fieldOf("item_stack").forGetter(ProcessedStage::itemStack),
-                    ProcessedStage.ProcessedStages.CODEC.fieldOf(TAG).forGetter(ProcessedStage::processedStage)
+                    ProcessedStages.CODEC.fieldOf(TAG).forGetter(ProcessedStage::processedStage)
             ).apply(instance, ProcessedStage::new));
 
-    public static boolean hasProcessedStage(ItemStack itemStack) {
+    public static boolean hasProcessedStage(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         return tag != null && tag.contains(TAG);
     }
 
-    public static String getProcessedStage(ItemStack itemStack) {
+    public static @Nullable String getProcessedStage(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         return tag != null && tag.contains(TAG) ? tag.getString(TAG) : null;
     }
 
-    public static String getProcessedStageOrDefault(ItemStack itemStack, String defaultProcessedStage) {
+    public static @Nullable String getProcessedStageOrDefault(ItemStack itemStack, String defaultProcessedStage) {
         if(hasProcessedStage(itemStack)) return getProcessedStage(itemStack);
 
         if(defaultProcessedStage == null) return null;
@@ -33,11 +35,11 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
         return defaultProcessedStage;
     }
 
-    public static void setProcessedStage(ItemStack itemStack, String processedStage) {
+    public static void setProcessedStage(@NotNull ItemStack itemStack, String processedStage) {
         itemStack.getOrCreateTag().putString(TAG, processedStage);
     }
 
-    public static ProcessedStage fromStack(ItemStack itemStack) {
+    public static @NotNull ProcessedStage fromStack(ItemStack itemStack) {
         String processedStageName = getProcessedStage(itemStack);
         ProcessedStages processedStages = ProcessedStages.fromStage(processedStageName);
 
@@ -56,7 +58,7 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
 
         public static final Codec<ProcessedStages> CODEC = Codec.STRING.xmap(
                 ProcessedStages::fromStage,
-                ProcessedStages::getStage);
+                processedStages -> processedStages != null ? processedStages.getStage() : null);
 
         private final String stage;
         ProcessedStages(String stage){
@@ -67,7 +69,7 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
             return stage;
         }
 
-        public static ProcessedStages fromStage(String stage) {
+        public static @Nullable ProcessedStages fromStage(String stage) {
             for (ProcessedStages processedStage : values()) {
                 if (processedStage.stage.equals(stage)) {
                     return processedStage;

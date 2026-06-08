@@ -9,7 +9,7 @@ public class TCMainHandSlot extends Slot {
     private final Player player;
     private int removeCount;
 
-    public TCMainHandSlot(Player player, int slot, int xPosition, int yPosition) {
+    public TCMainHandSlot(@NotNull Player player, int slot, int xPosition, int yPosition) {
         super(player.getInventory(), slot, xPosition, yPosition);
         this.player = player;
     }

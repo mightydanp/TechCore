@@ -1,45 +1,15 @@
 package com.mightydanp.techcore.materials.Item;
 
-import com.mightydanp.techcore.materials.components.StoneLayerComponent;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Purity;
 import com.mightydanp.techcore.world.item.properties.Quantity;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
-
 
 public class DustItem extends MaterialItem {
-    public DustItem(MaterialItemProperties properties) {
+    public DustItem(@NotNull MaterialItemProperties properties) {
         super(properties.stacksTo(1));
-    }
-
-    @Override
-    public @NotNull Component getName(@NotNull ItemStack itemStack) {
-        Component component = super.getName(itemStack);
-        Purity purity = Purity.stack(itemStack).get();
-
-        if (purity == null || purity.purity() < Purity.MAX) return component;
-
-        var itemKey = itemStack.getItemHolder()
-                .unwrapKey()
-                .orElseThrow()
-                .location();
-        String path = itemKey.getPath();
-
-        return StoneLayerComponent.getStoneLayerMaterials().stream()
-                .map(material -> material.name + "_")
-                .filter(path::startsWith)
-                .max(Comparator.comparingInt(String::length))
-                .<Component>map(prefix -> {
-                    String strippedPath = path.substring(prefix.length());
-                    if ("dust".equals(strippedPath)) return component;
-
-                    return Component.translatable("item." + itemKey.getNamespace() + "." + strippedPath);
-                })
-                .orElse(component);
     }
 
 

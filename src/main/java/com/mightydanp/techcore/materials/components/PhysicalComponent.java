@@ -2,17 +2,13 @@ package com.mightydanp.techcore.materials.components;
 
 import com.mightydanp.techcore.materials.Material;
 
-public class PhysicalComponent<A extends Material> extends Component<PhysicalComponent<A>> {
+public class PhysicalComponent<A extends Material> extends Component<A, PhysicalComponent<A>> {
     private int color;
     private double density;
     private int harvestLevel;
 
-
-    private final A material;
-
     public PhysicalComponent(A material) {
-        super("physical", "component");
-        this.material = material;
+        super("physical", "component", material);
     }
 
     public PhysicalComponent<A> setColor(int color) {
@@ -41,10 +37,5 @@ public class PhysicalComponent<A extends Material> extends Component<PhysicalCom
 
     public int getHarvestLevel() {
         return this.harvestLevel;
-    }
-
-
-    public A end() {
-        return this.material;
     }
 }

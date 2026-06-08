@@ -29,7 +29,7 @@ public final class WasGenerated {
     private static final class ChangedAfterGenerationData extends SavedData {
         private final Long2ObjectOpenHashMap<LongOpenHashSet> changedPositions = new Long2ObjectOpenHashMap<>();
 
-        private static ChangedAfterGenerationData get(ServerLevel level) {
+        private static @NotNull ChangedAfterGenerationData get(@NotNull ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(
                     ChangedAfterGenerationData::load,
                     ChangedAfterGenerationData::new,
@@ -47,7 +47,7 @@ public final class WasGenerated {
             return positions != null && positions.contains(localKey(pos));
         }
 
-        private static ChangedAfterGenerationData load(CompoundTag tag) {
+        private static @NotNull ChangedAfterGenerationData load(@NotNull CompoundTag tag) {
             ChangedAfterGenerationData data = new ChangedAfterGenerationData();
             ListTag chunks = tag.getList("chunks", Tag.TAG_COMPOUND);
 
@@ -74,11 +74,11 @@ public final class WasGenerated {
             return tag;
         }
 
-        private static long chunkKey(BlockPos pos) {
+        private static long chunkKey(@NotNull BlockPos pos) {
             return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
-        private static long localKey(BlockPos pos) {
+        private static long localKey(@NotNull BlockPos pos) {
             return BlockPos.asLong(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
         }
     }

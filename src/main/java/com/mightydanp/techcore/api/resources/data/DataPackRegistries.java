@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,7 +88,7 @@ public class DataPackRegistries {
     }
 */
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveBlockTag(TagContent<Block> content, boolean override) {
+    public static boolean saveBlockTag(@NotNull TagContent<Block> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.blockTag.containsKey(resourceLocation)) {
@@ -107,7 +108,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveBlockMineableTag(TagContent<Block> content, boolean override) {
+    public static boolean saveBlockMineableTag(@NotNull TagContent<Block> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.blockMineableTag.containsKey(resourceLocation)) {
@@ -127,7 +128,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveCatVariantTag(TagContent<CatVariant> content, boolean override) {
+    public static boolean saveCatVariantTag(@NotNull TagContent<CatVariant> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.catVariantTag.containsKey(resourceLocation)) {
@@ -168,7 +169,7 @@ public class DataPackRegistries {
     }
 */
     //----------------------------------------------------------------------------------------------------------------------
-    public static boolean saveEntityTypeTag(TagContent<EntityType<?>> content, boolean override) {
+    public static boolean saveEntityTypeTag(@NotNull TagContent<EntityType<?>> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.entityTypeTag.containsKey(resourceLocation)) {
@@ -188,7 +189,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveFluidTag(TagContent<Fluid> content, boolean override) {
+    public static boolean saveFluidTag(@NotNull TagContent<Fluid> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.fluidTag.containsKey(resourceLocation)) {
@@ -208,7 +209,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveGameEventTag(TagContent<GameEvent> content, boolean override) {
+    public static boolean saveGameEventTag(@NotNull TagContent<GameEvent> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.gameEventTag.containsKey(resourceLocation)) {
@@ -228,7 +229,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveInstrumentTag(TagContent<Instrument> content, boolean override) {
+    public static boolean saveInstrumentTag(@NotNull TagContent<Instrument> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.instrumentTag.containsKey(resourceLocation)) {
@@ -248,7 +249,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveItemTag(TagContent<Item> content, boolean override) {
+    public static boolean saveItemTag(@NotNull TagContent<Item> content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.itemTag.containsKey(resourceLocation)) {
@@ -334,7 +335,7 @@ public class DataPackRegistries {
     }
 */
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveBlockLootTable(LootTableContent content, boolean override) {
+    public static boolean saveBlockLootTable(@NotNull LootTableContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.blockLootTable.containsKey(resourceLocation)) {
@@ -354,7 +355,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveChestLootTable(LootTableContent content, boolean override) {
+    public static boolean saveChestLootTable(@NotNull LootTableContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.chestLootTable.containsKey(resourceLocation)) {
@@ -374,7 +375,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveEntityLootTable(LootTableContent content, boolean override) {
+    public static boolean saveEntityLootTable(@NotNull LootTableContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.entityLootTable.containsKey(resourceLocation)) {
@@ -394,7 +395,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveGameplayLootTable(LootTableContent content, boolean override) {
+    public static boolean saveGameplayLootTable(@NotNull LootTableContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.gameplayLootTable.containsKey(resourceLocation)) {
@@ -414,7 +415,7 @@ public class DataPackRegistries {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public static boolean saveRecipe(RecipeContent content, boolean override) {
+    public static boolean saveRecipe(@NotNull RecipeContent content, boolean override) {
         ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
         if (!override && DataPackRegistries.recipe.containsKey(resourceLocation)) {

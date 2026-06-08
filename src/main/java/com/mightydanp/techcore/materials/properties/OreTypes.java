@@ -4,9 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public enum OreTypes {
-    SMALL(new OreType("small")),
     ORE(new OreType("ore")),
-    DENSE(new OreType("dense")),
     GEM(new OreType("gem")),
     CRYSTAL(new OreType("crystal"));
 

@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -15,7 +16,8 @@ import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
 public class MaterialBlockProperties extends BlockBehaviour.Properties {
-    public static MaterialBlockProperties of() {
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull MaterialBlockProperties of() {
         return new MaterialBlockProperties();
     }
 

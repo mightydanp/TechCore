@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.inventory.InventoryMenu;
+import org.jetbrains.annotations.NotNull;
 
 public final class TemperatureRenderType extends RenderType {
     private static ShaderInstance temperatureItemShader;
@@ -26,7 +27,7 @@ public final class TemperatureRenderType extends RenderType {
         return TEMPERATURE_ITEM;
     }
 
-    private static RenderType createTemperatureItem() {
+    private static @NotNull RenderType createTemperatureItem() {
         CompositeState state = CompositeState.builder()
                 .setShaderState(TEMPERATURE_ITEM_SHADER)
                 .setTextureState(new TextureStateShard(InventoryMenu.BLOCK_ATLAS, false, true))

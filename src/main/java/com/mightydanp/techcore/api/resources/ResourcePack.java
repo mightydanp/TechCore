@@ -56,7 +56,7 @@ public class ResourcePack implements PackResources {
     public void removeAsset(ResourceLocation location) { assets.remove(location); }
     public void removeData(ResourceLocation location)  { data.remove(location);  }
 
-    private static void put(Map<ResourceLocation, IoSupplier<InputStream>> map, ResourceLocation loc, JsonObject json) {
+    private static void put(@NotNull Map<ResourceLocation, IoSupplier<InputStream>> map, ResourceLocation loc, @NotNull JsonObject json) {
         byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
         map.put(loc, () -> new ByteArrayInputStream(bytes));
     }
@@ -112,7 +112,7 @@ public class ResourcePack implements PackResources {
 
     @Nullable
     @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
+    public <T> T getMetadataSection(@NotNull MetadataSectionSerializer<T> serializer) {
         if ("pack".equals(serializer.getMetadataSectionName())) {
             JsonObject obj = new JsonObject();
             obj.addProperty("pack_format", version);

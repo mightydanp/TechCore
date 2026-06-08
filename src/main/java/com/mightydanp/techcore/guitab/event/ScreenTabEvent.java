@@ -4,6 +4,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.guitab.ScreenTab;
 import com.mightydanp.techcore.guitab.components.ScreenTabBase;
 import com.mightydanp.techcore.guitab.components.ScreenTabButton;
+import com.mightydanp.techcore.guitab.registries.ScreenTabRegistries;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -18,11 +19,10 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.mightydanp.techcore.guitab.registries.ScreenTabRegistries.screenTabs;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, value = Dist.CLIENT)
 public class ScreenTabEvent {
@@ -31,7 +31,7 @@ public class ScreenTabEvent {
     private static int currentPage = 0;
 
     @SubscribeEvent
-    public static void addTabsToInventoryScreen(ScreenEvent.Init.Pre event) {
+    public static void addTabsToInventoryScreen(ScreenEvent.Init.@NotNull Pre event) {
         Screen screen = event.getScreen();
 
         if (screen instanceof CreativeModeInventoryScreen) {
@@ -41,12 +41,12 @@ public class ScreenTabEvent {
         if (screen instanceof AbstractContainerScreen<?> containerScreen && screen.getMinecraft().player != null) {
             Map<Class<? extends Screen>, ScreenTab> orderedScreenTabs = new LinkedHashMap<>();
 
-            screenTabs.entrySet().stream()
+            ScreenTabRegistries.screenTabs.entrySet().stream()
                     .filter(entry -> entry.getValue().priorityNumber != -1)
                     .sorted(Comparator.comparingInt(entry -> entry.getValue().priorityNumber))
                     .forEachOrdered(entry -> orderedScreenTabs.put(entry.getKey(), entry.getValue()));
 
-            screenTabs.entrySet().stream()
+            ScreenTabRegistries.screenTabs.entrySet().stream()
                     .filter(entry -> entry.getValue().priorityNumber == -1)
                     .forEachOrdered(entry -> orderedScreenTabs.put(entry.getKey(), entry.getValue()));
 

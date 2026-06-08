@@ -65,7 +65,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+    protected void renderBg(@NotNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
         int x = this.leftPos;
         int y = this.topPos;
         //int x = (this.width - this.imageWidth) / 2;
@@ -82,7 +82,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         renderEntityInInventoryFollowsAngle(guiGraphics, x1, y1, x2, y2, scale, yOffset, f2, f3, entity);
     }
 
-    public static void renderEntityInInventoryFollowsAngle(GuiGraphics p_282802_, int p_275688_, int p_275245_, int p_275535_, int p_294406_, int p_294663_, float p_275604_, float angleXComponent, float angleYComponent, LivingEntity p_275689_) {
+    public static void renderEntityInInventoryFollowsAngle(@NotNull GuiGraphics p_282802_, int p_275688_, int p_275245_, int p_275535_, int p_294406_, int p_294663_, float p_275604_, float angleXComponent, float angleYComponent, @NotNull LivingEntity p_275689_) {
         float f = (float) (p_275688_ + p_275535_) / 2.0F;
         float f1 = (float) (p_275245_ + p_294406_) / 2.0F;
         p_282802_.enableScissor(p_275688_, p_275245_, p_275535_, p_294406_);
@@ -111,7 +111,7 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         p_282802_.disableScissor();
     }
 
-    public static void renderEntityInInventory(GuiGraphics guiGraphics, float x, float y, float scale, Vector3f translate, Quaternionf pose, @Nullable Quaternionf cameraOrientation, LivingEntity entity) {
+    public static void renderEntityInInventory(@NotNull GuiGraphics guiGraphics, float x, float y, float scale, @NotNull Vector3f translate, Quaternionf pose, @Nullable Quaternionf cameraOrientation, LivingEntity entity) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x, y, 50.0);
         guiGraphics.pose().scale(scale, scale, -scale);

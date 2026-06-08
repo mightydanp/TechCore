@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -22,7 +23,7 @@ public final class ClientShaderEvents {
     private ClientShaderEvents() {}
 
     @SubscribeEvent
-    public static void registerShaders(RegisterShadersEvent event) throws IOException {
+    public static void registerShaders(@NotNull RegisterShadersEvent event) throws IOException {
         ResourceLocation shaderLocation = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "rendertype_temperature_item");
         event.registerShader(new ShaderInstance(
                 event.getResourceProvider(),

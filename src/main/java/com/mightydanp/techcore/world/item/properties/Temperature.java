@@ -5,6 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record Temperature(double temperature, Scales.Scale scale) {
     public static final String TAG = "temperature";
@@ -25,12 +28,12 @@ public record Temperature(double temperature, Scales.Scale scale) {
     }
 
 ///item helpers
-    public static boolean hasTemperature(ItemStack itemStack) {
+    public static boolean hasTemperature(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         return tag != null && tag.contains(TAG);
     }
 
-    public static Double getTemperature(ItemStack itemStack) {
+    public static @Nullable Double getTemperature(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
 
         if (tag != null && tag.contains(TAG)) {
@@ -39,11 +42,11 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return null;
     }
 
-    public static void setTemperature(ItemStack itemStack, double temperature) {
+    public static void setTemperature(@NotNull ItemStack itemStack, double temperature) {
         itemStack.getOrCreateTag().putDouble(TAG, temperature);
     }
 
-    public static Temperature fromStack(ItemStack itemStack) {
+    public static @Nullable Temperature fromStack(ItemStack itemStack) {
         Double temperature = getTemperature(itemStack);
 
         if (temperature == null) return null;
@@ -52,11 +55,13 @@ public record Temperature(double temperature, Scales.Scale scale) {
     }
 ///
 
-    public Double toKelvin(int temperature) {
+    @Contract(pure = true)
+    public @NotNull Double toKelvin(int temperature) {
     return temperature + 273.15;
 }
 
-    public Double toFahrenheit(int temperature) {
+    @Contract(pure = true)
+    public @NotNull Double toFahrenheit(int temperature) {
         return (temperature * 9.0 / 5.0) + 32;
     }
 
@@ -64,7 +69,7 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return MaterialConfig.TEMPERATURE_SCALE.get().scale;
     }
 
-    public Double getTemperature(Scales.Scale scale) {
+    public Double getTemperature(Scales.@NotNull Scale scale) {
         if (scale.equals(Scales.KELVIN.scale)) return toKelvin();
         if (scale.equals(Scales.FAHRENHEIT.scale)) return toFahrenheit();
         return temperature;
@@ -89,7 +94,8 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
     }
 
-    private int[] heatColor() {
+    @Contract(" -> new")
+    private int @NotNull [] heatColor() {
         if (temperature <= 425.0D) {
             return new int[]{0, 0, 0};
         }
@@ -132,7 +138,8 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return new int[]{clamp(r), clamp(g), clamp(b)};
     }
 
-    private int[] coldColor() {
+    @Contract(" -> new")
+    private int @NotNull [] coldColor() {
         double coldness = Math.abs(Math.min(0.0D, temperature));
 
         double amount = 1.0D - Math.exp(-coldness / 300.0D);

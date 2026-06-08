@@ -8,6 +8,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -27,7 +28,7 @@ public class ClientConfig {
         SPEC = builder.build();
     }
 
-    public static void registerConfigs(FMLJavaModLoadingContext context) {
+    public static void registerConfigs(@NotNull FMLJavaModLoadingContext context) {
         context.registerConfig(ModConfig.Type.CLIENT, SPEC, CoreRef.MOD_ID + "-client.toml");
     }
 
@@ -40,7 +41,7 @@ public class ClientConfig {
         });
     }
 
-    public static void blacklist(ItemLike... items) {
+    public static void blacklist(ItemLike @NotNull ... items) {
         for (ItemLike itemLike : items) {
             Item item = itemLike.asItem();
             blacklisted_items.add(item);

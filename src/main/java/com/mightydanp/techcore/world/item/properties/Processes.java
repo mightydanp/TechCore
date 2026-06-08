@@ -7,6 +7,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +21,12 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
                     Processes.Process.CODEC.listOf().fieldOf(TAG).forGetter(Processes::processes)
             ).apply(instance, Processes::new));
 
-    public static boolean hasProcesses(ItemStack itemStack) {
+    public static boolean hasProcesses(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         return tag != null && tag.contains(TAG);
     }
 
-    public static List<String> getProcesses(ItemStack itemStack) {
+    public static List<String> getProcesses(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         if (tag == null || !tag.contains(TAG)) return List.of();
 
@@ -43,7 +44,7 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
         return defaultProcesses;
     }
 
-    public static void setProcesses(ItemStack itemStack, List<String> Processes) {
+    public static void setProcesses(ItemStack itemStack, @NotNull List<String> Processes) {
         ListTag ProcessesTag = new ListTag();
         for (String stage : Processes) {
             ProcessesTag.add(StringTag.valueOf(stage));
@@ -51,7 +52,7 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
         }
     }
 
-    public static Processes fromStack(ItemStack itemStack) {
+    public static @NotNull Processes fromStack(ItemStack itemStack) {
         List<Process> Processes = getProcesses(itemStack).stream()
                 .map(Process::fromProcess)
                 .toList();
@@ -82,7 +83,7 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
             return process;
         }
 
-        public static Process fromProcess(String processName) {
+        public static @NotNull Process fromProcess(String processName) {
             for (Process process : values()) {
                 if (process.process.equals(processName)) {
                     return process;

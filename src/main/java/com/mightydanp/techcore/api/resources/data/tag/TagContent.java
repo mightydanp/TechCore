@@ -10,6 +10,7 @@ import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.tags.ITagManager;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class TagContent<A> {
     private final @Nullable IForgeRegistry<A> forgeRegistry;
     private final ResourceKey<? extends Registry<A>> resourceKey;
 
-    public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry) {
+    public TagContent(@NotNull ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable Registry<A> registry) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
         tagKey = TagKey.create(ResourceKey, resourceLocation);
@@ -42,7 +43,7 @@ public class TagContent<A> {
         this.resourceKey = ResourceKey;
     }
 
-    public TagContent(ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable IForgeRegistry<A> forgeRegistry) {
+    public TagContent(@NotNull ResourceLocation resourceLocation, ResourceKey<? extends Registry<A>> ResourceKey, @Nullable IForgeRegistry<A> forgeRegistry) {
         this.modid = resourceLocation.getNamespace();
         this.name = resourceLocation.getPath();
         tagKey = TagKey.create(ResourceKey, resourceLocation);

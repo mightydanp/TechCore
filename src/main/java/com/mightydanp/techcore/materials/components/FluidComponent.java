@@ -5,7 +5,7 @@ import com.mightydanp.techcore.materials.Material;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.FlowingFluid;
 
-public class FluidComponent<A extends Material> extends Component<FluidComponent<A>> {
+public class FluidComponent<A extends Material> extends Component<A, FluidComponent<A>>{
     private Float acceleration = 0.014F;
     private FluidStates.FluidState state = null;
     private Integer density = null;
@@ -15,11 +15,8 @@ public class FluidComponent<A extends Material> extends Component<FluidComponent
     public FlowingFluid fluid, fluid_flowing;
     public Block fluidBlock;
 
-    private final A material;
-
     public FluidComponent(A material) {
-        super("fluid", "component");
-        this.material = material;
+        super("fluid", "component", material);
     }
 
     public FluidComponent<A> setAcceleration(float acceleration) {
@@ -65,9 +62,5 @@ public class FluidComponent<A extends Material> extends Component<FluidComponent
 
     public FluidStates.FluidState getState() {
         return state;
-    }
-
-    public A end(){
-        return material;
     }
 }

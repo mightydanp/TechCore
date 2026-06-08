@@ -14,6 +14,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.RenderTypeHelper;
+import org.jetbrains.annotations.NotNull;
 
 public final class TemperatureItemSecondPass {
     private TemperatureItemSecondPass() {}
@@ -64,7 +65,7 @@ public final class TemperatureItemSecondPass {
     }
 
     private static void flushVanillaItemRenderTypes(
-            MultiBufferSource.BufferSource bufferSource,
+            MultiBufferSource.@NotNull BufferSource bufferSource,
             ItemStack stack,
             BakedModel model
     ) {

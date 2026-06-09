@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Item;
+package com.mightydanp.techcore.materials.item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;

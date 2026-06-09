@@ -28,7 +28,7 @@ public class ModelContent<A> {
         this.name = name;
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
+        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name), (A) this);
     }
 
     @SuppressWarnings("unchecked")
@@ -37,7 +37,7 @@ public class ModelContent<A> {
         this.modid = resourceLocation.getNamespace();
         this.modelType = modelType;
         this.organizationPath = organizationPath;
-        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, "models/" + modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name + ".json"), (A) this);
+        this.model = new ModelBuilder<>(ResourceLocation.fromNamespaceAndPath(modid, modelType + "/" + (organizationPath == null ? "" : organizationPath + "/") + name), (A) this);
     }
 
     protected ModelContent(String modid, String name, String modelType, String organizationPath, ModelBuilder<A> builder) {

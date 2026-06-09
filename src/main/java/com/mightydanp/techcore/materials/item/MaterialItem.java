@@ -1,27 +1,29 @@
-package com.mightydanp.techcore.materials.Item;
+package com.mightydanp.techcore.materials.item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
-import com.mightydanp.techcore.world.item.properties.*;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quality;
+import com.mightydanp.techcore.world.item.properties.Quantity;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class MaterialItemBlock extends BlockItem {
+public class MaterialItem extends Item {
     private final String symbol;
     private final int color;
     private final Double boilingPoint;
     private final Double meltingPoint;
 
-    public MaterialItemBlock(Block block, MaterialItemProperties properties) {
-        super(block, properties);
+    public MaterialItem(MaterialItemProperties properties) {
+        super(properties);
         this.symbol = properties.getSymbol();
         this.color = properties.getColor();
         this.boilingPoint = properties.getBoilingPoint();
@@ -44,7 +46,7 @@ public class MaterialItemBlock extends BlockItem {
         Quantity quantity = Quantity.stack(itemStack).get();
 
         if (quantity != null) {
-            return Math.round(13.0f * quantity.level());
+            return Math.round(13 * quantity.level());
         }
 
         return super.getBarWidth(itemStack);
@@ -129,5 +131,6 @@ public class MaterialItemBlock extends BlockItem {
     public Double getMeltingPoint() {
         return meltingPoint;
     }
+
 
 }

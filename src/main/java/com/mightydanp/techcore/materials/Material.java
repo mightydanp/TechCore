@@ -17,8 +17,9 @@ public class Material implements BaseRegistries<Material> {
     public ThermalComponent<Material> thermal;
     public FluidComponent<Material> fluid;
     public OreComponent<Material> ore;
-    public StoneLayerComponent<Material> stoneLayer;
+    public RockLayerComponent<Material> rockLayer;
     public ProcessedComponent<Material> processed;
+    public ToolComponent<Material> tool;
 
     private final List<Component<?, ?>> components = new ArrayList<>();
 
@@ -30,9 +31,10 @@ public class Material implements BaseRegistries<Material> {
         physical = addComponent(1, new PhysicalComponent<>(this));
         thermal = addComponent(2, new ThermalComponent<>(this));
         fluid = addComponent(3, new FluidComponent<>(this));
-        stoneLayer = addComponent(4, new StoneLayerComponent<>(this));
+        rockLayer = addComponent(4, new RockLayerComponent<>(this));
         ore = addComponent(5, new OreComponent<>(this));
         processed = addComponent(6, new ProcessedComponent<>(this));
+        tool = addComponent(7, new ToolComponent<>(this));
     }
 
     @Override

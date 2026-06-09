@@ -2,7 +2,6 @@ package com.mightydanp.techcore.guitab.registries;
 
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.client.ref.ScreenRef;
 import com.mightydanp.techcore.guitab.ScreenTab;
 import com.mightydanp.techcore.guitab.tabs.InventoryScreenTab;
 import com.mightydanp.techcore.guitab.libs.ScreenTabRef;
@@ -28,7 +27,7 @@ public class ScreenTabRegistries implements BaseRegistries<ScreenTabRegistries> 
 
     @Override
     public ScreenTabRegistries initLanguages() {
-        ScreenRef.initLanguages();
+        ScreenTabRef.initLanguages();
         return this;
     }
 

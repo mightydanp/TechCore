@@ -19,6 +19,7 @@ public class OreBlockModelContent extends MaterialBlockModelContent{
         var model = model()
                 .renderType("cutout")
                 .parent(uncheckedMCModelFile(ModelProvider.BLOCK_FOLDER, "block"))
+                .texture("particle", stoneTexture)
                 .texture("stone", stoneTexture)
                 .texture("ore", oreBlockTexture(icon, variant, false))
                 .texture("ore_overlay", oreBlockTexture(icon, variant, true));

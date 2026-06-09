@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.materials.Item;
+package com.mightydanp.techcore.materials.item;
 
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Purity;
@@ -6,10 +6,12 @@ import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class OreItem extends MaterialItem {
-    public OreItem(@NotNull MaterialItemProperties properties) {
+
+public class DustItem extends MaterialItem {
+    public DustItem(@NotNull MaterialItemProperties properties) {
         super(properties.stacksTo(1));
     }
+
 
     public float getQuantityLevel(ItemStack itemStack) {
         Quantity quantity = Quantity.stack(itemStack).get();
@@ -33,8 +35,12 @@ public class OreItem extends MaterialItem {
 
         if (purity == null) return 0.75f;
 
+        if (purity.purity() < 75) return 0.0f;//impure
+
         if (purity.purity() < 100) return 0.75f;//normal
 
         return 1.0f;//pure
     }
+
+
 }

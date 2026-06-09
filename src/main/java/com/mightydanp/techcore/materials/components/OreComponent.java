@@ -10,9 +10,9 @@ import com.mightydanp.techcore.api.resources.assets.content.model.block.componen
 import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.component.OreItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.GemItem;
-import com.mightydanp.techcore.materials.Item.OreBlockItem;
-import com.mightydanp.techcore.materials.Item.OreItem;
+import com.mightydanp.techcore.materials.item.GemItem;
+import com.mightydanp.techcore.materials.item.OreBlockItem;
+import com.mightydanp.techcore.materials.item.OreItem;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.block.BedrockOre;
 import com.mightydanp.techcore.materials.block.DenseOre;
@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class OreComponent<A extends Material> extends Component<A, OreComponent<A>>{
+    private static final String BEDROCK_ORE_KEY = "bedrock";
+
     public List<Material> sameRockMaterials = new ArrayList<>();
 
     private OreTypes.OreType oreType;
@@ -66,14 +68,14 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
         this.oreType = oreType;
         this.maxDensity = maxDensity;
         this.rockTypes = Arrays.asList(rockTypes);
-        this.sameRockMaterials = StoneLayerComponent.getStoneLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.stoneLayer.rockType)).toList();
+        this.sameRockMaterials = RockLayerComponent.getRockLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.rockLayer.rockType) && material1.rockLayer.canContainOre).toList();
         return this;
     }
 
     public OreComponent<A> setOre(OreTypes.OreType oreType, RockTypes.RockType... rockTypes) {
         this.oreType = oreType;
         this.rockTypes = Arrays.asList(rockTypes);
-        this.sameRockMaterials = StoneLayerComponent.getStoneLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.stoneLayer.rockType)).toList();
+        this.sameRockMaterials = RockLayerComponent.getRockLayerMaterials().stream().filter(material1 -> this.rockTypes.contains(material1.rockLayer.rockType) && material1.rockLayer.canContainOre).toList();
         return this;
     }
 
@@ -94,10 +96,11 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
             legendaryGem = registerGemItem("legendary_" + name);
         }
 
-        for (Material stoneLayer : sameRockMaterials) {
-            String stoneName = stoneLayer.name;
+        if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
+            registerBedrockOreBlock(material.name + "_ore");
 
-            if (oreType == OreTypes.ORE.oreType() || oreType == OreTypes.GEM.oreType()) {
+            for (Material stoneLayer : sameRockMaterials) {
+                String stoneName = stoneLayer.name;
                 String name = stoneName + "_" + material.name + "_ore";
 
                 rawOreItems.put(stoneName, registerOreItem("raw_" + name));
@@ -108,8 +111,6 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
                 registerSparseOreBlock(stoneName, name);
                 registerOreBlock(stoneName, name);
                 registerDenseOreBlock(stoneName, name);
-                registerBedrockOreBlock(stoneName, name);
-
             }
         }
 
@@ -154,7 +155,7 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
         denseOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
     }
 
-    private void registerBedrockOreBlock(String stoneName, String baseName) {
+    private void registerBedrockOreBlock(String baseName) {
         String blockName = "bedrock_" + baseName;
         Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new BedrockOre(
                 MaterialBlockProperties.of()
@@ -162,8 +163,8 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
                         .requiresCorrectToolForDrops()
         ));
 
-        bedrockOreBlocks.put(stoneName, block);
-        bedrockOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
+        bedrockOreBlocks.put(BEDROCK_ORE_KEY, block);
+        bedrockOreBlockItems.put(BEDROCK_ORE_KEY, registerOreBlockItem(blockName, block));
     }
 
 
@@ -240,21 +241,20 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
                 String rockName = stoneLayer.name;
 
                 new OreItemModelContent(modid, "raw_" + rockName + "_" + name + "_ore", null)
-                        .saveStageOreItemModel("raw");
+                        .saveStageOreItemModel(material.icon, "raw");
                 new OreItemModelContent(modid, "centrifuged_" + rockName + "_" + name + "_ore", null)
-                        .saveStageOreItemModel("centrifuged");
+                        .saveStageOreItemModel(material.icon, "centrifuged");
                 new OreItemModelContent(modid, "crushed_" + rockName + "_" + name + "_ore", null)
-                        .saveStageOreItemModel("crushed");
+                        .saveStageOreItemModel(material.icon, "crushed");
                 new OreItemModelContent(modid, "purified_" + rockName + "_" + name + "_ore", null)
-                        .saveStageOreItemModel("purified");
+                        .saveStageOreItemModel(material.icon, "purified");
             }
         }
     }
 
     private void initOreBlockModels(String modid, String name) {
-        List<Map<String, Supplier<Block>>> blockMaps = List.of(sparseOreBlocks, oreBlocks, denseOreBlocks, bedrockOreBlocks);
-        String[] stages = {"sparse", "ore", "dense", "bedrock"};
-        String[] textureVariants = {"sparse_ore", "ore", "dense_ore", "bedrock_ore"};
+        List<Map<String, Supplier<Block>>> blockMaps = List.of(sparseOreBlocks, oreBlocks, denseOreBlocks);
+        String[] stages = {"sparse", "ore", "dense"};
 
         for (Material stoneLayer : sameRockMaterials) {
             Block stoneBaseBlock = getOreBaseBlock(stoneLayer);
@@ -266,28 +266,41 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
 
                 if (oreBlock == null) continue;
 
-                Block baseBlock = "bedrock".equals(stage) ? Blocks.BEDROCK : stoneBaseBlock;
-
                 String blockName = "ore".equals(stage)
                         ? stoneLayer.name + "_" + name + "_ore"
                         : stage + "_" + stoneLayer.name + "_" + name + "_ore";
 
-                saveOreBlockAssets(modid, blockName, stage, baseBlock, oreBlock);
+                saveOreBlockAssets(modid, blockName, stage, stoneLayer, oreBlock);
             }
+        }
+
+        Supplier<Block> bedrockOreBlock = bedrockOreBlocks.get(BEDROCK_ORE_KEY);
+        if (bedrockOreBlock != null) {
+            saveOreBlockAssets(modid, "bedrock_" + name + "_ore", "bedrock", Blocks.BEDROCK, bedrockOreBlock);
         }
 
     }
 
     @Contract(pure = true)
     private Block getOreBaseBlock(@NotNull Material stoneLayer) {
-        return stoneLayer.stoneLayer.existingStonelayerBlock != null
-                ? stoneLayer.stoneLayer.existingStonelayerBlock
-                : stoneLayer.stoneLayer.layerBlock;
+        return stoneLayer.rockLayer.existingRocklayerBlock != null
+                ? stoneLayer.rockLayer.existingRocklayerBlock
+                : stoneLayer.rockLayer.stoneBlock != null ? stoneLayer.rockLayer.stoneBlock.get() : null;
+    }
+
+    private void saveOreBlockAssets(String modid, String blockName, @NotNull String textureVariant, Material stoneLayer, @NotNull Supplier<Block> oreBlock) {
+        ResourceLocation baseTexture = oreBaseTexture(modid, stoneLayer);
+
+        saveOreBlockAssets(modid, blockName, textureVariant, baseTexture, oreBlock);
     }
 
     private void saveOreBlockAssets(String modid, String blockName, @NotNull String textureVariant, Block baseBlock, @NotNull Supplier<Block> oreBlock) {
         ResourceLocation baseTexture = new OreBlockStateComponent(modid, blockName).blockTexture(baseBlock);
 
+        saveOreBlockAssets(modid, blockName, textureVariant, baseTexture, oreBlock);
+    }
+
+    private void saveOreBlockAssets(String modid, String blockName, @NotNull String textureVariant, ResourceLocation baseTexture, @NotNull Supplier<Block> oreBlock) {
         new OreBlockModelContent(modid, blockName, "ore")
                 .saveOreBlockModel(material.icon, blockName, baseTexture, textureVariant.matches("ore") ? textureVariant : textureVariant + "_ore");
 
@@ -296,6 +309,14 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
 
         new OreItemModelContent(modid, blockName, null)
                 .saveOreBlockItemModel("ore/" + blockName);
+    }
+
+    private ResourceLocation oreBaseTexture(String modid, Material stoneLayer) {
+        if (stoneLayer.rockLayer.useExistingRockLayerTexture && stoneLayer.rockLayer.existingRocklayerBlock != null) {
+            return new OreBlockStateComponent(modid, stoneLayer.name).blockTexture(stoneLayer.rockLayer.existingRocklayerBlock);
+        }
+
+        return ResourceLocation.fromNamespaceAndPath(modid,  BlockModelContent.BLOCK_FOLDER + "/stones/" + stoneLayer.name + "/stone");
     }
 
     ///
@@ -344,7 +365,7 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
     }
     ///
     @Override
-    public OreComponent<A> initClientRenderLayers(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+    public OreComponent<A> initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         registerItemColor(event, chippedGem, material.physical.getColor());
         registerItemColor(event, flawedGem, material.physical.getColor());
         registerItemColor(event, gem, material.physical.getColor());
@@ -359,12 +380,12 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
         registerOreColors(event, sparseOreBlockItems);
         registerOreColors(event, oreBlockItems);
         registerOreColors(event, denseOreBlockItems);
-        registerOreColors(event, bedrockOreBlockItems);
+        registerItemColor(event, bedrockOreBlockItems.get(BEDROCK_ORE_KEY), material.physical.getColor());
 
         return this;
     }
 
-    private void registerOreColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> oreItems) {
+    private void registerOreColors(RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> oreItems) {
         for (Material stoneLayer : sameRockMaterials) {
             Supplier<Item> oreItem = oreItems.get(stoneLayer.name);
             if (oreItem != null) {
@@ -425,9 +446,10 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
             AssetPackRegistries.registerSafetyLanguage(denseOreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
                     "dense_" + blockName, "Dense " + translatedName + " Ore");
 
-            AssetPackRegistries.registerSafetyLanguage(bedrockOreBlockItems.get(rockName), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
-                    "bedrock_" + blockName, "Bedrock " + translatedName + " Ore");
         }
+
+        AssetPackRegistries.registerSafetyLanguage(bedrockOreBlockItems.get(BEDROCK_ORE_KEY), modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                "bedrock_" + name + "_ore", "Bedrock " + LanguageContent.toDisplayName(name) + " Ore");
 
         return this;
     }

@@ -28,13 +28,13 @@ public class OreItemModelContent extends MaterialItemModelContent{
 
     public OreItemModelContent saveOreItemModel(Icons.Icon icon, String stage) {
         for (String model : oreModels(stage)) {
-            materialModel(icon, model, model, model + "_overlay");
+            materialModel(icon, icon.label() + "/" + model, model, model + "_overlay");
         }
 
         return this;
     }
 
-    public OreItemModelContent saveStageOreItemModel(String stage) {
+    public OreItemModelContent saveStageOreItemModel(Icons.Icon icon, String stage) {
         OreItemModelContent content = new OreItemModelContent(modid(), name(), null);
         String[] models = oreModels(stage);
         float[] quantities = {0f, 0.25f, 0.50f, 1.0f};
@@ -42,7 +42,7 @@ public class OreItemModelContent extends MaterialItemModelContent{
         for (int i = 0; i < models.length; i++) {
             content.model().override()
                     .predicate(ResourceLocation.fromNamespaceAndPath(modid(), "quantity"), quantities[i])
-                    .model(uncheckedModelFile(ModelProvider.ITEM_FOLDER, "ore" + "/" + models[i]))
+                    .model(uncheckedModelFile(ModelProvider.ITEM_FOLDER, "ore/" + icon.label() + "/" + models[i]))
                     .end();
         }
 

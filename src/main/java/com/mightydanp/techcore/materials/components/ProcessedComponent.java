@@ -7,15 +7,15 @@ import com.mightydanp.techcore.api.resources.assets.content.language.LanguageCon
 import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.component.ProcessedItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.DustItem;
+import com.mightydanp.techcore.materials.item.DustItem;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -33,7 +33,7 @@ public class ProcessedComponent<A extends Material> extends Component<A, Process
     public ProcessedComponent<A> init() {
         dust = registerDustItem(material.name + "_dust");
 
-        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null){
+        if(!material.rockLayer.isRockLayer && material.ore.getOreType() != null){
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String stoneName = stoneLayer.name;
 
@@ -92,12 +92,19 @@ public class ProcessedComponent<A extends Material> extends Component<A, Process
         return this;
     }
 
-    private void registerDustColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> dustItems) {
-        for(int i=0; i < material.ore.sameRockMaterials.size(); i++) {
-            List<Supplier<Item>> dusts = dustItems.values().stream().toList();
+    private void registerDustColors(RegisterColorHandlersEvent.Item event, Map<String, Supplier<Item>> dustItems) {
+        dustItems.forEach((rockName, dustItem) -> {
+            if (dustItem == null) return;
 
-            registerItemColor(event, dusts.get(i), material.physical.getColor(), material.ore.sameRockMaterials.get(i).physical.getColor());
-        }
+            Material rockMaterial = RegistriesHandler.getMaterials().stream()
+                    .filter(material -> material.name.equals(rockName))
+                    .findFirst()
+                    .orElse(null);
+
+            int rockColor = rockMaterial != null ? rockMaterial.physical.getColor() : material.physical.getColor();
+
+            registerItemColor(event, dustItem, material.physical.getColor(), rockColor);
+        });
     }
 
     @Override
@@ -108,15 +115,15 @@ public class ProcessedComponent<A extends Material> extends Component<A, Process
         AssetPackRegistries.registerSafetyLanguage(dust, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
                 name + "_dust", LanguageContent.toDisplayName(name) + " Dust");
 
-        if(!material.stoneLayer.isStoneLayer && material.ore.getOreType() != null) {
+        if(!material.rockLayer.isRockLayer && material.ore.getOreType() != null) {
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String rockName = stoneLayer.name;
 
                 AssetPackRegistries.registerSafetyLanguage(impureDustItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
-                        "impure_" + rockName + "_" + name + "_dust", "Impure " + LanguageContent.toDisplayName(rockName + "_" + name) + " Dust");
+                        "impure_" + rockName + "_" + name + "_dust", "Impure " + LanguageContent.toDisplayName(name) + " Dust");
 
                 AssetPackRegistries.registerSafetyLanguage(dustItems.get(rockName), modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
-                        rockName + "_" + name + "_dust", LanguageContent.toDisplayName(rockName + "_" + name) + " Dust");
+                        rockName + "_" + name + "_dust", LanguageContent.toDisplayName(name) + " Dust");
             }
 
             AssetPackRegistries.registerSafetyLanguage(pureDust, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,

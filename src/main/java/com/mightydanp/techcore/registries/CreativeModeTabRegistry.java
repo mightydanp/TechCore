@@ -3,7 +3,7 @@ package com.mightydanp.techcore.registries;
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.client.ref.CreativeTabsRef;
-import com.mightydanp.techcore.materials.Item.OreItem;
+import com.mightydanp.techcore.materials.item.OreItem;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.world.item.properties.Purity;
 import com.mightydanp.techcore.world.item.properties.Quality;
@@ -104,9 +104,30 @@ public class CreativeModeTabRegistry implements BaseRegistries<CreativeModeTabRe
     public static final Supplier<CreativeModeTab> STONE_LAYER_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register(CreativeTabsRef.stone_layer_tab, () -> CreativeModeTab.builder()
             .title(Component.translatable(CreativeTabsRef.stone_layer_tab_translatable))
             .icon(() -> new ItemStack(Items.STONE))
-            .displayItems((params, output) -> {
-                // Add stone layers here
-            })
+            .displayItems((params, output) -> RegistriesHandler.getMaterialObjects().forEach(matObj -> {
+                Material mat = matObj.get();
+
+                if (mat.rockLayer.isRockLayer) {
+                    if (!mat.rockLayer.useExistingRockLayerTexture) {
+                        output.accept(mat.rockLayer.stoneItemBlock.get());
+                        output.accept(mat.rockLayer.smoothSlabItemBlock.get());
+                        output.accept(mat.rockLayer.tilesItemBlock.get());
+                        output.accept(mat.rockLayer.bricksItemBlock.get());
+                        output.accept(mat.rockLayer.cobbleItemBlock.get());
+                        output.accept(mat.rockLayer.smoothItemBlock.get());
+                        output.accept(mat.rockLayer.small_tilesItemBlock.get());
+                        output.accept(mat.rockLayer.small_bricksItemBlock.get());
+                        output.accept(mat.rockLayer.square_bricksItemBlock.get());
+                        output.accept(mat.rockLayer.cracked_bricksItemBlock.get());
+                        output.accept(mat.rockLayer.chiseled_bricksItemBlock.get());
+                        output.accept(mat.rockLayer.windmill_tiles_aItemBlock.get());
+                        output.accept(mat.rockLayer.windmill_tiles_bItemBlock.get());
+                        output.accept(mat.rockLayer.mossyCobbleItemBlock.get());
+                        output.accept(mat.rockLayer.mossyBricksItemBlock.get());
+                        output.accept(mat.rockLayer.reinforcedBricksItemBlock.get());
+                    }
+                }
+            }))
             .build()
     );
 

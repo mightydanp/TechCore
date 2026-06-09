@@ -2,9 +2,9 @@ package com.mightydanp.techcore.compat.jei;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.Item.DustItem;
-import com.mightydanp.techcore.materials.Item.GemItem;
-import com.mightydanp.techcore.materials.Item.OreItem;
+import com.mightydanp.techcore.materials.item.DustItem;
+import com.mightydanp.techcore.materials.item.GemItem;
+import com.mightydanp.techcore.materials.item.OreItem;
 import com.mightydanp.techcore.materials.Material;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;

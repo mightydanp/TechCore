@@ -73,7 +73,7 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
         for (int i = 0; i < layerTextures.length; i++) {
             model.texture("layer" + i, layerTextures[i]);
 
-            float offset = i == 0 ? 0.0F : 0.025F * i;
+            float offset = i == 0 ? 0.0F : 0.002F * i;
             addFlatLayer(model, "layer" + i, i, 7.50F, offset);
         }
 
@@ -83,7 +83,7 @@ public class ItemModelContent<A extends ItemModelContent<A>> extends ModelConten
     }
 
     private ItemModelBuilder<A> addFlatLayer(ItemModelBuilder<A> model, String textureKey, int tintIndex, float baseZ, float offset) {
-        float halfThickness = 0.005F;
+        float halfThickness = 0.001F;
 
         addFlatFace(model, Direction.NORTH, "#" + textureKey, tintIndex, baseZ - halfThickness - offset);
         addFlatFace(model, Direction.SOUTH, "#" + textureKey, tintIndex, baseZ + halfThickness + offset);

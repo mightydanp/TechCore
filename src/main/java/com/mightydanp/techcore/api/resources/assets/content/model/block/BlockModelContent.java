@@ -125,19 +125,19 @@ public class BlockModelContent<A extends BlockModelContent<A>> extends ModelCont
     }
 
     public ModelBuilder<BlockModelContent<A>> buttonPressed(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/button_pressed", texture);
+        return singleTexture(BLOCK_FOLDER + "/button_pressed", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> buttonInventory(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/button_inventory", texture);
+        return singleTexture(BLOCK_FOLDER + "/button_inventory", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> pressurePlate(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/pressure_plate_up", texture);
+        return singleTexture(BLOCK_FOLDER + "/pressure_plate_up", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> pressurePlateDown(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/pressure_plate_down", texture);
+        return singleTexture(BLOCK_FOLDER + "/pressure_plate_down", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> sign(String name, ResourceLocation texture) {
@@ -146,31 +146,31 @@ public class BlockModelContent<A extends BlockModelContent<A>> extends ModelCont
     }
 
     public ModelBuilder<BlockModelContent<A>> fencePost(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/fence_post", texture);
+        return singleTexture(BLOCK_FOLDER + "/fence_post", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceSide(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/fence_side", texture);
+        return singleTexture(BLOCK_FOLDER + "/fence_side", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceInventory(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/fence_inventory", texture);
+        return singleTexture(BLOCK_FOLDER + "/fence_inventory", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceGate(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_fence_gate", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_fence_gate", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceGateOpen(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_fence_gate_open", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_fence_gate_open", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceGateWall(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_fence_gate_wall", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_fence_gate_wall", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> fenceGateWallOpen(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_fence_gate_wall_open", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_fence_gate_wall_open", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> wallPost(ResourceLocation wall) {
@@ -228,27 +228,27 @@ public class BlockModelContent<A extends BlockModelContent<A>> extends ModelCont
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorBottom(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_trapdoor_bottom", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_trapdoor_bottom", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorTop(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_trapdoor_top", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_trapdoor_top", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorOpen(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_trapdoor_open", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_trapdoor_open", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorOrientableBottom(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_orientable_trapdoor_bottom", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_orientable_trapdoor_bottom", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorOrientableTop(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_orientable_trapdoor_top", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_orientable_trapdoor_top", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> trapdoorOrientableOpen(String name, ResourceLocation texture) {
-        return singleTexture(name, BLOCK_FOLDER + "/template_orientable_trapdoor_open", texture);
+        return singleTexture(BLOCK_FOLDER + "/template_orientable_trapdoor_open", texture);
     }
 
     public ModelBuilder<BlockModelContent<A>> torch(ResourceLocation torch) {

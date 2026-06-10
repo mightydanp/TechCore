@@ -108,23 +108,29 @@ public class CreativeModeTabRegistry implements BaseRegistries<CreativeModeTabRe
                 Material mat = matObj.get();
 
                 if (mat.rockLayer.isRockLayer) {
+
+                    output.accept(mat.rockLayer.tilesItemBlock.get());
+                    output.accept(mat.rockLayer.smallTilesItemBlock.get());
+                    output.accept(mat.rockLayer.smallBricksItemBlock.get());
+                    output.accept(mat.rockLayer.squareBricksItemBlock.get());
+                    output.accept(mat.rockLayer.crackedBricksItemBlock.get());
+                    output.accept(mat.rockLayer.chiseledBricksItemBlock.get());
+                    output.accept(mat.rockLayer.windmillTilesAItemBlock.get());
+                    output.accept(mat.rockLayer.windmillTilesBItemBlock.get());
+                    output.accept(mat.rockLayer.mossyCobbleItemBlock.get());
+                    output.accept(mat.rockLayer.mossyBricksItemBlock.get());
+                    output.accept(mat.rockLayer.reinforcedBricksItemBlock.get());
+
                     if (!mat.rockLayer.useExistingRockLayerTexture) {
                         output.accept(mat.rockLayer.stoneItemBlock.get());
-                        output.accept(mat.rockLayer.smoothSlabItemBlock.get());
-                        output.accept(mat.rockLayer.tilesItemBlock.get());
+                        output.accept(mat.rockLayer.stoneButtonItemBlock.get());
+                        output.accept(mat.rockLayer.stonePressurePlateItemBlock.get());
+                        output.accept(mat.rockLayer.polishedSlabItemBlock.get());
+                        output.accept(mat.rockLayer.polishedStairsItemBlock.get());
                         output.accept(mat.rockLayer.bricksItemBlock.get());
                         output.accept(mat.rockLayer.cobbleItemBlock.get());
-                        output.accept(mat.rockLayer.smoothItemBlock.get());
-                        output.accept(mat.rockLayer.small_tilesItemBlock.get());
-                        output.accept(mat.rockLayer.small_bricksItemBlock.get());
-                        output.accept(mat.rockLayer.square_bricksItemBlock.get());
-                        output.accept(mat.rockLayer.cracked_bricksItemBlock.get());
-                        output.accept(mat.rockLayer.chiseled_bricksItemBlock.get());
-                        output.accept(mat.rockLayer.windmill_tiles_aItemBlock.get());
-                        output.accept(mat.rockLayer.windmill_tiles_bItemBlock.get());
-                        output.accept(mat.rockLayer.mossyCobbleItemBlock.get());
-                        output.accept(mat.rockLayer.mossyBricksItemBlock.get());
-                        output.accept(mat.rockLayer.reinforcedBricksItemBlock.get());
+                        output.accept(mat.rockLayer.polishedItemBlock.get());
+
                     }
                 }
             }))

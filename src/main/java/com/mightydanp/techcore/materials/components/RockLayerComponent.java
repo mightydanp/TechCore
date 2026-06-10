@@ -18,7 +18,12 @@ import com.mightydanp.techcore.materials.properties.RockTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -38,14 +43,19 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
 
     public Block existingRocklayerBlock;
 
-    public Supplier<Block> stoneBlock, smoothSlabBlock, tilesBlock, bricksBlock, cobbleBlock, smoothBlock,
-            small_tilesBlock, small_bricksBlock, square_bricksBlock, cracked_bricksBlock, chiseled_bricksBlock,
-            windmill_tiles_aBlock, windmill_tiles_bBlock, mossyCobbleBlock, mossyBricksBlock, reinforcedBricksBlock;
+    public Supplier<Block> stoneBlock, tilesBlock, bricksBlock, cobbleBlock, polishedBlock,
+            smallTilesBlock, smallBricksBlock, squareBricksBlock, crackedBricksBlock, chiseledBricksBlock,
+            windmillTilesABlock, windmillTilesBBlock, mossyCobbleBlock, mossyBricksBlock, reinforcedBricksBlock;
+    public Supplier<SlabBlock> polishedSlabBlock;
+    public Supplier<StairBlock> polishedStairsBlock;
+    public Supplier<ButtonBlock> stoneButtonBlock;
+    public Supplier<PressurePlateBlock> stonePressurePlateBlock;
 
-    public Supplier<Item> stoneItemBlock, smoothSlabItemBlock, tilesItemBlock, bricksItemBlock, cobbleItemBlock,
-            smoothItemBlock, small_tilesItemBlock, small_bricksItemBlock, square_bricksItemBlock,
-            cracked_bricksItemBlock, chiseled_bricksItemBlock, windmill_tiles_aItemBlock,
-            windmill_tiles_bItemBlock, mossyCobbleItemBlock, mossyBricksItemBlock, reinforcedBricksItemBlock;
+    public Supplier<Item> stoneItemBlock, polishedSlabItemBlock, tilesItemBlock, bricksItemBlock, cobbleItemBlock,
+            polishedItemBlock, smallTilesItemBlock, smallBricksItemBlock, squareBricksItemBlock,
+            crackedBricksItemBlock, chiseledBricksItemBlock, windmillTilesAItemBlock,
+            windmillTilesBItemBlock, mossyCobbleItemBlock, mossyBricksItemBlock, reinforcedBricksItemBlock,
+            polishedStairsItemBlock, stoneButtonItemBlock, stonePressurePlateItemBlock;
 
     public RockLayerComponent(A material) {
         super("rock_layer", "component", material);
@@ -60,17 +70,13 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
 
     public RockLayerComponent<A> rockLayer(RockTypes.RockType rockType) {
         this.rockType = rockType;
+        this.useExistingRockLayerTexture = false;
         isRockLayer = true;
         return this;
     }
 
-    public RockLayerComponent<A> noOreAllowed(){
+    public RockLayerComponent<A> noOresAllowed(){
         canContainOre = false;
-        return this;
-    }
-
-    public RockLayerComponent<A> useExistingRockLayerTexture() {
-        useExistingRockLayerTexture = true;
         return this;
     }
 
@@ -83,23 +89,45 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
     @Override
     public RockLayerComponent<A> init() {
         if (isRockLayer) {
-            if (!useExistingRockLayerTexture) {
-                registerLayerBlock();
-                registerSmoothSlabBlock();
-                registerTilesBlock();
-                registerBricksBlock();
-                registerCobbleBlock();
-                registerSmoothBlock();
-                registerSmallTilesBlock();
-                registerSmallBricksBlock();
-                registerSquareBricksBlock();
-                registerCrackedBricksBlock();
-                registerChiseledBricksBlock();
-                registerWindmillTilesABlock();
-                registerWindmillTilesBBlock();
-                registerMossyCobbleBlock();
-                registerMossyBricksBlock();
-                registerReinforcedBricksBlock();
+            tilesBlock = registerBlock(variantName("tiles"));
+            tilesItemBlock = registerItemBlock(variantName("tiles"), tilesBlock);
+            bricksBlock = registerBlock(variantName("bricks"));
+            bricksItemBlock = registerItemBlock(variantName("bricks"), bricksBlock);
+            smallTilesBlock = registerBlock(variantName("small_tiles"));
+            smallTilesItemBlock = registerItemBlock(variantName("small_tiles"), smallTilesBlock);
+            smallBricksBlock = registerBlock(variantName("small_bricks"));
+            smallBricksItemBlock = registerItemBlock(variantName("small_bricks"), smallBricksBlock);
+            squareBricksBlock = registerBlock(variantName("square_bricks"));
+            squareBricksItemBlock = registerItemBlock(variantName("square_bricks"), squareBricksBlock);
+            crackedBricksBlock = registerBlock(variantName("cracked_bricks"));
+            crackedBricksItemBlock = registerItemBlock(variantName("cracked_bricks"), crackedBricksBlock);
+            chiseledBricksBlock = registerBlock(variantName("chiseled_bricks"));
+            chiseledBricksItemBlock = registerItemBlock(variantName("chiseled_bricks"), chiseledBricksBlock);
+            windmillTilesABlock = registerBlock(variantName("windmill_tiles_a"));
+            windmillTilesAItemBlock = registerItemBlock(variantName("windmill_tiles_a"), windmillTilesABlock);
+            windmillTilesBBlock = registerBlock(variantName("windmill_tiles_b"));
+            windmillTilesBItemBlock = registerItemBlock(variantName("windmill_tiles_b"), windmillTilesBBlock);
+            mossyCobbleBlock = registerBlock(variantName("mossy_cobble"));
+            mossyCobbleItemBlock = registerItemBlock(variantName("mossy_cobble"), mossyCobbleBlock);
+            mossyBricksBlock = registerBlock(variantName("mossy_bricks"));
+            mossyBricksItemBlock = registerItemBlock(variantName("mossy_bricks"), mossyBricksBlock);
+            registerReinforcedBricksBlock();
+
+            if(!useExistingRockLayerTexture){
+                stoneBlock = registerBlock(material.name);
+                stoneItemBlock = registerItemBlock(material.name, stoneBlock);
+                cobbleBlock = registerBlock(variantName("cobble"));
+                cobbleItemBlock = registerItemBlock(variantName("cobble"), cobbleBlock);
+                polishedBlock = registerBlock(variantName("polished"));
+                polishedItemBlock = registerItemBlock(variantName("polished"), polishedBlock);
+                polishedSlabBlock = registerSlabBlock(variantName("polished_slab"));
+                polishedSlabItemBlock = registerItemBlock(variantName("polished_slab"), polishedSlabBlock);
+                polishedStairsBlock = registerStairsBlock(variantName("polished_stairs"), polishedBlock);
+                polishedStairsItemBlock = registerItemBlock(variantName("polished_stairs"), polishedStairsBlock);
+                stoneButtonBlock = registerButtonBlock(variantName("button"));
+                stoneButtonItemBlock = registerItemBlock(variantName("button"), stoneButtonBlock);
+                stonePressurePlateBlock = registerPressurePlateBlock(variantName("pressure_plate"));
+                stonePressurePlateItemBlock = registerItemBlock(variantName("pressure_plate"), stonePressurePlateBlock);
             }
         }
 
@@ -108,291 +136,8 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
 
     /// Register
 
-    private void registerLayerBlock() {
-        stoneBlock = RegistriesHandler.BLOCKS.register(material.name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        stoneItemBlock = RegistriesHandler.BLOCK_ITEMS.register(material.name, () -> new RockLayerItemBlock(
-                stoneBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerSmoothSlabBlock() {
-        String name = material.name + "_smooth_slab";
-
-        smoothSlabBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        smoothSlabItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                smoothSlabBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerTilesBlock() {
-        String name = material.name + "_tiles";
-
-        tilesBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        tilesItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                tilesBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerBricksBlock() {
-        String name = material.name + "_bricks";
-
-        bricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        bricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                bricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerCobbleBlock() {
-        String name = material.name + "_cobble";
-
-        cobbleBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        cobbleItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                cobbleBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerSmoothBlock() {
-        String name = material.name + "_smooth";
-
-        smoothBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        smoothItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                smoothBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerSmallTilesBlock() {
-        String name = material.name + "_small_tiles";
-
-        small_tilesBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        small_tilesItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                small_tilesBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerSmallBricksBlock() {
-        String name = material.name + "_small_bricks";
-
-        small_bricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        small_bricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                small_bricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerSquareBricksBlock() {
-        String name = material.name + "_square_bricks";
-
-        square_bricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        square_bricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                square_bricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerCrackedBricksBlock() {
-        String name = material.name + "_cracked_bricks";
-
-        cracked_bricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        cracked_bricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                cracked_bricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerChiseledBricksBlock() {
-        String name = material.name + "_chiseled_bricks";
-
-        chiseled_bricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        chiseled_bricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                chiseled_bricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerWindmillTilesABlock() {
-        String name = material.name + "_windmill_tiles_a";
-
-        windmill_tiles_aBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        windmill_tiles_aItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                windmill_tiles_aBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerWindmillTilesBBlock() {
-        String name = material.name + "_windmill_tiles_b";
-
-        windmill_tiles_bBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        windmill_tiles_bItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                windmill_tiles_bBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerMossyCobbleBlock() {
-        String name = material.name + "_mossy_cobble";
-
-        mossyCobbleBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        mossyCobbleItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                mossyCobbleBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
-    private void registerMossyBricksBlock() {
-        String name = material.name + "_mossy_bricks";
-
-        mossyBricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
-                MaterialBlockProperties.of()
-                        .strength(3.0f, 3.0f)
-                        .sound(SoundType.STONE)
-                        .requiresCorrectToolForDrops()
-        ));
-
-        mossyBricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                mossyBricksBlock.get(),
-                new MaterialItemProperties()
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
-    }
-
     private void registerReinforcedBricksBlock() {
-        String name = material.name + "_reinforced_bricks";
+        String name = variantName("reinforced_bricks");
 
         reinforcedBricksBlock = RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(
                 MaterialBlockProperties.of()
@@ -401,42 +146,91 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
                         .requiresCorrectToolForDrops()
         ));
 
-        reinforcedBricksItemBlock = RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(
-                reinforcedBricksBlock.get(),
-                new MaterialItemProperties()
-                        .color(material.physical.getColor())
-                        .symbol(material.chemical.getSymbol())
-                        .boilingPoint(material.thermal.getBoilingPoint())
-                        .meltingPoint(material.thermal.getMeltingPoint())
-        ));
+        reinforcedBricksItemBlock = registerItemBlock(name, reinforcedBricksBlock, true);
+    }
+
+    private Supplier<Block> registerBlock(String name) {
+        return RegistriesHandler.BLOCKS.register(name, () -> new RockLayerBlock(blockProperties()));
+    }
+
+    private Supplier<SlabBlock> registerSlabBlock(String name) {
+        return RegistriesHandler.BLOCKS.register(name, () -> new SlabBlock(blockProperties()));
+    }
+
+    private Supplier<StairBlock> registerStairsBlock(String name, Supplier<? extends Block> baseBlock) {
+        return RegistriesHandler.BLOCKS.register(name, () -> new StairBlock(() -> baseBlock.get().defaultBlockState(), blockProperties()));
+    }
+
+    private Supplier<ButtonBlock> registerButtonBlock(String name) {
+        return RegistriesHandler.BLOCKS.register(name, () -> new ButtonBlock(blockProperties(), BlockSetType.STONE, 20, false));
+    }
+
+    private Supplier<PressurePlateBlock> registerPressurePlateBlock(String name) {
+        return RegistriesHandler.BLOCKS.register(name, () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, blockProperties(), BlockSetType.STONE));
+    }
+
+    private Supplier<Item> registerItemBlock(String name, Supplier<? extends Block> block) {
+        return registerItemBlock(name, block, false);
+    }
+
+    private Supplier<Item> registerItemBlock(String name, Supplier<? extends Block> block, boolean includeColor) {
+        return RegistriesHandler.BLOCK_ITEMS.register(name, () -> new RockLayerItemBlock(block.get(), itemProperties(includeColor)));
+    }
+
+    private MaterialBlockProperties blockProperties() {
+        return MaterialBlockProperties.of()
+                .strength(3.0f, 3.0f)
+                .sound(SoundType.STONE)
+                .requiresCorrectToolForDrops();
+    }
+
+    private MaterialItemProperties itemProperties(boolean includeColor) {
+        MaterialItemProperties properties = new MaterialItemProperties();
+
+        if (includeColor) {
+            properties.color(material.physical.getColor());
+        }
+
+        return properties
+                .symbol(material.chemical.getSymbol())
+                .boilingPoint(material.thermal.getBoilingPoint())
+                .meltingPoint(material.thermal.getMeltingPoint());
+    }
+
+    private String variantName(String variant) {
+        return material.name + "_" + variant;
     }
 
     /// Models
 
     @Override
     public RockLayerComponent<A> initClient() {
-        if (isRockLayer && stoneBlock != null) {
+        if (isRockLayer) {
             String modid = CoreRef.MOD_ID;
             String name = material.name;
 
-            initLayerBlockModel(modid, name);
+            saveVariantBlockAssets(modid, name, "tiles", tilesBlock);
+            saveVariantBlockAssets(modid, name, "bricks", bricksBlock);
+            saveVariantBlockAssets(modid, name, "small_tiles", smallTilesBlock);
+            saveVariantBlockAssets(modid, name, "small_bricks", smallBricksBlock);
+            saveVariantBlockAssets(modid, name, "square_bricks", squareBricksBlock);
+            saveVariantBlockAssets(modid, name, "cracked_bricks", crackedBricksBlock);
+            saveVariantBlockAssets(modid, name, "chiseled_bricks", chiseledBricksBlock);
+            saveVariantBlockAssets(modid, name, "windmill_tiles_a", windmillTilesABlock);
+            saveVariantBlockAssets(modid, name, "windmill_tiles_b", windmillTilesBBlock);
+            saveVariantBlockAssets(modid, name, "mossy_cobble", mossyCobbleBlock, "cobble", "mossy_cobble_overlay");
+            saveVariantBlockAssets(modid, name, "mossy_bricks", mossyBricksBlock, "bricks", "mossy_bricks_overlay");
+            saveVariantBlockAssets(modid, name, "reinforced_bricks", reinforcedBricksBlock, "bricks", "reinforced_bricks_overlay");
+
 
             if (!useExistingRockLayerTexture) {
-                initSmoothSlabBlockModel(modid, name);
-                initTilesBlockModel(modid, name);
-                initBricksBlockModel(modid, name);
-                initCobbleBlockModel(modid, name);
-                initSmoothBlockModel(modid, name);
-                initSmallTilesBlockModel(modid, name);
-                initSmallBricksBlockModel(modid, name);
-                initSquareBricksBlockModel(modid, name);
-                initCrackedBricksBlockModel(modid, name);
-                initChiseledBricksBlockModel(modid, name);
-                initWindmillTilesABlockModel(modid, name);
-                initWindmillTilesBBlockModel(modid, name);
-                initMossyCobbleBlockModel(modid, name);
-                initMossyBricksBlockModel(modid, name);
-                initReinforcedBricksBlockModel(modid, name);
+                initLayerBlockModel(modid, name);
+                saveVariantBlockAssets(modid, name, "cobble", cobbleBlock);
+                saveVariantBlockAssets(modid, name, "polished", polishedBlock);
+                initPolishedSlabBlockModel(modid, name);
+                initPolishedStairsBlockModel(modid, name);
+                initStoneButtonBlockModel(modid, name);
+                initStonePressurePlateBlockModel(modid, name);
             }
         }
 
@@ -448,112 +242,44 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
         saveRockLayerBlockAssets(modid, name, stoneBlock, texture, null);
     }
 
-    private void initSmoothSlabBlockModel(String modid, String name) {
-        String blockName = name + "_smooth_slab";
-        ResourceLocation texture = accessoryTexture(modid, name, "smooth");
+    private void initPolishedSlabBlockModel(String modid, String name) {
+        String blockName = name + "_polished_slab";
+        ResourceLocation texture = accessoryTexture(modid, name, "polished");
+        ResourceLocation doubleSlab = ResourceLocation.fromNamespaceAndPath(modid, BlockModelContent.BLOCK_FOLDER + "/" + name + "_polished");
 
-        saveRockLayerBlockAssets(modid, blockName, smoothSlabBlock, texture, null);
+        new RockLayerModelContent(modid, blockName, null).saveRockLayerSlabBlockModel(polishedSlabBlock.get(), texture, doubleSlab);
     }
 
-    private void initTilesBlockModel(String modid, String name) {
-        String blockName = name + "_tiles";
-        ResourceLocation texture = accessoryTexture(modid, name, "tiles");
+    private void initPolishedStairsBlockModel(String modid, String name) {
+        String blockName = name + "_polished_stairs";
+        ResourceLocation texture = accessoryTexture(modid, name, "polished");
 
-        saveRockLayerBlockAssets(modid, blockName, tilesBlock, texture, null);
+        new RockLayerModelContent(modid, blockName, null).saveRockLayerStairsBlockModel(polishedStairsBlock.get(), texture);
     }
 
-    private void initBricksBlockModel(String modid, String name) {
-        String blockName = name + "_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "bricks");
+    private void initStoneButtonBlockModel(String modid, String name) {
+        String blockName = name + "_button";
+        ResourceLocation texture = accessoryTexture(modid, name, "stone");
 
-        saveRockLayerBlockAssets(modid, blockName, bricksBlock, texture, null);
+        new RockLayerModelContent(modid, blockName, null).saveRockLayerButtonBlockModel(stoneButtonBlock.get(), texture);
     }
 
-    private void initCobbleBlockModel(String modid, String name) {
-        String blockName = name + "_cobble";
-        ResourceLocation texture = accessoryTexture(modid, name, "cobble");
+    private void initStonePressurePlateBlockModel(String modid, String name) {
+        String blockName = name + "_pressure_plate";
+        ResourceLocation texture = accessoryTexture(modid, name, "stone");
 
-        saveRockLayerBlockAssets(modid, blockName, cobbleBlock, texture, null);
+        new RockLayerModelContent(modid, blockName, null).saveRockLayerPressurePlateBlockModel(stonePressurePlateBlock.get(), texture);
     }
 
-    private void initSmoothBlockModel(String modid, String name) {
-        String blockName = name + "_smooth";
-        ResourceLocation texture = accessoryTexture(modid, name, "smooth");
-
-        saveRockLayerBlockAssets(modid, blockName, smoothBlock, texture, null);
+    private void saveVariantBlockAssets(String modid, String rockName, String variant, Supplier<Block> block) {
+        saveVariantBlockAssets(modid, rockName, variant, block, variant, null);
     }
 
-    private void initSmallTilesBlockModel(String modid, String name) {
-        String blockName = name + "_small_tiles";
-        ResourceLocation texture = accessoryTexture(modid, name, "small_tiles");
+    private void saveVariantBlockAssets(String modid, String rockName, String blockVariant, Supplier<Block> block, String textureVariant, String overlayVariant) {
+        ResourceLocation texture = accessoryTexture(modid, rockName, textureVariant);
+        ResourceLocation overlayTexture = overlayVariant == null ? null : accessoryTexture(modid, rockName, overlayVariant);
 
-        saveRockLayerBlockAssets(modid, blockName, small_tilesBlock, texture, null);
-    }
-
-    private void initSmallBricksBlockModel(String modid, String name) {
-        String blockName = name + "_small_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "small_bricks");
-
-        saveRockLayerBlockAssets(modid, blockName, small_bricksBlock, texture, null);
-    }
-
-    private void initSquareBricksBlockModel(String modid, String name) {
-        String blockName = name + "_square_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "square_bricks");
-
-        saveRockLayerBlockAssets(modid, blockName, square_bricksBlock, texture, null);
-    }
-
-    private void initCrackedBricksBlockModel(String modid, String name) {
-        String blockName = name + "_cracked_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "cracked_bricks");
-
-        saveRockLayerBlockAssets(modid, blockName, cracked_bricksBlock, texture, null);
-    }
-
-    private void initChiseledBricksBlockModel(String modid, String name) {
-        String blockName = name + "_chiseled_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "chiseled_bricks");
-
-        saveRockLayerBlockAssets(modid, blockName, chiseled_bricksBlock, texture, null);
-    }
-
-    private void initWindmillTilesABlockModel(String modid, String name) {
-        String blockName = name + "_windmill_tiles_a";
-        ResourceLocation texture = accessoryTexture(modid, name, "windmill_tiles_a");
-
-        saveRockLayerBlockAssets(modid, blockName, windmill_tiles_aBlock, texture, null);
-    }
-
-    private void initWindmillTilesBBlockModel(String modid, String name) {
-        String blockName = name + "_windmill_tiles_b";
-        ResourceLocation texture = accessoryTexture(modid, name, "windmill_tiles_b");
-
-        saveRockLayerBlockAssets(modid, blockName, windmill_tiles_bBlock, texture, null);
-    }
-
-    private void initMossyCobbleBlockModel(String modid, String name) {
-        String blockName = name + "_mossy_cobble";
-        ResourceLocation texture = accessoryTexture(modid, name, "cobble");
-        ResourceLocation overlayTexture = accessoryTexture(modid, name, "mossy_cobble_overlay");
-
-        saveRockLayerBlockAssets(modid, blockName, mossyCobbleBlock, texture, overlayTexture);
-    }
-
-    private void initMossyBricksBlockModel(String modid, String name) {
-        String blockName = name + "_mossy_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "bricks");
-        ResourceLocation overlayTexture = accessoryTexture(modid, name, "mossy_bricks_overlay");
-
-        saveRockLayerBlockAssets(modid, blockName, mossyBricksBlock, texture, overlayTexture);
-    }
-
-    private void initReinforcedBricksBlockModel(String modid, String name) {
-        String blockName = name + "_reinforced_bricks";
-        ResourceLocation texture = accessoryTexture(modid, name, "bricks");
-        ResourceLocation overlayTexture = accessoryTexture(modid, name, "reinforced_bricks_overlay");
-
-        saveRockLayerBlockAssets(modid, blockName, reinforcedBricksBlock, texture, overlayTexture);
+        saveRockLayerBlockAssets(modid, rockName + "_" + blockVariant, block, texture, overlayTexture);
     }
 
     private ResourceLocation accessoryTexture(String modid, String rockName, String variant) {
@@ -567,12 +293,7 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
                 ? new RockLayerModelContent(modid, blockName, null).saveRockLayerBlockModel(texture)
                 : new RockLayerModelContent(modid, blockName, null).saveRockLayerBlockModel(texture, overlayTexture);
 
-        try {
-            new BlockStateContent<>(modid, blockName).simpleBlock(block.get(), model.model());
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to generate rock layer blockstate for " + blockName, e);
-        }
-
+        new BlockStateContent<>(modid, blockName).simpleBlock(block.get(), model.model());
         new MCItemModelContent(modid, blockName, null).saveBlockItem(model);
     }
 
@@ -584,123 +305,41 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
             String modid = CoreRef.MOD_ID;
             String name = material.name;
 
-            registerLayerLanguage(modid, name);
+
+            registerVariantLanguage(modid, name, "tiles", tilesItemBlock);
+            registerVariantLanguage(modid, name, "bricks", bricksItemBlock);
+            registerVariantLanguage(modid, name, "small_tiles", smallTilesItemBlock);
+            registerVariantLanguage(modid, name, "small_bricks", smallBricksItemBlock);
+            registerVariantLanguage(modid, name, "square_bricks", squareBricksItemBlock);
+            registerVariantLanguage(modid, name, "cracked_bricks", crackedBricksItemBlock);
+            registerVariantLanguage(modid, name, "chiseled_bricks", chiseledBricksItemBlock);
+            registerVariantLanguage(modid, name, "windmill_tiles_a", windmillTilesAItemBlock);
+            registerVariantLanguage(modid, name, "windmill_tiles_b", windmillTilesBItemBlock);
+            registerVariantLanguage(modid, name, "mossy_cobble", mossyCobbleItemBlock);
+            registerVariantLanguage(modid, name, "mossy_bricks", mossyBricksItemBlock);
+            registerVariantLanguage(modid, name, "reinforced_bricks", reinforcedBricksItemBlock);
 
             if (!useExistingRockLayerTexture) {
-                registerSmoothSlabLanguage(modid, name);
-                registerTilesLanguage(modid, name);
-                registerBricksLanguage(modid, name);
-                registerCobbleLanguage(modid, name);
-                registerSmoothLanguage(modid, name);
-                registerSmallTilesLanguage(modid, name);
-                registerSmallBricksLanguage(modid, name);
-                registerSquareBricksLanguage(modid, name);
-                registerCrackedBricksLanguage(modid, name);
-                registerChiseledBricksLanguage(modid, name);
-                registerWindmillTilesALanguage(modid, name);
-                registerWindmillTilesBLanguage(modid, name);
-                registerMossyCobbleLanguage(modid, name);
-                registerMossyBricksLanguage(modid, name);
-                registerReinforcedBricksLanguage(modid, name);
+                registerLanguage(modid, name, stoneItemBlock);
+                registerVariantLanguage(modid, name, "cobble", cobbleItemBlock);
+                registerVariantLanguage(modid, name, "polished", polishedItemBlock);
+                registerVariantLanguage(modid, name, "polished_slab", polishedSlabItemBlock);
+                registerVariantLanguage(modid, name, "polished_stairs", polishedStairsItemBlock);
+                registerVariantLanguage(modid, name, "button", stoneButtonItemBlock);
+                registerVariantLanguage(modid, name, "pressure_plate", stonePressurePlateItemBlock);
             }
         }
 
         return this;
     }
 
-    private void registerLayerLanguage(String modid, String name) {
-        AssetPackRegistries.registerSafetyLanguage(stoneItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
-                name, LanguageContent.toDisplayName(name));
+    private void registerVariantLanguage(String modid, String name, String variant, Supplier<Item> item) {
+        registerLanguage(modid, name + "_" + variant, item);
     }
 
-    private void registerSmoothSlabLanguage(String modid, String name) {
-        String blockName = name + "_smooth_slab";
-
-        AssetPackRegistries.registerSafetyLanguage(smoothSlabItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerTilesLanguage(String modid, String name) {
-        String blockName = name + "_tiles";
-
-        AssetPackRegistries.registerSafetyLanguage(tilesItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerBricksLanguage(String modid, String name) {
-        String blockName = name + "_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(bricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerCobbleLanguage(String modid, String name) {
-        String blockName = name + "_cobble";
-
-        AssetPackRegistries.registerSafetyLanguage(cobbleItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerSmoothLanguage(String modid, String name) {
-        String blockName = name + "_smooth";
-
-        AssetPackRegistries.registerSafetyLanguage(smoothItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerSmallTilesLanguage(String modid, String name) {
-        String blockName = name + "_small_tiles";
-
-        AssetPackRegistries.registerSafetyLanguage(small_tilesItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerSmallBricksLanguage(String modid, String name) {
-        String blockName = name + "_small_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(small_bricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerSquareBricksLanguage(String modid, String name) {
-        String blockName = name + "_square_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(square_bricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerCrackedBricksLanguage(String modid, String name) {
-        String blockName = name + "_cracked_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(cracked_bricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerChiseledBricksLanguage(String modid, String name) {
-        String blockName = name + "_chiseled_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(chiseled_bricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerWindmillTilesALanguage(String modid, String name) {
-        String blockName = name + "_windmill_tiles_a";
-
-        AssetPackRegistries.registerSafetyLanguage(windmill_tiles_aItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerWindmillTilesBLanguage(String modid, String name) {
-        String blockName = name + "_windmill_tiles_b";
-
-        AssetPackRegistries.registerSafetyLanguage(windmill_tiles_bItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerMossyCobbleLanguage(String modid, String name) {
-        String blockName = name + "_mossy_cobble";
-
-        AssetPackRegistries.registerSafetyLanguage(mossyCobbleItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerMossyBricksLanguage(String modid, String name) {
-        String blockName = name + "_mossy_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(mossyBricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
-    }
-
-    private void registerReinforcedBricksLanguage(String modid, String name) {
-        String blockName = name + "_reinforced_bricks";
-
-        AssetPackRegistries.registerSafetyLanguage(reinforcedBricksItemBlock, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER, blockName, LanguageContent.toDisplayName(blockName));
+    private void registerLanguage(String modid, String blockName, Supplier<Item> item) {
+        AssetPackRegistries.registerSafetyLanguage(item, modid, LanguageCodes.english, BlockModelContent.BLOCK_FOLDER,
+                blockName, LanguageContent.toDisplayName(blockName));
     }
 
     /// Item Properties

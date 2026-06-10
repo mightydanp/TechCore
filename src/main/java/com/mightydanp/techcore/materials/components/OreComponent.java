@@ -289,7 +289,7 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
     }
 
     private void saveOreBlockAssets(String modid, String blockName, @NotNull String textureVariant, Material stoneLayer, @NotNull Supplier<Block> oreBlock) {
-        ResourceLocation baseTexture = oreBaseTexture(modid, stoneLayer);
+        ResourceLocation baseTexture = baseTexture(modid, stoneLayer, "stone");
 
         saveOreBlockAssets(modid, blockName, textureVariant, baseTexture, oreBlock);
     }
@@ -311,12 +311,12 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
                 .saveOreBlockItemModel("ore/" + blockName);
     }
 
-    private ResourceLocation oreBaseTexture(String modid, Material stoneLayer) {
+    private ResourceLocation baseTexture(String modid, Material stoneLayer, @NotNull String textureVariant) {
         if (stoneLayer.rockLayer.useExistingRockLayerTexture && stoneLayer.rockLayer.existingRocklayerBlock != null) {
             return new OreBlockStateComponent(modid, stoneLayer.name).blockTexture(stoneLayer.rockLayer.existingRocklayerBlock);
         }
 
-        return ResourceLocation.fromNamespaceAndPath(modid,  BlockModelContent.BLOCK_FOLDER + "/stones/" + stoneLayer.name + "/stone");
+        return ResourceLocation.fromNamespaceAndPath(modid,  BlockModelContent.BLOCK_FOLDER + "/stones/" + stoneLayer.name + "/" + textureVariant);
     }
 
     ///

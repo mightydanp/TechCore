@@ -43,22 +43,22 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         return (A) this;
     }
 
-    public VariantBlockStateBuilder getVariantBuilder(Block b) throws Exception {
+    public VariantBlockStateBuilder getVariantBuilder(Block b) {
         try {
             Constructor<VariantBlockStateBuilder> constructor = VariantBlockStateBuilder.class.getDeclaredConstructor(Block.class);
             constructor.setAccessible(true);
             return constructor.newInstance(b);
-        } catch (NoSuchMethodException e) {
+        } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("VariantBlockStateBuilder constructor signature has changed in this version of Forge — BlockStateContent needs to be updated.", e);
         }
     }
 
-    public MultiPartBlockStateBuilder getMultipartBuilder(Block b) throws Exception {
+    public MultiPartBlockStateBuilder getMultipartBuilder(Block b) {
         try {
             Constructor<MultiPartBlockStateBuilder> constructor = MultiPartBlockStateBuilder.class.getDeclaredConstructor(Block.class);
             constructor.setAccessible(true);
             return constructor.newInstance(b);
-        } catch (NoSuchMethodException e) {
+        } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("MultiPartBlockStateBuilder constructor signature has changed in this version of Forge — BlockStateContent needs to be updated.", e);
         }
     }
@@ -122,19 +122,19 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         return modelContent.model();
     }
 
-    public void simpleBlock(Block block) throws Exception {
+    public void simpleBlock(Block block) {
         simpleBlock(block, cubeAll(block));
     }
 
-    public void simpleBlock(Block block, @NotNull Function<ModelBuilder<?>, ConfiguredModel[]> expander) throws Exception {
+    public void simpleBlock(Block block, @NotNull Function<ModelBuilder<?>, ConfiguredModel[]> expander) {
         simpleBlock(block, expander.apply(cubeAll(block)));
     }
 
-    public void simpleBlock(Block block, ModelBuilder<?> model) throws Exception {
+    public void simpleBlock(Block block, ModelBuilder<?> model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
-    public void simpleBlock(Block block, ModelFile model) throws Exception {
+    public void simpleBlock(Block block, ModelFile model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
@@ -143,12 +143,12 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         itemModel.model().parent(model);
     }
 
-    public void simpleBlockWithItem(Block block, ModelBuilder<?> model) throws Exception {
+    public void simpleBlockWithItem(Block block, ModelBuilder<?> model) {
         simpleBlock(block, model);
         simpleBlockItem(block, model);
     }
 
-    public void simpleBlock(Block block, ConfiguredModel... models) throws Exception {
+    public void simpleBlock(Block block, ConfiguredModel... models) {
         VariantBlockStateBuilder builder = getVariantBuilder(block).partialState().setModels(models);
 
         getVariantBuilder(block)

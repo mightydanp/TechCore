@@ -56,6 +56,12 @@ public class Material implements BaseRegistries<Material> {
     }
 
     @Override
+    public Material initTags() {
+        components.forEach(AbstractComponent::initTags);
+        return this;
+    }
+
+    @Override
     public Material initItemProperties() {
         components.forEach(AbstractComponent::initItemProperties);
         return this;

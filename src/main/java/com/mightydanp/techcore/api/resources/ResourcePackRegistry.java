@@ -2,6 +2,7 @@ package com.mightydanp.techcore.api.resources;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.api.resources.assets.AssetPackRegistries;
+import com.mightydanp.techcore.api.resources.data.DataPackRegistries;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import net.minecraft.server.packs.PackType;
@@ -30,10 +31,12 @@ public class ResourcePackRegistry {
 
             init.forEach(BaseRegistries::initClient);
             init.forEach(BaseRegistries::initLanguages);
+            init.forEach(BaseRegistries::initTags);
             clientInitialized = true;
         }
 
         AssetPackRegistries.init();
+        DataPackRegistries.init();
 
         if (event.getPackType() == PackType.CLIENT_RESOURCES) {
             event.addRepositorySource(consumer -> consumer.accept(PACK.createAssetPack()));

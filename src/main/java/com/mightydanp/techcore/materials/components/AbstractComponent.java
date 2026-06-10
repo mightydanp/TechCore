@@ -39,6 +39,11 @@ public abstract class AbstractComponent<A extends AbstractComponent<A>> {
     }
 
     @SuppressWarnings("unchecked")
+    public A initTags() {
+        return (A)this;
+    }
+
+    @SuppressWarnings("unchecked")
     public A initItemProperties() {
         return (A)this;
     }

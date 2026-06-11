@@ -6,11 +6,13 @@ import com.mightydanp.techcore.guitab.registries.ScreenTabRegistries;
 public class Registries {
     public static ScreenRegistries screenRegistries = new ScreenRegistries().init();
     public static ScreenTabRegistries screenTabRegistries = new ScreenTabRegistries().init();
-    public static CreativeModeTabRegistry creativeModeTabRegistry = new CreativeModeTabRegistry().init();
+    public static CreativeModeTabRegistries creativeModeTabRegistries = new CreativeModeTabRegistries().init();
+    public static RockLayerWorldGenRegistries rockLayerWorldGenRegistries = new RockLayerWorldGenRegistries().init();
 
     public static void init(){
         ResourcePackRegistry.addInit(screenRegistries);
         ResourcePackRegistry.addInit(screenTabRegistries);
-        ResourcePackRegistry.addInit(creativeModeTabRegistry);
+        ResourcePackRegistry.addInit(creativeModeTabRegistries);
+        ResourcePackRegistry.addInit(rockLayerWorldGenRegistries);
     }
 }

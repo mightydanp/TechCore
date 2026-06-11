@@ -24,8 +24,6 @@ public class ResourcePackRegistry {
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event) {
         if (!clientInitialized) {
-            //MaterialResources.init();
-
             RegistriesHandler.getMaterialObjects().forEach(material -> ResourcePackRegistry.init.add(material.get()));
             MaterialRef.initLanguages();
 

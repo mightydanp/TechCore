@@ -2,6 +2,7 @@ package com.mightydanp.techcore.api.registries;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
+import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -60,6 +62,8 @@ public class RegistriesHandler {
 
     public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
     public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
+
+    public static final RegistryObject<RockLayerFeature> ROCK_LAYER_FEATURE = FEATURES.register("rock_layer", () -> new RockLayerFeature(NoneFeatureConfiguration.CODEC));
 
 
     public static void init(IEventBus bus) {
@@ -124,6 +128,7 @@ public class RegistriesHandler {
     public static Collection<RegistryObject<Material>> getMaterialObjects() {
         return MATERIALS.getEntries();
     }
+
 
     @SubscribeEvent
     public static void bootstrapMaterials(NewRegistryEvent event) {

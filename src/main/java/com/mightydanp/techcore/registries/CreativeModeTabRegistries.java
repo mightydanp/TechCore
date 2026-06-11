@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public class CreativeModeTabRegistry implements BaseRegistries<CreativeModeTabRegistry> {
+public class CreativeModeTabRegistries implements BaseRegistries<CreativeModeTabRegistries> {
     public static final Supplier<CreativeModeTab> BLOCK_TAB = RegistriesHandler.CREATIVE_MODE_TABS.register(CreativeTabsRef.block_tab, () -> CreativeModeTab.builder()
             .title(Component.translatable(CreativeTabsRef.block_tab_translatable))
             .icon(() -> new ItemStack(Blocks.STONE))
@@ -249,17 +249,17 @@ public class CreativeModeTabRegistry implements BaseRegistries<CreativeModeTabRe
     }
 
     @Override
-    public CreativeModeTabRegistry init() {
+    public CreativeModeTabRegistries init() {
         return this;
     }
 
     @Override
-    public CreativeModeTabRegistry initClient() {
+    public CreativeModeTabRegistries initClient() {
         return this;
     }
 
     @Override
-    public CreativeModeTabRegistry initLanguages() {
+    public CreativeModeTabRegistries initLanguages() {
         CreativeTabsRef.initLanguages();
         return this;
     }

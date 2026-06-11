@@ -14,11 +14,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
@@ -26,7 +22,7 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     private static final double FREQUENCY_Y = 0.075D;
     private static final double FREQUENCY_Z = 0.009D;
 
-    private static final Map<ResourceKey<Level>, List<Material>> ALLOWED_MATERIALS_BY_DIMENSION = new LinkedHashMap<>();
+    private static final Map<ResourceKey<Level>, List<Supplier<Material>>> ALLOWED_MATERIALS_BY_DIMENSION = new LinkedHashMap<>();
 
     public RockLayerFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -90,38 +86,55 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static List<Material> getAllowedMaterials(ResourceKey<Level> dimension) {
-        // Return a read-only view of the material list for this dimension.
-        return Collections.unmodifiableList(ALLOWED_MATERIALS_BY_DIMENSION.getOrDefault(dimension, List.of()));
+        List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
+
+        if (materialSuppliers == null || materialSuppliers.isEmpty()) {
+            return List.of();
+        }
+
+        List<Material> materials = new ArrayList<>();
+
+        for (Supplier<Material> materialSupplier : materialSuppliers) {
+            materials.add(materialSupplier.get());
+        }
+
+        return Collections.unmodifiableList(materials);
     }
 
     public static void setAllowedMaterials(ResourceKey<Level> dimension, List<Material> materials) {
-        // Replace the whole material list for this dimension.
+        List<Supplier<Material>> materialSuppliers = new ArrayList<>();
+
+        for (Material material : materials) {
+            materialSuppliers.add(() -> material);
+        }
+
+        ALLOWED_MATERIALS_BY_DIMENSION.put(dimension, materialSuppliers);
+    }
+
+    public static void setAllowedMaterialSuppliers(ResourceKey<Level> dimension, List<Supplier<Material>> materials) {
         ALLOWED_MATERIALS_BY_DIMENSION.put(dimension, new ArrayList<>(materials));
     }
 
     public static void addAllowedMaterial(ResourceKey<Level> dimension, Material material) {
-        // Add one material to the allowed list for this dimension.
+        addAllowedMaterial(dimension, () -> material);
+    }
+
+    public static void addAllowedMaterial(ResourceKey<Level> dimension, Supplier<Material> material) {
         ALLOWED_MATERIALS_BY_DIMENSION.computeIfAbsent(dimension, key -> new ArrayList<>()).add(material);
     }
 
-    public static boolean removeAllowedMaterial(ResourceKey<Level> dimension, Material material) {
-        // Get the material list for this dimension.
-        List<Material> materials = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
+    public static void removeAllowedMaterial(ResourceKey<Level> dimension, Material material) {
+        List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
-        // If there is no material list, nothing can be removed.
-        if (materials == null) {
-            return false;
+        if (materialSuppliers == null) {
+            return;
         }
 
-        // Remove the material from the dimension list.
-        boolean removed = materials.remove(material);
+        materialSuppliers.removeIf(materialSupplier -> Objects.equals(materialSupplier.get(), material));
 
-        // If the dimension list is empty, remove it from the map.
-        if (materials.isEmpty()) {
+        if (materialSuppliers.isEmpty()) {
             ALLOWED_MATERIALS_BY_DIMENSION.remove(dimension);
         }
-
-        return removed;
     }
 
     private static int layerIndex(long seed, int x, int y, int z, int size) {
@@ -223,30 +236,13 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         }
 
         private static boolean isReplaceableStone(BlockState state) {
-            // Match GT6 behavior by allowing vanilla stone and vanilla ore blocks to be replaced.
             return state.is(Blocks.STONE)
                     || state.is(Blocks.DEEPSLATE)
                     || state.is(Blocks.GRANITE)
                     || state.is(Blocks.DIORITE)
                     || state.is(Blocks.ANDESITE)
                     || state.is(Blocks.TUFF)
-                    || state.is(Blocks.CALCITE)
-                    || state.is(Blocks.COAL_ORE)
-                    || state.is(Blocks.DEEPSLATE_COAL_ORE)
-                    || state.is(Blocks.IRON_ORE)
-                    || state.is(Blocks.DEEPSLATE_IRON_ORE)
-                    || state.is(Blocks.COPPER_ORE)
-                    || state.is(Blocks.DEEPSLATE_COPPER_ORE)
-                    || state.is(Blocks.GOLD_ORE)
-                    || state.is(Blocks.DEEPSLATE_GOLD_ORE)
-                    || state.is(Blocks.REDSTONE_ORE)
-                    || state.is(Blocks.DEEPSLATE_REDSTONE_ORE)
-                    || state.is(Blocks.EMERALD_ORE)
-                    || state.is(Blocks.DEEPSLATE_EMERALD_ORE)
-                    || state.is(Blocks.LAPIS_ORE)
-                    || state.is(Blocks.DEEPSLATE_LAPIS_ORE)
-                    || state.is(Blocks.DIAMOND_ORE)
-                    || state.is(Blocks.DEEPSLATE_DIAMOND_ORE);
+                    || state.is(Blocks.CALCITE);
         }
     }
 

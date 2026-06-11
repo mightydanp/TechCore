@@ -60,11 +60,11 @@ public class RegistriesHandler {
         add(material -> material.rockLayer.isRockLayer);
     }};
 
-    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
+    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(
+            ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
     public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
 
     public static final RegistryObject<RockLayerFeature> ROCK_LAYER_FEATURE = FEATURES.register("rock_layer", () -> new RockLayerFeature(NoneFeatureConfiguration.CODEC));
-
 
     public static void init(IEventBus bus) {
         if (initialized) return;

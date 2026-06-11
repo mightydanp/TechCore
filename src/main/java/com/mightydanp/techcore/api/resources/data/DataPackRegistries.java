@@ -1,41 +1,55 @@
 package com.mightydanp.techcore.api.resources.data;
 
+import com.google.gson.JsonObject;
 import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
+import com.mightydanp.techcore.api.resources.data.biomemodifier.BiomeModifierContent;
 import com.mightydanp.techcore.api.resources.data.loottable.LootTableContent;
+import com.mightydanp.techcore.api.resources.data.worldgen.ConfiguredFeatureContent;
+import com.mightydanp.techcore.api.resources.data.worldgen.PlacedFeatureContent;
 import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
 import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DataPackRegistries {
-    //private static final Map<ResourceLocation, TagContent<BannerPattern>> bannerPatternTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<BannerPattern>> bannerPatternTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Block>> blockTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Block>> blockMineableTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<CatVariant>> catVariantTag = new ConcurrentHashMap<>();
-
-    //private static final Map<ResourceLocation, TagContent<DamageType>> damageTypeTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<DamageType>> damageTypeTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<EntityType<?>>> entityTypeTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Fluid>> fluidTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<GameEvent>> gameEventTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Item>> itemTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Instrument>> instrumentTag = new ConcurrentHashMap<>();
-
-    //private static final Map<ResourceLocation, TagContent<PaintingVariant>> paintingVariantTag = new ConcurrentHashMap<>();
-    //private static final Map<ResourceLocation, TagContent<Biome>> biomeTag = new ConcurrentHashMap<>();
-    //private static final Map<ResourceLocation, TagContent<ConfiguredFeature<?, ?>>> configuredFeatureTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<PaintingVariant>> paintingVariantTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<Biome>> biomeTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, TagContent<ConfiguredFeature<?, ?>>> configuredFeatureTag = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, ConfiguredFeatureContent> configuredFeature = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, PlacedFeatureContent> placedFeature = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, BiomeModifierContent> biomeModifier = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> blockLootTable = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> chestLootTable = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> entityLootTable = new ConcurrentHashMap<>();
@@ -43,395 +57,359 @@ public class DataPackRegistries {
     public static final Map<ResourceLocation, RecipeContent> recipe = new ConcurrentHashMap<>();
 
     public static void init() {
-        //bannerPatternTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/banner_pattern/" + s.getPath() + ".json"), b.json()));
-        blockTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/" + s.getPath() + ".json"), b.json()));
-        blockMineableTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/blocks/mineable/" + s.getPath() + ".json"), b.json()));
-        catVariantTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/cat_variant/" + s.getPath() + ".json"), b.json()));
-        //damageTypeTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/damage_type/" +  s.getPath() + ".json"), b.json()));
-        entityTypeTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/entity_type/" + s.getPath() + ".json"), b.json()));
-        fluidTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/fluids/" + s.getPath() + ".json"), b.json()));
-        gameEventTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/game_events/" + s.getPath() + ".json"), b.json()));
-        itemTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/items/" + s.getPath() + ".json"), b.json()));
-        instrumentTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/instrument/" + s.getPath() + ".json"), b.json()));
-        //paintingVariantTag.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/painting_variant/" + s.getPath() + ".json"), b.json()));
-        //biomeTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/worldgen/biome/" +  s.getPath() + ".json"), b.json()));
-        //configuredFeatureTag.forEach((s, b) -> DataPackRegistry.dataHolder.addToResources(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "tags/worldgen/configured_structure_feature/" +  s.getPath() + ".json"), b.json()));
-
-        blockLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/blocks/" + s.getPath() + ".json"), b.json()));
-        chestLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/chests/" + s.getPath() + ".json"), b.json()));
-        entityLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/entities/" + s.getPath() + ".json"), b.json()));
-        gameplayLootTable.forEach((s, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(s.getNamespace(), "loot_tables/gameplay/" + s.getPath() + ".json"), b.json()));
-
-        recipe.forEach((r, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "recipes/" + r.getPath() + ".json"), b.recipeJson()));
-        recipe.forEach((r, b) -> ResourcePackRegistry.PACK.addData(ResourceLocation.fromNamespaceAndPath(r.getNamespace(), "advancements/" + r.getPath() + ".json"), b.advancementJson()));
+        addData(bannerPatternTag, "tags/banner_pattern", TagContent::json);
+        addData(blockTag, "tags/blocks", TagContent::json);
+        addData(blockMineableTag, "tags/blocks/mineable", TagContent::json);
+        addData(catVariantTag, "tags/cat_variant", TagContent::json);
+        addData(damageTypeTag, "tags/damage_type", TagContent::json);
+        addData(entityTypeTag, "tags/entity_type", TagContent::json);
+        addData(fluidTag, "tags/fluids", TagContent::json);
+        addData(gameEventTag, "tags/game_events", TagContent::json);
+        addData(itemTag, "tags/items", TagContent::json);
+        addData(instrumentTag, "tags/instrument", TagContent::json);
+        addData(paintingVariantTag, "tags/painting_variant", TagContent::json);
+        addData(biomeTag, "tags/worldgen/biome", TagContent::json);
+        addData(configuredFeatureTag, "tags/worldgen/configured_feature", TagContent::json);
+        addData(configuredFeature, "worldgen/configured_feature", ConfiguredFeatureContent::json);
+        addData(placedFeature, "worldgen/placed_feature", PlacedFeatureContent::json);
+        addData(biomeModifier, "forge/biome_modifier", BiomeModifierContent::json);
+        addData(blockLootTable, "loot_tables/blocks", LootTableContent::json);
+        addData(chestLootTable, "loot_tables/chests", LootTableContent::json);
+        addData(entityLootTable, "loot_tables/entities", LootTableContent::json);
+        addData(gameplayLootTable, "loot_tables/gameplay", LootTableContent::json);
+        addData(recipe, "recipes", RecipeContent::recipeJson);
+        addData(recipe, "advancements", RecipeContent::advancementJson);
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-/*
-    public static boolean saveBannerPatternTag(TagContent<BannerPattern> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
+    private static <T> void addData(Map<ResourceLocation, T> map, String folder, Function<T, JsonObject> jsonGetter) {
+        map.forEach((location, content) -> ResourcePackRegistry.PACK.addData(
+                ResourceLocation.fromNamespaceAndPath(
+                        location.getNamespace(),
+                        folder + "/" + location.getPath() + ".json"
+                ),
 
-        if (!override && DataPackRegistries.bannerPatternTag.containsKey(resourceLocation)) {
-            return false;
-        }
+                jsonGetter.apply(content)
+        ));
+    }
 
-        DataPackRegistries.bannerPatternTag.put(resourceLocation, content);
-        return true;
+    ///
+    public static boolean saveBannerPatternTag(@NotNull TagContent<BannerPattern> content, boolean override) {
+        return save(bannerPatternTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<BannerPattern> getBannerPatternTag(ResourceLocation name) {
-        return bannerPatternTag.getOrDefault(name, new TagContent<>(name, Registries.BANNER_PATTERN, BuiltInRegistries.BANNER_PATTERN));
+        return get(bannerPatternTag, name, () -> new TagContent<>(name, Registries.BANNER_PATTERN, BuiltInRegistries.BANNER_PATTERN));
     }
 
     public static TagContent<BannerPattern> getBannerPatternTag(String modid, String name) {
-        return bannerPatternTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BANNER_PATTERN, BuiltInRegistries.BANNER_PATTERN));
+        return getBannerPatternTag(location(modid, name));
     }
-*/
-    //------------------------------------------------------------------------------------------------------------------
+
+    ///
     public static boolean saveBlockTag(@NotNull TagContent<Block> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.blockTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.blockTag.put(resourceLocation, content);
-        return true;
+        return save(blockTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<Block> getBlockTag(ResourceLocation name) {
-        return blockTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS));
+        return get(blockTag, name, () -> new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS)
+        );
     }
 
     public static TagContent<Block> getBlockTag(String modid, String name) {
-        return blockTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, ForgeRegistries.BLOCKS));
+        return getBlockTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveBlockMineableTag(@NotNull TagContent<Block> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.blockMineableTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.blockMineableTag.put(resourceLocation, content);
-        return true;
+        return save(blockMineableTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<Block> getBlockMineableTag(ResourceLocation name) {
-        return blockMineableTag.getOrDefault(name, new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS));
+        return get(blockMineableTag, name, () -> new TagContent<>(name, Registries.BLOCK, ForgeRegistries.BLOCKS));
     }
 
     public static TagContent<Block> getBlockMineableTag(String modid, String name) {
-        return blockMineableTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BLOCK, ForgeRegistries.BLOCKS));
+        return getBlockMineableTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveCatVariantTag(@NotNull TagContent<CatVariant> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.catVariantTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.catVariantTag.put(resourceLocation, content);
-        return true;
+        return save(catVariantTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<CatVariant> getCatVariantTag(ResourceLocation name) {
-        return catVariantTag.getOrDefault(name, new TagContent<>(name, Registries.CAT_VARIANT, BuiltInRegistries.CAT_VARIANT));
+        return get(catVariantTag, name, () -> new TagContent<>(name, Registries.CAT_VARIANT, BuiltInRegistries.CAT_VARIANT));
     }
 
     public static TagContent<CatVariant> getCatVariantTag(String modid, String name) {
-        return catVariantTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.CAT_VARIANT, BuiltInRegistries.CAT_VARIANT));
+        return getCatVariantTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-/*
-    public static boolean saveDamageTypeTag(TagContent<DamageType> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if(!override && DataPackRegistries.damageTypeTag.containsKey(resourceLocation)){
-            return false;
-        }
-
-        DataPackRegistries.damageTypeTag.put(resourceLocation, content);
-        return true;
+    ///
+    public static boolean saveDamageTypeTag(@NotNull TagContent<DamageType> content, boolean override) {
+        return save(damageTypeTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<DamageType> getDamageTypeTag(ResourceLocation name) {
-        return damageTypeTag.getOrDefault(name, new TagContent<>(name, Registries.DAMAGE_TYPE, BuiltInRegistries.));
+        return get(damageTypeTag, name, () -> new TagContent<>(name, Registries.DAMAGE_TYPE)
+        );
     }
 
     public static TagContent<DamageType> getDamageTypeTag(String modid, String name) {
-        return damageTypeTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.DAMAGE_TYPE, BuiltInRegistries.));
+        return getDamageTypeTag(location(modid, name));
     }
-*/
-    //----------------------------------------------------------------------------------------------------------------------
+
+    ///
     public static boolean saveEntityTypeTag(@NotNull TagContent<EntityType<?>> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.entityTypeTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.entityTypeTag.put(resourceLocation, content);
-        return true;
+        return save(entityTypeTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<EntityType<?>> getEntityTypeTag(ResourceLocation name) {
-        return entityTypeTag.getOrDefault(name, new TagContent<>(name, Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES));
+        return get(entityTypeTag, name, () -> new TagContent<>(name, Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES)
+        );
     }
 
     public static TagContent<EntityType<?>> getEntityTypeTag(String modid, String name) {
-        return entityTypeTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES));
+        return getEntityTypeTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveFluidTag(@NotNull TagContent<Fluid> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.fluidTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.fluidTag.put(resourceLocation, content);
-        return true;
+        return save(fluidTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<Fluid> getFluidTag(ResourceLocation name) {
-        return fluidTag.getOrDefault(name, new TagContent<>(name, Registries.FLUID, ForgeRegistries.FLUIDS));
+        return get(fluidTag, name, () -> new TagContent<>(name, Registries.FLUID, ForgeRegistries.FLUIDS)
+        );
     }
 
     public static TagContent<Fluid> getFluidTag(String modid, String name) {
-        return fluidTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.FLUID, ForgeRegistries.FLUIDS));
+        return getFluidTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveGameEventTag(@NotNull TagContent<GameEvent> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.gameEventTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.gameEventTag.put(resourceLocation, content);
-        return true;
+        return save(gameEventTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<GameEvent> getGameEventTag(ResourceLocation name) {
-        return gameEventTag.getOrDefault(name, new TagContent<>(name, Registries.GAME_EVENT, BuiltInRegistries.GAME_EVENT));
+        return get(gameEventTag, name, () -> new TagContent<>(name, Registries.GAME_EVENT, BuiltInRegistries.GAME_EVENT)
+        );
     }
 
     public static TagContent<GameEvent> getGameEventTag(String modid, String name) {
-        return gameEventTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.GAME_EVENT, BuiltInRegistries.GAME_EVENT));
+        return getGameEventTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveInstrumentTag(@NotNull TagContent<Instrument> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.instrumentTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.instrumentTag.put(resourceLocation, content);
-        return true;
+        return save(instrumentTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<Instrument> getInstrumentTag(ResourceLocation name) {
-        return instrumentTag.getOrDefault(name, new TagContent<>(name, Registries.INSTRUMENT, BuiltInRegistries.INSTRUMENT));
+        return get(instrumentTag, name, () -> new TagContent<>(name, Registries.INSTRUMENT, BuiltInRegistries.INSTRUMENT)
+        );
     }
 
     public static TagContent<Instrument> getInstrumentTag(String modid, String name) {
-        return instrumentTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.INSTRUMENT, BuiltInRegistries.INSTRUMENT));
+        return getInstrumentTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveItemTag(@NotNull TagContent<Item> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.itemTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.itemTag.put(resourceLocation, content);
-        return true;
+        return save(itemTag, location(content.modid(), content.name()), content, override);
     }
-
 
     public static TagContent<Item> getItemTag(ResourceLocation name) {
-        return itemTag.getOrDefault(name, new TagContent<>(name, Registries.ITEM, ForgeRegistries.ITEMS));
+        return get(itemTag, name, () -> new TagContent<>(name, Registries.ITEM, ForgeRegistries.ITEMS)
+        );
     }
 
     public static TagContent<Item> getItemTag(String modid, String name) {
-        return itemTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.ITEM, ForgeRegistries.ITEMS));
+        return getItemTag(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-/*
-    public static boolean savePaintVariantTag(TagContent<PaintingVariant> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.paintingVariantTag.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.paintingVariantTag.put(resourceLocation, content);
-        return true;
+    ///
+    public static boolean savePaintVariantTag(@NotNull TagContent<PaintingVariant> content, boolean override) {
+        return save(paintingVariantTag, location(content.modid(), content.name()), content, override);
     }
-
 
     public static TagContent<PaintingVariant> getPaintVariantTag(ResourceLocation name) {
-        return paintingVariantTag.getOrDefault(name, new TagContent<>(name, Registries.PAINTING_VARIANT, BuiltInRegistries.PAINTING_VARIANT));
+        return get(paintingVariantTag, name, () -> new TagContent<>(name, Registries.PAINTING_VARIANT)
+        );
     }
 
     public static TagContent<PaintingVariant> getPaintVariantTag(String modid, String name) {
-        return paintingVariantTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.PAINTING_VARIANT, BuiltInRegistries.PAINTING_VARIANT));
+        return getPaintVariantTag(location(modid, name));
     }
-*/
-    //------------------------------------------------------------------------------------------------------------------
-/*
-    public static boolean saveBiomeTag(TagContent<Biome> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
 
-        if(!override && DataPackRegistries.biomeTag.containsKey(resourceLocation)){
-            return false;
-        }
-
-        DataPackRegistries.biomeTag.put(resourceLocation, content);
-        return true;
+    ///
+    public static boolean saveBiomeTag(@NotNull TagContent<Biome> content, boolean override) {
+        return save(biomeTag, location(content.modid(), content.name()), content, override);
     }
 
     public static TagContent<Biome> getBiomeTag(ResourceLocation name) {
-        return biomeTag.getOrDefault(name, new TagContent<>(name, Registries.BIOME, BuiltInRegistries.));
+        return get(biomeTag, name, () -> new TagContent<>(name, Registries.BIOME)
+        );
     }
 
     public static TagContent<Biome> getBiomeTag(String modid, String name) {
-        return biomeTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.BIOME, BuiltInRegistries.));
-    }
-*/
-    //------------------------------------------------------------------------------------------------------------------
-/*
-    public static boolean saveConfiguredFeatureTag(TagContent<ConfiguredFeature<?, ?>> content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if(!override && DataPackRegistries.configuredFeatureTag.containsKey(resourceLocation)){
-            return false;
-        }
-
-        DataPackRegistries.configuredFeatureTag.put(resourceLocation, content);
-        return true;
+        return getBiomeTag(location(modid, name));
     }
 
+    ///
+    public static boolean saveConfiguredFeatureTag(@NotNull TagContent<ConfiguredFeature<?, ?>> content, boolean override) {
+        return save(configuredFeatureTag, location(content.modid(), content.name()), content, override);
+    }
 
     public static TagContent<ConfiguredFeature<?, ?>> getConfiguredFeatureTag(ResourceLocation name) {
-        return configuredFeatureTag.getOrDefault(name, new TagContent<>(name, Registries.CONFIGURED_FEATURE, BuiltInRegistries));
+        return get(configuredFeatureTag, name, () -> new TagContent<>(name, Registries.CONFIGURED_FEATURE)
+        );
     }
 
-    public static TagContent<ConfiguredFeature<?, ?>> getBiomeTag(String modid, String name) {
-        return configuredFeatureTag.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new TagContent<>(modid, name, Registries.CONFIGURED_FEATURE, BuiltInRegistries.));
+    public static TagContent<ConfiguredFeature<?, ?>> getConfiguredFeatureTag(String modid, String name) {
+        return getConfiguredFeatureTag(location(modid, name));
     }
-*/
-    //------------------------------------------------------------------------------------------------------------------
+
+    ///
+    public static boolean saveConfiguredFeature(@NotNull ConfiguredFeatureContent content, boolean override) {
+        return save(configuredFeature, location(content.modid(), content.name()), content, override);
+    }
+
+    public static ConfiguredFeatureContent getConfiguredFeature(ResourceLocation name) {
+        return get(configuredFeature, name, () -> new ConfiguredFeatureContent(name)
+        );
+    }
+
+    public static ConfiguredFeatureContent getConfiguredFeature(String modid, String name) {
+        return getConfiguredFeature(location(modid, name));
+    }
+
+    ///
+    public static boolean savePlacedFeature(@NotNull PlacedFeatureContent content, boolean override) {
+        return save(placedFeature, location(content.modid(), content.name()), content, override);
+    }
+
+    public static PlacedFeatureContent getPlacedFeature(ResourceLocation name, ResourceLocation configuredFeature) {
+        return get(placedFeature, name, () -> new PlacedFeatureContent(name, configuredFeature)
+        );
+    }
+
+    public static PlacedFeatureContent getPlacedFeature(String modid, String name, ResourceLocation configuredFeature) {
+        return getPlacedFeature(location(modid, name), configuredFeature);
+    }
+
+    ///
+    public static boolean saveBiomeModifier(@NotNull BiomeModifierContent content, boolean override) {
+        return save(biomeModifier, location(content.modid(), content.name()), content, override);
+    }
+
+    public static BiomeModifierContent getBiomeModifier(ResourceLocation name) {
+        return get(biomeModifier, name, () -> new BiomeModifierContent(name)
+        );
+    }
+
+    public static BiomeModifierContent getBiomeModifier(String modid, String name) {
+        return getBiomeModifier(location(modid, name));
+    }
+
+    public static boolean removeBiomeModifier(ResourceLocation name) {
+        return biomeModifier.remove(name) != null;
+    }
+
+    public static boolean removeBiomeModifier(String modid, String name) {
+        return removeBiomeModifier(location(modid, name));
+    }
+
+    public static boolean saveAddFeaturesBiomeModifier(String modid, String name, String biomes, List<String> features, String step, boolean override) {
+        return saveBiomeModifier(new BiomeModifierContent(modid, name).addFeatures(biomes, features, step), override);
+    }
+
+    public static boolean saveRemoveFeaturesBiomeModifier(String modid, String name, String biomes, List<String> features, List<String> steps, boolean override) {
+        return saveBiomeModifier(new BiomeModifierContent(modid, name).removeFeatures(biomes, features, steps), override);
+    }
+
+    ///
     public static boolean saveBlockLootTable(@NotNull LootTableContent content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.blockLootTable.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.blockLootTable.put(resourceLocation, content);
-        return true;
+        return save(blockLootTable, location(content.modid(), content.name()), content, override);
     }
 
     public static LootTableContent getBlockLootTable(ResourceLocation name) {
-        return blockLootTable.getOrDefault(name, new LootTableContent(name));
+        return get(blockLootTable, name, () -> new LootTableContent(name));
     }
 
     public static LootTableContent getBlockLootTable(String modid, String name) {
-        return blockLootTable.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new LootTableContent(modid, name));
+        return getBlockLootTable(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveChestLootTable(@NotNull LootTableContent content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.chestLootTable.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.chestLootTable.put(resourceLocation, content);
-        return true;
+        return save(chestLootTable, location(content.modid(), content.name()), content, override);
     }
 
     public static LootTableContent getChestLootTable(ResourceLocation name) {
-        return chestLootTable.getOrDefault(name, new LootTableContent(name));
+        return get(chestLootTable, name, () -> new LootTableContent(name));
     }
 
     public static LootTableContent getChestLootTable(String modid, String name) {
-        return chestLootTable.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new LootTableContent(modid, name));
+        return getChestLootTable(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveEntityLootTable(@NotNull LootTableContent content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.entityLootTable.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.entityLootTable.put(resourceLocation, content);
-        return true;
+        return save(entityLootTable, location(content.modid(), content.name()), content, override);
     }
 
     public static LootTableContent getEntityLootTable(ResourceLocation name) {
-        return entityLootTable.getOrDefault(name, new LootTableContent(name));
+        return get(entityLootTable, name, () -> new LootTableContent(name));
     }
 
     public static LootTableContent getEntityLootTable(String modid, String name) {
-        return entityLootTable.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new LootTableContent(modid, name));
+        return getEntityLootTable(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveGameplayLootTable(@NotNull LootTableContent content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.gameplayLootTable.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.gameplayLootTable.put(resourceLocation, content);
-        return true;
+        return save(gameplayLootTable, location(content.modid(), content.name()), content, override);
     }
 
     public static LootTableContent getGameplayLootTable(ResourceLocation name) {
-        return gameplayLootTable.getOrDefault(name, new LootTableContent(name));
+        return get(gameplayLootTable, name, () -> new LootTableContent(name));
     }
 
     public static LootTableContent getGameplayLootTable(String modid, String name) {
-        return gameplayLootTable.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new LootTableContent(modid, name));
+        return getGameplayLootTable(location(modid, name));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    ///
     public static boolean saveRecipe(@NotNull RecipeContent content, boolean override) {
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(content.modid(), content.name());
-
-        if (!override && DataPackRegistries.recipe.containsKey(resourceLocation)) {
-            return false;
-        }
-
-        DataPackRegistries.recipe.put(resourceLocation, content);
-
-        return true;
+        return save(recipe, location(content.modid(), content.name()), content, override);
     }
 
     public static RecipeContent getRecipe(ResourceLocation name) {
-        return recipe.getOrDefault(name, new RecipeContent(name));
+        return get(recipe, name, () -> new RecipeContent(name));
     }
 
     public static RecipeContent getRecipe(String modid, String name) {
-        return recipe.getOrDefault(ResourceLocation.fromNamespaceAndPath(modid, name), new RecipeContent(modid, name));
+        return getRecipe(location(modid, name));
+    }
+
+    @Contract("_, _ -> new")
+    private static @NotNull ResourceLocation location(String modid, String name) {
+        return ResourceLocation.fromNamespaceAndPath(modid, name);
+    }
+
+    ///
+    private static <T> boolean save(Map<ResourceLocation, T> map, ResourceLocation location, T content, boolean override) {
+        if (!override && map.containsKey(location)) {
+            return false;
+        }
+
+        map.put(location, content);
+        return true;
+    }
+
+    private static <T> T get(Map<ResourceLocation, T> map, ResourceLocation location, Supplier<T> fallback) {
+        return map.getOrDefault(location, fallback.get());
     }
 }

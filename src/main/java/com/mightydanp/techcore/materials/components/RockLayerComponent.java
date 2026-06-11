@@ -46,21 +46,18 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
     public Block existingBrickBlock;
     public Block existingCobbleBlock;
 
-    public Supplier<Block> stoneBlock, tilesBlock, bricksBlock, cobbleBlock, polishedBlock,
-            smallTilesBlock, smallBricksBlock, squareBricksBlock, crackedBricksBlock, chiseledBricksBlock,
-            windmillTilesABlock, windmillTilesBBlock, mossyCobbleBlock, mossyBricksBlock, reinforcedBricksBlock;
+    public Supplier<Block> stoneBlock, tilesBlock, bricksBlock, cobbleBlock, polishedBlock, smallTilesBlock, smallBricksBlock, squareBricksBlock,
+            crackedBricksBlock, chiseledBricksBlock, windmillTilesABlock, windmillTilesBBlock, mossyCobbleBlock, mossyBricksBlock, reinforcedBricksBlock;
     public Supplier<SlabBlock> polishedSlabBlock;
     public Supplier<StairBlock> polishedStairsBlock;
     public Supplier<ButtonBlock> stoneButtonBlock;
     public Supplier<PressurePlateBlock> stonePressurePlateBlock;
     public Supplier<WallBlock> cobbleWallBlock, mossyCobbleWallBlock, bricksWallBlock, mossyBricksWallBlock;
 
-    public Supplier<Item> stoneItemBlock, polishedSlabItemBlock, tilesItemBlock, bricksItemBlock, cobbleItemBlock,
-            polishedItemBlock, smallTilesItemBlock, smallBricksItemBlock, squareBricksItemBlock,
-            crackedBricksItemBlock, chiseledBricksItemBlock, windmillTilesAItemBlock,
-            windmillTilesBItemBlock, mossyCobbleItemBlock, mossyBricksItemBlock, reinforcedBricksItemBlock,
-            polishedStairsItemBlock, stoneButtonItemBlock, stonePressurePlateItemBlock, cobbleWallItemBlock,
-            mossyCobbleWallItemBlock, bricksWallItemBlock, mossyBricksWallItemBlock;
+    public Supplier<Item> stoneItemBlock, polishedSlabItemBlock, tilesItemBlock, bricksItemBlock, cobbleItemBlock, polishedItemBlock, smallTilesItemBlock,
+            smallBricksItemBlock, squareBricksItemBlock, crackedBricksItemBlock, chiseledBricksItemBlock, windmillTilesAItemBlock, windmillTilesBItemBlock,
+            mossyCobbleItemBlock, mossyBricksItemBlock, reinforcedBricksItemBlock, polishedStairsItemBlock, stoneButtonItemBlock, stonePressurePlateItemBlock,
+            cobbleWallItemBlock, mossyCobbleWallItemBlock, bricksWallItemBlock, mossyBricksWallItemBlock;
 
     public RockLayerComponent(A material) {
         super("rock_layer", "component", material);

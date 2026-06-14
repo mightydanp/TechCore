@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -466,5 +467,25 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
 
     public int getMaxDensity() {
         return maxDensity;
+    }
+
+    public List<RockTypes.RockType> getRockTypes() {
+        return Collections.unmodifiableList(rockTypes);
+    }
+
+    public Map<String, Supplier<Block>> getSparseOreBlocks() {
+        return Collections.unmodifiableMap(sparseOreBlocks);
+    }
+
+    public Map<String, Supplier<Item>> getSparseOreBlockItems() {
+        return Collections.unmodifiableMap(sparseOreBlockItems);
+    }
+
+    public Map<String, Supplier<Block>> getOreBlocks() {
+        return Collections.unmodifiableMap(oreBlocks);
+    }
+
+    public Map<String, Supplier<Block>> getDenseOreBlocks() {
+        return Collections.unmodifiableMap(denseOreBlocks);
     }
 }

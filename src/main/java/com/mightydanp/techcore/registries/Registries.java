@@ -8,11 +8,13 @@ public class Registries {
     public static ScreenTabRegistries screenTabRegistries = new ScreenTabRegistries().init();
     public static CreativeModeTabRegistries creativeModeTabRegistries = new CreativeModeTabRegistries().init();
     public static RockLayerWorldGenRegistries rockLayerWorldGenRegistries = new RockLayerWorldGenRegistries().init();
+    public static OreVeinWorldGenRegistries oreVeinWorldGenRegistries = new OreVeinWorldGenRegistries().init();
 
     public static void init(){
         ResourcePackRegistry.addInit(screenRegistries);
         ResourcePackRegistry.addInit(screenTabRegistries);
         ResourcePackRegistry.addInit(creativeModeTabRegistries);
         ResourcePackRegistry.addInit(rockLayerWorldGenRegistries);
+        ResourcePackRegistry.addInit(oreVeinWorldGenRegistries);
     }
 }

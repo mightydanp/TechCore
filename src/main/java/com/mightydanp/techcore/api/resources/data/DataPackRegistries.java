@@ -5,6 +5,7 @@ import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.api.resources.data.biomemodifier.BiomeModifierContent;
 import com.mightydanp.techcore.api.resources.data.loottable.LootTableContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.ConfiguredFeatureContent;
+import com.mightydanp.techcore.api.resources.data.worldgen.NoiseSettingsContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.PlacedFeatureContent;
 import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
 import com.mightydanp.techcore.api.resources.data.tag.TagContent;
@@ -49,6 +50,7 @@ public class DataPackRegistries {
     private static final Map<ResourceLocation, TagContent<ConfiguredFeature<?, ?>>> configuredFeatureTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, ConfiguredFeatureContent> configuredFeature = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, PlacedFeatureContent> placedFeature = new ConcurrentHashMap<>();
+    private static final Map<ResourceLocation, NoiseSettingsContent> noiseSettings = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, BiomeModifierContent> biomeModifier = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> blockLootTable = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> chestLootTable = new ConcurrentHashMap<>();
@@ -72,6 +74,7 @@ public class DataPackRegistries {
         addData(configuredFeatureTag, "tags/worldgen/configured_feature", TagContent::json);
         addData(configuredFeature, "worldgen/configured_feature", ConfiguredFeatureContent::json);
         addData(placedFeature, "worldgen/placed_feature", PlacedFeatureContent::json);
+        addData(noiseSettings, "worldgen/noise_settings", NoiseSettingsContent::json);
         addData(biomeModifier, "forge/biome_modifier", BiomeModifierContent::json);
         addData(blockLootTable, "loot_tables/blocks", LootTableContent::json);
         addData(chestLootTable, "loot_tables/chests", LootTableContent::json);
@@ -297,6 +300,27 @@ public class DataPackRegistries {
 
     public static PlacedFeatureContent getPlacedFeature(String modid, String name, ResourceLocation configuredFeature) {
         return getPlacedFeature(location(modid, name), configuredFeature);
+    }
+
+    ///
+    public static boolean saveNoiseSettings(@NotNull NoiseSettingsContent content, boolean override) {
+        return save(noiseSettings, location(content.modid(), content.name()), content, override);
+    }
+
+    public static NoiseSettingsContent getNoiseSettings(ResourceLocation name) {
+        return get(noiseSettings, name, () -> new NoiseSettingsContent(name));
+    }
+
+    public static NoiseSettingsContent getNoiseSettings(String modid, String name) {
+        return getNoiseSettings(location(modid, name));
+    }
+
+    public static boolean removeNoiseSettings(ResourceLocation name) {
+        return noiseSettings.remove(name) != null;
+    }
+
+    public static boolean removeNoiseSettings(String modid, String name) {
+        return removeNoiseSettings(location(modid, name));
     }
 
     ///

@@ -2,6 +2,7 @@ package com.mightydanp.techcore.api.registries;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
+import com.mightydanp.techcore.world.level.levelgen.feature.OreVeinFeature;
 import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -65,6 +66,7 @@ public class RegistriesHandler {
     public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
 
     public static final RegistryObject<RockLayerFeature> ROCK_LAYER_FEATURE = FEATURES.register("rock_layer", () -> new RockLayerFeature(NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<OreVeinFeature> ORE_VEIN_FEATURE = FEATURES.register("ore_veins", () -> new OreVeinFeature(NoneFeatureConfiguration.CODEC));
 
     public static void init(IEventBus bus) {
         if (initialized) return;

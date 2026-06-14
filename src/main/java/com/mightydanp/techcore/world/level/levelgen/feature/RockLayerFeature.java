@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -70,7 +71,11 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
                     }
 
                     // Select the rock layer from absolute coordinates so regions cross chunk borders.
-                    RockLayer layer = layers.get(layerIndex(level.getSeed(), x, y, z, layers.size()));
+                    RockLayer layer = getOriginalRockLayer(level.getSeed(), layers, cursor);
+                    if (layer == null) {
+                        continue;
+                    }
+
                     BlockState target = layer.stateFor(replacement);
 
                     // Replace the block only when the selected rock layer differs from the current block.
@@ -99,6 +104,26 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         }
 
         return Collections.unmodifiableList(materials);
+    }
+
+    public static @Nullable Material getOriginalRockMaterial(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
+        //return the original rock material from the dimension's allowed materials
+        return getOriginalRockMaterial(worldSeed, getAllowedMaterials(dimension), position);
+    }
+
+    public static @Nullable BlockState getOriginalRockState(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
+        // Get the original rock material without checking the current live block.
+        Material material = getOriginalRockMaterial(worldSeed, dimension, position);
+
+        if (material == null) {
+            //return nothing if the position has no original rock material
+            return null;
+        }
+
+        // Return the normal stone variant because vanilla terrain state cannot be reconstructed here.
+        RockLayer layer = RockLayer.fromMaterial(material);
+        //return nothing if the material has no usable rock layer, otherwise return the stone state
+        return layer == null ? null : layer.stone();
     }
 
     public static void setAllowedMaterials(ResourceKey<Level> dimension, List<Material> materials) {
@@ -135,6 +160,32 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         if (materialSuppliers.isEmpty()) {
             ALLOWED_MATERIALS_BY_DIMENSION.remove(dimension);
         }
+    }
+
+    static @Nullable Material getOriginalRockMaterial(long worldSeed, List<Material> materials, BlockPos position) {
+        // Select from the supplied ordered material list using the same index as world generation.
+        int index = getOriginalRockIndex(worldSeed, position, materials.size());
+        //return nothing if no material can be selected, otherwise return the selected material
+        return index < 0 ? null : materials.get(index);
+    }
+
+    private static @Nullable RockLayer getOriginalRockLayer(long worldSeed, List<RockLayer> layers, BlockPos position) {
+        // Select from prebuilt rock layers using the same index exposed to material lookup callers.
+        int index = getOriginalRockIndex(worldSeed, position, layers.size());
+        //return nothing if no layer can be selected, otherwise return the selected layer
+        return index < 0 ? null : layers.get(index);
+    }
+
+    static int getOriginalRockIndex(long worldSeed, BlockPos position, int size) {
+        // Empty layer lists have no original rock owner for this coordinate.
+        if (size <= 0) {
+            //return no layer index
+            return -1;
+        }
+
+        // Use absolute block coordinates so chunk borders and negative positions stay deterministic.
+        //return the selected original rock layer index
+        return layerIndex(worldSeed, position.getX(), position.getY(), position.getZ(), size);
     }
 
     private static int layerIndex(long seed, int x, int y, int z, int size) {

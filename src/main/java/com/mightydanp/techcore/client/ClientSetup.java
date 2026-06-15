@@ -1,4 +1,4 @@
-package com.mightydanp.techcore;
+package com.mightydanp.techcore.client;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;

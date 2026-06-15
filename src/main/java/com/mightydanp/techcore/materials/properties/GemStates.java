@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public enum GemStates {
-    CHIPPED  (new GemStates.GemState("chipped")),
-    FLAWED   (new GemStates.GemState("flawed")),
-    GEM      (new GemStates.GemState("gem")),
-    FLAWLESS (new GemStates.GemState("flawless")),
+    CHIPPED(new GemStates.GemState("chipped")),
+    FLAWED(new GemStates.GemState("flawed")),
+    GEM(new GemStates.GemState("gem")),
+    FLAWLESS(new GemStates.GemState("flawless")),
     LEGENDARY(new GemStates.GemState("legendary"));
 
     public final GemStates.GemState gemState;

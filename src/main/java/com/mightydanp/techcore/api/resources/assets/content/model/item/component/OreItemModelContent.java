@@ -6,7 +6,7 @@ import net.minecraftforge.client.model.generators.ModelProvider;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public class OreItemModelContent extends MaterialItemModelContent{
+public class OreItemModelContent extends MaterialItemModelContent {
     public OreItemModelContent(String modid, String modelName, String parentFolder) {
         super(modid, modelName, parentFolder);
     }
@@ -61,10 +61,9 @@ public class OreItemModelContent extends MaterialItemModelContent{
     }
 
 
-
     @Contract(value = "_ -> new", pure = true)
     private String @NotNull [] oreModels(String stage) {
-        return new String[] {
+        return new String[]{
                 stage + "_div72_ore",
                 stage + "_tiny_ore",
                 stage + "_small_ore",

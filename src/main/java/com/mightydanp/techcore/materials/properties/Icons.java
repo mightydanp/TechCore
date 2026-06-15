@@ -39,10 +39,6 @@ public enum Icons {
     }
 
     public record Icon(String label, String fallback) {
-        public Icon(String label) {
-            this(label, null);
-        }
-
         public static final Codec<Icon> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
                         Codec.STRING.fieldOf("label").forGetter(Icon::label),
@@ -53,6 +49,10 @@ public enum Icons {
                         new Icon(label, fallback.isBlank() ? null : fallback)
                 )
         );
+
+        public Icon(String label) {
+            this(label, null);
+        }
 
         public boolean hasFallback() {
             return fallback != null && !fallback.isBlank();

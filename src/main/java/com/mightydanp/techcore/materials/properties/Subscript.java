@@ -22,6 +22,12 @@ public enum Subscript {
         this.unicode = unicode;
     }
 
+    public static @NotNull String convertNumber(int number) {
+        return String.valueOf(number).chars()                          // Convert number to stream of chars
+                .mapToObj(c -> Subscript.values()[c - '0'].unicode)    // Map each char to subscript unicode
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)  // Collect to string
+                .toString();
+    }
 
     public int getValue() {
         return value;
@@ -29,12 +35,5 @@ public enum Subscript {
 
     public char getUnicode() {
         return unicode;
-    }
-
-    public static @NotNull String convertNumber(int number) {
-        return String.valueOf(number).chars()                          // Convert number to stream of chars
-                .mapToObj(c -> Subscript.values()[c - '0'].unicode)    // Map each char to subscript unicode
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)  // Collect to string
-                .toString();
     }
 }

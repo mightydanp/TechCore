@@ -12,9 +12,9 @@ import com.mightydanp.techcore.api.resources.assets.content.model.item.MCItemMod
 import com.mightydanp.techcore.api.resources.data.DataPackRegistries;
 import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.item.RockLayerItemBlock;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.block.RockLayerBlock;
+import com.mightydanp.techcore.materials.item.RockLayerItemBlock;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.materials.properties.RockTypes;
@@ -63,13 +63,19 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
         super("rock_layer", "component", material);
     }
 
+    public static @NotNull @Unmodifiable List<Material> getRockLayerMaterials() {
+        return RegistriesHandler.getMaterials().stream()
+                .filter(material -> material.rockLayer.isRockLayer)
+                .toList();
+    }
+
     public RockLayerComponent<A> rockLayer(RockTypes.RockType rockType) {
         this.rockType = rockType;
         isRockLayer = true;
         return this;
     }
 
-    public RockLayerComponent<A> existingRockLayer(Block existingRocklayerBlock, @Nullable Block existingCobbleBlock, @Nullable Block existingBrickBlock){
+    public RockLayerComponent<A> existingRockLayer(Block existingRocklayerBlock, @Nullable Block existingCobbleBlock, @Nullable Block existingBrickBlock) {
         this.useExistingRockLayerTexture = true;
         this.existingRocklayerBlock = existingRocklayerBlock;
         this.existingCobbleBlock = existingCobbleBlock;
@@ -78,15 +84,9 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
         return this;
     }
 
-    public RockLayerComponent<A> noOresAllowed(){
+    public RockLayerComponent<A> noOresAllowed() {
         canContainOre = false;
         return this;
-    }
-
-    public static @NotNull @Unmodifiable List<Material> getRockLayerMaterials() {
-        return RegistriesHandler.getMaterials().stream()
-                .filter(material -> material.rockLayer.isRockLayer)
-                .toList();
     }
 
     @Override

@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.mightydanp.techcore.api.resources.ResourcePackRegistry;
 import com.mightydanp.techcore.api.resources.data.biomemodifier.BiomeModifierContent;
 import com.mightydanp.techcore.api.resources.data.loottable.LootTableContent;
+import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
+import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.ConfiguredFeatureContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.NoiseSettingsContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.PlacedFeatureContent;
-import com.mightydanp.techcore.api.resources.data.recipe.RecipeContent;
-import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +35,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataPackRegistries {
+    public static final Map<ResourceLocation, RecipeContent> recipe = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<BannerPattern>> bannerPatternTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Block>> blockTag = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, TagContent<Block>> blockMineableTag = new ConcurrentHashMap<>();
@@ -56,7 +57,6 @@ public class DataPackRegistries {
     private static final Map<ResourceLocation, LootTableContent> chestLootTable = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> entityLootTable = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, LootTableContent> gameplayLootTable = new ConcurrentHashMap<>();
-    public static final Map<ResourceLocation, RecipeContent> recipe = new ConcurrentHashMap<>();
 
     public static void init() {
         addData(bannerPatternTag, "tags/banner_pattern", TagContent::json);

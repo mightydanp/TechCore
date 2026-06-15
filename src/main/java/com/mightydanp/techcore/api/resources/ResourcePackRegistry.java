@@ -18,28 +18,47 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ResourcePackRegistry {
     public static final ResourcePack PACK = new ResourcePack(CoreRef.MOD_ID, "dynamic", true, Pack.Position.TOP, true);
 
-    private static List<BaseRegistries<?>> init = new CopyOnWriteArrayList<>();
+    private static final List<BaseRegistries<?>> init = new CopyOnWriteArrayList<>();
+    private static boolean registriesAdded = false;
     private static boolean clientInitialized = false;
+    private static boolean serverInitialized = false;
 
     @SubscribeEvent
     public static void addResourcePack(AddPackFindersEvent event) {
-        if (!clientInitialized) {
-            RegistriesHandler.getMaterialObjects().forEach(material -> ResourcePackRegistry.init.add(material.get()));
-            MaterialRef.initLanguages();
+        if (!registriesAdded) {
+            RegistriesHandler.getMaterialObjects()
+                    .forEach(material -> init.add(material.get()));
 
-            init.forEach(BaseRegistries::initClient);
-            init.forEach(BaseRegistries::initLanguages);
-            init.forEach(BaseRegistries::initTags);
-            clientInitialized = true;
+            registriesAdded = true;
         }
 
-        AssetPackRegistries.init();
-        DataPackRegistries.init();
-
         if (event.getPackType() == PackType.CLIENT_RESOURCES) {
-            event.addRepositorySource(consumer -> consumer.accept(PACK.createAssetPack()));
+            if (!clientInitialized) {
+                MaterialRef.initLanguages();
+
+                init.forEach(BaseRegistries::initClient);
+                init.forEach(BaseRegistries::initLanguages);
+
+                AssetPackRegistries.init();
+
+                clientInitialized = true;
+            }
+
+            event.addRepositorySource(
+                    consumer -> consumer.accept(PACK.createAssetPack())
+            );
         } else if (event.getPackType() == PackType.SERVER_DATA) {
-            event.addRepositorySource(consumer -> consumer.accept(PACK.createDataPack()));
+            if (!serverInitialized) {
+                init.forEach(BaseRegistries::initTags);
+
+                DataPackRegistries.init();
+
+                serverInitialized = true;
+            }
+
+            event.addRepositorySource(
+                    consumer -> consumer.accept(PACK.createDataPack())
+            );
         }
     }
 

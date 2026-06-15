@@ -8,25 +8,15 @@ import com.mightydanp.techcore.api.resources.data.worldgen.ConfiguredFeatureCont
 import com.mightydanp.techcore.api.resources.data.worldgen.NoiseSettingsContent;
 import com.mightydanp.techcore.api.resources.data.worldgen.PlacedFeatureContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import net.minecraft.resources.ResourceLocation;
 import com.mightydanp.techcore.world.level.levelgen.feature.OreVeinFeature;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import java.util.List;
 
 public final class OreVeinWorldGenRegistries implements BaseRegistries<OreVeinWorldGenRegistries> {
-    private static boolean initialized;
     private static final OreVeinFeature SERIALIZATION_FALLBACK_FEATURE = new OreVeinFeature(NoneFeatureConfiguration.CODEC);
-
-    interface WorldGenContentSink {
-        void configuredFeature(ConfiguredFeatureContent content);
-
-        void placedFeature(PlacedFeatureContent content);
-
-        void noiseSettings(NoiseSettingsContent content);
-
-        void biomeModifier(BiomeModifierContent content);
-    }
+    private static boolean initialized;
 
     static void emitWorldGenContent(WorldGenContentSink sink) {
         ResourceLocation configuredFeature = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "ore_veins");
@@ -81,5 +71,15 @@ public final class OreVeinWorldGenRegistries implements BaseRegistries<OreVeinWo
         });
 
         return this;
+    }
+
+    interface WorldGenContentSink {
+        void configuredFeature(ConfiguredFeatureContent content);
+
+        void placedFeature(PlacedFeatureContent content);
+
+        void noiseSettings(NoiseSettingsContent content);
+
+        void biomeModifier(BiomeModifierContent content);
     }
 }

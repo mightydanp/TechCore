@@ -36,9 +36,9 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
     }
 
     public static List<String> getProcessesOrDefault(ItemStack itemStack, List<String> defaultProcesses) {
-        if(hasProcesses(itemStack)) return getProcesses(itemStack);
+        if (hasProcesses(itemStack)) return getProcesses(itemStack);
 
-        if(defaultProcesses.isEmpty()) return new ArrayList<>();
+        if (defaultProcesses.isEmpty()) return new ArrayList<>();
 
         setProcesses(itemStack, defaultProcesses);
         return defaultProcesses;
@@ -60,7 +60,7 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
         return new Processes(itemStack, Processes);
     }
 
-    public enum Process{
+    public enum Process {
         NONE("none"),
         CENTRIFUGE("centrifuge"),
         GRIND("grind"),
@@ -79,10 +79,6 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
             this.process = process;
         }
 
-        public String getProcess() {
-            return process;
-        }
-
         public static @NotNull Process fromProcess(String processName) {
             for (Process process : values()) {
                 if (process.process.equals(processName)) {
@@ -90,6 +86,10 @@ public record Processes(ItemStack itemStack, List<Process> processes) {
                 }
             }
             throw new IllegalArgumentException("Unknown processed process: " + processName);
+        }
+
+        public String getProcess() {
+            return process;
         }
     }
 }

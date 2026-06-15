@@ -27,6 +27,11 @@ public class ItemTrait extends Trait<ItemTrait> {
         this.meters = meters;
     }
 
+    @Contract(" -> new")
+    public static @NotNull ItemTrait getInstance() {
+        return new ItemTrait();
+    }
+
     @Override
     public Codec<ItemTrait> codec() {
         return RecordCodecBuilder.create((instance) -> instance.group(
@@ -36,11 +41,6 @@ public class ItemTrait extends Trait<ItemTrait> {
                 Codec.DOUBLE.optionalFieldOf("kilograms", kilograms).forGetter(ItemTrait::kilograms),
                 Codec.DOUBLE.optionalFieldOf("meters", meters).forGetter(ItemTrait::meters)
         ).apply(instance, ItemTrait::new));
-    }
-
-    @Contract(" -> new")
-    public static @NotNull ItemTrait getInstance() {
-        return new ItemTrait();
     }
 
     public ItemTrait color(int color) {

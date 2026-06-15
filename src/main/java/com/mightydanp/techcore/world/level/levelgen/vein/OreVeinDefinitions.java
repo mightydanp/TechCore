@@ -10,20 +10,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public final class OreVeinDefinitions {
-    public static final double MAX_BOUNDARY_DISTORTION_BLOCKS = 3.0D;
+    public static final double MAX_BOUNDARY_DISTORTION_BLOCKS = 7.0D;
 
     private static final Map<ResourceLocation, OreVeinDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> GENERATION_SETTINGS = new LinkedHashMap<>();
@@ -89,20 +80,21 @@ public final class OreVeinDefinitions {
         return OVERLAP_SETTINGS.get(dimension);
     }
 
-    public static boolean isSupportedDimension(ResourceKey<Level> dimension) {
+    public static boolean isUnsupportedDimension(ResourceKey<Level> dimension) {
         Objects.requireNonNull(dimension, "dimension");
 
-        if (!GENERATION_SETTINGS.containsKey(dimension) || !OVERLAP_SETTINGS.containsKey(dimension)) {
-            return false;
+        if (!GENERATION_SETTINGS.containsKey(dimension)
+                || !OVERLAP_SETTINGS.containsKey(dimension)) {
+            return true;
         }
 
         for (OreVeinDefinition definition : DEFINITIONS.values()) {
             if (definition.dimensions().contains(dimension)) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     public static void validateAll() {
@@ -271,22 +263,17 @@ public final class OreVeinDefinitions {
     private static void validateHaloSettings(OreVeinDefinition definition, List<String> problems) {
         OreVeinHaloSettings haloSettings = definition.haloSettings();
 
-        if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() <= 0.0D) {
-            problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and positive"));
-        }
-
-        if (!Double.isFinite(haloSettings.haloRadiusBlocks()) || haloSettings.haloRadiusBlocks() < haloSettings.transitionWidthBlocks()) {
-            problems.add(problem(definition, null, null, null, null, null, null, "haloRadiusBlocks must be finite and at least transitionWidthBlocks"));
-        }
-
-        if (haloSettings.outerHaloFillNumerator() < 0 || haloSettings.outerHaloFillNumerator() > definition.densitySettings().regularFillNumerator()) {
-            problems.add(problem(definition, null, null, null, null, null, null, "outerHaloFillNumerator must be in [0, regularFillNumerator]"));
-        }
-
-        try {
-            checkedCeilToInt(haloSettings.haloRadiusBlocks(), "haloRadiusBlocks");
-        } catch (IllegalArgumentException exception) {
-            problems.add(problem(definition, null, null, null, null, null, null, exception.getMessage()));
+        if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() < 0.0D) {
+            problems.add(problem(
+                    definition,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "transitionWidthBlocks must be finite and non-negative"
+            ));
         }
     }
 
@@ -356,7 +343,7 @@ public final class OreVeinDefinitions {
             for (ResolvedOreEntry resolvedOreEntry : oreEntries) {
                 Material oreMaterial = resolvedOreEntry.material();
 
-                if (oreMaterial == null || !isConfiguredOre(oreMaterial)) {
+                if (isInvalidOre(oreMaterial)) {
                     continue;
                 }
 
@@ -443,7 +430,7 @@ public final class OreVeinDefinitions {
                 continue;
             }
 
-            if (!isConfiguredOre(oreMaterial)) {
+            if (isInvalidOre(oreMaterial)) {
                 problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "invalid ore material"));
                 continue;
             }
@@ -478,7 +465,7 @@ public final class OreVeinDefinitions {
         for (ResolvedOreEntry resolvedOreEntry : oreEntries) {
             Material oreMaterial = resolvedOreEntry.material();
 
-            if (!isConfiguredOre(oreMaterial)) {
+            if (isInvalidOre(oreMaterial)) {
                 continue;
             }
 
@@ -573,8 +560,8 @@ public final class OreVeinDefinitions {
         return material != null && material.rockLayer != null && material.rockLayer.isRockLayer && material.rockLayer.rockType != null;
     }
 
-    private static boolean isConfiguredOre(Material material) {
-        return material != null && material.ore != null && material.ore.getOreType() != null && !material.ore.getRockTypes().isEmpty();
+    private static boolean isInvalidOre(Material material) {
+        return material == null || material.ore == null || material.ore.getOreType() == null || material.ore.getRockTypes().isEmpty();
     }
 
     private static String problem(OreVeinDefinition definition, ResourceKey<Level> dimension, VeinOreEntry entry, Material oreMaterial, Material hostRockMaterial, String requiredMap, Set<RockTypes.RockType> commonRockTypes, String reason) {
@@ -663,9 +650,6 @@ public final class OreVeinDefinitions {
         return values.toString();
     }
 
-    public record DimensionHeight(int minY, int maxYExclusive) {
-    }
-
     static int checkedCeilToInt(double value, String name) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException(name + " must be finite");
@@ -678,6 +662,9 @@ public final class OreVeinDefinitions {
         }
 
         return Math.toIntExact((long) ceil);
+    }
+
+    public record DimensionHeight(int minY, int maxYExclusive) {
     }
 
     private record ResolvedOreEntry(VeinOreEntry entry, Material material) {

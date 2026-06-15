@@ -37,16 +37,6 @@ public final class WasGenerated {
             );
         }
 
-        private void markChanged(BlockPos pos) {
-            changedPositions.computeIfAbsent(chunkKey(pos), key -> new LongOpenHashSet()).add(localKey(pos));
-            setDirty();
-        }
-
-        private boolean wasChanged(BlockPos pos) {
-            LongOpenHashSet positions = changedPositions.get(chunkKey(pos));
-            return positions != null && positions.contains(localKey(pos));
-        }
-
         private static @NotNull ChangedAfterGenerationData load(@NotNull CompoundTag tag) {
             ChangedAfterGenerationData data = new ChangedAfterGenerationData();
             ListTag chunks = tag.getList("chunks", Tag.TAG_COMPOUND);
@@ -57,6 +47,24 @@ public final class WasGenerated {
             }
 
             return data;
+        }
+
+        private static long chunkKey(@NotNull BlockPos pos) {
+            return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+        }
+
+        private static long localKey(@NotNull BlockPos pos) {
+            return BlockPos.asLong(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
+        }
+
+        private void markChanged(BlockPos pos) {
+            changedPositions.computeIfAbsent(chunkKey(pos), key -> new LongOpenHashSet()).add(localKey(pos));
+            setDirty();
+        }
+
+        private boolean wasChanged(BlockPos pos) {
+            LongOpenHashSet positions = changedPositions.get(chunkKey(pos));
+            return positions != null && positions.contains(localKey(pos));
         }
 
         @Override
@@ -72,14 +80,6 @@ public final class WasGenerated {
 
             tag.put("chunks", chunks);
             return tag;
-        }
-
-        private static long chunkKey(@NotNull BlockPos pos) {
-            return ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
-        }
-
-        private static long localKey(@NotNull BlockPos pos) {
-            return BlockPos.asLong(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
         }
     }
 }

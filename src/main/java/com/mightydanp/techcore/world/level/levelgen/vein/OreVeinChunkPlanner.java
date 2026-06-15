@@ -5,40 +5,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public final class OreVeinChunkPlanner {
-    @FunctionalInterface
-    interface CandidateProvider {
-        List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive);
-    }
-
-    @FunctionalInterface
-    interface EvaluationBoundsProvider {
-        OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor);
-    }
-
-    @FunctionalInterface
-    interface ResolvedCellProvider {
-        Optional<OreVeinResolvedCell> resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinInstanceDescriptor> candidates);
-    }
-
-    record PlanningDependencies(
-            CandidateProvider candidateProvider,
-            EvaluationBoundsProvider boundsProvider,
-            ResolvedCellProvider resolvedCellProvider
-    ) {
-        PlanningDependencies {
-            Objects.requireNonNull(candidateProvider, "candidateProvider");
-            Objects.requireNonNull(boundsProvider, "boundsProvider");
-            Objects.requireNonNull(resolvedCellProvider, "resolvedCellProvider");
-        }
-    }
-
     static final PlanningDependencies PRODUCTION_DEPENDENCIES = new PlanningDependencies(
             OreVeinCandidateLookup::candidatesForChunk,
             OreVeinCandidateLookup::evaluationBounds,
@@ -160,5 +129,32 @@ public final class OreVeinChunkPlanner {
                 ),
                 x - chunkMinX
         );
+    }
+
+    @FunctionalInterface
+    interface CandidateProvider {
+        List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive);
+    }
+
+    @FunctionalInterface
+    interface EvaluationBoundsProvider {
+        OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor);
+    }
+
+    @FunctionalInterface
+    interface ResolvedCellProvider {
+        Optional<OreVeinResolvedCell> resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinInstanceDescriptor> candidates);
+    }
+
+    record PlanningDependencies(
+            CandidateProvider candidateProvider,
+            EvaluationBoundsProvider boundsProvider,
+            ResolvedCellProvider resolvedCellProvider
+    ) {
+        PlanningDependencies {
+            Objects.requireNonNull(candidateProvider, "candidateProvider");
+            Objects.requireNonNull(boundsProvider, "boundsProvider");
+            Objects.requireNonNull(resolvedCellProvider, "resolvedCellProvider");
+        }
     }
 }

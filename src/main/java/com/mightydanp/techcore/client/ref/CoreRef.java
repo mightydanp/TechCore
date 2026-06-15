@@ -8,5 +8,4 @@ public class CoreRef {
     public static final String server_proxy_location = "mightydanp." + MOD_ID + ".ServerSetup";
 
 
-
 }

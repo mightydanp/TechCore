@@ -41,8 +41,8 @@ public class ItemModelBuilder<A> extends ModelBuilder<A> {
     }
 
     public class OverrideBuilder {
-        private ModelFile model;
         private final Map<ResourceLocation, Float> predicates = new LinkedHashMap<>();
+        private ModelFile model;
 
         public OverrideBuilder model(ModelFile model) {
             this.model = model;

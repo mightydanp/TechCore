@@ -11,15 +11,13 @@ public class ItemTraitConfig implements IConfig {
     private final ForgeConfigSpec.ConfigValue<String> textureIconConfig;
     private final ForgeConfigSpec.ConfigValue<Double> kilogramsConfig;
     private final ForgeConfigSpec.ConfigValue<Double> metersConfig;
-
-    private ForgeConfigSpec builtSpec;
-
     public String registry;
     public Integer color;
     public Integer maxDamage;
     public String textureIcon;
     public Double kilograms;
     public Double meters;
+    private ForgeConfigSpec builtSpec;
 
     public ItemTraitConfig(String registry, Integer color, Integer maxDamage, String textureIcon, Double kilograms, Double meters) {
         registryConfig = builder

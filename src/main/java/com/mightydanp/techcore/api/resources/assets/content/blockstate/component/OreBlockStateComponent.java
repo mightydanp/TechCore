@@ -7,7 +7,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 
-public class OreBlockStateComponent extends MaterialBlockStateContent{
+public class OreBlockStateComponent extends MaterialBlockStateContent {
     public OreBlockStateComponent(ResourceLocation resourceLocation) {
         super(resourceLocation);
     }

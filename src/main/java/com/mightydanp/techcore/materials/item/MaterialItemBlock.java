@@ -2,7 +2,10 @@ package com.mightydanp.techcore.materials.item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
-import com.mightydanp.techcore.world.item.properties.*;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quality;
+import com.mightydanp.techcore.world.item.properties.Quantity;
+import com.mightydanp.techcore.world.item.properties.Temperature;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;

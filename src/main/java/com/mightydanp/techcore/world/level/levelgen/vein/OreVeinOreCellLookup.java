@@ -10,16 +10,6 @@ import java.util.List;
 import java.util.Objects;
 
 public final class OreVeinOreCellLookup {
-    @FunctionalInterface
-    interface OreCellEvaluator {
-        OreVeinOreCellResult evaluate(
-                OreVeinInstanceDescriptor descriptor,
-                OreVeinDefinition definition,
-                BlockPos position,
-                OreVeinContribution contribution
-        );
-    }
-
     private static final Comparator<OreVeinOreCellResult> RESULT_ORDER =
             Comparator.comparingLong(OreVeinOreCellResult::instanceId)
                     .thenComparing(result -> result.definitionId().toString());
@@ -94,24 +84,31 @@ public final class OreVeinOreCellLookup {
                     "Missing ore vein definition: " + descriptor.definitionId()
             );
 
-            try {
-                results.add(oreCellEvaluator.evaluate(descriptor, definition, position, contribution));
-            } catch (IllegalArgumentException exception) {
-                if ("position is outside halo".equals(exception.getMessage())) {
-                    continue;
-                }
-
-                throw exception;
-            } catch (NullPointerException exception) {
-                if ("oreMaterial supplier returned null".equals(exception.getMessage())) {
-                    continue;
-                }
-
-                throw exception;
+            if (contribution.signedBoundaryDistanceBlocks() > definition.sparseReachBlocks()) {
+                continue;
             }
+
+            results.add(
+                    oreCellEvaluator.evaluate(
+                            descriptor,
+                            definition,
+                            position,
+                            contribution
+                    )
+            );
         }
 
         results.sort(RESULT_ORDER);
         return List.copyOf(results);
+    }
+
+    @FunctionalInterface
+    interface OreCellEvaluator {
+        OreVeinOreCellResult evaluate(
+                OreVeinInstanceDescriptor descriptor,
+                OreVeinDefinition definition,
+                BlockPos position,
+                OreVeinContribution contribution
+        );
     }
 }

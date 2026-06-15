@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import net.minecraft.core.BlockPos;
+
 import java.util.Objects;
 
 public record OreVeinBounds(

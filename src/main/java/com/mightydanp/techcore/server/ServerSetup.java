@@ -1,4 +1,4 @@
-package com.mightydanp.techcore;
+package com.mightydanp.techcore.server;
 
 import com.mightydanp.techcore.client.ref.CoreRef;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,7 +18,7 @@ public class ServerSetup {
         LOGGER.info("Tech Core server setup is starting");
 
         //enqueueWork is only needed for things that aren't thread-safe
-        event.enqueueWork(() ->{
+        event.enqueueWork(() -> {
 
         });
 

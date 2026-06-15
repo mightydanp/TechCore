@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public final class TemperatureClientRender {
-    private TemperatureClientRender() {}
+    private TemperatureClientRender() {
+    }
 
     public static boolean shouldRender(@NotNull ItemStack stack, ItemDisplayContext context) {
         if (stack.isEmpty()) return false;
@@ -41,7 +42,7 @@ public final class TemperatureClientRender {
     public static float getStrength(ItemStack stack) {
         Double itemStackTemperature = Temperature.getTemperature(stack);
 
-        if(itemStackTemperature == null) return 0.0F;
+        if (itemStackTemperature == null) return 0.0F;
 
         return getStrength(itemStackTemperature);
     }

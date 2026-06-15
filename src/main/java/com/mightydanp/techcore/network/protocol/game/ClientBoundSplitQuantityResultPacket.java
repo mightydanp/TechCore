@@ -21,17 +21,6 @@ public class ClientBoundSplitQuantityResultPacket {
         this.cursorStack = cursorStack;
     }
 
-    public void encode(@NotNull FriendlyByteBuf buffer) {
-        // Writes the client menu slot index that should be updated.
-        buffer.writeInt(this.clientSlotIndex);
-
-        // Writes the server-accepted stack for the target slot.
-        buffer.writeItem(Objects.requireNonNullElse(this.slotStack, ItemStack.EMPTY));
-
-        // Writes the server-accepted stack for the cursor.
-        buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
-    }
-
     public static @NotNull ClientBoundSplitQuantityResultPacket decode(@NotNull FriendlyByteBuf buffer) {
         // Reads the client menu slot index that should be updated.
         int clientSlotIndex = buffer.readInt();
@@ -43,6 +32,17 @@ public class ClientBoundSplitQuantityResultPacket {
         ItemStack cursorStack = buffer.readItem();
 
         return new ClientBoundSplitQuantityResultPacket(clientSlotIndex, slotStack, cursorStack);
+    }
+
+    public void encode(@NotNull FriendlyByteBuf buffer) {
+        // Writes the client menu slot index that should be updated.
+        buffer.writeInt(this.clientSlotIndex);
+
+        // Writes the server-accepted stack for the target slot.
+        buffer.writeItem(Objects.requireNonNullElse(this.slotStack, ItemStack.EMPTY));
+
+        // Writes the server-accepted stack for the cursor.
+        buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
     }
 
     public void handle(@NotNull Supplier<NetworkEvent.Context> contextSupplier) {

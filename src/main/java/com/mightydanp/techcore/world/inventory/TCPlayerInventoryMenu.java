@@ -48,10 +48,15 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
     public static final ResourceLocation EMPTY_HAND_SLOT_RIGHT = ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "item/empty_hand_slot_right");
     private static final Map<EquipmentSlot, ResourceLocation> TEXTURE_EMPTY_SLOTS;
     private static final EquipmentSlot[] SLOT_IDS;
+
+    static {
+        TEXTURE_EMPTY_SLOTS = Map.of(EquipmentSlot.FEET, EMPTY_ARMOR_SLOT_BOOTS, EquipmentSlot.LEGS, EMPTY_ARMOR_SLOT_LEGGINGS, EquipmentSlot.CHEST, EMPTY_ARMOR_SLOT_CHESTPLATE, EquipmentSlot.HEAD, EMPTY_ARMOR_SLOT_HELMET);
+        SLOT_IDS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    }
+
     private final ResultContainer resultSlots = new ResultContainer();
     //public final boolean active;
     private final Player player;
-
     private final List<String> inventorySecretary = new ArrayList<>();
 
     public TCPlayerInventoryMenu(int windowId, @NotNull Inventory playerInventory) {
@@ -111,14 +116,14 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
         this.addSlot("result", new TCInventoryResultSlot(playerInventory.player, 45, 152, 62));
     }
 
+    public static boolean isHotbarSlot(int index) {
+        return index >= 36 && index < 45 || index == 45;
+    }
+
     protected @NotNull Slot addSlot(String name, @NotNull Slot slot) {
         inventorySecretary.add(slot.getSlotIndex() + " : " + name);
         Collections.sort(inventorySecretary);
         return super.addSlot(slot);
-    }
-
-    public static boolean isHotbarSlot(int index) {
-        return index >= 36 && index < 45 || index == 45;
     }
 
     public void fillCraftSlotsStackedContents(StackedContents itemHelper) {
@@ -138,7 +143,7 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
         super.removed(player);
         this.resultSlots.clearContent();
         //if (!player.level().isClientSide) {
-            //this.clearContainer(player, this.craftSlots);
+        //this.clearContainer(player, this.craftSlots);
         //}
 
     }
@@ -219,10 +224,5 @@ public class TCPlayerInventoryMenu extends AbstractContainerMenu {
 
     public boolean shouldMoveToInventory(int slotIndex) {
         return slotIndex != this.getResultSlotIndex();
-    }
-
-    static {
-        TEXTURE_EMPTY_SLOTS = Map.of(EquipmentSlot.FEET, EMPTY_ARMOR_SLOT_BOOTS, EquipmentSlot.LEGS, EMPTY_ARMOR_SLOT_LEGGINGS, EquipmentSlot.CHEST, EMPTY_ARMOR_SLOT_CHESTPLATE, EquipmentSlot.HEAD, EMPTY_ARMOR_SLOT_HELMET);
-        SLOT_IDS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     }
 }

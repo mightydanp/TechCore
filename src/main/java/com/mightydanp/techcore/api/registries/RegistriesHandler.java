@@ -5,7 +5,6 @@ import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.world.level.levelgen.feature.OreVeinFeature;
 import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -24,6 +23,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -32,41 +32,35 @@ import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = CoreRef.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RegistriesHandler {
-    private static boolean initialized;
-
-    private static final Map<ResourceLocation, RegistryHolder> additionalRegistries = new HashMap<>();
-    private static final Map<ResourceLocation, FinalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
-
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, CoreRef.MOD_ID);
-    public static final DeferredRegister<Item> BLOCK_ITEMS = DeferredRegister.create(Registries.ITEM, CoreRef.MOD_ID);
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, CoreRef.MOD_ID);
-    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, CoreRef.MOD_ID);
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, CoreRef.MOD_ID);
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, CoreRef.MOD_ID);
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Registries.FEATURE, CoreRef.MOD_ID);
-    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, CoreRef.MOD_ID);
-    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, CoreRef.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.Registries.ITEM, CoreRef.MOD_ID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(net.minecraft.core.registries.Registries.BLOCK, CoreRef.MOD_ID);
+    public static final DeferredRegister<Item> BLOCK_ITEMS = DeferredRegister.create(net.minecraft.core.registries.Registries.ITEM, CoreRef.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(net.minecraft.core.registries.Registries.BLOCK_ENTITY_TYPE, CoreRef.MOD_ID);
+    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(net.minecraft.core.registries.Registries.FLUID, CoreRef.MOD_ID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(net.minecraft.core.registries.Registries.MENU, CoreRef.MOD_ID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, CoreRef.MOD_ID);
+    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(net.minecraft.core.registries.Registries.FEATURE, CoreRef.MOD_ID);
+    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(net.minecraft.core.registries.Registries.RECIPE_TYPE, CoreRef.MOD_ID);
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(net.minecraft.core.registries.Registries.RECIPE_SERIALIZER, CoreRef.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
+    public static final ResourceKey<Registry<Material>> MATERIAL_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material"));
+    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(
+            ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
     //public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPE = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, CoreRef.MOD_ID);
-
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
+    public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
 
     //public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CoreRef.MOD_ID);
-
-    public static final ResourceKey<Registry<Material>> MATERIAL_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material"));
+    public static final RegistryObject<RockLayerFeature> ROCK_LAYER_FEATURE = FEATURES.register("rock_layer", () -> new RockLayerFeature(NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<OreVeinFeature> ORE_VEIN_FEATURE = FEATURES.register("ore_veins", () -> new OreVeinFeature(NoneFeatureConfiguration.CODEC));
+    private static final Map<ResourceLocation, RegistryHolder> additionalRegistries = new HashMap<>();
+    private static final Map<ResourceLocation, FinalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
     private static final DeferredRegister<Material> MATERIALS = DeferredRegister.create(MATERIAL_KEY, CoreRef.MOD_ID);
     private static final Supplier<IForgeRegistry<Material>> MATERIAL_REGISTRY = MATERIALS.makeRegistry(RegistryBuilder::new);
     private static final List<Material> MATERIAL_LIST = new ArrayList<>();
-    private static final List<Predicate<Material>>  MATERIAL_INIT_STEPS = new ArrayList<>(){{
+    private static final List<Predicate<Material>> MATERIAL_INIT_STEPS = new ArrayList<>() {{
         add(material -> material.rockLayer.isRockLayer);
     }};
-
-    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(
-            ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
-    public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
-
-    public static final RegistryObject<RockLayerFeature> ROCK_LAYER_FEATURE = FEATURES.register("rock_layer", () -> new RockLayerFeature(NoneFeatureConfiguration.CODEC));
-    public static final RegistryObject<OreVeinFeature> ORE_VEIN_FEATURE = FEATURES.register("ore_veins", () -> new OreVeinFeature(NoneFeatureConfiguration.CODEC));
+    private static boolean initialized;
 
     public static void init(IEventBus bus) {
         if (initialized) return;
@@ -104,24 +98,7 @@ public class RegistriesHandler {
         });
     }
 
-    public void addDeferredRegister(ResourceLocation name, RegistryHolder holder) {
-        additionalRegistries.put(name, holder);
-    }
-
-    public FinalizedRegistryHolder getDeferredRegister(ResourceLocation name) {
-        if (!additionalRegistries.containsKey(name)) {
-            return finalizedDeferredRegister.get(name);
-        }
-
-        throw new IllegalStateException("DeferredRegister : " + name + " : has not been finalized yet. Ensure init() has been called before accessing registries.");
-    }
-
-    public record RegistryHolder(Registry<?> key) {
-    }
-
-    public record FinalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey, DeferredRegister<?> registry) {}
-
-    public static Supplier<Material> registerMaterial(String name, Supplier<Material> supplier) {
+    public static Supplier<Material> registerMaterial(String name, @NotNull Supplier<Material> supplier) {
         Material mat = supplier.get();
         MATERIAL_LIST.add(mat);
         return MATERIALS.register(name, () -> mat);
@@ -130,7 +107,6 @@ public class RegistriesHandler {
     public static Collection<RegistryObject<Material>> getMaterialObjects() {
         return MATERIALS.getEntries();
     }
-
 
     @SubscribeEvent
     public static void bootstrapMaterials(NewRegistryEvent event) {
@@ -158,7 +134,7 @@ public class RegistriesHandler {
         }
     }
 
-    public static void addCondition(Predicate<Material> supplier){
+    public static void addCondition(Predicate<Material> supplier) {
         addCondition(MATERIAL_INIT_STEPS.size(), supplier);
     }
 
@@ -173,5 +149,24 @@ public class RegistriesHandler {
 
     public static List<Material> getMaterials() {
         return MATERIAL_LIST;
+    }
+
+    public void addDeferredRegister(ResourceLocation name, RegistryHolder holder) {
+        additionalRegistries.put(name, holder);
+    }
+
+    public FinalizedRegistryHolder getDeferredRegister(ResourceLocation name) {
+        if (!additionalRegistries.containsKey(name)) {
+            return finalizedDeferredRegister.get(name);
+        }
+
+        throw new IllegalStateException("DeferredRegister : " + name + " : has not been finalized yet. Ensure init() has been called before accessing registries.");
+    }
+
+    public record RegistryHolder(Registry<?> key) {
+    }
+
+    public record FinalizedRegistryHolder(ResourceKey<? extends Registry<?>> resourceKey,
+                                          DeferredRegister<?> registry) {
     }
 }

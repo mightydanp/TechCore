@@ -38,6 +38,30 @@ public class QuantitySplitScreen extends Screen {
         this.clientSlotIndex = clientSlotIndex;
     }
 
+    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
+        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
+            return false;
+        }
+
+        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
+    }
+
+    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
+        ItemStack copy = stack.copy();
+        CompoundTag tag = copy.getTag();
+
+        if (tag != null) {
+            tag.remove(Quantity.TAG);
+            tag.remove(Quantity.MAX_TAG);
+
+            if (tag.isEmpty()) {
+                copy.setTag(null);
+            }
+        }
+
+        return copy;
+    }
+
     @Override
     protected void init() {
         Quantity cursorQuantity = Quantity.stack(cursorStack).get();
@@ -111,30 +135,6 @@ public class QuantitySplitScreen extends Screen {
                 this.height / 2 + 20,  // y — same row as the confirm button
                 20, 20// small square button
         ).build());
-    }
-
-    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
-        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
-            return false;
-        }
-
-        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
-    }
-
-    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
-        ItemStack copy = stack.copy();
-        CompoundTag tag = copy.getTag();
-
-        if (tag != null) {
-            tag.remove(Quantity.TAG);
-            tag.remove(Quantity.MAX_TAG);
-
-            if (tag.isEmpty()) {
-                copy.setTag(null);
-            }
-        }
-
-        return copy;
     }
 
     @Override

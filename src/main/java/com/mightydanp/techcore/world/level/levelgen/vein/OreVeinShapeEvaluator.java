@@ -10,9 +10,11 @@ public final class OreVeinShapeEvaluator {
     private static final double MEDIUM_FREQUENCY = 1.0D / 14.0D;
     private static final double DETAIL_FREQUENCY = 1.0D / 6.0D;
 
-    private static final double COARSE_AMPLITUDE_BLOCKS = 1.5D;
-    private static final double MEDIUM_AMPLITUDE_BLOCKS = 1.0D;
-    private static final double DETAIL_AMPLITUDE_BLOCKS = 0.5D;
+    private static final double COARSE_AMPLITUDE_BLOCKS = 4.0D;
+    private static final double MEDIUM_AMPLITUDE_BLOCKS = 2.0D;
+    private static final double DETAIL_AMPLITUDE_BLOCKS = 1.0D;
+
+    private static final double VERTICAL_DISTORTION_SCALE = 0.35D;
 
     private static final long COARSE_SALT = 0x6A09E667F3BCC909L;
     private static final long MEDIUM_SALT = 0xBB67AE8584CAA73BL;
@@ -133,11 +135,45 @@ public final class OreVeinShapeEvaluator {
     }
 
     static double distortionBlocks(long shapeSeed, double localX, double localY, double localZ) {
-        double coarse = sampleNoise(shapeSeed, COARSE_SALT, localX, localY, localZ, COARSE_FREQUENCY) * COARSE_AMPLITUDE_BLOCKS;
-        double medium = sampleNoise(shapeSeed, MEDIUM_SALT, localX, localY, localZ, MEDIUM_FREQUENCY) * MEDIUM_AMPLITUDE_BLOCKS;
-        double detail = sampleNoise(shapeSeed, DETAIL_SALT, localX, localY, localZ, DETAIL_FREQUENCY) * DETAIL_AMPLITUDE_BLOCKS;
+        double coarse = sampleNoise(
+                shapeSeed,
+                COARSE_SALT,
+                localX,
+                localY,
+                localZ,
+                COARSE_FREQUENCY
+        ) * COARSE_AMPLITUDE_BLOCKS;
 
-        return clampDistortion(coarse + medium + detail);
+        double medium = sampleNoise(
+                shapeSeed,
+                MEDIUM_SALT,
+                localX,
+                localY,
+                localZ,
+                MEDIUM_FREQUENCY
+        ) * MEDIUM_AMPLITUDE_BLOCKS;
+
+        double detail = sampleNoise(
+                shapeSeed,
+                DETAIL_SALT,
+                localX,
+                localY,
+                localZ,
+                DETAIL_FREQUENCY
+        ) * DETAIL_AMPLITUDE_BLOCKS;
+
+        double radialDistance = length(localX, localY, localZ);
+
+        double verticalShare = radialDistance == 0.0D ?
+                0.0D : Math.abs(localY) / radialDistance;
+
+        double horizontalStrength = 1.0D - square(verticalShare);
+
+        double directionalScale = VERTICAL_DISTORTION_SCALE + (1.0D - VERTICAL_DISTORTION_SCALE) * horizontalStrength;
+
+        return clampDistortion(
+                (coarse + medium + detail) * directionalScale
+        );
     }
 
     static long latticeHash(long shapeSeed, long layerSalt, long x, long y, long z) {
@@ -199,6 +235,15 @@ public final class OreVeinShapeEvaluator {
                 forward.m01(), forward.m11(), forward.m21(),
                 forward.m02(), forward.m12(), forward.m22()
         );
+    }
+
+    static RotatedVector forwardRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
+        RotationMatrix matrix = forwardRotation(
+                yawDegrees,
+                pitchDegrees,
+                rollDegrees);
+
+        return matrix.apply(x, y, z);
     }
 
     private static double sampleNoise(long shapeSeed, long layerSalt, double localX, double localY, double localZ, double frequency) {
@@ -265,7 +310,7 @@ public final class OreVeinShapeEvaluator {
     public record HalfExtents(int x, int y, int z) {
     }
 
-    static record RotationMatrix(
+    record RotationMatrix(
             double m00,
             double m01,
             double m02,
@@ -285,6 +330,5 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    static record RotatedVector(double x, double y, double z) {
-    }
+    record RotatedVector(double x, double y, double z) { }
 }

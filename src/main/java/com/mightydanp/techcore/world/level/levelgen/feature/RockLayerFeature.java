@@ -29,67 +29,6 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         super(codec);
     }
 
-    @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
-        WorldGenLevel level = context.level();
-
-        // Get all rock layer materials that are allowed to generate in this dimension.
-        List<RockLayer> layers = RockLayer.fromMaterials(getAllowedMaterials(level.getLevel().dimension()));
-
-        // If there are no rock layers registered for this dimension, do not generate anything.
-        if (layers.isEmpty()) {
-            return false;
-        }
-
-        ChunkPos chunk = new ChunkPos(context.origin());
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        boolean placed = false;
-
-        // Get the full build height for the current worldgen level.
-        int minY = level.getMinBuildHeight();
-        int maxY = level.getMaxBuildHeight();
-
-        // Loop through every X position in the chunk.
-        for (int localX = 0; localX < 16; localX++) {
-            int x = chunk.getMinBlockX() + localX;
-
-            // Loop through every Z position in the chunk.
-            for (int localZ = 0; localZ < 16; localZ++) {
-                int z = chunk.getMinBlockZ() + localZ;
-
-                // Walk the whole vertical column so the layer field is continuous.
-                for (int y = minY; y < maxY; y++) {
-                    cursor.set(x, y, z);
-
-                    // Check if the current block is a stone type this feature is allowed to replace.
-                    BlockState current = level.getBlockState(cursor);
-                    Replacement replacement = Replacement.forState(current);
-
-                    // If this is not a replaceable block, leave it alone.
-                    if (replacement == Replacement.NONE) {
-                        continue;
-                    }
-
-                    // Select the rock layer from absolute coordinates so regions cross chunk borders.
-                    RockLayer layer = getOriginalRockLayer(level.getSeed(), layers, cursor);
-                    if (layer == null) {
-                        continue;
-                    }
-
-                    BlockState target = layer.stateFor(replacement);
-
-                    // Replace the block only when the selected rock layer differs from the current block.
-                    if (target != current) {
-                        level.setBlock(cursor, target, Block.UPDATE_CLIENTS);
-                        placed = true;
-                    }
-                }
-            }
-        }
-
-        return placed;
-    }
-
     public static List<Material> getAllowedMaterials(ResourceKey<Level> dimension) {
         List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
@@ -259,6 +198,67 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     private static double unit(long value) {
         // Convert the high bits of the hash into a value from zero to one.
         return (value >>> 11) * 0x1.0p-53D;
+    }
+
+    @Override
+    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        WorldGenLevel level = context.level();
+
+        // Get all rock layer materials that are allowed to generate in this dimension.
+        List<RockLayer> layers = RockLayer.fromMaterials(getAllowedMaterials(level.getLevel().dimension()));
+
+        // If there are no rock layers registered for this dimension, do not generate anything.
+        if (layers.isEmpty()) {
+            return false;
+        }
+
+        ChunkPos chunk = new ChunkPos(context.origin());
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        boolean placed = false;
+
+        // Get the full build height for the current worldgen level.
+        int minY = level.getMinBuildHeight();
+        int maxY = level.getMaxBuildHeight();
+
+        // Loop through every X position in the chunk.
+        for (int localX = 0; localX < 16; localX++) {
+            int x = chunk.getMinBlockX() + localX;
+
+            // Loop through every Z position in the chunk.
+            for (int localZ = 0; localZ < 16; localZ++) {
+                int z = chunk.getMinBlockZ() + localZ;
+
+                // Walk the whole vertical column so the layer field is continuous.
+                for (int y = minY; y < maxY; y++) {
+                    cursor.set(x, y, z);
+
+                    // Check if the current block is a stone type this feature is allowed to replace.
+                    BlockState current = level.getBlockState(cursor);
+                    Replacement replacement = Replacement.forState(current);
+
+                    // If this is not a replaceable block, leave it alone.
+                    if (replacement == Replacement.NONE) {
+                        continue;
+                    }
+
+                    // Select the rock layer from absolute coordinates so regions cross chunk borders.
+                    RockLayer layer = getOriginalRockLayer(level.getSeed(), layers, cursor);
+                    if (layer == null) {
+                        continue;
+                    }
+
+                    BlockState target = layer.stateFor(replacement);
+
+                    // Replace the block only when the selected rock layer differs from the current block.
+                    if (target != current) {
+                        level.setBlock(cursor, target, Block.UPDATE_CLIENTS);
+                        placed = true;
+                    }
+                }
+            }
+        }
+
+        return placed;
     }
 
     private enum Replacement {

@@ -30,6 +30,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class RecipeContent {
+    private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> SHAPE_BUILDERS = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder().put(BlockFamily.Variant.BUTTON, (p_176733_, p_176734_) -> buttonBuilder(p_176733_, Ingredient.of(p_176734_))).put(BlockFamily.Variant.CHISELED, (p_248037_, p_248038_) -> chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, p_248037_, Ingredient.of(p_248038_))).put(BlockFamily.Variant.CUT, (p_248026_, p_248027_) -> cutBuilder(RecipeCategory.BUILDING_BLOCKS, p_248026_, Ingredient.of(p_248027_))).put(BlockFamily.Variant.DOOR, (p_176714_, p_176715_) -> doorBuilder(p_176714_, Ingredient.of(p_176715_))).put(BlockFamily.Variant.CUSTOM_FENCE, (p_176708_, p_176709_) -> fenceBuilder(p_176708_, Ingredient.of(p_176709_))).put(BlockFamily.Variant.FENCE, (p_248031_, p_248032_) -> fenceBuilder(p_248031_, Ingredient.of(p_248032_))).put(BlockFamily.Variant.CUSTOM_FENCE_GATE, (p_176698_, p_176699_) -> fenceGateBuilder(p_176698_, Ingredient.of(p_176699_))).put(BlockFamily.Variant.FENCE_GATE, (p_248035_, p_248036_) -> fenceGateBuilder(p_248035_, Ingredient.of(p_248036_))).put(BlockFamily.Variant.SIGN, (p_176688_, p_176689_) -> signBuilder(p_176688_, Ingredient.of(p_176689_))).put(BlockFamily.Variant.SLAB, (p_248017_, p_248018_) -> slabBuilder(RecipeCategory.BUILDING_BLOCKS, p_248017_, Ingredient.of(p_248018_))).put(BlockFamily.Variant.STAIRS, (p_176674_, p_176675_) -> stairBuilder(p_176674_, Ingredient.of(p_176675_))).put(BlockFamily.Variant.PRESSURE_PLATE, (p_248039_, p_248040_) -> pressurePlateBuilder(RecipeCategory.REDSTONE, p_248039_, Ingredient.of(p_248040_))).put(BlockFamily.Variant.POLISHED, (p_248019_, p_248020_) -> polishedBuilder(RecipeCategory.BUILDING_BLOCKS, p_248019_, Ingredient.of(p_248020_))).put(BlockFamily.Variant.TRAPDOOR, (p_176638_, p_176639_) -> trapdoorBuilder(p_176638_, Ingredient.of(p_176639_))).put(BlockFamily.Variant.WALL, (p_248024_, p_248025_) -> wallBuilder(RecipeCategory.DECORATIONS, p_248024_, Ingredient.of(p_248025_))).build();
     private final String modid;
     private final String name;
     private ShapelessRecipeBuilder shapeless = null;
@@ -37,8 +38,6 @@ public class RecipeContent {
     private JsonObject recipeJson;
     private JsonObject advancementJson;
     private RecipeBuilder builder;
-
-    private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> SHAPE_BUILDERS = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder().put(BlockFamily.Variant.BUTTON, (p_176733_, p_176734_) -> buttonBuilder(p_176733_, Ingredient.of(p_176734_))).put(BlockFamily.Variant.CHISELED, (p_248037_, p_248038_) -> chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, p_248037_, Ingredient.of(p_248038_))).put(BlockFamily.Variant.CUT, (p_248026_, p_248027_) -> cutBuilder(RecipeCategory.BUILDING_BLOCKS, p_248026_, Ingredient.of(p_248027_))).put(BlockFamily.Variant.DOOR, (p_176714_, p_176715_) -> doorBuilder(p_176714_, Ingredient.of(p_176715_))).put(BlockFamily.Variant.CUSTOM_FENCE, (p_176708_, p_176709_) -> fenceBuilder(p_176708_, Ingredient.of(p_176709_))).put(BlockFamily.Variant.FENCE, (p_248031_, p_248032_) -> fenceBuilder(p_248031_, Ingredient.of(p_248032_))).put(BlockFamily.Variant.CUSTOM_FENCE_GATE, (p_176698_, p_176699_) -> fenceGateBuilder(p_176698_, Ingredient.of(p_176699_))).put(BlockFamily.Variant.FENCE_GATE, (p_248035_, p_248036_) -> fenceGateBuilder(p_248035_, Ingredient.of(p_248036_))).put(BlockFamily.Variant.SIGN, (p_176688_, p_176689_) -> signBuilder(p_176688_, Ingredient.of(p_176689_))).put(BlockFamily.Variant.SLAB, (p_248017_, p_248018_) -> slabBuilder(RecipeCategory.BUILDING_BLOCKS, p_248017_, Ingredient.of(p_248018_))).put(BlockFamily.Variant.STAIRS, (p_176674_, p_176675_) -> stairBuilder(p_176674_, Ingredient.of(p_176675_))).put(BlockFamily.Variant.PRESSURE_PLATE, (p_248039_, p_248040_) -> pressurePlateBuilder(RecipeCategory.REDSTONE, p_248039_, Ingredient.of(p_248040_))).put(BlockFamily.Variant.POLISHED, (p_248019_, p_248020_) -> polishedBuilder(RecipeCategory.BUILDING_BLOCKS, p_248019_, Ingredient.of(p_248020_))).put(BlockFamily.Variant.TRAPDOOR, (p_176638_, p_176639_) -> trapdoorBuilder(p_176638_, Ingredient.of(p_176639_))).put(BlockFamily.Variant.WALL, (p_248024_, p_248025_) -> wallBuilder(RecipeCategory.DECORATIONS, p_248024_, Ingredient.of(p_248025_))).build();
 
     public RecipeContent(String modid, String name) {
         this.modid = modid;
@@ -50,70 +49,9 @@ public class RecipeContent {
         this.name = resourceLocation.getPath();
     }
 
-    public String modid() {
-        return modid;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item) {
-        shapeless = ShapelessRecipeBuilder.shapeless(category, item);
-        return shapeless;
-    }
-
-    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item, int amount) {
-        shapeless = ShapelessRecipeBuilder.shapeless(category, item, amount);
-        return shapeless;
-    }
-
-    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item) {
-        shaped = ShapedRecipeBuilder.shaped(category, item);
-        return shaped;
-    }
-
-    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item, int amount) {
-        shaped = ShapedRecipeBuilder.shaped(category, item, amount);
-        return shaped;
-    }
-
-    public void save(Consumer<FinishedRecipe> recipeConsumer) {
-        this.save(recipeConsumer, getDefaultRecipeId(builder.getResult()).getPath());
-    }
-
-    public void save(Consumer<FinishedRecipe> p_176501_, String p_176502_) {
-        ResourceLocation resourcelocation = getDefaultRecipeId(builder.getResult());
-        ResourceLocation resourcelocation1 = ResourceLocation.parse(p_176502_);
-        if (resourcelocation1.equals(resourcelocation)) {
-            throw new IllegalStateException("Recipe " + p_176502_ + " should remove its 'save' argument as it is equal to default one");
-        } else {
-            this.save(p_176501_, resourcelocation1.getPath());
-        }
-    }
-
     @SuppressWarnings("ALL")
     public static @NotNull ResourceLocation getDefaultRecipeId(@NotNull ItemLike itemLike) {
         return BuiltInRegistries.ITEM.getKey(itemLike.asItem());
-    }
-
-
-    public JsonObject recipeJson() {
-        //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
-        //need to create an advancement data
-        //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
-        return recipeJson;
-    }
-
-    public JsonObject advancementJson() {
-        //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
-        //need to create an advancement data
-        //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
-        return advancementJson;
-    }
-
-    protected void generateForEnabledBlockFamilies(Consumer<FinishedRecipe> p_249188_, FeatureFlagSet p_251836_) {
-        BlockFamilies.getAllFamilies().filter((p_248034_) -> p_248034_.shouldGenerateRecipe(p_251836_)).forEach((p_176624_) -> generateRecipes(p_249188_, p_176624_));
     }
 
     protected static void oneToOneConversionRecipe(Consumer<FinishedRecipe> p_176552_, ItemLike p_176553_, ItemLike p_176554_, @javax.annotation.Nullable String p_176555_) {
@@ -133,7 +71,7 @@ public class RecipeContent {
     }
 
     protected static void oreCooking(Consumer<FinishedRecipe> p_250791_, RecipeSerializer<? extends AbstractCookingRecipe> p_251817_, @NotNull List<ItemLike> p_249619_, RecipeCategory p_251154_, ItemLike p_250066_, float p_251871_, int p_251316_, String p_251450_, String p_249236_) {
-        for(ItemLike itemlike : p_249619_) {
+        for (ItemLike itemlike : p_249619_) {
             SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), p_251154_, p_250066_, p_251871_, p_251316_, p_251817_).group(p_251450_).unlockedBy(getHasName(itemlike), has(itemlike)).save(p_250791_, getItemName(p_250066_) + p_249236_ + "_" + getItemName(itemlike));
         }
 
@@ -230,7 +168,7 @@ public class RecipeContent {
     }
 
     protected static void colorBlockWithDye(Consumer<FinishedRecipe> p_289666_, @NotNull List<Item> p_289675_, List<Item> p_289672_, String p_289641_) {
-        for(int i = 0; i < p_289675_.size(); ++i) {
+        for (int i = 0; i < p_289675_.size(); ++i) {
             Item item = p_289675_.get(i);
             Item item1 = p_289672_.get(i);
             ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item1).requires(item).requires(Ingredient.of(p_289672_.stream().filter((p_288265_) -> !p_288265_.equals(item1)).map(ItemStack::new))).group(p_289641_).unlockedBy("has_needed_dye", has(item)).save(p_289666_, "dye_" + getItemName(item1));
@@ -445,6 +383,66 @@ public class RecipeContent {
 
     protected static @NotNull String getBlastingRecipeName(ItemLike p_176669_) {
         return getItemName(p_176669_) + "_from_blasting";
+    }
+
+    public String modid() {
+        return modid;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item) {
+        shapeless = ShapelessRecipeBuilder.shapeless(category, item);
+        return shapeless;
+    }
+
+    public ShapelessRecipeBuilder shapeless(RecipeCategory category, ItemLike item, int amount) {
+        shapeless = ShapelessRecipeBuilder.shapeless(category, item, amount);
+        return shapeless;
+    }
+
+    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item) {
+        shaped = ShapedRecipeBuilder.shaped(category, item);
+        return shaped;
+    }
+
+    public ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item, int amount) {
+        shaped = ShapedRecipeBuilder.shaped(category, item, amount);
+        return shaped;
+    }
+
+    public void save(Consumer<FinishedRecipe> recipeConsumer) {
+        this.save(recipeConsumer, getDefaultRecipeId(builder.getResult()).getPath());
+    }
+
+    public void save(Consumer<FinishedRecipe> p_176501_, String p_176502_) {
+        ResourceLocation resourcelocation = getDefaultRecipeId(builder.getResult());
+        ResourceLocation resourcelocation1 = ResourceLocation.parse(p_176502_);
+        if (resourcelocation1.equals(resourcelocation)) {
+            throw new IllegalStateException("Recipe " + p_176502_ + " should remove its 'save' argument as it is equal to default one");
+        } else {
+            this.save(p_176501_, resourcelocation1.getPath());
+        }
+    }
+
+    public JsonObject recipeJson() {
+        //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
+        //need to create an advancement data
+        //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
+        return recipeJson;
+    }
+
+    public JsonObject advancementJson() {
+        //RecipeProvider.this.recipePathProvider.json(resourceLocation)));
+        //need to create an advancement data
+        //RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
+        return advancementJson;
+    }
+
+    protected void generateForEnabledBlockFamilies(Consumer<FinishedRecipe> p_249188_, FeatureFlagSet p_251836_) {
+        BlockFamilies.getAllFamilies().filter((p_248034_) -> p_248034_.shouldGenerateRecipe(p_251836_)).forEach((p_176624_) -> generateRecipes(p_249188_, p_176624_));
     }
 
     @Contract(pure = true)

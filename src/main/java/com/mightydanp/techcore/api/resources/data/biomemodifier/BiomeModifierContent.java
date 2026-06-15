@@ -22,6 +22,14 @@ public class BiomeModifierContent {
         this.name = resourceLocation.getPath();
     }
 
+    private static JsonArray stringArray(List<String> values) {
+        JsonArray array = new JsonArray();
+
+        // Convert each string into a JsonPrimitive entry in order.
+        values.forEach(array::add);
+        return array;
+    }
+
     public String modid() {
         return modid;
     }
@@ -61,13 +69,5 @@ public class BiomeModifierContent {
 
     public JsonObject json() {
         return json;
-    }
-
-    private static JsonArray stringArray(List<String> values) {
-        JsonArray array = new JsonArray();
-
-        // Convert each string into a JsonPrimitive entry in order.
-        values.forEach(array::add);
-        return array;
     }
 }

@@ -2,7 +2,7 @@ package com.mightydanp.techcore.api.resources.assets.content.blockstate.componen
 
 import net.minecraft.resources.ResourceLocation;
 
-public class RockLayerBlockStateComponent  extends MaterialBlockStateContent{
+public class RockLayerBlockStateComponent extends MaterialBlockStateContent {
     public RockLayerBlockStateComponent(ResourceLocation resourceLocation) {
         super(resourceLocation);
     }

@@ -24,6 +24,11 @@ public class BlockTrait extends Trait<BlockTrait> {
         this.canPickUp = canPickUp;
     }
 
+    @Contract(" -> new")
+    public static @NotNull BlockTrait getInstance() {
+        return new BlockTrait();
+    }
+
     @Override
     public Codec<BlockTrait> codec() {
         return RecordCodecBuilder.create((instance) -> instance.group(
@@ -31,11 +36,6 @@ public class BlockTrait extends Trait<BlockTrait> {
                 Codec.DOUBLE.optionalFieldOf("kilograms", kilograms).forGetter(BlockTrait::kilograms),
                 Codec.BOOL.optionalFieldOf("can_pick_up", canPickUp).forGetter(BlockTrait::canPickUp)
         ).apply(instance, BlockTrait::new));
-    }
-
-    @Contract(" -> new")
-    public static @NotNull BlockTrait getInstance() {
-        return new BlockTrait();
     }
 
     public BlockTrait color(int color) {

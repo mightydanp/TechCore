@@ -11,9 +11,17 @@ public class ToolComponent<A extends Material> extends Component<A, ToolComponen
         super("tool", "component", material);
     }
 
+    public Integer getDurability() {
+        return durability;
+    }
+
     public ToolComponent<A> setDurability(int durability) {
         this.durability = durability;
         return this;
+    }
+
+    public Integer getAttackSpeed() {
+        return attackSpeed;
     }
 
     public ToolComponent<A> setAttackSpeed(int attackSpeed) {
@@ -21,20 +29,12 @@ public class ToolComponent<A extends Material> extends Component<A, ToolComponen
         return this;
     }
 
+    public Float getAttackDamage() {
+        return attackDamage;
+    }
+
     public ToolComponent<A> setAttackDamage(float attackDamage) {
         this.attackDamage = attackDamage;
         return this;
-    }
-
-    public Integer getDurability() {
-        return durability;
-    }
-
-    public Integer getAttackSpeed() {
-        return attackSpeed;
-    }
-
-    public Float getAttackDamage() {
-        return attackDamage;
     }
 }

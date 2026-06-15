@@ -19,6 +19,11 @@ public final class MaterialTextureResolver {
     private final Map<String, Set<String>> indexedTextures = new HashMap<>();
     private final Map<String, ResourceLocation> resolvedCache = new HashMap<>();
 
+    @Contract(pure = true)
+    private static @NotNull String indexKey(String namespace, String textureFolder, String folder) {
+        return namespace + "|" + textureFolder + "|" + folder;
+    }
+
     public void indexNamespace(String namespace) {
         index(namespace, ItemModelContent.ITEM_FOLDER);
         index(namespace, BlockModelContent.BLOCK_FOLDER);
@@ -145,10 +150,5 @@ public final class MaterialTextureResolver {
                         textureFolder,
                         "material"
                 );
-    }
-
-    @Contract(pure = true)
-    private static @NotNull String indexKey(String namespace, String textureFolder, String folder) {
-        return namespace + "|" + textureFolder + "|" + folder;
     }
 }

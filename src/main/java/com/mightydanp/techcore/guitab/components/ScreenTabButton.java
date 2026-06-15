@@ -20,37 +20,24 @@ import org.jetbrains.annotations.Nullable;
 @OnlyIn(Dist.CLIENT)
 public class ScreenTabButton extends Button {
 
-    public int buttonNumber;
-
-    protected final ScreenTab screenTab;
+    private static final ResourceLocation CREATIVE_TABS_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tabs.png");
+    private static final int CELL_W = 26;
+    private static final int CELL_H = 32;
+    private static final int COLS = 7;
+    private static final int ROWS = 4;
+    private static final int SHEET_W = 256;
+    private static final int SHEET_H = 256;
     public final Player player;
+    protected final ScreenTab screenTab;
     protected final Screen screen;
-
     protected final float red;
     protected final float green;
     protected final float blue;
     protected final float alpha;
-
     protected final ResourceLocation image;
     protected final ItemStack item;
-
     protected final ResourceLocation customImage;
-
-    private static final ResourceLocation CREATIVE_TABS_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tabs.png");
-
-    private static final int CELL_W = 26;
-    private static final int CELL_H = 32;
-
-    private static final int COLS = 7;
-    private static final int ROWS = 4;
-
-    private static final int SHEET_W = 256;
-    private static final int SHEET_H = 256;
-
-    @Contract("_, _, _, _, _, _ -> new")
-    public static @NotNull ScreenTabButton create(int registryButtonNumber, ScreenTab screenTab, Player player, Screen screen, int x, int y) {
-        return new ScreenTabButton(registryButtonNumber, screenTab, player, screen, x, y);
-    }
+    public int buttonNumber;
 
     private ScreenTabButton(int registryButtonNumber, @NotNull ScreenTab screenTab, Player player, Screen screen, int x, int y) {
         super(x, y, ScreenTabBase.TAB_WIDTH, ScreenTabBase.TAB_HEIGHT, screenTab.narration, button -> {
@@ -72,17 +59,15 @@ public class ScreenTabButton extends Button {
         this.customImage = screenTab.sprites;
     }
 
+    @Contract("_, _, _, _, _, _ -> new")
+    public static @NotNull ScreenTabButton create(int registryButtonNumber, ScreenTab screenTab, Player player, Screen screen, int x, int y) {
+        return new ScreenTabButton(registryButtonNumber, screenTab, player, screen, x, y);
+    }
+
     @Override
     public void onPress() {
         screenTab.openTargetScreen(this.player);
         super.onPress();
-    }
-
-    @Override
-    public void setTooltip(@Nullable Tooltip tooltip) {
-        if (screenTab.tooltip == null) {
-            super.setTooltip(tooltip);
-        }
     }
 
     @Override
@@ -92,6 +77,13 @@ public class ScreenTabButton extends Button {
         }
 
         return super.getTooltip();
+    }
+
+    @Override
+    public void setTooltip(@Nullable Tooltip tooltip) {
+        if (screenTab.tooltip == null) {
+            super.setTooltip(tooltip);
+        }
     }
 
     @Override

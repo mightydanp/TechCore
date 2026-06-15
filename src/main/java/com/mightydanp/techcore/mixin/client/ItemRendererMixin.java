@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.mixin.client;
 
-import com.mightydanp.techcore.client.event.RenderItemEvent;
 import com.mightydanp.techcore.client.event.ItemRenderEventGuard;
+import com.mightydanp.techcore.client.event.RenderItemEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;

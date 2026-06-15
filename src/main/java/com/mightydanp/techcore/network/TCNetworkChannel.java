@@ -8,12 +8,10 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class TCNetworkChannel {
+    private static final String PROTOCOL_VERSION = CoreRef.MOD_ID + "_" + "network_channel";
     public static SimpleChannel INSTANCE;
-
     private static boolean initialized = false;
     private static int packetID = 0;
-    private static final String PROTOCOL_VERSION = CoreRef.MOD_ID + "_" + "network_channel";
-
 
     public static void init() {
         if (initialized) return;
@@ -45,7 +43,9 @@ public class TCNetworkChannel {
 
     }
 
-    private static int nextId() { return packetID++; }
+    private static int nextId() {
+        return packetID++;
+    }
 
 
 }

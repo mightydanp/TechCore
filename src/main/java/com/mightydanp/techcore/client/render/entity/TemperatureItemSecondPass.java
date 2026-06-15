@@ -17,7 +17,8 @@ import net.minecraftforge.client.RenderTypeHelper;
 import org.jetbrains.annotations.NotNull;
 
 public final class TemperatureItemSecondPass {
-    private TemperatureItemSecondPass() {}
+    private TemperatureItemSecondPass() {
+    }
 
     public static void render(ItemStack stack, ItemDisplayContext displayContext, boolean leftHanded, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, BakedModel model) {
         if (ItemRenderEventGuard.isRenderingExtraPass()) return;
@@ -28,7 +29,7 @@ public final class TemperatureItemSecondPass {
 
         Double itemTemperature = Temperature.getTemperature(stack);
 
-        if(itemTemperature == null) return;
+        if (itemTemperature == null) return;
 
         int color = new Temperature(itemTemperature, Temperature.getScale()).getColor(stack);
 

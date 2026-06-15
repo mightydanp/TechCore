@@ -32,6 +32,14 @@ public class LootTableContent {
         this.name = resourceLocation.getPath();
     }
 
+    public static @NotNull LootTable standardDropTable(Block b) {
+        return LootTable.lootTable().withPool(createStandardDrops(b)).build();
+    }
+
+    public static LootPool.@NotNull Builder createStandardDrops(ItemLike itemProvider) {
+        return LootPool.lootPool().setRolls(ConstantValue.exactly(1)).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(itemProvider));
+    }
+
     public String modid() {
         return modid;
     }
@@ -48,17 +56,14 @@ public class LootTableContent {
     public JsonObject json() {
         //LootTableProvider
         return new LootTable.Serializer().serialize(lootTable, LootTable.class, new com.google.gson.JsonSerializationContext() {
-            public JsonElement serialize(Object src) { return com.google.gson.JsonParser.parseString(new com.google.gson.Gson().toJson(src)); }
-            public JsonElement serialize(Object src, Type typeOfSrc) { return serialize(src); }
+            public JsonElement serialize(Object src) {
+                return com.google.gson.JsonParser.parseString(new com.google.gson.Gson().toJson(src));
+            }
+
+            public JsonElement serialize(Object src, Type typeOfSrc) {
+                return serialize(src);
+            }
         }).getAsJsonObject();
 
-    }
-
-    public static @NotNull LootTable standardDropTable(Block b) {
-        return LootTable.lootTable().withPool(createStandardDrops(b)).build();
-    }
-
-    public static LootPool.@NotNull Builder createStandardDrops(ItemLike itemProvider) {
-        return LootPool.lootPool().setRolls(ConstantValue.exactly(1)).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(itemProvider));
     }
 }

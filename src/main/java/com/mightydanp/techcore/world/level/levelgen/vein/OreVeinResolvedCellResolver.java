@@ -9,13 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.DENSE_ORE;
@@ -31,7 +25,7 @@ public final class OreVeinResolvedCellResolver {
         Objects.requireNonNull(dimension, "dimension");
         Objects.requireNonNull(position, "position");
 
-        if (!OreVeinDefinitions.isSupportedDimension(dimension)) {
+        if (OreVeinDefinitions.isUnsupportedDimension(dimension)) {
             return Optional.empty();
         }
 
@@ -64,7 +58,7 @@ public final class OreVeinResolvedCellResolver {
         Objects.requireNonNull(position, "position");
         Objects.requireNonNull(candidates, "candidates");
 
-        if (!OreVeinDefinitions.isSupportedDimension(dimension)) {
+        if (OreVeinDefinitions.isUnsupportedDimension(dimension)) {
             return Optional.empty();
         }
 
@@ -133,8 +127,7 @@ public final class OreVeinResolvedCellResolver {
     }
 
     static OreVeinOreCellResult pickWinner(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinOreCellResult> compatibleOreResults) {
-        return compatibleOreResults.stream()
-                .sorted((left, right) -> {
+        return compatibleOreResults.stream().min((left, right) -> {
                     int byVariant = Integer.compare(variantRank(right.variant()), variantRank(left.variant()));
 
                     if (byVariant != 0) {
@@ -169,7 +162,6 @@ public final class OreVeinResolvedCellResolver {
 
                     return left.definitionId().toString().compareTo(right.definitionId().toString());
                 })
-                .findFirst()
                 .orElseThrow();
     }
 
@@ -228,10 +220,14 @@ public final class OreVeinResolvedCellResolver {
 
     private static BlockState resolveOreState(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellResult winner) {
         Supplier<Block> supplier = switch (winner.variant()) {
-            case REGULAR_ORE -> supplierFor(winner.selectedMaterial().ore.getOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case DENSE_ORE -> supplierFor(winner.selectedMaterial().ore.getDenseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case SPARSE_ORE -> supplierFor(winner.selectedMaterial().ore.getSparseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case HOST_ROCK -> throw invalidReplacement("host-rock winner is not replaceable", dimension, position, originalHostMaterial, winner);
+            case REGULAR_ORE ->
+                    supplierFor(winner.selectedMaterial().ore.getOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            case DENSE_ORE ->
+                    supplierFor(winner.selectedMaterial().ore.getDenseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            case SPARSE_ORE ->
+                    supplierFor(winner.selectedMaterial().ore.getSparseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            case HOST_ROCK ->
+                    throw invalidReplacement("host-rock winner is not replaceable", dimension, position, originalHostMaterial, winner);
         };
         Block block = supplier.get();
 

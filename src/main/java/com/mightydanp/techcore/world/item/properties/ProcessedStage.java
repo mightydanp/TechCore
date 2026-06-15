@@ -27,9 +27,9 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
     }
 
     public static @Nullable String getProcessedStageOrDefault(ItemStack itemStack, String defaultProcessedStage) {
-        if(hasProcessedStage(itemStack)) return getProcessedStage(itemStack);
+        if (hasProcessedStage(itemStack)) return getProcessedStage(itemStack);
 
-        if(defaultProcessedStage == null) return null;
+        if (defaultProcessedStage == null) return null;
 
         setProcessedStage(itemStack, defaultProcessedStage);
         return defaultProcessedStage;
@@ -45,8 +45,8 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
 
         return new ProcessedStage(itemStack, processedStages);
     }
-    
-    public enum ProcessedStages{
+
+    public enum ProcessedStages {
         CENTRIFUGED("centrifuged"),
         CRUSHED("crushed"),
         GROUND("ground"),
@@ -61,12 +61,9 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
                 processedStages -> processedStages != null ? processedStages.getStage() : null);
 
         private final String stage;
-        ProcessedStages(String stage){
-            this.stage = stage;
-        }
 
-        public String getStage() {
-            return stage;
+        ProcessedStages(String stage) {
+            this.stage = stage;
         }
 
         public static @Nullable ProcessedStages fromStage(String stage) {
@@ -78,6 +75,10 @@ public record ProcessedStage(ItemStack itemStack, ProcessedStages processedStage
 
             return null;
             //throw new IllegalArgumentException("Unknown processed stage: " + stage);
+        }
+
+        public String getStage() {
+            return stage;
         }
     }
 }

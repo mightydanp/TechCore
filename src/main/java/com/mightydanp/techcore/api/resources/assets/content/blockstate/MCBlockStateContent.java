@@ -8,19 +8,42 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.*;
-import net.minecraftforge.client.model.generators.*;
+import net.minecraftforge.client.model.generators.ConfiguredModel;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
+import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> {
+    public static final ImmutableMap<Direction, Property<WallSide>> WALL_PROPS = ImmutableMap.<Direction, Property<WallSide>>builder()
+            .put(Direction.EAST, BlockStateProperties.EAST_WALL)
+            .put(Direction.NORTH, BlockStateProperties.NORTH_WALL)
+            .put(Direction.SOUTH, BlockStateProperties.SOUTH_WALL)
+            .put(Direction.WEST, BlockStateProperties.WEST_WALL)
+            .build();
+
     public MCBlockStateContent(String modid, String name) {
         super(modid, name);
     }
 
     public MCBlockStateContent(ResourceLocation resourceLocation) {
         super(resourceLocation);
+    }
+    //------------------------------------------------------------------------------------------------------------------
+
+    private static int getyRot(@NotNull Direction facing, StairsShape shape, Half half) {
+        int yRot = (int) facing.getClockWise().toYRot(); // Stairs model is rotated 90 degrees clockwise for some reason
+        if (shape == StairsShape.INNER_LEFT || shape == StairsShape.OUTER_LEFT) {
+            yRot += 270; // Left facing stairs are rotated 90 degrees clockwise
+        }
+        if (shape != StairsShape.STRAIGHT && half == Half.TOP) {
+            yRot += 90; // Top stairs are rotated 90 degrees clockwise
+        }
+        yRot %= 360;
+        return yRot;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -45,9 +68,10 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
 
         axisBlock(block, column, columnHorizontal);
     }
+
     //------------------------------------------------------------------------------------------------------------------
 
-    public void buttonBlock(ButtonBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void buttonBlock(ButtonBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent buttonModel = new MCBlockModelContent(modid(), name(), "");
         MCBlockModelContent buttonPressedModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_pressed"), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
@@ -57,7 +81,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             buttonPressedModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             buttonModel.model().renderType(renderType, renderTypeFast);
             buttonPressedModel.model().renderType(renderType, renderTypeFast);
         }
@@ -69,7 +93,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         buttonBlock(block, button, buttonPressed);
     }
 
-    public void buttonBlock(ButtonBlock block, ModelFile button, ModelFile buttonPressed)  {
+    public void buttonBlock(ButtonBlock block, ModelFile button, ModelFile buttonPressed) {
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStates(state -> {
             Direction facing = state.getValue(ButtonBlock.FACING);
             AttachFace face = state.getValue(ButtonBlock.FACE);
@@ -86,9 +110,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         this.setBlockState(builder).save(false);
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-
-    private void doorBlockInternal(DoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, Map<Integer, ResourceLocation> bottomTextures, Map<Integer, ResourceLocation> topTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    private void doorBlockInternal(DoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, Map<Integer, ResourceLocation> bottomTextures, Map<Integer, ResourceLocation> topTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent bottomLeftBlockModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom_left"), "");
         MCBlockModelContent bottomLeftOpenModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom_left_open"), "");
         MCBlockModelContent bottomRightModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom_right"), "");
@@ -110,7 +132,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             topRightOpenModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             bottomLeftBlockModel.model().renderType(renderType, renderTypeFast);
             bottomLeftOpenModel.model().renderType(renderType, renderTypeFast);
             bottomRightModel.model().renderType(renderType, renderTypeFast);
@@ -134,7 +156,9 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         doorBlock(block, bottomLeft, bottomLeftOpen, bottomRight, bottomRightOpen, topLeft, topLeftOpen, topRight, topRightOpen);
     }
 
-    public void doorBlock(DoorBlock block, ModelFile bottomLeft, ModelFile bottomLeftOpen, ModelFile bottomRight, ModelFile bottomRightOpen, ModelFile topLeft, ModelFile topLeftOpen, ModelFile topRight, ModelFile topRightOpen)  {
+//----------------------------------------------------------------------------------------------------------------------
+
+    public void doorBlock(DoorBlock block, ModelFile bottomLeft, ModelFile bottomLeftOpen, ModelFile bottomRight, ModelFile bottomRightOpen, ModelFile topLeft, ModelFile topLeftOpen, ModelFile topRight, ModelFile topRightOpen) {
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int yRot = ((int) state.getValue(DoorBlock.FACING).toYRot()) + 90;
             boolean right = state.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT;
@@ -191,7 +215,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             fenceSideModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             fenceInventoryModel.model().renderType(renderType, renderTypeFast);
             fencePostModel.model().renderType(renderType, renderTypeFast);
             fenceSideModel.model().renderType(renderType, renderTypeFast);
@@ -205,9 +229,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         fourWayBlock(block, fencePost, fenceSide);
     }
 
-//----------------------------------------------------------------------------------------------------------------------
-
-    private void fenceGateBlockInternal(FenceGateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, Map<Integer, ResourceLocation> openTextures, Map<Integer, ResourceLocation> wallTextures, Map<Integer, ResourceLocation> wallOpenTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    private void fenceGateBlockInternal(FenceGateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, Map<Integer, ResourceLocation> openTextures, Map<Integer, ResourceLocation> wallTextures, Map<Integer, ResourceLocation> wallOpenTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent fenceGateModel = new MCBlockModelContent(modid(), name(), "");
         MCBlockModelContent fenceGateOpenModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_open"), "");
         MCBlockModelContent fenceGateWallModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_wall"), "");
@@ -221,7 +243,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             fenceGateWallOpenModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             fenceGateModel.model().renderType(renderType, renderTypeFast);
             fenceGateOpenModel.model().renderType(renderType, renderTypeFast);
             fenceGateWallModel.model().renderType(renderType, renderTypeFast);
@@ -237,7 +259,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         fenceGateBlock(block, fenceGate, fenceGateOpen, fenceGateWall, fenceGateWallOpen);
     }
 
-    public void fenceGateBlock(FenceGateBlock block, ModelFile gate, ModelFile gateOpen, ModelFile gateWall, ModelFile gateWallOpen)  {
+    public void fenceGateBlock(FenceGateBlock block, ModelFile gate, ModelFile gateOpen, ModelFile gateWall, ModelFile gateWallOpen) {
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             ModelFile model = gate;
             if (state.getValue(FenceGateBlock.IN_WALL)) {
@@ -257,7 +279,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void hangingSignBlockInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void hangingSignBlockInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent hangingSignModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -265,7 +287,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             hangingSignModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             hangingSignModel.model().renderType(renderType, renderTypeFast);
         }
 
@@ -275,12 +297,12 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         hangingSignBlock(block, hangingSign);
     }
 
-    public void hangingSignBlock(Block block, ModelFile model)  {
+    public void hangingSignBlock(Block block, ModelFile model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void leavesInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void leavesInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent leavesModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -288,7 +310,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             leavesModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             leavesModel.model().renderType(renderType, renderTypeFast);
         }
 
@@ -298,7 +320,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         leavesBlock(block, leaves);
     }
 
-    public void leavesBlock(Block block, ModelFile model)  {
+    public void leavesBlock(Block block, ModelFile model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
@@ -313,7 +335,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             logsHorizontalModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             logsModel.model().renderType(renderType, renderTypeFast);
             logsHorizontalModel.model().renderType(renderType, renderTypeFast);
         }
@@ -332,7 +354,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    private void paneBlockInternal(IronBarsBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, Map<Integer, MCBlockModelContent.PaneSideAltRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    private void paneBlockInternal(IronBarsBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, Map<Integer, MCBlockModelContent.PaneSideAltRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent panePostModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_post"), "");
         MCBlockModelContent paneSideModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_side"), "");
         MCBlockModelContent paneSideAltModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_side_alt"), "");
@@ -348,7 +370,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             paneNoSideAltModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             panePostModel.model().renderType(renderType, renderTypeFast);
             paneSideModel.model().renderType(renderType, renderTypeFast);
             paneSideAltModel.model().renderType(renderType, renderTypeFast);
@@ -366,7 +388,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         paneBlock(block, panePostBuilder, paneSideBuilder, paneSideAltBuilder, paneNoSideBuilder, paneNoSideAltBuilder);
     }
 
-    public void paneBlock(IronBarsBlock block, ModelFile post, ModelFile side, ModelFile sideAlt, ModelFile noSide, ModelFile noSideAlt)  {
+    public void paneBlock(IronBarsBlock block, ModelFile post, ModelFile side, ModelFile sideAlt, ModelFile noSide, ModelFile noSideAlt) {
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel().end();
         PipeBlock.PROPERTY_BY_DIRECTION.forEach((dir, value) -> {
@@ -383,7 +405,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void planksBlockSeparateInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, MCBlockModelContent.CubeSeparateRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void planksBlockSeparateInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, MCBlockModelContent.CubeSeparateRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent planksModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -391,7 +413,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             planksModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             planksModel.model().renderType(renderType, renderTypeFast);
         }
 
@@ -401,7 +423,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         planksBlock(block, planks);
     }
 
-    public void planksBlockTogetherInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void planksBlockTogetherInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent planksModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -419,12 +441,12 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         itemModel.mcPlanks(planksModel);
     }
 
-    public void planksBlock(Block block, ModelFile model)  {
+    public void planksBlock(Block block, ModelFile model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void pressurePlateBlock(PressurePlateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void pressurePlateBlock(PressurePlateBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent pressurePlateModel = new MCBlockModelContent(modid(), name(), "");
         MCBlockModelContent pressurePlateDownModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_down"), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
@@ -434,7 +456,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             pressurePlateDownModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             pressurePlateModel.model().renderType(renderType, renderTypeFast);
             pressurePlateDownModel.model().renderType(renderType, renderTypeFast);
         }
@@ -446,7 +468,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         pressurePlateBlock(block, pressurePlate, pressurePlateDown);
     }
 
-    public void pressurePlateBlock(PressurePlateBlock block, ModelFile pressurePlate, ModelFile pressurePlateDown)  {
+    public void pressurePlateBlock(PressurePlateBlock block, ModelFile pressurePlate, ModelFile pressurePlateDown) {
         VariantBlockStateBuilder builder = getVariantBuilder(block);
 
         builder
@@ -457,7 +479,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    public void saplingBlockInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void saplingBlockInternal(Block block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent saplingModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -465,7 +487,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             saplingModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             saplingModel.model().renderType(renderType, renderTypeFast);
         }
 
@@ -475,12 +497,13 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         saplingBlock(block, leaves);
     }
 
-    public void saplingBlock(Block block, ModelFile model)  {
+    public void saplingBlock(Block block, ModelFile model) {
         simpleBlock(block, new ConfiguredModel(model));
     }
+    //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    public void signBlockInternal(StandingSignBlock signBlock, WallSignBlock wallSignBlock, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    public void signBlockInternal(StandingSignBlock signBlock, WallSignBlock wallSignBlock, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> itemTextures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent signModel = new MCBlockModelContent(modid(), name(), "");
         MCItemModelContent itemModel = new MCItemModelContent(modid(), name(), "");
 
@@ -488,7 +511,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             signModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             signModel.model().renderType(renderType, renderTypeFast);
         }
 
@@ -498,11 +521,10 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         signBlock(signBlock, wallSignBlock, sign);
     }
 
-    public void signBlock(StandingSignBlock signBlock, WallSignBlock wallSignBlock, ModelBuilder<?> sign)  {
+    public void signBlock(StandingSignBlock signBlock, WallSignBlock wallSignBlock, ModelBuilder<?> sign) {
         simpleBlock(signBlock, sign);
         simpleBlock(wallSignBlock, sign);
     }
-    //------------------------------------------------------------------------------------------------------------------
 
     public void slabBlockInternal(SlabBlock block, String baseName, ResourceLocation particle, ResourceLocation doubleSlab, Map<Integer, MCBlockModelContent.SlabRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent slabModel = new MCBlockModelContent(modid(), name(), "");
@@ -514,7 +536,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             slabTopModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             slabModel.model().renderType(renderType, renderTypeFast);
             slabTopModel.model().renderType(renderType, renderTypeFast);
         }
@@ -538,7 +560,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    private void stairsBlockInternal(StairBlock block, String baseName, ResourceLocation particle, Map<Integer, MCBlockModelContent.StairsRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    private void stairsBlockInternal(StairBlock block, String baseName, ResourceLocation particle, Map<Integer, MCBlockModelContent.StairsRecord> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent stairsModel = new MCBlockModelContent(modid(), name(), "");
         MCBlockModelContent stairsInnerModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_inner"), "");
         MCBlockModelContent stairsOuterModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_outer"), "");
@@ -550,7 +572,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             stairsOuterModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             stairsModel.model().renderType(renderType, renderTypeFast);
             stairsInnerModel.model().renderType(renderType, renderTypeFast);
             stairsOuterModel.model().renderType(renderType, renderTypeFast);
@@ -565,7 +587,9 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         stairsBlock(block, stairs, stairsInner, stairsOuter);
     }
 
-    public void stairsBlock(StairBlock block, ModelFile stairs, ModelFile stairsInner, ModelFile stairsOuter)  {
+    //------------------------------------------------------------------------------------------------------------------
+
+    public void stairsBlock(StairBlock block, ModelFile stairs, ModelFile stairsInner, ModelFile stairsOuter) {
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .forAllStatesExcept(state -> {
                     Direction facing = state.getValue(StairBlock.FACING);
@@ -584,21 +608,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         this.setBlockState(builder).save(false);
     }
 
-    private static int getyRot(@NotNull Direction facing, StairsShape shape, Half half) {
-        int yRot = (int) facing.getClockWise().toYRot(); // Stairs model is rotated 90 degrees clockwise for some reason
-        if (shape == StairsShape.INNER_LEFT || shape == StairsShape.OUTER_LEFT) {
-            yRot += 270; // Left facing stairs are rotated 90 degrees clockwise
-        }
-        if (shape != StairsShape.STRAIGHT && half == Half.TOP) {
-            yRot += 90; // Top stairs are rotated 90 degrees clockwise
-        }
-        yRot %= 360;
-        return yRot;
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    private void trapdoorBlockInternal(TrapDoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast, boolean orientable)  {
+    private void trapdoorBlockInternal(TrapDoorBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast, boolean orientable) {
         if (orientable) {
             MCBlockModelContent trapdoorOrientableBottomModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_bottom"), "");
             MCBlockModelContent trapdoorOrientableTopModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_top"), "");
@@ -611,7 +621,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
                 trapdoorOrientableOpenModel.model().renderType(renderType);
             }
 
-            if (renderType != null && renderTypeFast != null){
+            if (renderType != null && renderTypeFast != null) {
                 trapdoorOrientableBottomModel.model().renderType(renderType, renderTypeFast);
                 trapdoorOrientableTopModel.model().renderType(renderType, renderTypeFast);
                 trapdoorOrientableOpenModel.model().renderType(renderType, renderTypeFast);
@@ -635,7 +645,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
                 trapdoorOpenModel.model().renderType(renderType);
             }
 
-            if (renderType != null && renderTypeFast != null){
+            if (renderType != null && renderTypeFast != null) {
                 trapdoorBottomModel.model().renderType(renderType, renderTypeFast);
                 trapdoorTopModel.model().renderType(renderType, renderTypeFast);
                 trapdoorOpenModel.model().renderType(renderType, renderTypeFast);
@@ -650,7 +660,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         }
     }
 
-    public void trapdoorBlock(TrapDoorBlock block, ModelFile bottom, ModelFile top, ModelFile open, boolean orientable)  {
+    public void trapdoorBlock(TrapDoorBlock block, ModelFile bottom, ModelFile top, ModelFile open, boolean orientable) {
         VariantBlockStateBuilder builder = getVariantBuilder(block).forAllStatesExcept(state -> {
             int xRot = 0;
             int yRot = ((int) state.getValue(TrapDoorBlock.FACING).toYRot()) + 180;
@@ -673,7 +683,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    private void wallBlockInternal(WallBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast)  {
+    private void wallBlockInternal(WallBlock block, String baseName, ResourceLocation particle, Map<Integer, ResourceLocation> textures, @Nullable ResourceLocation renderType, @Nullable ResourceLocation renderTypeFast) {
         MCBlockModelContent wallInventoryModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_post"), "");
         MCBlockModelContent wallPostModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_post"), "");
         MCBlockModelContent wallSideModel = new MCBlockModelContent(ResourceLocation.fromNamespaceAndPath(modid(), name() + "_side"), "");
@@ -687,7 +697,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
             wallSideTallModel.model().renderType(renderType);
         }
 
-        if (renderType != null && renderTypeFast != null){
+        if (renderType != null && renderTypeFast != null) {
             wallInventoryModel.model().renderType(renderType, renderTypeFast);
             wallPostModel.model().renderType(renderType, renderTypeFast);
             wallSideModel.model().renderType(renderType, renderTypeFast);
@@ -703,14 +713,7 @@ public class MCBlockStateContent extends BlockStateContent<MCBlockStateContent> 
         wallBlock(block, wallPostBuilder, wallSideBuilder, wallSideTallBuilder);
     }
 
-    public static final ImmutableMap<Direction, Property<WallSide>> WALL_PROPS = ImmutableMap.<Direction, Property<WallSide>>builder()
-            .put(Direction.EAST, BlockStateProperties.EAST_WALL)
-            .put(Direction.NORTH, BlockStateProperties.NORTH_WALL)
-            .put(Direction.SOUTH, BlockStateProperties.SOUTH_WALL)
-            .put(Direction.WEST, BlockStateProperties.WEST_WALL)
-            .build();
-
-    public void wallBlock(WallBlock block, ModelFile post, ModelFile side, ModelFile sideTall)  {
+    public void wallBlock(WallBlock block, ModelFile post, ModelFile side, ModelFile sideTall) {
         MultiPartBlockStateBuilder builder = getMultipartBuilder(block)
                 .part().modelFile(post).addModel()
                 .condition(WallBlock.UP, true).end();

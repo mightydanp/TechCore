@@ -49,5 +49,4 @@ public class ProcessedItemModelContent extends MaterialItemModelContent {
     }
 
 
-
 }

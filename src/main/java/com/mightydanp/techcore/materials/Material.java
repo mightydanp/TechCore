@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Material implements BaseRegistries<Material> {
+    private final List<Component<?, ?>> components = new ArrayList<>();
     public String name;
     public Icons.Icon icon;
-
     public ChemicalComponent<Material> chemical;
     public PhysicalComponent<Material> physical;
     public ThermalComponent<Material> thermal;
@@ -21,9 +21,7 @@ public class Material implements BaseRegistries<Material> {
     public ProcessedComponent<Material> processed;
     public ToolComponent<Material> tool;
 
-    private final List<Component<?, ?>> components = new ArrayList<>();
-
-    public Material(String name, Icons.Icon icon){
+    public Material(String name, Icons.Icon icon) {
         this.name = name;
         this.icon = icon;
 
@@ -38,13 +36,13 @@ public class Material implements BaseRegistries<Material> {
     }
 
     @Override
-    public Material init(){
+    public Material init() {
         components.forEach(AbstractComponent::init);
         return this;
     }
 
     @Override
-    public Material initClient(){
+    public Material initClient() {
         components.forEach(AbstractComponent::initClient);
         return this;
     }

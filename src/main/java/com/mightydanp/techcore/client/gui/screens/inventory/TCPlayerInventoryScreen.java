@@ -38,42 +38,6 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         this.inventoryLabelY = this.imageHeight - 110;
     }
 
-    public void containerTick() {
-
-        if (Objects.requireNonNull(Objects.requireNonNull(this.minecraft).gameMode).hasInfiniteItems()) {
-            this.minecraft.setScreen(new CreativeModeInventoryScreen(Objects.requireNonNull(this.minecraft.player), this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
-        }
-    }
-
-    protected void init() {
-        super.init();
-        if (Objects.requireNonNull(Objects.requireNonNull(this.minecraft).gameMode).hasInfiniteItems()) {
-            this.minecraft.setScreen(new CreativeModeInventoryScreen(Objects.requireNonNull(this.minecraft.player), this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
-        }
-    }
-
-    protected void renderLabels(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        //guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
-    }
-
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
-        this.xMouse = (float) mouseX;
-        this.yMouse = (float) mouseY;
-    }
-
-    @Override
-    protected void renderBg(@NotNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        int x = this.leftPos;
-        int y = this.topPos;
-        //int x = (this.width - this.imageWidth) / 2;
-        //int y = (this.height - this.imageHeight)/ 2;
-        guiGraphics.blit(GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
-        renderEntityInInventoryFollowsMouse(guiGraphics, x + 26, y + 8, x + 75, y + 78, 30, 0.0625F, this.xMouse, this.yMouse, Objects.requireNonNull(this.minecraft).player);
-    }
-
     public static void renderEntityInInventoryFollowsMouse(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int scale, float yOffset, float mouseX, float mouseY, LivingEntity entity) {
         float f = (float) (x1 + x2) / 2.0F;
         float f1 = (float) (y1 + y2) / 2.0F;
@@ -135,17 +99,53 @@ public class TCPlayerInventoryScreen extends EffectRenderingInventoryScreen<TCPl
         if (!Minecraft.useShaderTransparency()) {
             renderCall.run();
             return;
-            }
-        
+        }
+
         OptionInstance<GraphicsStatus> graphicsMode = Minecraft.getInstance().options.graphicsMode();
         GraphicsStatus previousGraphicsMode = graphicsMode.get();
         graphicsMode.set(GraphicsStatus.FANCY);
         try {
-                renderCall.run();
-            } finally {
-                graphicsMode.set(previousGraphicsMode);
-            }
+            renderCall.run();
+        } finally {
+            graphicsMode.set(previousGraphicsMode);
         }
+    }
+
+    public void containerTick() {
+
+        if (Objects.requireNonNull(Objects.requireNonNull(this.minecraft).gameMode).hasInfiniteItems()) {
+            this.minecraft.setScreen(new CreativeModeInventoryScreen(Objects.requireNonNull(this.minecraft.player), this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
+        }
+    }
+
+    protected void init() {
+        super.init();
+        if (Objects.requireNonNull(Objects.requireNonNull(this.minecraft).gameMode).hasInfiniteItems()) {
+            this.minecraft.setScreen(new CreativeModeInventoryScreen(Objects.requireNonNull(this.minecraft.player), this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
+        }
+    }
+
+    protected void renderLabels(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        //guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+    }
+
+    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        this.xMouse = (float) mouseX;
+        this.yMouse = (float) mouseY;
+    }
+
+    @Override
+    protected void renderBg(@NotNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+        int x = this.leftPos;
+        int y = this.topPos;
+        //int x = (this.width - this.imageWidth) / 2;
+        //int y = (this.height - this.imageHeight)/ 2;
+        guiGraphics.blit(GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        renderEntityInInventoryFollowsMouse(guiGraphics, x + 26, y + 8, x + 75, y + 78, 30, 0.0625F, this.xMouse, this.yMouse, Objects.requireNonNull(this.minecraft).player);
+    }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         return super.keyPressed(keyCode, scanCode, modifiers);

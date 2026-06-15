@@ -38,7 +38,8 @@ public class MaterialItemProperties extends Item.Properties {
         return symbol;
     }
 
-    public int getColor() {return color;
+    public int getColor() {
+        return color;
     }
 
     public Double getBoilingPoint() {

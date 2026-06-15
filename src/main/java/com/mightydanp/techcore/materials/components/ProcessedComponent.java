@@ -7,8 +7,8 @@ import com.mightydanp.techcore.api.resources.assets.content.language.LanguageCon
 import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.component.ProcessedItemModelContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
-import com.mightydanp.techcore.materials.item.DustItem;
 import com.mightydanp.techcore.materials.Material;
+import com.mightydanp.techcore.materials.item.DustItem;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -33,7 +33,7 @@ public class ProcessedComponent<A extends Material> extends Component<A, Process
     public ProcessedComponent<A> init() {
         dust = registerDustItem(material.name + "_dust");
 
-        if(!material.rockLayer.isRockLayer && material.ore.getOreType() != null){
+        if (!material.rockLayer.isRockLayer && material.ore.getOreType() != null) {
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String stoneName = stoneLayer.name;
 
@@ -115,7 +115,7 @@ public class ProcessedComponent<A extends Material> extends Component<A, Process
         AssetPackRegistries.registerSafetyLanguage(dust, modid, LanguageCodes.english, ItemModelContent.ITEM_FOLDER,
                 name + "_dust", LanguageContent.toDisplayName(name) + " Dust");
 
-        if(!material.rockLayer.isRockLayer && material.ore.getOreType() != null) {
+        if (!material.rockLayer.isRockLayer && material.ore.getOreType() != null) {
             for (Material stoneLayer : material.ore.sameRockMaterials) {
                 String rockName = stoneLayer.name;
 

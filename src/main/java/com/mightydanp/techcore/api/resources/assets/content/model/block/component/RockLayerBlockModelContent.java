@@ -3,11 +3,7 @@ package com.mightydanp.techcore.api.resources.assets.content.model.block.compone
 import com.mightydanp.techcore.api.resources.assets.content.blockstate.MCBlockStateContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.MCItemModelContent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.ModelProvider;
 

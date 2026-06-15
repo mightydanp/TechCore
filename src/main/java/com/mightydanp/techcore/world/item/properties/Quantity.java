@@ -24,13 +24,13 @@ public record Quantity(int quantity, int maxQuantity) {
         quantity = Mth.clamp(quantity, 0, maxQuantity);
     }
 
-    public float level() {
-        return maxQuantity <= 0 ? 0.0f : (float) quantity / maxQuantity;
-    }
-
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Stack stack(ItemStack stack) {
         return new Stack(stack);
+    }
+
+    public float level() {
+        return maxQuantity <= 0 ? 0.0f : (float) quantity / maxQuantity;
     }
 
     public static final class Stack {

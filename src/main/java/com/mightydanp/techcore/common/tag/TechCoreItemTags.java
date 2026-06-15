@@ -10,5 +10,6 @@ public final class TechCoreItemTags {
     public static final TagKey<Item> DISABLE_TEMPERATURE_RENDER =
             ItemTags.create(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "disable_temperature_render"));
 
-    private TechCoreItemTags() {}
+    private TechCoreItemTags() {
+    }
 }

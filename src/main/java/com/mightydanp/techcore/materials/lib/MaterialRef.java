@@ -23,11 +23,6 @@ public class MaterialRef {
     public static final String gem = "gem";
     public static final String flawless = "flawless";
     public static final String legendary = "legendary";
-
-    private static final List<String> english_Translations = List.of(
-            temperature, quantity, quality, purity, processed_stage, melting_point, boiling_point, gem_state, chipped, flawed, gem, flawless, legendary
-    );
-
     public static final String temperature_translatable = LanguageContent.grabTranslatable(folder, temperature);
     public static final String quantity_translatable = LanguageContent.grabTranslatable(folder, quantity);
     public static final String quality_translatable = LanguageContent.grabTranslatable(folder, quality);
@@ -41,6 +36,9 @@ public class MaterialRef {
     public static final String gem_translatable = LanguageContent.grabTranslatable(folder, gem);
     public static final String flawless_translatable = LanguageContent.grabTranslatable(folder, flawless);
     public static final String legendary_translatable = LanguageContent.grabTranslatable(folder, legendary);
+    private static final List<String> english_Translations = List.of(
+            temperature, quantity, quality, purity, processed_stage, melting_point, boiling_point, gem_state, chipped, flawed, gem, flawless, legendary
+    );
 
     public static void initLanguages() {
         for (String name : english_Translations) {

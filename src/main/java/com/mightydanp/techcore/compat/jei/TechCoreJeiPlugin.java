@@ -2,10 +2,10 @@ package com.mightydanp.techcore.compat.jei;
 
 import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;
+import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.item.DustItem;
 import com.mightydanp.techcore.materials.item.GemItem;
 import com.mightydanp.techcore.materials.item.OreItem;
-import com.mightydanp.techcore.materials.Material;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
@@ -46,6 +46,12 @@ public class TechCoreJeiPlugin implements IModPlugin {
         return "quantity=" + quantity + "|purity=" + purity;
     };
 
+    private static void addItem(Set<Item> items, Supplier<Item> supplier) {
+        if (supplier != null) {
+            items.add(supplier.get());
+        }
+    }
+
     @Override
     public @NotNull ResourceLocation getPluginUid() {
         return ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "jei_plugin");
@@ -81,12 +87,6 @@ public class TechCoreJeiPlugin implements IModPlugin {
 
         for (Item item : dustItems) {
             registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item, DUST_SUBTYPE);
-        }
-    }
-
-    private static void addItem(Set<Item> items, Supplier<Item> supplier) {
-        if (supplier != null) {
-            items.add(supplier.get());
         }
     }
 }

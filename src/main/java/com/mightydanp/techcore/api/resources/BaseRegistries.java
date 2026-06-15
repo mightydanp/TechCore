@@ -4,35 +4,37 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
 public interface BaseRegistries<A> {
     @SuppressWarnings("unchecked")
-    default A init(){
-        return (A) this;
-    }
-    @SuppressWarnings("unchecked")
-    default A initClient(){
+    default A init() {
         return (A) this;
     }
 
     @SuppressWarnings("unchecked")
-    default A initLanguages(){
+    default A initClient() {
         return (A) this;
     }
 
     @SuppressWarnings("unchecked")
-    default A initTags(){
+    default A initLanguages() {
         return (A) this;
     }
 
     @SuppressWarnings("unchecked")
-    default A initItemProperties(){
+    default A initTags() {
         return (A) this;
     }
 
     @SuppressWarnings("unchecked")
-    default A initBlockProperties(RegisterColorHandlersEvent.Block event){
+    default A initItemProperties() {
         return (A) this;
     }
+
     @SuppressWarnings("unchecked")
-    default A initClientRenderLayers(RegisterColorHandlersEvent.Item event){
+    default A initBlockProperties(RegisterColorHandlersEvent.Block event) {
+        return (A) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    default A initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
         return (A) this;
     }
 }

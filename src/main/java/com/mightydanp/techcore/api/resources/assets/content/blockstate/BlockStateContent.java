@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class BlockStateContent<A extends BlockStateContent<A>> {
+    private static final int DEFAULT_ANGLE_OFFSET = 180;
     private final String modid;
     private final String name;
     private IGeneratedBlockState blockState;
@@ -161,7 +162,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         axisBlock(block, blockTexture(block));
     }
 
-
     public void axisBlock(RotatedPillarBlock block, ResourceLocation baseName) throws Exception {
         axisBlock(block, extend(baseName, "_side"), extend(baseName, "_end"));
     }
@@ -175,7 +175,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
     public void axisBlockWithRenderType(RotatedPillarBlock block, String renderType) throws Exception {
         axisBlockWithRenderType(block, blockTexture(block), renderType);
     }
-
 
     public void axisBlockWithRenderType(RotatedPillarBlock block, ResourceLocation baseName, String renderType) throws Exception {
         axisBlockWithRenderType(block, extend(baseName, "_side"), extend(baseName, "_end"), renderType);
@@ -225,7 +224,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
         axisBlock(block, modeContent.cubeColumn(side, end), modeContent.cubeColumnHorizontal(side, end).renderType(renderType, renderTypeFast));
     }
 
-
     public void axisBlock(RotatedPillarBlock block, ModelFile vertical, ModelFile horizontal) throws Exception {
         VariantBlockStateBuilder builder = getVariantBuilder(block)
                 .partialState().with(RotatedPillarBlock.AXIS, Direction.Axis.Y)
@@ -237,8 +235,6 @@ public class BlockStateContent<A extends BlockStateContent<A>> {
 
         this.setBlockState(builder).save(false);
     }
-
-    private static final int DEFAULT_ANGLE_OFFSET = 180;
 
     public void horizontalBlock(Block block, ResourceLocation side, ResourceLocation front, ResourceLocation top) throws Exception {
         BlockModelContent<?> modelContent = new BlockModelContent<>(modid(), name(), "");

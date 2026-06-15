@@ -15,25 +15,25 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ResourcePack implements PackResources {
-    // Holders for each side
-    private final Map<ResourceLocation, IoSupplier<InputStream>> assets = new HashMap<>();
-    private final Map<ResourceLocation, IoSupplier<InputStream>> data   = new HashMap<>();
-
     // Pack meta
     public final int version = 15; // 1.20.1
     public final PackSource source = PackSource.DEFAULT;
-
     // Identity
     public final String namespace;
     public final String name;
-
     // Repository prefs
     public final boolean required;
     public final Pack.Position defaultPosition;
     public final boolean fixedPosition;
+    // Holders for each side
+    private final Map<ResourceLocation, IoSupplier<InputStream>> assets = new HashMap<>();
+    private final Map<ResourceLocation, IoSupplier<InputStream>> data = new HashMap<>();
 
     public ResourcePack(String namespace, String name, boolean required, Pack.Position defaultPosition, boolean fixedPosition) {
         this.namespace = namespace;
@@ -45,6 +45,11 @@ public class ResourcePack implements PackResources {
 
     /* ------------ API to add/remove ------------- */
 
+    private static void put(@NotNull Map<ResourceLocation, IoSupplier<InputStream>> map, ResourceLocation loc, @NotNull JsonObject json) {
+        byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
+        map.put(loc, () -> new ByteArrayInputStream(bytes));
+    }
+
     public void addAsset(ResourceLocation location, JsonObject json) {
         put(assets, location, json);
     }
@@ -53,12 +58,12 @@ public class ResourcePack implements PackResources {
         put(data, location, json);
     }
 
-    public void removeAsset(ResourceLocation location) { assets.remove(location); }
-    public void removeData(ResourceLocation location)  { data.remove(location);  }
+    public void removeAsset(ResourceLocation location) {
+        assets.remove(location);
+    }
 
-    private static void put(@NotNull Map<ResourceLocation, IoSupplier<InputStream>> map, ResourceLocation loc, @NotNull JsonObject json) {
-        byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
-        map.put(loc, () -> new ByteArrayInputStream(bytes));
+    public void removeData(ResourceLocation location) {
+        data.remove(location);
     }
 
     /* ------------ PackResources impl ------------- */
@@ -132,11 +137,15 @@ public class ResourcePack implements PackResources {
         // no-op (keep content across reloads)
     }
 
-    public PackResources open() { return this; }
+    public PackResources open() {
+        return this;
+    }
 
     /* ------------ Pack registry helpers ------------- */
 
-    /** Create the visual "Assets" pack (CLIENT_RESOURCES) backed by this UnifiedPack. */
+    /**
+     * Create the visual "Assets" pack (CLIENT_RESOURCES) backed by this UnifiedPack.
+     */
     @Nullable
     public Pack createAssetPack() {
         Pack.ResourcesSupplier supplier = (a) -> this;
@@ -151,7 +160,9 @@ public class ResourcePack implements PackResources {
         );
     }
 
-    /** Create the visual "Data" pack (SERVER_DATA) backed by this UnifiedPack. */
+    /**
+     * Create the visual "Data" pack (SERVER_DATA) backed by this UnifiedPack.
+     */
     @Nullable
     public Pack createDataPack() {
         Pack.ResourcesSupplier supplier = (a) -> this;

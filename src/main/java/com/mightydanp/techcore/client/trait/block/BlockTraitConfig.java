@@ -9,13 +9,11 @@ public class BlockTraitConfig implements IConfig {
     private final ForgeConfigSpec.ConfigValue<Integer> colorConfig;
     private final ForgeConfigSpec.ConfigValue<Double> kilogramConfig;
     private final ForgeConfigSpec.ConfigValue<Boolean> canPickUpConfig;
-
-    private ForgeConfigSpec builtSpec;
-
     public String registry;
     public Integer color;
     public Double kilogram;
     public Boolean canPickUp;
+    private ForgeConfigSpec builtSpec;
 
     public BlockTraitConfig(String registry, Integer color, Double kilogram, Boolean canPickUp) {
         registryConfig = builder

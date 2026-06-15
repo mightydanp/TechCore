@@ -5,7 +5,7 @@ import com.mightydanp.techcore.api.resources.assets.content.model.ModelBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockModelBuilder <A> extends ModelBuilder<A>{
+public class BlockModelBuilder<A> extends ModelBuilder<A> {
 
     public BlockModelBuilder(ResourceLocation location) {
         super(location);

@@ -24,6 +24,19 @@ public class LanguageContent {
         this.name = name;
     }
 
+    public static String grabTranslatable(String folder, String translatable) {
+        return folder + "." + CoreRef.MOD_ID + "." + translatable;
+    }
+
+    public static @NotNull String toDisplayName(@NotNull String input) {
+        if (input.isEmpty()) return input;
+
+        return Arrays.stream(input.split("_+"))
+                .filter(s -> !s.isEmpty())
+                .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+
     public String modid() {
         return modid;
     }
@@ -45,12 +58,8 @@ public class LanguageContent {
         return this;
     }
 
-    public static String grabTranslatable(String folder, String translatable) {
-        return folder + "." + CoreRef.MOD_ID + "." + translatable;
-    }
-
     public LanguageContent addToTranslations(@NotNull JsonObject json) {
-        json.asMap().forEach((modid, translation) ->{
+        json.asMap().forEach((modid, translation) -> {
             if (!translations.has(name)) {
                 translations.add(modid, translation);
             }
@@ -58,14 +67,6 @@ public class LanguageContent {
         return this;
     }
 
-    public static @NotNull  String toDisplayName(@NotNull String input) {
-        if (input.isEmpty()) return input;
-
-        return Arrays.stream(input.split("_+"))
-                .filter(s -> !s.isEmpty())
-                .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase())
-                .collect(Collectors.joining(" "));
+    public record translation(String modID, String language, String translatable, String translation) {
     }
-
-    public record translation(String modID, String language, String translatable, String translation){}
 }

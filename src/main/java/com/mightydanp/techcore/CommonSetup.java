@@ -17,7 +17,7 @@ public class CommonSetup {
         LOGGER.info("Tech Core common setup is starting");
 
         //enqueueWork is only needed for things that aren't thread-safe
-        event.enqueueWork(() ->{
+        event.enqueueWork(() -> {
 
         });
 

@@ -27,20 +27,6 @@ public class ServerBoundSplitQuantityPacket {
         this.cursorStack = cursorStack;
     }
 
-    public void encode(@NotNull FriendlyByteBuf buffer) {
-        // Writes the real server slot index.
-        buffer.writeInt(this.slotIndex);
-
-        // Writes the client menu slot index that the result packet should update.
-        buffer.writeInt(this.clientSlotIndex);
-
-        // Writes the amount being split.
-        buffer.writeInt(this.amount);
-
-        // Writes the cursor stack the client is trying to split.
-        buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
-    }
-
     public static @NotNull ServerBoundSplitQuantityPacket decode(@NotNull FriendlyByteBuf buffer) {
         // Reads the real server slot index.
         int slotIndex = buffer.readInt();
@@ -55,6 +41,44 @@ public class ServerBoundSplitQuantityPacket {
         ItemStack itemStack = buffer.readItem();
 
         return new ServerBoundSplitQuantityPacket(slotIndex, clientSlotIndex, amount, itemStack);
+    }
+
+    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
+        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
+            return false;
+        }
+
+        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
+    }
+
+    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
+        ItemStack copy = stack.copy();
+        CompoundTag tag = copy.getTag();
+
+        if (tag != null) {
+            tag.remove(Quantity.TAG);
+            tag.remove(Quantity.MAX_TAG);
+
+            if (tag.isEmpty()) {
+                copy.setTag(null);
+            }
+        }
+
+        return copy;
+    }
+
+    public void encode(@NotNull FriendlyByteBuf buffer) {
+        // Writes the real server slot index.
+        buffer.writeInt(this.slotIndex);
+
+        // Writes the client menu slot index that the result packet should update.
+        buffer.writeInt(this.clientSlotIndex);
+
+        // Writes the amount being split.
+        buffer.writeInt(this.amount);
+
+        // Writes the cursor stack the client is trying to split.
+        buffer.writeItem(Objects.requireNonNullElse(this.cursorStack, ItemStack.EMPTY));
     }
 
     public void handle(@NotNull Supplier<NetworkEvent.Context> contextSupplier) {
@@ -139,30 +163,6 @@ public class ServerBoundSplitQuantityPacket {
                 PacketDistributor.PLAYER.with(() -> player),
                 new ClientBoundSplitQuantityResultPacket(clientSlotIndex, slotCopy, clientCursorStack)
         );
-    }
-
-    private static boolean canMergeQuantityStacks(ItemStack cursorStack, ItemStack slotStack) {
-        if (!ItemStack.isSameItem(cursorStack, slotStack)) {
-            return false;
-        }
-
-        return ItemStack.isSameItemSameTags(withoutQuantity(cursorStack), withoutQuantity(slotStack));
-    }
-
-    private static @NotNull ItemStack withoutQuantity(@NotNull ItemStack stack) {
-        ItemStack copy = stack.copy();
-        CompoundTag tag = copy.getTag();
-
-        if (tag != null) {
-            tag.remove(Quantity.TAG);
-            tag.remove(Quantity.MAX_TAG);
-
-            if (tag.isEmpty()) {
-                copy.setTag(null);
-            }
-        }
-
-        return copy;
     }
 
 }

@@ -6,7 +6,7 @@ import net.minecraftforge.client.model.generators.ModelProvider;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public class OreBlockModelContent extends MaterialBlockModelContent{
+public class OreBlockModelContent extends MaterialBlockModelContent {
     public OreBlockModelContent(String modid, String modelName, String parentFolder) {
         super(modid, modelName, parentFolder);
     }
@@ -52,7 +52,6 @@ public class OreBlockModelContent extends MaterialBlockModelContent{
     }
 
 
-
     @Contract("_, _, _ -> new")
     private @NotNull ResourceLocation oreBlockTexture(Icons.@NotNull Icon icon, String variant, boolean overlay) {
         return ResourceLocation.fromNamespaceAndPath(
@@ -60,7 +59,6 @@ public class OreBlockModelContent extends MaterialBlockModelContent{
                 "block/material_icons/" + icon.label() + "/" + variant + (overlay ? "_overlay" : "")
         );
     }
-
 
 
 }

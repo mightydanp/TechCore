@@ -28,6 +28,14 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
         this.registryKey = resourceKey;
     }
 
+    public static @NotNull String prefixNamespace(@NotNull ResourceLocation registryKey) {
+        return registryKey.getNamespace().equals("minecraft") ? registryKey.getPath() : registryKey.getNamespace() + "/" + registryKey.getPath();
+    }
+
+    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
+        return "traits/" + prefixNamespace(resourceKey.location());
+    }
+
     public Codec<A> codec() {
         return null;
     }
@@ -39,7 +47,9 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
             throw new IllegalStateException(this.getClass().getSimpleName() + " must override codec() before traits can be loaded.");
         }
         resourceLocationJsonElementMap.forEach((resourceLocation, jsonElement) -> traits.put(resourceLocation, codec.decode(JsonOps.INSTANCE, jsonElement)
-                .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to decode: " + msg); })
+                .getOrThrow(false, msg -> {
+                    throw new IllegalStateException("Failed to decode: " + msg);
+                })
                 .getFirst()));
     }
 
@@ -53,22 +63,18 @@ public class Trait<A extends Trait<A>> extends SimpleJsonResourceReloadListener 
 
     public JsonObject json(@NotNull Codec<A> codec, A builder) {
         return codec.encodeStart(JsonOps.INSTANCE, builder)
-                .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to encode: " + msg); })
+                .getOrThrow(false, msg -> {
+                    throw new IllegalStateException("Failed to encode: " + msg);
+                })
                 .getAsJsonObject();
     }
 
     public A trait(@NotNull Codec<A> codec, JsonObject jsonObject) {
         return codec.decode(JsonOps.INSTANCE, jsonObject)
-                .getOrThrow(false, msg -> { throw new IllegalStateException("Failed to decode: " + msg); })
+                .getOrThrow(false, msg -> {
+                    throw new IllegalStateException("Failed to decode: " + msg);
+                })
                 .getFirst();
-    }
-
-    public static @NotNull String prefixNamespace(@NotNull ResourceLocation registryKey) {
-        return registryKey.getNamespace().equals("minecraft") ? registryKey.getPath() : registryKey.getNamespace() + "/" + registryKey.getPath();
-    }
-
-    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
-        return "traits/" + prefixNamespace(resourceKey.location());
     }
 
 }

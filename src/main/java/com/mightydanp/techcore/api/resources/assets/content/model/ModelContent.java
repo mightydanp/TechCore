@@ -14,13 +14,11 @@ public class ModelContent<A> {
     protected static final ExistingFileHelper.ResourceType MODEL = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, ".json", "models");
 
     protected static final ExistingFileHelper.ResourceType MODEL_WITH_EXTENSION = new ExistingFileHelper.ResourceType(PackType.CLIENT_RESOURCES, "", "models");
-    private ModelBuilder<A> model;
-
     private final String modid;
-
     private final String name;
     private final String modelType;
     private final String organizationPath;
+    private ModelBuilder<A> model;
 
     @SuppressWarnings("unchecked")
     public ModelContent(String modid, String name, String modelType, String organizationPath) {

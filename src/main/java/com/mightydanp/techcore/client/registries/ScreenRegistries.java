@@ -1,4 +1,4 @@
-package com.mightydanp.techcore.registries;
+package com.mightydanp.techcore.client.registries;
 
 import com.mightydanp.techcore.api.resources.BaseRegistries;
 import com.mightydanp.techcore.client.ref.ScreenRef;

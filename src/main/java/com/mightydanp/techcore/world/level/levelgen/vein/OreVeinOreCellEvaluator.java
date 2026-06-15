@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinContribution.ContributionState.INSIDE_MAIN_BODY;
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.DENSE_ORE;
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.HOST_ROCK;
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.REGULAR_ORE;
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.SPARSE_ORE;
+import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.*;
 
 public final class OreVeinOreCellEvaluator {
     static final long MATERIAL_SELECTION_SALT = 0xD1B54A32D192ED03L;
@@ -56,11 +53,6 @@ public final class OreVeinOreCellEvaluator {
 
     static OreVeinOreCellResult evaluateCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, OreVeinContribution contribution) {
         double signedBoundaryDistanceBlocks = contribution.signedBoundaryDistanceBlocks();
-        double maximumSignedDistanceBlocks = definition.sparseReachBlocks();
-
-        if (signedBoundaryDistanceBlocks > maximumSignedDistanceBlocks) {
-            throw new IllegalArgumentException("position is outside halo");
-        }
 
         SelectedOreEntry selectedOreEntry = selectOreEntry(descriptor, definition, position);
         DenseNodeOutcome denseNodeOutcome = denseNodeOutcome(descriptor, definition, contribution, selectedOreEntry.material());
@@ -334,28 +326,6 @@ public final class OreVeinOreCellEvaluator {
         );
     }
 
-    static int haloFillNumerator(OreVeinDensitySettings densitySettings, OreVeinHaloSettings haloSettings, double signedBoundaryDistanceBlocks) {
-        double distanceT = clamp01(signedBoundaryDistanceBlocks / haloSettings.haloRadiusBlocks());
-        double falloff = distanceT * distanceT * (3.0D - 2.0D * distanceT);
-        return densitySettings.regularFillNumerator() - (int) Math.floor(
-                falloff * (densitySettings.regularFillNumerator() - haloSettings.outerHaloFillNumerator())
-        );
-    }
-
-    static OreVeinOreCellResult.OreVariant transitionVariant(
-            OreVeinInstanceDescriptor descriptor,
-            BlockPos position,
-            double signedBoundaryDistanceBlocks,
-            double transitionWidthBlocks,
-            int fillDenominator
-    ) {
-        double t = clamp01(signedBoundaryDistanceBlocks / transitionWidthBlocks);
-        double blend = t * t * (3.0D - 2.0D * t);
-        int blendNumerator = Math.max(0, Math.min(fillDenominator, (int) Math.floor(blend * fillDenominator)));
-        int variantRoll = occupancyRoll(descriptor, position, TRANSITION_VARIANT_SALT, fillDenominator);
-        return variantRoll < blendNumerator ? SPARSE_ORE : REGULAR_ORE;
-    }
-
     static OreVeinOreCellResult.OreVariant insideTransitionVariant(
             OreVeinInstanceDescriptor descriptor,
             BlockPos position,
@@ -530,11 +500,6 @@ public final class OreVeinOreCellEvaluator {
         return Mth.floor(Mth.lerp(outsideTransitionProgress, 1024.0D, baseExteriorThreshold));
     }
 
-    @FunctionalInterface
-    interface HaloOccupancyRollProvider {
-        int roll(OreVeinInstanceDescriptor descriptor, BlockPos position, int fillDenominator);
-    }
-
     private static int occupancyRoll(OreVeinInstanceDescriptor descriptor, BlockPos position, long salt, int fillDenominator) {
         long hash = descriptor.instanceSeed() ^ salt;
         hash ^= (long) position.getX() * X_HASH_MULTIPLIER;
@@ -571,10 +536,6 @@ public final class OreVeinOreCellEvaluator {
         return value * value;
     }
 
-    private static double clamp01(double value) {
-        return Math.max(0.0D, Math.min(1.0D, value));
-    }
-
     private static OreVeinOreCellResult.OreVariant variant(int finalDensity) {
         if (finalDensity <= 0) {
             return HOST_ROCK;
@@ -587,22 +548,59 @@ public final class OreVeinOreCellEvaluator {
         return DENSE_ORE;
     }
 
+    static long nodeIdSalt() {
+        return NODE_ID_SALT;
+    }
+
+    static long nodeCenterXSalt() {
+        return NODE_CENTER_X_SALT;
+    }
+
+    static long nodeCenterYSalt() {
+        return NODE_CENTER_Y_SALT;
+    }
+
+    static long nodeCenterZSalt() {
+        return NODE_CENTER_Z_SALT;
+    }
+
+    static long nodeRadiusXSalt() {
+        return NODE_RADIUS_X_SALT;
+    }
+
+    static long nodeRadiusYSalt() {
+        return NODE_RADIUS_Y_SALT;
+    }
+
+    static long nodeRadiusZSalt() {
+        return NODE_RADIUS_Z_SALT;
+    }
+
+    static long nodePeakSalt() {
+        return NODE_PEAK_SALT;
+    }
+
+    static long xHashMultiplier() {
+        return X_HASH_MULTIPLIER;
+    }
+
+    static long yHashMultiplier() {
+        return Y_HASH_MULTIPLIER;
+    }
+
+    static int nodeCenterMaxAttempts() {
+        return NODE_CENTER_MAX_ATTEMPTS;
+    }
+
+    @FunctionalInterface
+    interface HaloOccupancyRollProvider {
+        int roll(OreVeinInstanceDescriptor descriptor, BlockPos position, int fillDenominator);
+    }
+
     record SelectedOreEntry(VeinOreEntry entry, Material material) {
     }
 
     record DenseNodeOutcome(long nodeId, double influence) {
         static final DenseNodeOutcome NONE = new DenseNodeOutcome(0L, 0.0D);
     }
-
-    static long nodeIdSalt() { return NODE_ID_SALT; }
-    static long nodeCenterXSalt() { return NODE_CENTER_X_SALT; }
-    static long nodeCenterYSalt() { return NODE_CENTER_Y_SALT; }
-    static long nodeCenterZSalt() { return NODE_CENTER_Z_SALT; }
-    static long nodeRadiusXSalt() { return NODE_RADIUS_X_SALT; }
-    static long nodeRadiusYSalt() { return NODE_RADIUS_Y_SALT; }
-    static long nodeRadiusZSalt() { return NODE_RADIUS_Z_SALT; }
-    static long nodePeakSalt() { return NODE_PEAK_SALT; }
-    static long xHashMultiplier() { return X_HASH_MULTIPLIER; }
-    static long yHashMultiplier() { return Y_HASH_MULTIPLIER; }
-    static int nodeCenterMaxAttempts() { return NODE_CENTER_MAX_ATTEMPTS; }
 }

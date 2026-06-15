@@ -1,14 +1,12 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 final class OreVeinDenseNodeLayout {
-    private OreVeinDenseNodeLayout() {
-    }
-
     static List<OreVeinDenseNode> generate(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition) {
         int requestedNodeCount = OreVeinOreCellEvaluator.nodeCount(descriptor, definition.densitySettings());
 
@@ -67,7 +65,7 @@ final class OreVeinDenseNodeLayout {
                 continue;
             }
 
-            if (overlapsAnyNode(candidate, acceptedNodes)) {
+            if (overlapsAnyNode(descriptor, candidate, acceptedNodes)) {
                 continue;
             }
 
@@ -126,14 +124,31 @@ final class OreVeinDenseNodeLayout {
     }
 
     private static boolean fullyContained(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode node) {
-        for (int x = minDenseBlock(node.localCenterX(), node.radiusX()); x <= maxDenseBlock(node.localCenterX(), node.radiusX()); x++) {
-            for (int y = minDenseBlock(node.localCenterY(), node.radiusY()); y <= maxDenseBlock(node.localCenterY(), node.radiusY()); y++) {
-                for (int z = minDenseBlock(node.localCenterZ(), node.radiusZ()); z <= maxDenseBlock(node.localCenterZ(), node.radiusZ()); z++) {
-                    if (!OreVeinOreCellEvaluator.isInsideDenseNodeVolume(node, x + 0.5D, y + 0.5D, z + 0.5D)) {
+        OreVeinBounds bounds = worldBounds(descriptor, node);
+        BlockPos.MutableBlockPos position =
+                new BlockPos.MutableBlockPos();
+
+        for (int x = bounds.minX(); x <= bounds.maxX(); x++) {
+            for (int y = bounds.minY(); y <= bounds.maxY(); y++) {
+                for (int z = bounds.minZ(); z <= bounds.maxZ(); z++) {
+                    position.set(x, y, z);
+
+                    OreVeinContribution contribution =
+                            OreVeinShapeEvaluator.evaluate(
+                                    descriptor,
+                                    position
+                            );
+
+                    if (!OreVeinOreCellEvaluator.isInsideDenseNodeVolume(
+                            node,
+                            contribution.localX(),
+                            contribution.localY(),
+                            contribution.localZ()
+                    )) {
                         continue;
                     }
 
-                    if (OreVeinShapeEvaluator.evaluateLocalPoint(descriptor, x + 0.5D, y + 0.5D, z + 0.5D).signedBoundaryDistanceBlocks() > 0.0D) {
+                    if (contribution.signedBoundaryDistanceBlocks() > 0.0D) {
                         return false;
                     }
                 }
@@ -143,9 +158,9 @@ final class OreVeinDenseNodeLayout {
         return true;
     }
 
-    private static boolean overlapsAnyNode(OreVeinDenseNode candidate, List<OreVeinDenseNode> acceptedNodes) {
+    private static boolean overlapsAnyNode(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode candidate, List<OreVeinDenseNode> acceptedNodes) {
         for (OreVeinDenseNode accepted : acceptedNodes) {
-            if (overlapExists(candidate, accepted)) {
+            if (overlapExists(descriptor, candidate, accepted)) {
                 return true;
             }
         }
@@ -153,34 +168,144 @@ final class OreVeinDenseNodeLayout {
         return false;
     }
 
-    static boolean overlapExists(OreVeinDenseNode first, OreVeinDenseNode second) {
-        int minX = Math.max(minDenseBlock(first.localCenterX(), first.radiusX()), minDenseBlock(second.localCenterX(), second.radiusX()));
-        int maxX = Math.min(maxDenseBlock(first.localCenterX(), first.radiusX()), maxDenseBlock(second.localCenterX(), second.radiusX()));
-        int minY = Math.max(minDenseBlock(first.localCenterY(), first.radiusY()), minDenseBlock(second.localCenterY(), second.radiusY()));
-        int maxY = Math.min(maxDenseBlock(first.localCenterY(), first.radiusY()), maxDenseBlock(second.localCenterY(), second.radiusY()));
-        int minZ = Math.max(minDenseBlock(first.localCenterZ(), first.radiusZ()), minDenseBlock(second.localCenterZ(), second.radiusZ()));
-        int maxZ = Math.min(maxDenseBlock(first.localCenterZ(), first.radiusZ()), maxDenseBlock(second.localCenterZ(), second.radiusZ()));
+    static boolean overlapExists(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode first, OreVeinDenseNode second) {
+        OreVeinBounds overlapBounds = worldBounds(descriptor, first)
+                .intersect(worldBounds(descriptor, second));
 
-        if (minX > maxX || minY > maxY || minZ > maxZ) {
+        if (overlapBounds == null) {
             return false;
         }
 
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    double sampleX = x + 0.5D;
-                    double sampleY = y + 0.5D;
-                    double sampleZ = z + 0.5D;
+        BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
 
-                    if (OreVeinOreCellEvaluator.isInsideDenseNodeVolume(first, sampleX, sampleY, sampleZ)
-                            && OreVeinOreCellEvaluator.isInsideDenseNodeVolume(second, sampleX, sampleY, sampleZ)) {
-                        return true;
+        for (int x = overlapBounds.minX();
+             x <= overlapBounds.maxX();
+             x++) {
+
+            for (int y = overlapBounds.minY();
+                 y <= overlapBounds.maxY();
+                 y++) {
+
+                for (int z = overlapBounds.minZ();
+                     z <= overlapBounds.maxZ();
+                     z++) {
+
+                    position.set(x, y, z);
+
+                    OreVeinContribution contribution =
+                            OreVeinShapeEvaluator.evaluate(
+                                    descriptor,
+                                    position
+                            );
+
+                    boolean insideFirst =
+                            OreVeinOreCellEvaluator
+                                    .isInsideDenseNodeVolume(
+                                            first,
+                                            contribution.localX(),
+                                            contribution.localY(),
+                                            contribution.localZ()
+                                    );
+
+                    if (!insideFirst) {
+                        continue;
                     }
+
+                    boolean insideSecond =
+                            OreVeinOreCellEvaluator
+                                    .isInsideDenseNodeVolume(
+                                            second,
+                                            contribution.localX(),
+                                            contribution.localY(),
+                                            contribution.localZ()
+                                    );
+
+                    if (insideSecond) return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private static OreVeinBounds worldBounds(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode node) {
+        double yaw = descriptor.yaw();
+        double pitch = descriptor.pitch();
+        double roll = descriptor.roll();
+
+        OreVeinShapeEvaluator.RotatedVector centerOffset =
+                OreVeinShapeEvaluator.forwardRotate(
+                        node.localCenterX(),
+                        node.localCenterY(),
+                        node.localCenterZ(),
+                        yaw,
+                        pitch,
+                        roll
+                );
+
+        double worldCenterX =
+                descriptor.center().getX() + 0.5D + centerOffset.x();
+        double worldCenterY =
+                descriptor.center().getY() + 0.5D + centerOffset.y();
+        double worldCenterZ =
+                descriptor.center().getZ() + 0.5D + centerOffset.z();
+
+        OreVeinShapeEvaluator.RotatedVector xAxis =
+                OreVeinShapeEvaluator.forwardRotate(
+                        node.radiusX(),
+                        0.0D,
+                        0.0D,
+                        yaw,
+                        pitch,
+                        roll
+                );
+
+        OreVeinShapeEvaluator.RotatedVector yAxis =
+                OreVeinShapeEvaluator.forwardRotate(
+                        0.0D,
+                        node.radiusY(),
+                        0.0D,
+                        yaw,
+                        pitch,
+                        roll
+                );
+
+        OreVeinShapeEvaluator.RotatedVector zAxis =
+                OreVeinShapeEvaluator.forwardRotate(
+                        0.0D,
+                        0.0D,
+                        node.radiusZ(),
+                        yaw,
+                        pitch,
+                        roll
+                );
+
+        double extentX = Math.sqrt(
+                square(xAxis.x())
+                        + square(yAxis.x())
+                        + square(zAxis.x())
+        );
+
+        double extentY = Math.sqrt(
+                square(xAxis.y())
+                        + square(yAxis.y())
+                        + square(zAxis.y())
+        );
+
+        double extentZ = Math.sqrt(
+                square(xAxis.z())
+                        + square(yAxis.z())
+                        + square(zAxis.z())
+        );
+
+        return new OreVeinBounds(
+                minDenseBlock(worldCenterX, extentX),
+                minDenseBlock(worldCenterY, extentY),
+                minDenseBlock(worldCenterZ, extentZ),
+                maxDenseBlock(worldCenterX, extentX),
+                maxDenseBlock(worldCenterY, extentY),
+                maxDenseBlock(worldCenterZ, extentZ)
+        );
     }
 
     static double normalizedSeparation(OreVeinDenseNode first, OreVeinDenseNode second) {
@@ -202,5 +327,9 @@ final class OreVeinDenseNodeLayout {
 
     private static int maxDenseBlock(double center, double radius) {
         return Mth.ceil(center + radius - 0.5D) - 1;
+    }
+
+    private static double square(double value) {
+        return value * value;
     }
 }

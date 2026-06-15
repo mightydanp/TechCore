@@ -25,36 +25,36 @@ public abstract class AbstractComponent<A extends AbstractComponent<A>> {
 
     @SuppressWarnings("unchecked")
     public A init() {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initClient() {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initLanguages() {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initTags() {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initItemProperties() {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initClientRenderLayers(RegisterColorHandlersEvent.Item event) {
-        return (A)this;
+        return (A) this;
     }
 
     @SuppressWarnings("unchecked")
     public A initBlockProperties(RegisterColorHandlersEvent.Block event) {
-        return (A)this;
+        return (A) this;
     }
 }

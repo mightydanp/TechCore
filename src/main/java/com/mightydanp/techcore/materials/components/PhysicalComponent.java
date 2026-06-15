@@ -11,9 +11,17 @@ public class PhysicalComponent<A extends Material> extends Component<A, Physical
         super("physical", "component", material);
     }
 
+    public int getColor() {
+        return this.color;
+    }
+
     public PhysicalComponent<A> setColor(int color) {
         this.color = color;
         return this;
+    }
+
+    public double getDensity() {
+        return this.density;
     }
 
     public PhysicalComponent<A> setDensity(double density) {
@@ -21,21 +29,12 @@ public class PhysicalComponent<A extends Material> extends Component<A, Physical
         return this;
     }
 
+    public int getHarvestLevel() {
+        return this.harvestLevel;
+    }
+
     public PhysicalComponent<A> setHarvestLevel(int harvestLevel) {
         this.harvestLevel = harvestLevel;
         return this;
-    }
-
-
-    public int getColor() {
-        return this.color;
-    }
-
-    public double getDensity() {
-        return this.density;
-    }
-
-    public int getHarvestLevel() {
-        return this.harvestLevel;
     }
 }

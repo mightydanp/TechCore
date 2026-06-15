@@ -38,6 +38,10 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
         this.provider = output.createPathProvider(PackOutput.Target.DATA_PACK, TraitProvider.getDir(resourceKey));
     }
 
+    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
+        return "traits/" + resourceKey.location().getNamespace();
+    }
+
     public abstract void generate(HolderLookup.Provider registries, ExistingFileHelper fileHelper);
 
     @Nonnull
@@ -66,9 +70,5 @@ public abstract class TraitProvider<A extends Trait<A>> implements DataProvider 
     @Override
     public @NotNull String getName() {
         return modId + " " + resourceKey.location().getPath() + " traits";
-    }
-
-    public static @NotNull String getDir(@NotNull ResourceKey<? extends Registry<?>> resourceKey) {
-        return "traits/" + resourceKey.location().getNamespace();
     }
 }

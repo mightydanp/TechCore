@@ -4,7 +4,8 @@ public final class ItemRenderEventGuard {
     private static final ThreadLocal<Boolean> RENDERING_EXTRA_PASS =
             ThreadLocal.withInitial(() -> false);
 
-    private ItemRenderEventGuard() {}
+    private ItemRenderEventGuard() {
+    }
 
     public static boolean isRenderingExtraPass() {
         return RENDERING_EXTRA_PASS.get();

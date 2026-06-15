@@ -7,33 +7,19 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.Objects;
 
-public record OreVeinDefinition(
-        ResourceLocation id,
-        List<ResourceKey<Level>> dimensions,
-        int generationWeight,
-        int minCenterY,
-        int maxCenterYExclusive,
-        int minSizeX,
-        int maxSizeX,
-        int minSizeY,
-        int maxSizeY,
-        int minSizeZ,
-        int maxSizeZ,
-        int sparseReachBlocks,
-        double maxPitchDegrees,
-        double maxRollDegrees,
-        OreVeinDensitySettings densitySettings,
-        OreVeinHaloSettings haloSettings,
-        List<VeinOreEntry> oreEntries
-) {
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, OreVeinDensitySettings densitySettings, OreVeinHaloSettings haloSettings, List<VeinOreEntry> oreEntries) {
     private static final int DEFAULT_SPARSE_REACH_BLOCKS = 32;
     private static final double DEFAULT_MAX_PITCH_DEGREES = 12.0D;
     private static final double DEFAULT_MAX_ROLL_DEGREES = 12.0D;
+
+    //private Double maxPitchDegrees;
+    //private Double maxRollDegrees;
+    
     private static final OreVeinDensitySettings DEFAULT_DENSITY_SETTINGS = new OreVeinDensitySettings(
             704,
             960,
             1024,
-            4096L,
+            8192L,
             0,
             5,
             4.0D,
@@ -45,11 +31,10 @@ public record OreVeinDefinition(
             2,
             4
     );
-    private static final OreVeinHaloSettings DEFAULT_HALO_SETTINGS = new OreVeinHaloSettings(
-            4.0D,
-            9.0D,
-            320
-    );
+    private static final OreVeinHaloSettings DEFAULT_HALO_SETTINGS =
+            new OreVeinHaloSettings(
+                    4.0D
+            );
 
     public OreVeinDefinition {
         Objects.requireNonNull(id, "id");
@@ -68,57 +53,24 @@ public record OreVeinDefinition(
         validateTotalDistributionWeight(oreEntries);
     }
 
+    public OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, double maxPitchDegrees, double maxRollDegrees, OreVeinDensitySettings densitySettings, OreVeinHaloSettings haloSettings, List<VeinOreEntry> oreEntries) {
+        this(id, dimensions, generationWeight, minCenterY, maxCenterYExclusive, minSizeX, maxSizeX, minSizeY, maxSizeY, minSizeZ, maxSizeZ, DEFAULT_SPARSE_REACH_BLOCKS, maxPitchDegrees, maxRollDegrees, densitySettings, haloSettings, oreEntries);
+    }
+
+    /*
+    public Builder maxPitchDegrees(double maxPitchDegrees) {
+        this.maxPitchDegrees = maxPitchDegrees;
+        return this;
+    }
+
+    public Builder maxRollDegrees(double maxRollDegrees) {
+        this.maxRollDegrees = maxRollDegrees;
+        return this;
+    }
+    */
+
     public static Builder builder(ResourceLocation id) {
         return new Builder(id);
-    }
-
-    public OreVeinDefinition(
-            ResourceLocation id,
-            List<ResourceKey<Level>> dimensions,
-            int generationWeight,
-            int minCenterY,
-            int maxCenterYExclusive,
-            int minSizeX,
-            int maxSizeX,
-            int minSizeY,
-            int maxSizeY,
-            int minSizeZ,
-            int maxSizeZ,
-            double maxPitchDegrees,
-            double maxRollDegrees,
-            OreVeinDensitySettings densitySettings,
-            OreVeinHaloSettings haloSettings,
-            List<VeinOreEntry> oreEntries
-    ) {
-        this(
-                id,
-                dimensions,
-                generationWeight,
-                minCenterY,
-                maxCenterYExclusive,
-                minSizeX,
-                maxSizeX,
-                minSizeY,
-                maxSizeY,
-                minSizeZ,
-                maxSizeZ,
-                DEFAULT_SPARSE_REACH_BLOCKS,
-                maxPitchDegrees,
-                maxRollDegrees,
-                densitySettings,
-                haloSettings,
-                oreEntries
-        );
-    }
-
-    public long totalDistributionWeight() {
-        long totalWeight = 0L;
-
-        for (VeinOreEntry entry : oreEntries) {
-            totalWeight = addDistributionWeight(totalWeight, entry);
-        }
-
-        return totalWeight;
     }
 
     private static <T> List<T> copyNonEmptyList(List<T> values, String name) {
@@ -188,6 +140,16 @@ public record OreVeinDefinition(
                     exception
             );
         }
+    }
+
+    public long totalDistributionWeight() {
+        long totalWeight = 0L;
+
+        for (VeinOreEntry entry : oreEntries) {
+            totalWeight = addDistributionWeight(totalWeight, entry);
+        }
+
+        return totalWeight;
     }
 
     public static final class Builder {
@@ -276,8 +238,8 @@ public record OreVeinDefinition(
                     minSizeZ,
                     maxSizeZ,
                     sparseReachBlocks != null ? sparseReachBlocks : DEFAULT_SPARSE_REACH_BLOCKS,
-                    DEFAULT_MAX_PITCH_DEGREES,
-                    DEFAULT_MAX_ROLL_DEGREES,
+                    DEFAULT_MAX_PITCH_DEGREES,//maxPitchDegrees != null ? maxPitchDegrees : DEFAULT_MAX_PITCH_DEGREES,
+                    DEFAULT_MAX_ROLL_DEGREES,//maxRollDegrees != null ? maxRollDegrees : DEFAULT_MAX_ROLL_DEGREES,
                     DEFAULT_DENSITY_SETTINGS,
                     DEFAULT_HALO_SETTINGS,
                     oreEntries

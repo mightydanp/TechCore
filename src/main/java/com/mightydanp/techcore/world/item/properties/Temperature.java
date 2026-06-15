@@ -19,15 +19,7 @@ public record Temperature(double temperature, Scales.Scale scale) {
             Scales.Scale.CODEC.fieldOf("scale").forGetter(Temperature::scale)
     ).apply(instance, Temperature::new));
 
-    public double toKelvin() {
-        return temperature + 273.15;
-    }
-
-    public double toFahrenheit() {
-        return (temperature * 9.0 / 5.0) + 32;
-    }
-
-///item helpers
+    /// item helpers
     public static boolean hasTemperature(@NotNull ItemStack itemStack) {
         CompoundTag tag = itemStack.getTag();
         return tag != null && tag.contains(TAG);
@@ -53,26 +45,9 @@ public record Temperature(double temperature, Scales.Scale scale) {
 
         return new Temperature(temperature, getScale());
     }
-///
-
-    @Contract(pure = true)
-    public @NotNull Double toKelvin(int temperature) {
-    return temperature + 273.15;
-}
-
-    @Contract(pure = true)
-    public @NotNull Double toFahrenheit(int temperature) {
-        return (temperature * 9.0 / 5.0) + 32;
-    }
 
     public static Scales.Scale getScale() {
         return MaterialConfig.TEMPERATURE_SCALE.get().scale;
-    }
-
-    public Double getTemperature(Scales.@NotNull Scale scale) {
-        if (scale.equals(Scales.KELVIN.scale)) return toKelvin();
-        if (scale.equals(Scales.FAHRENHEIT.scale)) return toFahrenheit();
-        return temperature;
     }
 
     public static int getColor(ItemStack itemStack) {
@@ -80,6 +55,48 @@ public record Temperature(double temperature, Scales.Scale scale) {
         return temperature == null ? 0xFFFFFF : temperature.getColor();
     }
 
+    private static double smoothstep(double edge0, double edge1, double value) {
+        double t = clamp01((value - edge0) / (edge1 - edge0));
+        return t * t * (3.0D - 2.0D * t);
+    }
+
+    private static double lerp(double delta, double start, double end) {
+        return start + delta * (end - start);
+    }
+
+    private static double clamp01(double value) {
+        return Math.max(0.0D, Math.min(1.0D, value));
+    }
+
+    private static int clamp(double value) {
+        return (int) Math.round(Math.max(0, Math.min(255, value)));
+    }
+
+    public double toKelvin() {
+        return temperature + 273.15;
+    }
+
+    public double toFahrenheit() {
+        return (temperature * 9.0 / 5.0) + 32;
+    }
+
+    ///
+
+    @Contract(pure = true)
+    public @NotNull Double toKelvin(int temperature) {
+        return temperature + 273.15;
+    }
+
+    @Contract(pure = true)
+    public @NotNull Double toFahrenheit(int temperature) {
+        return (temperature * 9.0 / 5.0) + 32;
+    }
+
+    public Double getTemperature(Scales.@NotNull Scale scale) {
+        if (scale.equals(Scales.KELVIN.scale)) return toKelvin();
+        if (scale.equals(Scales.FAHRENHEIT.scale)) return toFahrenheit();
+        return temperature;
+    }
 
     private int[] getRGBColor() {
         if (temperature < 0.0D) {
@@ -150,23 +167,6 @@ public record Temperature(double temperature, Scales.Scale scale) {
         int b = 255;
 
         return new int[]{clamp(r), clamp(g), clamp(b)};
-    }
-
-    private static double smoothstep(double edge0, double edge1, double value) {
-        double t = clamp01((value - edge0) / (edge1 - edge0));
-        return t * t * (3.0D - 2.0D * t);
-    }
-
-    private static double lerp(double delta, double start, double end) {
-        return start + delta * (end - start);
-    }
-
-    private static double clamp01(double value) {
-        return Math.max(0.0D, Math.min(1.0D, value));
-    }
-
-    private static int clamp(double value) {
-        return (int) Math.round(Math.max(0, Math.min(255, value)));
     }
 
     public enum Scales {

@@ -3,6 +3,8 @@ package com.mightydanp.techcore.world.level.levelgen.vein;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -31,9 +33,6 @@ public final class OreVeinGenerationMath {
     private static final long SALT_PITCH = 0x629a292a367cd507L;
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
 
-    private OreVeinGenerationMath() {
-    }
-
     public static BigInteger budgetQ16(OreVeinDimensionGenerationSettings settings) {
         return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
     }
@@ -50,9 +49,7 @@ public final class OreVeinGenerationMath {
     public static BigInteger totalEffectiveWeightQ16(List<OreVeinDefinition> definitions) {
         BigInteger total = BigInteger.ZERO;
 
-        for (OreVeinDefinition definition : definitions) {
-            total = total.add(effectiveWeightQ16(definition));
-        }
+        for (OreVeinDefinition definition : definitions) total = total.add(effectiveWeightQ16(definition));
 
         return total;
     }
@@ -69,46 +66,60 @@ public final class OreVeinGenerationMath {
     }
 
     public static long instanceId(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
-        return hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_INSTANCE_ID);
+        return instanceHash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_INSTANCE_ID);
     }
 
     public static long instanceSeed(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
-        return hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_INSTANCE_SEED);
+        return instanceHash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_INSTANCE_SEED);
     }
 
     public static long shapeSeed(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
-        return hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SHAPE_SEED);
+        return instanceHash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SHAPE_SEED);
+    }
+
+    private static long instanceHash(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt) {
+        return hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt);
     }
 
     public static int centerX(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
-        return Math.addExact(Math.multiplyExact(originRegionX, REGION_BLOCKS), randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_CENTER_X, REGION_BLOCKS));
+        return centerCoordinate(worldSeed, dimension, originRegionX, originRegionZ, originIndex, originRegionX, SALT_CENTER_X);
     }
 
     public static int centerZ(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
-        return Math.addExact(Math.multiplyExact(originRegionZ, REGION_BLOCKS), randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_CENTER_Z, REGION_BLOCKS));
+        return centerCoordinate(worldSeed, dimension, originRegionX, originRegionZ, originIndex, originRegionZ, SALT_CENTER_Z);
     }
 
-    public static int sizeX(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
-        return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_X, definition.minSizeX(), definition.maxSizeX());
+    private static int centerCoordinate(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, int axisRegionCoordinate, long salt) {
+        int regionStart = Math.multiplyExact(axisRegionCoordinate, REGION_BLOCKS);
+        int regionOffset = randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, REGION_BLOCKS);
+        return Math.addExact(regionStart, regionOffset);
     }
 
-    public static int sizeY(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
-        return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Y, definition.minSizeY(), definition.maxSizeY());
+    public static int sizeX(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_X, definition.minSizeX(), definition.maxSizeX());
     }
 
-    public static int sizeZ(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
-        return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Z, definition.minSizeZ(), definition.maxSizeZ());
+    public static int sizeY(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Y, definition.minSizeY(), definition.maxSizeY());
+    }
+
+    public static int sizeZ(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Z, definition.minSizeZ(), definition.maxSizeZ());
+    }
+
+    private static int size(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, int minSize, int maxSize) {
+        return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, minSize, maxSize);
     }
 
     public static double yaw(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
         return randomUnit(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_YAW) * 360.0D;
     }
 
-    public static double pitch(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
+    public static double pitch(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
         return randomSigned(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_PITCH, definition.maxPitchDegrees());
     }
 
-    public static double roll(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
+    public static double roll(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
         return randomSigned(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_ROLL, definition.maxRollDegrees());
     }
 
@@ -116,7 +127,8 @@ public final class OreVeinGenerationMath {
         return minInclusive + randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_CENTER_Y, maxExclusive - minInclusive);
     }
 
-    public static HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
+    @Contract("_, _, _, _, _, _ -> new")
+    public static @NotNull HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
         double hx = (sizeX - 1) / 2.0D;
         double hy = (sizeY - 1) / 2.0D;
         double hz = (sizeZ - 1) / 2.0D;
@@ -147,7 +159,8 @@ public final class OreVeinGenerationMath {
         );
     }
 
-    public static OreVeinBounds bounds(int centerX, int centerY, int centerZ, HalfExtents halfExtents) {
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull OreVeinBounds bounds(int centerX, int centerY, int centerZ, @NotNull HalfExtents halfExtents) {
         return new OreVeinBounds(
                 centerX - halfExtents.x(),
                 centerY - halfExtents.y(),
@@ -162,7 +175,7 @@ public final class OreVeinGenerationMath {
         return Math.floorDiv(blockCoordinate, REGION_BLOCKS);
     }
 
-    public static BigInteger expectedVolume8(OreVeinDefinition definition) {
+    public static @NotNull BigInteger expectedVolume8(@NotNull OreVeinDefinition definition) {
         BigInteger mid2X = BigInteger.valueOf((long) definition.minSizeX() + definition.maxSizeX());
         BigInteger mid2Y = BigInteger.valueOf((long) definition.minSizeY() + definition.maxSizeY());
         BigInteger mid2Z = BigInteger.valueOf((long) definition.minSizeZ() + definition.maxSizeZ());
@@ -170,17 +183,18 @@ public final class OreVeinGenerationMath {
         return mid2X.multiply(mid2Y).multiply(mid2Z);
     }
 
-    public static BigInteger ceilDiv(BigInteger value, BigInteger divisor) {
+    public static BigInteger ceilDiv(@NotNull BigInteger value, BigInteger divisor) {
         BigInteger[] divided = value.divideAndRemainder(divisor);
 
         return divided[1].signum() == 0 ? divided[0] : divided[0].add(BigInteger.ONE);
     }
 
-    public static BigInteger sqrtFloor(BigInteger value) {
+    @Contract(pure = true)
+    public static BigInteger sqrtFloor(@NotNull BigInteger value) {
         return value.sqrt();
     }
 
-    static long hashSeedAndDimension(long worldSeed, ResourceKey<Level> dimension, long salt) {
+    public static long hashSeedAndDimension(long worldSeed, ResourceKey<Level> dimension, long salt) {
         long value = 0xcbf29ce484222325L;
         value = mix64(value ^ worldSeed);
         value = mix64(value ^ GENERATOR_VERSION);
@@ -188,20 +202,16 @@ public final class OreVeinGenerationMath {
         return mix64(foldDimensionIdentity(value, dimension));
     }
 
-    static long foldDimensionIdentity(long value, ResourceKey<Level> dimension) {
+    private static long foldDimensionIdentity(long value, @NotNull ResourceKey<Level> dimension) {
         ResourceLocation location = dimension.location();
         byte[] namespace = location.getNamespace().getBytes(StandardCharsets.UTF_8);
         byte[] path = location.getPath().getBytes(StandardCharsets.UTF_8);
 
-        for (byte b : namespace) {
-            value = mix64(value ^ b);
-        }
+        for (byte b : namespace) value = mix64(value ^ b);
 
         value = mix64(value ^ ':');
 
-        for (byte b : path) {
-            value = mix64(value ^ b);
-        }
+        for (byte b : path) value = mix64(value ^ b);
 
         return value;
     }
@@ -211,17 +221,13 @@ public final class OreVeinGenerationMath {
     }
 
     private static int randomInt(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, int bound) {
-        if (bound <= 0) {
-            throw new IllegalArgumentException("bound must be positive");
-        }
+        if (bound <= 0) throw new IllegalArgumentException("bound must be positive");
 
         return Math.floorMod(hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt), bound);
     }
 
     private static double randomSigned(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, double maxAbsolute) {
-        if (maxAbsolute == 0.0D) {
-            return 0.0D;
-        }
+        if (maxAbsolute == 0.0D) return 0.0D;
 
         return (randomUnit(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt) * 2.0D - 1.0D) * maxAbsolute;
     }
@@ -238,7 +244,7 @@ public final class OreVeinGenerationMath {
         return mix64(value);
     }
 
-    static long mix64(long value) {
+    public static long mix64(long value) {
         value ^= value >>> 30;
         value *= 0xbf58476d1ce4e5b9L;
         value ^= value >>> 27;
@@ -258,6 +264,5 @@ public final class OreVeinGenerationMath {
         }
     }
 
-    public record HalfExtents(int x, int y, int z) {
-    }
+    public record HalfExtents(int x, int y, int z) {}
 }

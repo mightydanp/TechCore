@@ -1,6 +1,8 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinContribution.ContributionState.INSIDE_MAIN_BODY;
 import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinContribution.ContributionState.OUTSIDE;
@@ -20,10 +22,7 @@ public final class OreVeinShapeEvaluator {
     private static final long MEDIUM_SALT = 0xBB67AE8584CAA73BL;
     private static final long DETAIL_SALT = 0x3C6EF372FE94F82BL;
 
-    private OreVeinShapeEvaluator() {
-    }
-
-    public static OreVeinContribution evaluate(OreVeinInstanceDescriptor descriptor, BlockPos position) {
+    public static @NotNull OreVeinContribution evaluate(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position) {
         double worldX = position.getX() + 0.5D;
         double worldY = position.getY() + 0.5D;
         double worldZ = position.getZ() + 0.5D;
@@ -41,7 +40,8 @@ public final class OreVeinShapeEvaluator {
         return evaluateLocalPoint(descriptor, local.x(), local.y(), local.z());
     }
 
-    public static OreVeinContribution evaluateLocalPoint(OreVeinInstanceDescriptor descriptor, double localX, double localY, double localZ) {
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull OreVeinContribution evaluateLocalPoint(@NotNull OreVeinInstanceDescriptor descriptor, double localX, double localY, double localZ) {
         double halfX = descriptor.sizeX() / 2.0D;
         double halfY = descriptor.sizeY() / 2.0D;
         double halfZ = descriptor.sizeZ() / 2.0D;
@@ -62,15 +62,7 @@ public final class OreVeinShapeEvaluator {
         }
 
         double normalizedRadius = normalizedRadius(localX, localY, localZ, halfX, halfY, halfZ);
-        double directionX = localX / radialDistance;
-        double directionY = localY / radialDistance;
-        double directionZ = localZ / radialDistance;
-        double ellipsoidSurfaceRadius = 1.0D / Math.sqrt(
-                square(directionX / halfX)
-                        + square(directionY / halfY)
-                        + square(directionZ / halfZ)
-        );
-        double baseDistanceBlocks = radialDistance - ellipsoidSurfaceRadius;
+        double baseDistanceBlocks = baseDistanceBlocks(localX, localY, localZ, halfX, halfY, halfZ);
         double distortionBlocks = distortionBlocks(descriptor.shapeSeed(), localX, localY, localZ);
         double signedBoundaryDistanceBlocks = baseDistanceBlocks - distortionBlocks;
 
@@ -87,7 +79,7 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    static HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
+    public static @NotNull HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
         double halfX = sizeX / 2.0D;
         double halfY = sizeY / 2.0D;
         double halfZ = sizeZ / 2.0D;
@@ -100,7 +92,8 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    static OreVeinBounds bounds(int centerX, int centerY, int centerZ, HalfExtents halfExtents) {
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull OreVeinBounds bounds(int centerX, int centerY, int centerZ, @NotNull HalfExtents halfExtents) {
         return new OreVeinBounds(
                 centerX - halfExtents.x(),
                 centerY - halfExtents.y(),
@@ -111,16 +104,15 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    static double normalizedRadius(double localX, double localY, double localZ, double halfX, double halfY, double halfZ) {
+    private static double normalizedRadius(double localX, double localY, double localZ, double halfX, double halfY, double halfZ) {
         return Math.sqrt(square(localX / halfX) + square(localY / halfY) + square(localZ / halfZ));
     }
 
-    static double baseDistanceBlocks(double localX, double localY, double localZ, double halfX, double halfY, double halfZ) {
+    private static double baseDistanceBlocks(double localX, double localY, double localZ, double halfX, double halfY, double halfZ) {
         double radialDistance = length(localX, localY, localZ);
 
-        if (radialDistance == 0.0D) {
-            return -Math.min(halfX, Math.min(halfY, halfZ));
-        }
+        if (radialDistance == 0.0D) return -Math.min(halfX, Math.min(halfY, halfZ));
+
 
         double directionX = localX / radialDistance;
         double directionY = localY / radialDistance;
@@ -134,33 +126,10 @@ public final class OreVeinShapeEvaluator {
         return radialDistance - ellipsoidSurfaceRadius;
     }
 
-    static double distortionBlocks(long shapeSeed, double localX, double localY, double localZ) {
-        double coarse = sampleNoise(
-                shapeSeed,
-                COARSE_SALT,
-                localX,
-                localY,
-                localZ,
-                COARSE_FREQUENCY
-        ) * COARSE_AMPLITUDE_BLOCKS;
-
-        double medium = sampleNoise(
-                shapeSeed,
-                MEDIUM_SALT,
-                localX,
-                localY,
-                localZ,
-                MEDIUM_FREQUENCY
-        ) * MEDIUM_AMPLITUDE_BLOCKS;
-
-        double detail = sampleNoise(
-                shapeSeed,
-                DETAIL_SALT,
-                localX,
-                localY,
-                localZ,
-                DETAIL_FREQUENCY
-        ) * DETAIL_AMPLITUDE_BLOCKS;
+    private static double distortionBlocks(long shapeSeed, double localX, double localY, double localZ) {
+        double coarse = noiseLayer(shapeSeed, COARSE_SALT, localX, localY, localZ, COARSE_FREQUENCY, COARSE_AMPLITUDE_BLOCKS);
+        double medium = noiseLayer(shapeSeed, MEDIUM_SALT, localX, localY, localZ, MEDIUM_FREQUENCY, MEDIUM_AMPLITUDE_BLOCKS);
+        double detail = noiseLayer(shapeSeed, DETAIL_SALT, localX, localY, localZ, DETAIL_FREQUENCY, DETAIL_AMPLITUDE_BLOCKS);
 
         double radialDistance = length(localX, localY, localZ);
 
@@ -176,35 +145,31 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    static long latticeHash(long shapeSeed, long layerSalt, long x, long y, long z) {
-        long h = shapeSeed ^ layerSalt;
-        h ^= x * 0x9E3779B97F4A7C15L;
-        h ^= y * 0xC2B2AE3D27D4EB4FL;
-        h ^= z * 0x165667B19E3779F9L;
-
-        h ^= h >>> 30;
-        h *= 0xBF58476D1CE4E5B9L;
-        h ^= h >>> 27;
-        h *= 0x94D049BB133111EBL;
-        h ^= h >>> 31;
-        return h;
+    private static long latticeHash(long shapeSeed, long layerSalt, long x, long y, long z) {
+        long hash = shapeSeed ^ layerSalt;
+        hash ^= x * 0x9E3779B97F4A7C15L;
+        hash ^= y * 0xC2B2AE3D27D4EB4FL;
+        hash ^= z * 0x165667B19E3779F9L;
+        return OreVeinGenerationMath.mix64(hash);
     }
 
-    static double hashToSignedUnit(long hash) {
+
+    public static double hashToSignedUnit(long hash) {
         double unit = (hash >>> 11) * 0x1.0p-53;
         return unit * 2.0D - 1.0D;
     }
 
-    static double fade(double t) {
+    private static double fade(double t) {
         return t * t * t * (t * (t * 6.0D - 15.0D) + 10.0D);
     }
 
-    static RotatedVector inverseRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
+    private static @NotNull RotatedVector inverseRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
         RotationMatrix matrix = inverseRotation(yawDegrees, pitchDegrees, rollDegrees);
         return matrix.apply(x, y, z);
     }
 
-    private static RotationMatrix forwardRotation(double yawDegrees, double pitchDegrees, double rollDegrees) {
+    @Contract("_, _, _ -> new")
+    private static @NotNull RotationMatrix forwardRotation(double yawDegrees, double pitchDegrees, double rollDegrees) {
         double yaw = Math.toRadians(yawDegrees);
         double pitch = Math.toRadians(pitchDegrees);
         double roll = Math.toRadians(rollDegrees);
@@ -228,7 +193,7 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    private static RotationMatrix inverseRotation(double yawDegrees, double pitchDegrees, double rollDegrees) {
+    private static @NotNull RotationMatrix inverseRotation(double yawDegrees, double pitchDegrees, double rollDegrees) {
         RotationMatrix forward = forwardRotation(yawDegrees, pitchDegrees, rollDegrees);
         return new RotationMatrix(
                 forward.m00(), forward.m10(), forward.m20(),
@@ -237,13 +202,17 @@ public final class OreVeinShapeEvaluator {
         );
     }
 
-    static RotatedVector forwardRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
+    public static @NotNull RotatedVector forwardRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
         RotationMatrix matrix = forwardRotation(
                 yawDegrees,
                 pitchDegrees,
                 rollDegrees);
 
         return matrix.apply(x, y, z);
+    }
+
+    private static double noiseLayer(long shapeSeed, long layerSalt, double localX, double localY, double localZ, double frequency, double amplitude) {
+        return sampleNoise(shapeSeed, layerSalt, localX, localY, localZ, frequency) * amplitude;
     }
 
     private static double sampleNoise(long shapeSeed, long layerSalt, double localX, double localY, double localZ, double frequency) {
@@ -310,17 +279,7 @@ public final class OreVeinShapeEvaluator {
     public record HalfExtents(int x, int y, int z) {
     }
 
-    record RotationMatrix(
-            double m00,
-            double m01,
-            double m02,
-            double m10,
-            double m11,
-            double m12,
-            double m20,
-            double m21,
-            double m22
-    ) {
+    private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22) {
         RotatedVector apply(double x, double y, double z) {
             return new RotatedVector(
                     m00 * x + m01 * y + m02 * z,
@@ -330,5 +289,5 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    record RotatedVector(double x, double y, double z) { }
+    public record RotatedVector(double x, double y, double z) { }
 }

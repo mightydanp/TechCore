@@ -4,28 +4,33 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.math.BigInteger;
 import java.util.*;
 
 public final class OreVeinCandidateLookup {
-    private OreVeinCandidateLookup() {
-    }
 
-    public static List<OreVeinInstanceDescriptor> candidatesForBlock(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
+    public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForBlock(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
         Objects.requireNonNull(position, "position");
 
         return candidatesForArea(worldSeed, dimension, position, position);
     }
 
-    public static List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunk) {
+    public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunk) {
         Objects.requireNonNull(chunk, "chunk");
 
-        return candidatesForArea(worldSeed, dimension, new BlockPos(chunk.getMinBlockX(), Integer.MIN_VALUE / 4, chunk.getMinBlockZ()),
-                new BlockPos(chunk.getMaxBlockX(), Integer.MAX_VALUE / 4, chunk.getMaxBlockZ()));
+        return candidatesForChunk(
+                worldSeed,
+                dimension,
+                chunk,
+                Integer.MIN_VALUE / 4,
+                Integer.MAX_VALUE / 4 + 1
+        );
     }
 
-    public static List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive) {
+    public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive) {
         Objects.requireNonNull(chunkPos, "chunkPos");
 
         if (maxYExclusive <= minY) {
@@ -40,7 +45,7 @@ public final class OreVeinCandidateLookup {
         );
     }
 
-    public static List<OreVeinInstanceDescriptor> candidatesForArea(long worldSeed, ResourceKey<Level> dimension, BlockPos minInclusive, BlockPos maxInclusive) {
+    public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForArea(long worldSeed, ResourceKey<Level> dimension, BlockPos minInclusive, BlockPos maxInclusive) {
         Objects.requireNonNull(dimension, "dimension");
 
         OreVeinBounds area = OreVeinBounds.from(minInclusive, maxInclusive);
@@ -97,7 +102,7 @@ public final class OreVeinCandidateLookup {
         return Optional.empty();
     }
 
-    static Optional<OreVeinInstanceDescriptor> createDescriptor(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
+    private static Optional<OreVeinInstanceDescriptor> createDescriptor(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
         int sizeX = OreVeinGenerationMath.sizeX(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeY = OreVeinGenerationMath.sizeY(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeZ = OreVeinGenerationMath.sizeZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
@@ -141,27 +146,12 @@ public final class OreVeinCandidateLookup {
                 bounds,
                 List.of()
         );
-        return Optional.of(new OreVeinInstanceDescriptor(
-                provisional.instanceId(),
-                provisional.instanceSeed(),
-                provisional.shapeSeed(),
-                provisional.definitionId(),
-                provisional.center(),
-                provisional.sizeX(),
-                provisional.sizeY(),
-                provisional.sizeZ(),
-                provisional.yaw(),
-                provisional.pitch(),
-                provisional.roll(),
-                provisional.originRegionX(),
-                provisional.originRegionZ(),
-                provisional.originIndex(),
-                provisional.bounds(),
-                OreVeinDenseNodeLayout.generate(provisional, definition)
-        ));
+
+        return Optional.of(provisional.withDenseNodes(OreVeinDenseNodeLayout.generate(provisional, definition)));
+
     }
 
-    public static OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor) {
+    public static @NotNull OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor) {
         Objects.requireNonNull(descriptor, "descriptor");
 
         OreVeinDefinition definition = Objects.requireNonNull(
@@ -178,26 +168,25 @@ public final class OreVeinCandidateLookup {
     }
 
     private static int maxCandidateReach(ResourceKey<Level> dimension) {
-        int reach = 0;
+        int shapeReach = 0;
+        int sparseReach = 0;
 
         for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
-            if (!definition.dimensions().contains(dimension)) {
-                continue;
-            }
+            if (!definition.dimensions().contains(dimension)) continue;
 
-            reach = Math.max(reach, maxReach(definition));
+            shapeReach = Math.max(shapeReach, maxReach(definition));
+            sparseReach = Math.max(sparseReach, definition.sparseReachBlocks());
         }
 
-        return Math.addExact(
-                reach,
-                Math.addExact(
-                        OreVeinDefinitions.checkedCeilToInt(OreVeinDefinitions.MAX_BOUNDARY_DISTORTION_BLOCKS, "MAX_BOUNDARY_DISTORTION_BLOCKS"),
-                        maxSparseReach(dimension)
-                )
+        int distortionReach = OreVeinDefinitions.checkedCeilToInt(
+                OreVeinDefinitions.MAX_BOUNDARY_DISTORTION_BLOCKS,
+                "MAX_BOUNDARY_DISTORTION_BLOCKS"
         );
+
+        return Math.addExact(shapeReach, Math.addExact(distortionReach, sparseReach));
     }
 
-    private static int maxReach(OreVeinDefinition definition) {
+    private static int maxReach(@NotNull OreVeinDefinition definition) {
         int maxReach = 0;
 
         for (double pitch : List.of(-definition.maxPitchDegrees(), definition.maxPitchDegrees())) {
@@ -216,19 +205,5 @@ public final class OreVeinCandidateLookup {
         }
 
         return maxReach;
-    }
-
-    private static int maxSparseReach(ResourceKey<Level> dimension) {
-        int maxSparseReach = 0;
-
-        for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
-            if (!definition.dimensions().contains(dimension)) {
-                continue;
-            }
-
-            maxSparseReach = Math.max(maxSparseReach, definition.sparseReachBlocks());
-        }
-
-        return maxSparseReach;
     }
 }

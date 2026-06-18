@@ -3,6 +3,8 @@ package com.mightydanp.techcore.world.level.levelgen.vein;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,10 +18,7 @@ public final class OreVeinContributionLookup {
             Comparator.comparingLong(OreVeinContribution::instanceId)
                     .thenComparing(contribution -> contribution.definitionId().toString());
 
-    private OreVeinContributionLookup() {
-    }
-
-    public static List<OreVeinContribution> contributionsForPosition(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
+    public static @NotNull @Unmodifiable List<OreVeinContribution> contributionsForPosition(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
         Objects.requireNonNull(dimension, "dimension");
         Objects.requireNonNull(position, "position");
 

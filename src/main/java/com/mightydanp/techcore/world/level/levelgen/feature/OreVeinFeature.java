@@ -1,6 +1,5 @@
 package com.mightydanp.techcore.world.level.levelgen.feature;
 
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinChunkPlan;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinChunkPlanner;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -27,10 +26,10 @@ public final class OreVeinFeature extends Feature<NoneFeatureConfiguration> {
         this.chunkPlanProvider = chunkPlanProvider;
     }
 
-    static boolean applyPlan(WorldGenLevel level, OreVeinChunkPlan plan) {
+    static boolean applyPlan(WorldGenLevel level, OreVeinChunkPlanner.ChunkPlan plan) {
         boolean changed = false;
 
-        for (OreVeinChunkPlan.PlannedReplacement replacement : plan.replacements()) {
+        for (OreVeinChunkPlanner.ChunkPlan.PlannedReplacement replacement : plan.replacements()) {
             BlockPos position = replacement.position();
             BlockState liveState = level.getBlockState(position);
 
@@ -52,12 +51,12 @@ public final class OreVeinFeature extends Feature<NoneFeatureConfiguration> {
         ResourceKey<Level> dimension = level.getLevel().dimension();
         int minY = level.getMinBuildHeight();
         int maxYExclusive = level.getMaxBuildHeight();
-        OreVeinChunkPlan plan = chunkPlanProvider.plan(worldSeed, dimension, chunkPos, minY, maxYExclusive);
+        OreVeinChunkPlanner.ChunkPlan plan = chunkPlanProvider.plan(worldSeed, dimension, chunkPos, minY, maxYExclusive);
         return applyPlan(level, plan);
     }
 
     @FunctionalInterface
     interface ChunkPlanProvider {
-        OreVeinChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive);
+        OreVeinChunkPlanner.ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive);
     }
 }

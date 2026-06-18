@@ -5,15 +5,10 @@ import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-public record OreVeinDimensionGenerationSettings(
-        ResourceKey<Level> dimension,
-        int originWeightBudget
-) {
+public record OreVeinDimensionGenerationSettings(ResourceKey<Level> dimension, int originWeightBudget) {
     public OreVeinDimensionGenerationSettings {
         Objects.requireNonNull(dimension, "dimension");
 
-        if (originWeightBudget <= 0) {
-            throw new IllegalArgumentException("originWeightBudget must be positive");
-        }
+        if (originWeightBudget <= 0) throw new IllegalArgumentException("originWeightBudget must be positive");
     }
 }

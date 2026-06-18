@@ -1,24 +1,19 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record OreVeinBounds(
-        int minX,
-        int minY,
-        int minZ,
-        int maxX,
-        int maxY,
-        int maxZ
-) {
+public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
     public OreVeinBounds {
-        if (minX > maxX || minY > maxY || minZ > maxZ) {
-            throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
-        }
+        if (minX > maxX || minY > maxY || minZ > maxZ) throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
     }
 
-    public static OreVeinBounds from(BlockPos minInclusive, BlockPos maxInclusive) {
+    @Contract("_, _ -> new")
+    public static @NotNull OreVeinBounds from(@NotNull BlockPos minInclusive, @NotNull BlockPos maxInclusive) {
         int minX = Math.min(minInclusive.getX(), maxInclusive.getX());
         int minY = Math.min(minInclusive.getY(), maxInclusive.getY());
         int minZ = Math.min(minInclusive.getZ(), maxInclusive.getZ());
@@ -40,10 +35,8 @@ public record OreVeinBounds(
                 && minZ <= other.maxZ;
     }
 
-    public OreVeinBounds intersect(OreVeinBounds other) {
-        if (!intersects(other)) {
-            return null;
-        }
+    public @Nullable OreVeinBounds intersect(OreVeinBounds other) {
+        if (!intersects(other)) return null;
 
         return new OreVeinBounds(
                 Math.max(minX, other.minX),
@@ -63,7 +56,8 @@ public record OreVeinBounds(
                 && position.getZ() >= minZ && position.getZ() <= maxZ;
     }
 
-    public OreVeinBounds inflate(int amount) {
+    @Contract("_ -> new")
+    public @NotNull OreVeinBounds inflate(int amount) {
         return new OreVeinBounds(
                 Math.subtractExact(minX, amount),
                 Math.subtractExact(minY, amount),

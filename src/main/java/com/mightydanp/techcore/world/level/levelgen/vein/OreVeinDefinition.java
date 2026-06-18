@@ -3,6 +3,9 @@ package com.mightydanp.techcore.world.level.levelgen.vein;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
@@ -69,88 +72,65 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
     */
 
-    public static Builder builder(ResourceLocation id) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Builder builder(ResourceLocation id) {
         return new Builder(id);
     }
 
-    private static <T> List<T> copyNonEmptyList(List<T> values, String name) {
+    private static <T> @Unmodifiable @NotNull List<T> copyNonEmptyList(List<T> values, String name) {
         Objects.requireNonNull(values, name);
 
-        if (values.isEmpty()) {
-            throw new IllegalArgumentException(name + " cannot be empty");
-        }
+        if (values.isEmpty()) throw new IllegalArgumentException(name + " cannot be empty");
 
         return List.copyOf(values);
     }
 
     private static void validateGenerationWeight(int generationWeight) {
-        if (generationWeight <= 0) {
-            throw new IllegalArgumentException("generationWeight must be positive");
-        }
+        if (generationWeight <= 0) throw new IllegalArgumentException("generationWeight must be positive");
     }
 
     private static void validateCenterYRange(int minCenterY, int maxCenterYExclusive) {
-        if (minCenterY >= maxCenterYExclusive) {
-            throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
-        }
+        if (minCenterY >= maxCenterYExclusive) throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
     }
 
     private static void validateSizeRange(int minSize, int maxSize, String name) {
-        if (minSize < 6) {
-            throw new IllegalArgumentException("min" + name + " must be at least 6");
-        }
-
-        if (maxSize < minSize) {
-            throw new IllegalArgumentException("max" + name + " must be at least min" + name);
-        }
+        if (minSize < 6) throw new IllegalArgumentException("min" + name + " must be at least 6");
+        if (maxSize < minSize) throw new IllegalArgumentException("max" + name + " must be at least min" + name);
     }
 
     private static void validateTilt(double maxTiltDegrees, String name) {
-        if (!Double.isFinite(maxTiltDegrees) || maxTiltDegrees < 0.0D || maxTiltDegrees > 90.0D) {
-            throw new IllegalArgumentException(name + " must be finite and in [0, 90]");
-        }
+        if (!Double.isFinite(maxTiltDegrees) || maxTiltDegrees < 0.0D || maxTiltDegrees > 90.0D) throw new IllegalArgumentException(name + " must be finite and in [0, 90]");
     }
 
     private static void validateSparseReachBlocks(int sparseReachBlocks) {
-        if (sparseReachBlocks < 0) {
-            throw new IllegalArgumentException("sparseReachBlocks must be at least 0");
-        }
+        if (sparseReachBlocks < 0) throw new IllegalArgumentException("sparseReachBlocks must be at least 0");
     }
 
     private static void validateTotalDistributionWeight(List<VeinOreEntry> oreEntries) {
-        long totalWeight = 0L;
-
-        for (VeinOreEntry entry : oreEntries) {
-            totalWeight = addDistributionWeight(totalWeight, entry);
-        }
-
-        if (totalWeight <= 0L) {
-            throw new IllegalArgumentException(
-                    "total distribution weight must be positive"
-            );
-        }
+        if (calculateTotalDistributionWeight(oreEntries) <= 0L)
+            throw new IllegalArgumentException("total distribution weight must be positive");
     }
 
-    private static long addDistributionWeight(long totalWeight, VeinOreEntry entry) {
+    private static long calculateTotalDistributionWeight(@NotNull List<VeinOreEntry> oreEntries) {
+        long totalWeight = 0L;
+
+        for (VeinOreEntry entry : oreEntries) totalWeight = addDistributionWeight(totalWeight, entry);
+
+        return totalWeight;
+    }
+
+    private static long addDistributionWeight(long totalWeight, @NotNull VeinOreEntry entry) {
         try {
             return Math.addExact(totalWeight, entry.distributionWeight());
         } catch (ArithmeticException exception) {
-            throw new IllegalArgumentException(
-                    "total distribution weight is too large",
-                    exception
-            );
+            throw new IllegalArgumentException("total distribution weight is too large", exception);
         }
     }
 
     public long totalDistributionWeight() {
-        long totalWeight = 0L;
-
-        for (VeinOreEntry entry : oreEntries) {
-            totalWeight = addDistributionWeight(totalWeight, entry);
-        }
-
-        return totalWeight;
+        return calculateTotalDistributionWeight(oreEntries);
     }
+
 
     public static final class Builder {
         private final ResourceLocation id;
@@ -224,7 +204,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
-        public OreVeinDefinition build() {
+        @Contract(" -> new")
+        public @NotNull OreVeinDefinition build() {
             return new OreVeinDefinition(
                     id,
                     dimensions,

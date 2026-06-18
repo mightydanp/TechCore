@@ -2,72 +2,65 @@ package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-final class OreVeinDenseNodeLayout {
-    static List<OreVeinDenseNode> generate(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition) {
+public final class OreVeinDenseNodeLayout {
+    public static List<OreVeinInstanceDescriptor.DenseNode> generate(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition) {
         int requestedNodeCount = OreVeinOreCellEvaluator.nodeCount(descriptor, definition.densitySettings());
 
-        if (requestedNodeCount == 0) {
-            return List.of();
-        }
+        if (requestedNodeCount == 0) return List.of();
 
-        List<OreVeinDenseNode> acceptedNodes = new ArrayList<>(requestedNodeCount);
+        List<OreVeinInstanceDescriptor.DenseNode> acceptedNodes = new ArrayList<>(requestedNodeCount);
 
         for (int nodeIndex = 0; nodeIndex < requestedNodeCount; nodeIndex++) {
-            OreVeinDenseNode node = candidateNode(descriptor, definition, nodeIndex, acceptedNodes);
-            if (node != null) {
-                acceptedNodes.add(node);
-            }
+            OreVeinInstanceDescriptor.DenseNode node = candidateNode(descriptor, definition, nodeIndex, acceptedNodes);
+
+            if (node != null) acceptedNodes.add(node);
         }
 
         return List.copyOf(acceptedNodes);
     }
 
-    private static OreVeinDenseNode candidateNode(
-            OreVeinInstanceDescriptor descriptor,
-            OreVeinDefinition definition,
-            int nodeIndex,
-            List<OreVeinDenseNode> acceptedNodes
-    ) {
+    private static OreVeinInstanceDescriptor.@Nullable DenseNode candidateNode(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, int nodeIndex, List<OreVeinInstanceDescriptor.DenseNode> acceptedNodes) {
+        OreVeinDensitySettings settings = definition.densitySettings();
         long nodeTerm = (long) nodeIndex * OreVeinOreCellEvaluator.xHashMultiplier();
+
         double radiusX = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeRadiusXSalt() ^ nodeTerm),
-                definition.densitySettings().minNodeRadiusX(),
-                definition.densitySettings().maxNodeRadiusX()
+                settings.minNodeRadiusX(),
+                settings.maxNodeRadiusX()
         );
+
         double radiusY = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeRadiusYSalt() ^ nodeTerm),
-                definition.densitySettings().minNodeRadiusY(),
-                definition.densitySettings().maxNodeRadiusY()
+                settings.minNodeRadiusY(),
+                settings.maxNodeRadiusY()
         );
+
         double radiusZ = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeRadiusZSalt() ^ nodeTerm),
-                definition.densitySettings().minNodeRadiusZ(),
-                definition.densitySettings().maxNodeRadiusZ()
+                settings.minNodeRadiusZ(),
+                settings.maxNodeRadiusZ()
         );
+
         int configuredPeakDensity = OreVeinOreCellEvaluator.sampleIntInclusive(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodePeakSalt() ^ nodeTerm),
-                definition.densitySettings().minPeakDensity(),
-                definition.densitySettings().maxPeakDensity()
+                settings.minPeakDensity(),
+                settings.maxPeakDensity()
         );
 
         for (int attemptIndex = 0; attemptIndex < OreVeinOreCellEvaluator.nodeCenterMaxAttempts(); attemptIndex++) {
-            OreVeinDenseNode candidate = candidateAt(descriptor, nodeIndex, attemptIndex, radiusX, radiusY, radiusZ, configuredPeakDensity);
+            OreVeinInstanceDescriptor.DenseNode candidate = candidateAt(descriptor, nodeIndex, attemptIndex, radiusX, radiusY, radiusZ, configuredPeakDensity);
 
-            if (candidate == null) {
-                continue;
-            }
+            if (candidate == null) continue;
 
-            if (!fullyContained(descriptor, candidate)) {
-                continue;
-            }
+            if (!fullyContained(descriptor, candidate)) continue;
 
-            if (overlapsAnyNode(descriptor, candidate, acceptedNodes)) {
-                continue;
-            }
+            if (overlapsAnyNode(descriptor, candidate, acceptedNodes)) continue;
 
             return candidate;
         }
@@ -75,15 +68,7 @@ final class OreVeinDenseNodeLayout {
         return null;
     }
 
-    private static OreVeinDenseNode candidateAt(
-            OreVeinInstanceDescriptor descriptor,
-            int nodeIndex,
-            int attemptIndex,
-            double radiusX,
-            double radiusY,
-            double radiusZ,
-            int configuredPeakDensity
-    ) {
+    private static OreVeinInstanceDescriptor.@Nullable DenseNode candidateAt(@NotNull OreVeinInstanceDescriptor descriptor, int nodeIndex, int attemptIndex, double radiusX, double radiusY, double radiusZ, int configuredPeakDensity) {
         double halfX = descriptor.sizeX() / 2.0D;
         double halfY = descriptor.sizeY() / 2.0D;
         double halfZ = descriptor.sizeZ() / 2.0D;
@@ -91,27 +76,21 @@ final class OreVeinDenseNodeLayout {
         double availableY = halfY - radiusY;
         double availableZ = halfZ - radiusZ;
 
-        if (availableX < 0.0D || availableY < 0.0D || availableZ < 0.0D) {
-            return null;
-        }
+        if (availableX < 0.0D || availableY < 0.0D || availableZ < 0.0D) return null;
+
 
         long nodeTerm = (long) nodeIndex * OreVeinOreCellEvaluator.xHashMultiplier();
         long attemptTerm = (long) attemptIndex * OreVeinOreCellEvaluator.yHashMultiplier();
-        double u = OreVeinShapeEvaluator.hashToSignedUnit(
-                OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeCenterXSalt() ^ nodeTerm ^ attemptTerm)
-        );
-        double v = OreVeinShapeEvaluator.hashToSignedUnit(
-                OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeCenterYSalt() ^ nodeTerm ^ attemptTerm)
-        );
-        double w = OreVeinShapeEvaluator.hashToSignedUnit(
-                OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeCenterZSalt() ^ nodeTerm ^ attemptTerm)
-        );
 
-        if (u * u + v * v + w * w > 1.0D) {
-            return null;
-        }
+        long instanceSeed = descriptor.instanceSeed();
+        double u = sampleNodeCoordinate(instanceSeed, OreVeinOreCellEvaluator.nodeCenterXSalt(), nodeTerm, attemptTerm);
+        double v = sampleNodeCoordinate(instanceSeed, OreVeinOreCellEvaluator.nodeCenterYSalt(), nodeTerm, attemptTerm);
+        double w = sampleNodeCoordinate(instanceSeed, OreVeinOreCellEvaluator.nodeCenterZSalt(), nodeTerm, attemptTerm);
 
-        return new OreVeinDenseNode(
+
+        if (u * u + v * v + w * w > 1.0D) return null;
+
+        return new OreVeinInstanceDescriptor.DenseNode(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinOreCellEvaluator.nodeIdSalt() ^ nodeTerm),
                 u * availableX,
                 v * availableY,
@@ -123,34 +102,25 @@ final class OreVeinDenseNodeLayout {
         );
     }
 
-    private static boolean fullyContained(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode node) {
+    private static double sampleNodeCoordinate(long instanceSeed, long salt, long nodeTerm, long attemptTerm) {
+        return OreVeinShapeEvaluator.hashToSignedUnit(OreVeinOreCellEvaluator.mix64(instanceSeed ^ salt ^ nodeTerm ^ attemptTerm));
+    }
+
+    private static boolean fullyContained(OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.DenseNode node) {
         OreVeinBounds bounds = worldBounds(descriptor, node);
-        BlockPos.MutableBlockPos position =
-                new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
 
         for (int x = bounds.minX(); x <= bounds.maxX(); x++) {
             for (int y = bounds.minY(); y <= bounds.maxY(); y++) {
                 for (int z = bounds.minZ(); z <= bounds.maxZ(); z++) {
                     position.set(x, y, z);
 
-                    OreVeinContribution contribution =
-                            OreVeinShapeEvaluator.evaluate(
-                                    descriptor,
-                                    position
-                            );
+                    OreVeinContribution contribution = OreVeinShapeEvaluator.evaluate(descriptor, position);
 
-                    if (!OreVeinOreCellEvaluator.isInsideDenseNodeVolume(
-                            node,
-                            contribution.localX(),
-                            contribution.localY(),
-                            contribution.localZ()
-                    )) {
-                        continue;
-                    }
+                    if (!OreVeinOreCellEvaluator.isInsideDenseNodeVolume(node, contribution.localX(), contribution.localY(), contribution.localZ())) continue;
 
-                    if (contribution.signedBoundaryDistanceBlocks() > 0.0D) {
-                        return false;
-                    }
+                    if (contribution.signedBoundaryDistanceBlocks() > 0.0D) return false;
+
                 }
             }
         }
@@ -158,23 +128,18 @@ final class OreVeinDenseNodeLayout {
         return true;
     }
 
-    private static boolean overlapsAnyNode(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode candidate, List<OreVeinDenseNode> acceptedNodes) {
-        for (OreVeinDenseNode accepted : acceptedNodes) {
-            if (overlapExists(descriptor, candidate, accepted)) {
-                return true;
-            }
-        }
+    private static boolean overlapsAnyNode(OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.DenseNode candidate, @NotNull List<OreVeinInstanceDescriptor.DenseNode> acceptedNodes) {
+        for (OreVeinInstanceDescriptor.DenseNode accepted : acceptedNodes)
+            if (overlapExists(descriptor, candidate, accepted)) return true;
 
         return false;
     }
 
-    static boolean overlapExists(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode first, OreVeinDenseNode second) {
+    private static boolean overlapExists(OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.DenseNode first, OreVeinInstanceDescriptor.DenseNode second) {
         OreVeinBounds overlapBounds = worldBounds(descriptor, first)
                 .intersect(worldBounds(descriptor, second));
 
-        if (overlapBounds == null) {
-            return false;
-        }
+        if (overlapBounds == null) return false;
 
         BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
 
@@ -192,33 +157,29 @@ final class OreVeinDenseNodeLayout {
 
                     position.set(x, y, z);
 
-                    OreVeinContribution contribution =
-                            OreVeinShapeEvaluator.evaluate(
-                                    descriptor,
-                                    position
+                    OreVeinContribution contribution = OreVeinShapeEvaluator.evaluate(
+                            descriptor,
+                            position
+                    );
+
+                    boolean insideFirst = OreVeinOreCellEvaluator
+                            .isInsideDenseNodeVolume(
+                                    first,
+                                    contribution.localX(),
+                                    contribution.localY(),
+                                    contribution.localZ()
                             );
 
-                    boolean insideFirst =
-                            OreVeinOreCellEvaluator
-                                    .isInsideDenseNodeVolume(
-                                            first,
-                                            contribution.localX(),
-                                            contribution.localY(),
-                                            contribution.localZ()
-                                    );
+                    if (!insideFirst) continue;
 
-                    if (!insideFirst) {
-                        continue;
-                    }
 
-                    boolean insideSecond =
-                            OreVeinOreCellEvaluator
-                                    .isInsideDenseNodeVolume(
-                                            second,
-                                            contribution.localX(),
-                                            contribution.localY(),
-                                            contribution.localZ()
-                                    );
+                    boolean insideSecond = OreVeinOreCellEvaluator
+                            .isInsideDenseNodeVolume(
+                                    second,
+                                    contribution.localX(),
+                                    contribution.localY(),
+                                    contribution.localZ()
+                            );
 
                     if (insideSecond) return true;
                 }
@@ -228,57 +189,50 @@ final class OreVeinDenseNodeLayout {
         return false;
     }
 
-    private static OreVeinBounds worldBounds(OreVeinInstanceDescriptor descriptor, OreVeinDenseNode node) {
+    private static @NotNull OreVeinBounds worldBounds(@NotNull OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.@NotNull DenseNode node) {
         double yaw = descriptor.yaw();
         double pitch = descriptor.pitch();
         double roll = descriptor.roll();
 
-        OreVeinShapeEvaluator.RotatedVector centerOffset =
-                OreVeinShapeEvaluator.forwardRotate(
-                        node.localCenterX(),
-                        node.localCenterY(),
-                        node.localCenterZ(),
-                        yaw,
-                        pitch,
-                        roll
-                );
+        OreVeinShapeEvaluator.RotatedVector centerOffset = OreVeinShapeEvaluator.forwardRotate(
+                node.localCenterX(),
+                node.localCenterY(),
+                node.localCenterZ(),
+                yaw,
+                pitch,
+                roll
+        );
 
-        double worldCenterX =
-                descriptor.center().getX() + 0.5D + centerOffset.x();
-        double worldCenterY =
-                descriptor.center().getY() + 0.5D + centerOffset.y();
-        double worldCenterZ =
-                descriptor.center().getZ() + 0.5D + centerOffset.z();
+        double worldCenterX = descriptor.center().getX() + 0.5D + centerOffset.x();
+        double worldCenterY = descriptor.center().getY() + 0.5D + centerOffset.y();
+        double worldCenterZ = descriptor.center().getZ() + 0.5D + centerOffset.z();
 
-        OreVeinShapeEvaluator.RotatedVector xAxis =
-                OreVeinShapeEvaluator.forwardRotate(
-                        node.radiusX(),
-                        0.0D,
-                        0.0D,
-                        yaw,
-                        pitch,
-                        roll
-                );
+        OreVeinShapeEvaluator.RotatedVector xAxis = OreVeinShapeEvaluator.forwardRotate(
+                node.radiusX(),
+                0.0D,
+                0.0D,
+                yaw,
+                pitch,
+                roll
+        );
 
-        OreVeinShapeEvaluator.RotatedVector yAxis =
-                OreVeinShapeEvaluator.forwardRotate(
-                        0.0D,
-                        node.radiusY(),
-                        0.0D,
-                        yaw,
-                        pitch,
-                        roll
-                );
+        OreVeinShapeEvaluator.RotatedVector yAxis = OreVeinShapeEvaluator.forwardRotate(
+                0.0D,
+                node.radiusY(),
+                0.0D,
+                yaw,
+                pitch,
+                roll
+        );
 
-        OreVeinShapeEvaluator.RotatedVector zAxis =
-                OreVeinShapeEvaluator.forwardRotate(
-                        0.0D,
-                        0.0D,
-                        node.radiusZ(),
-                        yaw,
-                        pitch,
-                        roll
-                );
+        OreVeinShapeEvaluator.RotatedVector zAxis = OreVeinShapeEvaluator.forwardRotate(
+                0.0D,
+                0.0D,
+                node.radiusZ(),
+                yaw,
+                pitch,
+                roll
+        );
 
         double extentX = Math.sqrt(
                 square(xAxis.x())
@@ -308,7 +262,7 @@ final class OreVeinDenseNodeLayout {
         );
     }
 
-    static double normalizedSeparation(OreVeinDenseNode first, OreVeinDenseNode second) {
+   private static double normalizedSeparation(OreVeinInstanceDescriptor.@NotNull DenseNode first, OreVeinInstanceDescriptor.@NotNull DenseNode second) {
         double dx = first.localCenterX() - second.localCenterX();
         double dy = first.localCenterY() - second.localCenterY();
         double dz = first.localCenterZ() - second.localCenterZ();

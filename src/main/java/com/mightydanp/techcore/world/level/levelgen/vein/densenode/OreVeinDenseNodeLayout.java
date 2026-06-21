@@ -1,10 +1,6 @@
 package com.mightydanp.techcore.world.level.levelgen.vein.densenode;
 
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinBounds;
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinDefinition;
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinInstanceDescriptor;
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator;
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator;
+import com.mightydanp.techcore.world.level.levelgen.vein.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -114,7 +110,8 @@ public final class OreVeinDenseNodeLayout {
 
                     OreVeinShapeEvaluator.ShapeContribution contribution = OreVeinShapeEvaluator.evaluate(descriptor, position);
 
-                    if (!OreVeinDenseNodeEvaluator.isInsideDenseNodeVolume(node, contribution.localX(), contribution.localY(), contribution.localZ())) continue;
+                    if (!OreVeinDenseNodeEvaluator.isInsideDenseNodeVolume(node, contribution.localX(), contribution.localY(), contribution.localZ()))
+                        continue;
                     if (contribution.signedBoundaryDistanceBlocks() > 0.0D) return false;
                 }
 

@@ -40,7 +40,8 @@ public final class OreVeinSparseTransitionEvaluator {
     }
 
     private static int sparseChanceDivisor(double distanceFromMainBody) {
-        if (!Double.isFinite(distanceFromMainBody) || distanceFromMainBody < 0.0D) throw new IllegalArgumentException("distanceFromMainBody must be finite and non-negative");
+        if (!Double.isFinite(distanceFromMainBody) || distanceFromMainBody < 0.0D)
+            throw new IllegalArgumentException("distanceFromMainBody must be finite and non-negative");
 
         return 2 + Mth.floor((distanceFromMainBody * (distanceFromMainBody + 2.0D)) / 4.0D);
     }

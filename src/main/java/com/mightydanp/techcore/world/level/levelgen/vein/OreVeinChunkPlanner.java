@@ -12,8 +12,8 @@ import java.util.*;
 public final class OreVeinChunkPlanner {
     private static final PlanningDependencies PRODUCTION_DEPENDENCIES = new PlanningDependencies(OreVeinCandidateLookup::candidatesForChunk, OreVeinCandidateLookup::evaluationBounds, OreVeinResolvedCellResolver::resolve);
     private static final Comparator<ChunkPlan.PlannedReplacement> REPLACEMENT_ORDER = Comparator.comparingInt((ChunkPlan.PlannedReplacement replacement) -> replacement.position().getY())
-                    .thenComparingInt(replacement -> replacement.position().getZ())
-                    .thenComparingInt(replacement -> replacement.position().getX());
+            .thenComparingInt(replacement -> replacement.position().getZ())
+            .thenComparingInt(replacement -> replacement.position().getX());
 
     public static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive) {
         return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, PRODUCTION_DEPENDENCIES);
@@ -53,7 +53,8 @@ public final class OreVeinChunkPlanner {
         List<ChunkPlan.PlannedReplacement> replacements = new ArrayList<>();
         List<OreVeinBounds> evaluationBounds = new ArrayList<>(candidates.size());
 
-        for (OreVeinInstanceDescriptor candidate : candidates) evaluationBounds.add(dependencies.boundsProvider().evaluationBounds(candidate));
+        for (OreVeinInstanceDescriptor candidate : candidates)
+            evaluationBounds.add(dependencies.boundsProvider().evaluationBounds(candidate));
 
 
         for (int i = 0; i < candidates.size(); i++) {
@@ -122,7 +123,8 @@ public final class OreVeinChunkPlanner {
         Optional<OreVeinResolvedCellResolver.ResolvedCell> resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinInstanceDescriptor> candidates);
     }
 
-    private record PlanningDependencies(CandidateProvider candidateProvider, EvaluationBoundsProvider boundsProvider, ResolvedCellProvider resolvedCellProvider) {
+    private record PlanningDependencies(CandidateProvider candidateProvider, EvaluationBoundsProvider boundsProvider,
+                                        ResolvedCellProvider resolvedCellProvider) {
         PlanningDependencies {
             Objects.requireNonNull(candidateProvider, "candidateProvider");
             Objects.requireNonNull(boundsProvider, "boundsProvider");

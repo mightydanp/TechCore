@@ -32,11 +32,11 @@ public final class OreVeinGenerationMath {
     private static final long SALT_PITCH = 0x629a292a367cd507L;
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
 
-    public static BigInteger budgetQ16(OreVeinDefinitions.DimensionGenerationSettings settings) {
+    public static @NotNull BigInteger budgetQ16(OreVeinDefinitions.@NotNull DimensionGenerationSettings settings) {
         return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
     }
 
-    public static BigInteger effectiveWeightQ16(OreVeinDefinition definition) {
+    public static @NotNull BigInteger effectiveWeightQ16(OreVeinDefinition definition) {
         BigInteger expectedVolume8 = expectedVolume8(definition);
         BigInteger volumeScaleQ16 = ceilDiv(expectedVolume8.multiply(Q16), REFERENCE_VOLUME_8);
         BigInteger penaltyQ16 = sqrtFloor(volumeScaleQ16.multiply(Q16)).max(Q16);
@@ -45,7 +45,7 @@ public final class OreVeinGenerationMath {
         return numerator.divide(penaltyQ16).max(BigInteger.ONE);
     }
 
-    public static BigInteger totalEffectiveWeightQ16(List<OreVeinDefinition> definitions) {
+    public static BigInteger totalEffectiveWeightQ16(@NotNull List<OreVeinDefinition> definitions) {
         BigInteger total = BigInteger.ZERO;
 
         for (OreVeinDefinition definition : definitions) total = total.add(effectiveWeightQ16(definition));
@@ -53,7 +53,7 @@ public final class OreVeinGenerationMath {
         return total;
     }
 
-    public static BigInteger rollQ16(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, BigInteger budgetQ16) {
+    public static @NotNull BigInteger rollQ16(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, BigInteger budgetQ16) {
         long low = hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_DEFINITION_SELECTION);
         long high = hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_DEFINITION_SELECTION ^ 0x9e3779b97f4a7c15L);
         byte[] bytes = new byte[16];

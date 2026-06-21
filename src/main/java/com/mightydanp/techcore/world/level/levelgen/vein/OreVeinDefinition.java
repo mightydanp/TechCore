@@ -11,14 +11,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight,
+                                int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY,
+                                int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees,
+                                double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings,
+                                List<OreEntry> oreEntries) {
     private static final int DEFAULT_SPARSE_REACH_BLOCKS = 32;
     private static final double DEFAULT_MAX_PITCH_DEGREES = 12.0D;
     private static final double DEFAULT_MAX_ROLL_DEGREES = 12.0D;
 
     //private Double maxPitchDegrees;
     //private Double maxRollDegrees;
-    
+
     private static final DensitySettings DEFAULT_DENSITY_SETTINGS = new DensitySettings(
             704,
             960,
@@ -91,7 +95,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
 
     private static void validateCenterYRange(int minCenterY, int maxCenterYExclusive) {
-        if (minCenterY >= maxCenterYExclusive) throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
+        if (minCenterY >= maxCenterYExclusive)
+            throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
     }
 
     private static void validateSizeRange(int minSize, int maxSize, String name) {
@@ -100,7 +105,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
 
     private static void validateTilt(double maxTiltDegrees, String name) {
-        if (!Double.isFinite(maxTiltDegrees) || maxTiltDegrees < 0.0D || maxTiltDegrees > 90.0D) throw new IllegalArgumentException(name + " must be finite and in [0, 90]");
+        if (!Double.isFinite(maxTiltDegrees) || maxTiltDegrees < 0.0D || maxTiltDegrees > 90.0D)
+            throw new IllegalArgumentException(name + " must be finite and in [0, 90]");
     }
 
     private static void validateSparseReachBlocks(int sparseReachBlocks) {
@@ -226,27 +232,37 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         }
     }
 
-    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator, long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX, double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY, double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity, int maxPeakDensity) {
+    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator,
+                                  long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX,
+                                  double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY,
+                                  double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity,
+                                  int maxPeakDensity) {
         public DensitySettings {
             if (fillDenominator <= 0) throw new IllegalArgumentException("fillDenominator must be positive");
-            if (regularFillNumerator < 0 || regularFillNumerator > fillDenominator) throw new IllegalArgumentException("regularFillNumerator must be in [0, fillDenominator]");
-            if (maximumFillNumerator < regularFillNumerator || maximumFillNumerator > fillDenominator) throw new IllegalArgumentException("maximumFillNumerator must be in [regularFillNumerator, fillDenominator]");
+            if (regularFillNumerator < 0 || regularFillNumerator > fillDenominator)
+                throw new IllegalArgumentException("regularFillNumerator must be in [0, fillDenominator]");
+            if (maximumFillNumerator < regularFillNumerator || maximumFillNumerator > fillDenominator)
+                throw new IllegalArgumentException("maximumFillNumerator must be in [regularFillNumerator, fillDenominator]");
             if (blocksPerDenseNode <= 0L) throw new IllegalArgumentException("blocksPerDenseNode must be positive");
-            if (minNodeCount < 0 || maxNodeCount < minNodeCount) throw new IllegalArgumentException("node-count range is invalid");
+            if (minNodeCount < 0 || maxNodeCount < minNodeCount)
+                throw new IllegalArgumentException("node-count range is invalid");
             validateRadiusRange(minNodeRadiusX, maxNodeRadiusX, "X");
             validateRadiusRange(minNodeRadiusY, maxNodeRadiusY, "Y");
             validateRadiusRange(minNodeRadiusZ, maxNodeRadiusZ, "Z");
-            if (minPeakDensity < 1 || maxPeakDensity < minPeakDensity) throw new IllegalArgumentException("peak-density range is invalid");
+            if (minPeakDensity < 1 || maxPeakDensity < minPeakDensity)
+                throw new IllegalArgumentException("peak-density range is invalid");
         }
 
         private static void validateRadiusRange(double minRadius, double maxRadius, String axis) {
-            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius) throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
+            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius)
+                throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
         }
     }
 
     public record HaloSettings(double transitionWidthBlocks) {
         public HaloSettings {
-            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D) throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
+            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D)
+                throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
         }
     }
 

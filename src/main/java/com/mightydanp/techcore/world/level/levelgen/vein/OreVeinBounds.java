@@ -9,7 +9,8 @@ import java.util.Objects;
 
 public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
     public OreVeinBounds {
-        if (minX > maxX || minY > maxY || minZ > maxZ) throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
+        if (minX > maxX || minY > maxY || minZ > maxZ)
+            throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
     }
 
     @Contract("_, _ -> new")

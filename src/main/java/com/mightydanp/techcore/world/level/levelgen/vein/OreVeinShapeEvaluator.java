@@ -279,7 +279,10 @@ public final class OreVeinShapeEvaluator {
     public record HalfExtents(int x, int y, int z) {
     }
 
-    public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId, double localX, double localY, double localZ, double normalizedRadius, double distortionBlocks, double signedBoundaryDistanceBlocks, ContributionState state) {
+    public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId,
+                                    double localX, double localY, double localZ, double normalizedRadius,
+                                    double distortionBlocks, double signedBoundaryDistanceBlocks,
+                                    ContributionState state) {
         public ShapeContribution {
             java.util.Objects.requireNonNull(definitionId, "definitionId");
             java.util.Objects.requireNonNull(state, "state");
@@ -294,8 +297,10 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22) {
-        RotatedVector apply(double x, double y, double z) {
+    private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20,
+                                  double m21, double m22) {
+        @Contract("_, _, _ -> new")
+        @NotNull RotatedVector apply(double x, double y, double z) {
             return new RotatedVector(
                     m00 * x + m01 * y + m02 * z,
                     m10 * x + m11 * y + m12 * z,
@@ -304,5 +309,6 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    public record RotatedVector(double x, double y, double z) { }
+    public record RotatedVector(double x, double y, double z) {
+    }
 }

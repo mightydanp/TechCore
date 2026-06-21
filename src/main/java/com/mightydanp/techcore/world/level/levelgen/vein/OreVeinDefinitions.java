@@ -156,7 +156,8 @@ public final class OreVeinDefinitions {
         ResourceLocation location = dimension.location();
 
         if (ResourceLocation.withDefaultNamespace("overworld").equals(location)) return new DimensionHeight(-64, 320);
-        if (ResourceLocation.withDefaultNamespace("the_nether").equals(location) || ResourceLocation.withDefaultNamespace("the_end").equals(location)) return new DimensionHeight(0, 256);
+        if (ResourceLocation.withDefaultNamespace("the_nether").equals(location) || ResourceLocation.withDefaultNamespace("the_end").equals(location))
+            return new DimensionHeight(0, 256);
 
         return null;
     }
@@ -176,7 +177,8 @@ public final class OreVeinDefinitions {
 
             DimensionGenerationSettings previous = settingsByDimension.putIfAbsent(setting.dimension(), setting);
 
-            if (previous != null) problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
+            if (previous != null)
+                problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
         }
 
         return settingsByDimension;
@@ -192,15 +194,19 @@ public final class OreVeinDefinitions {
 
         Set<RockTypes.RockType> commonRockTypes = commonRockTypes(oreEntries);
 
-        if (!hasResolvedOreMaterial(oreEntries)) problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no resolved ore materials"));
-        if (commonRockTypes.isEmpty()) problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockType across vein ores"));
+        if (!hasResolvedOreMaterial(oreEntries))
+            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no resolved ore materials"));
+        if (commonRockTypes.isEmpty())
+            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockType across vein ores"));
 
         for (ResourceKey<Level> dimension : definition.dimensions()) {
-            if (!settingsByDimension.containsKey(dimension)) problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension generation settings"));
+            if (!settingsByDimension.containsKey(dimension))
+                problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension generation settings"));
 
             DimensionHeight height = dimensionHeight(dimension);
 
-            if (height == null) problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension height limits"));
+            if (height == null)
+                problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension height limits"));
             else validateLegalCenterRange(definition, dimension, height, commonRockTypes, problems);
 
             validateDimensionHosts(definition, dimension, oreEntries, commonRockTypes, problems);
@@ -208,9 +214,11 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateGenerationFields(@NotNull OreVeinDefinition definition, List<String> problems) {
-        if (definition.generationWeight() <= 0) problems.add(problem(definition, null, null, null, null, null, null, "generationWeight must be positive"));
+        if (definition.generationWeight() <= 0)
+            problems.add(problem(definition, null, null, null, null, null, null, "generationWeight must be positive"));
 
-        if (definition.minCenterY() >= definition.maxCenterYExclusive()) problems.add(problem(definition, null, null, null, null, null, null, "minCenterY must be less than maxCenterYExclusive"));
+        if (definition.minCenterY() >= definition.maxCenterYExclusive())
+            problems.add(problem(definition, null, null, null, null, null, null, "minCenterY must be less than maxCenterYExclusive"));
 
         validateSizeRange(definition, definition.minSizeX(), definition.maxSizeX(), "X", problems);
         validateSizeRange(definition, definition.minSizeY(), definition.maxSizeY(), "Y", problems);
@@ -224,7 +232,8 @@ public final class OreVeinDefinitions {
     private static void validateHaloSettings(@NotNull OreVeinDefinition definition, List<String> problems) {
         OreVeinDefinition.HaloSettings haloSettings = definition.haloSettings();
 
-        if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() < 0.0D) problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and non-negative"));
+        if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() < 0.0D)
+            problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and non-negative"));
     }
 
 
@@ -251,13 +260,16 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateSizeRange(OreVeinDefinition definition, int minSize, int maxSize, String axis, List<String> problems) {
-        if (minSize < 6) problems.add(problem(definition, null, null, null, null, null, null, "minSize" + axis + " must be at least 6"));
+        if (minSize < 6)
+            problems.add(problem(definition, null, null, null, null, null, null, "minSize" + axis + " must be at least 6"));
 
-        if (maxSize < minSize) problems.add(problem(definition, null, null, null, null, null, null, "maxSize" + axis + " must be at least minSize" + axis));
+        if (maxSize < minSize)
+            problems.add(problem(definition, null, null, null, null, null, null, "maxSize" + axis + " must be at least minSize" + axis));
     }
 
     private static void validateTilt(OreVeinDefinition definition, double value, String name, List<String> problems) {
-        if (!Double.isFinite(value) || value < 0.0D || value > 90.0D) problems.add(problem(definition, null, null, null, null, null, null, name + " must be finite and in [0, 90]"));
+        if (!Double.isFinite(value) || value < 0.0D || value > 90.0D)
+            problems.add(problem(definition, null, null, null, null, null, null, name + " must be finite and in [0, 90]"));
 
     }
 
@@ -266,7 +278,8 @@ public final class OreVeinDefinitions {
         int minLegalCenterY = Math.max(definition.minCenterY(), height.minY() + maxHalfY);
         int maxLegalCenterYExclusive = Math.min(definition.maxCenterYExclusive(), height.maxYExclusive() - maxHalfY);
 
-        if (minLegalCenterY >= maxLegalCenterYExclusive) problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "no legal center Y can keep rotated bounds inside dimension"));
+        if (minLegalCenterY >= maxLegalCenterYExclusive)
+            problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "no legal center Y can keep rotated bounds inside dimension"));
     }
 
     private static int maxAllowedHalfY(@NotNull OreVeinDefinition definition) {
@@ -340,15 +353,18 @@ public final class OreVeinDefinitions {
         for (Map.Entry<ResourceKey<Level>, OverlapSettings> entry : OVERLAP_SETTINGS.entrySet()) {
             OverlapSettings settings = entry.getValue();
 
-            if (settings.denominator() <= 0) problems.add(entry.getKey().location() + "\n  reason: overlap denominator must be positive");
-            if (settings.mainBodyGapNumerator() < 0 || settings.mainBodyGapNumerator() > settings.denominator()) problems.add(entry.getKey().location() + "\n  reason: overlap mainBodyGapNumerator must be in [0, denominator]");
+            if (settings.denominator() <= 0)
+                problems.add(entry.getKey().location() + "\n  reason: overlap denominator must be positive");
+            if (settings.mainBodyGapNumerator() < 0 || settings.mainBodyGapNumerator() > settings.denominator())
+                problems.add(entry.getKey().location() + "\n  reason: overlap mainBodyGapNumerator must be in [0, denominator]");
         }
 
         for (OreVeinDefinition definition : definitions) {
             if (definition == null) continue;
 
             for (ResourceKey<Level> dimension : definition.dimensions())
-                if (settingsByDimension.containsKey(dimension) && !OVERLAP_SETTINGS.containsKey(dimension)) problems.add(problem(definition, dimension, null, null, null, null, null, "missing dimension overlap settings"));
+                if (settingsByDimension.containsKey(dimension) && !OVERLAP_SETTINGS.containsKey(dimension))
+                    problems.add(problem(definition, dimension, null, null, null, null, null, "missing dimension overlap settings"));
         }
     }
 
@@ -368,7 +384,8 @@ public final class OreVeinDefinitions {
             }
         }
 
-        if (totalWeight <= 0L) problems.add(problem(definition, null, null, null, null, null, null, "total distribution weight must be positive"));
+        if (totalWeight <= 0L)
+            problems.add(problem(definition, null, null, null, null, null, null, "total distribution weight must be positive"));
     }
 
     private static void validateOreMaterials(OreVeinDefinition definition, @NotNull List<ResolvedOreEntry> oreEntries, List<String> problems) {
@@ -382,7 +399,8 @@ public final class OreVeinDefinitions {
                 continue;
             }
 
-            if (oreMaterial.ore.getMaxDensity() < 1) problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "ore max density must be at least 1"));
+            if (oreMaterial.ore.getMaxDensity() < 1)
+                problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "ore max density must be at least 1"));
         }
     }
 
@@ -396,7 +414,8 @@ public final class OreVeinDefinitions {
 
             OreVeinDefinition.OreEntry previous = seen.putIfAbsent(oreMaterial, resolvedOreEntry.entry());
 
-            if (previous != null) problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "duplicate ore material"));
+            if (previous != null)
+                problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "duplicate ore material"));
         }
     }
 
@@ -430,12 +449,14 @@ public final class OreVeinDefinitions {
 
 
     private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
-        if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial)) problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockType"));
+        if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial))
+            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockType"));
 
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), commonRockTypes, problems);
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), commonRockTypes, problems);
 
-        if (maxReachableDensity(definition, oreMaterial) >= 2) validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), commonRockTypes, problems);
+        if (maxReachableDensity(definition, oreMaterial) >= 2)
+            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), commonRockTypes, problems);
 
     }
 
@@ -449,13 +470,15 @@ public final class OreVeinDefinitions {
     private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
         Supplier<Block> block = blocks.get(hostRockMaterial.name);
 
-        if (block == null) problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, requiredMap, commonRockTypes, "missing " + requiredMap + " mapping"));
+        if (block == null)
+            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, requiredMap, commonRockTypes, "missing " + requiredMap + " mapping"));
     }
 
     private static @NotNull List<ResolvedOreEntry> resolveOreEntries(@NotNull OreVeinDefinition definition, List<String> problems) {
         List<ResolvedOreEntry> entries = new ArrayList<>();
 
-        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) entries.add(new ResolvedOreEntry(entry, resolveOreMaterial(definition, entry, problems)));
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries())
+            entries.add(new ResolvedOreEntry(entry, resolveOreMaterial(definition, entry, problems)));
 
         return entries;
     }
@@ -464,7 +487,8 @@ public final class OreVeinDefinitions {
         try {
             Material material = entry.oreMaterial().get();
 
-            if (material == null) problems.add(problem(definition, null, entry, null, null, null, null, "ore supplier returned null"));
+            if (material == null)
+                problems.add(problem(definition, null, entry, null, null, null, null, "ore supplier returned null"));
 
             return material;
         } catch (RuntimeException exception) {
@@ -489,20 +513,24 @@ public final class OreVeinDefinitions {
         message.append("  centerY range: [").append(definition.minCenterY()).append(", ").append(definition.maxCenterYExclusive()).append(")\n");
         message.append("  size ranges: X[").append(definition.minSizeX()).append(", ").append(definition.maxSizeX()).append("] Y[").append(definition.minSizeY()).append(", ").append(definition.maxSizeY()).append("] Z[").append(definition.minSizeZ()).append(", ").append(definition.maxSizeZ()).append("]\n");
 
-        if (entry != null) message.append("  ore distribution weight: ").append(entry.distributionWeight()).append("\n");
+        if (entry != null)
+            message.append("  ore distribution weight: ").append(entry.distributionWeight()).append("\n");
 
-        if (oreMaterial != null || entry != null) message.append("  ore: ").append(materialName(oreMaterial)).append("\n");
+        if (oreMaterial != null || entry != null)
+            message.append("  ore: ").append(materialName(oreMaterial)).append("\n");
 
         message.append("  vein ore RockTypes: ").append(veinOreRockTypes(definition)).append("\n");
 
-        if (commonRockTypes != null) message.append("  common RockTypes: ").append(rockTypes(commonRockTypes)).append("\n");
+        if (commonRockTypes != null)
+            message.append("  common RockTypes: ").append(rockTypes(commonRockTypes)).append("\n");
 
         if (hostRockMaterial != null) {
             message.append("  host rock: ").append(materialName(hostRockMaterial)).append("\n");
             message.append("  host RockType: ").append(rockTypeName(hostRockMaterial)).append("\n");
         }
 
-        if (oreMaterial != null) message.append("  allowed ore RockTypes: ").append(rockTypes(oreMaterial)).append("\n");
+        if (oreMaterial != null)
+            message.append("  allowed ore RockTypes: ").append(rockTypes(oreMaterial)).append("\n");
 
 
         if (requiredMap != null) message.append("  required map: ").append(requiredMap).append("\n");
@@ -577,7 +605,8 @@ public final class OreVeinDefinitions {
     public record OverlapSettings(int mainBodyGapNumerator, int denominator) {
         public OverlapSettings {
             if (denominator <= 0) throw new IllegalArgumentException("denominator must be positive");
-            if (mainBodyGapNumerator < 0 || mainBodyGapNumerator > denominator) throw new IllegalArgumentException("mainBodyGapNumerator must be in [0, denominator]");
+            if (mainBodyGapNumerator < 0 || mainBodyGapNumerator > denominator)
+                throw new IllegalArgumentException("mainBodyGapNumerator must be in [0, denominator]");
         }
     }
 

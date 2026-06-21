@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
+import com.mightydanp.techcore.world.level.levelgen.vein.densenode.OreVeinDenseNodeLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -77,7 +78,7 @@ public final class OreVeinCandidateLookup {
     public static Optional<OreVeinInstanceDescriptor> descriptorForOrigin(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
         Objects.requireNonNull(dimension, "dimension");
 
-        OreVeinDimensionGenerationSettings settings = OreVeinDefinitions.getGenerationSettings(dimension);
+        OreVeinDefinitions.DimensionGenerationSettings settings = OreVeinDefinitions.getGenerationSettings(dimension);
 
         if (settings == null) {
             return Optional.empty();

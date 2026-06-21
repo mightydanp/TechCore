@@ -15,11 +15,14 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellResult.OreVariant.DENSE_ORE;
+import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE;
 
 public final class OreVeinResolvedCellResolver {
     private static final long WINNER_POSITION_SALT = 0xE9C56AF8D1B54A32L;
     private static final long OVERLAP_GAP_SALT = 0xA24BAED4963EE407L;
+    private static final Comparator<OreVeinOreCellEvaluator.OreCellResult> RESULT_ORDER =
+            Comparator.comparingLong(OreVeinOreCellEvaluator.OreCellResult::instanceId)
+                    .thenComparing(result -> result.definitionId().toString());
 
     public static Optional<ResolvedCell> resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
         Objects.requireNonNull(dimension, "dimension");
@@ -67,16 +70,75 @@ public final class OreVeinResolvedCellResolver {
                 position,
                 originalHostMaterial,
                 originalHostState,
-                OreVeinOreCellLookup.resultsForPosition(worldSeed, dimension, position, candidates)
+                oreCellResultsForPosition(worldSeed, dimension, position, candidates)
         ));
     }
 
-    private static @NotNull OreVeinResolvedCellResolver.ResolvedCell resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, BlockState originalHostState, List<OreVeinOreCellResult> results) {
-        List<OreVeinOreCellResult> compatibleOreResults = compatibleOreResults(results, originalHostMaterial);
+    public static @NotNull @Unmodifiable List<OreVeinOreCellEvaluator.OreCellResult> oreCellResultsForPosition(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
+        Objects.requireNonNull(dimension, "dimension");
+        Objects.requireNonNull(position, "position");
+
+        return oreCellResultsForPosition(
+                worldSeed,
+                dimension,
+                position,
+                OreVeinCandidateLookup.candidatesForBlock(worldSeed, dimension, position)
+        );
+    }
+
+    public static @NotNull @Unmodifiable List<OreVeinOreCellEvaluator.OreCellResult> oreCellResultsForPosition(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinInstanceDescriptor> candidates) {
+        Objects.requireNonNull(dimension, "dimension");
+        Objects.requireNonNull(position, "position");
+        Objects.requireNonNull(candidates, "candidates");
+
+        List<OreVeinBounds> evaluationBounds = new ArrayList<>(candidates.size());
+
+        for (OreVeinInstanceDescriptor candidate : candidates) evaluationBounds.add(OreVeinCandidateLookup.evaluationBounds(candidate));
+
+        return oreCellResultsForPosition(
+                position,
+                candidates,
+                evaluationBounds,
+                OreVeinOreCellEvaluator::evaluateCell
+        );
+    }
+
+    private static @NotNull @Unmodifiable List<OreVeinOreCellEvaluator.OreCellResult> oreCellResultsForPosition(BlockPos position, List<OreVeinInstanceDescriptor> candidates, List<OreVeinBounds> evaluationBounds, OreCellEvaluator oreCellEvaluator) {
+        Objects.requireNonNull(position, "position");
+        Objects.requireNonNull(candidates, "candidates");
+        Objects.requireNonNull(evaluationBounds, "evaluationBounds");
+        Objects.requireNonNull(oreCellEvaluator, "oreCellEvaluator");
+
+        if (candidates.size() != evaluationBounds.size()) throw new IllegalArgumentException("candidates and evaluationBounds must have the same size");
+
+        List<OreVeinOreCellEvaluator.OreCellResult> results = new ArrayList<>();
+
+        for (int i = 0; i < candidates.size(); i++) {
+            OreVeinInstanceDescriptor descriptor = candidates.get(i);
+
+            if (!evaluationBounds.get(i).contains(position)) continue;
+
+            OreVeinShapeEvaluator.ShapeContribution contribution = OreVeinShapeEvaluator.evaluate(descriptor, position);
+            OreVeinDefinition definition = Objects.requireNonNull(
+                    OreVeinDefinitions.getDefinition(descriptor.definitionId()),
+                    "Missing ore vein definition: " + descriptor.definitionId()
+            );
+
+            if (contribution.signedBoundaryDistanceBlocks() > definition.sparseReachBlocks()) continue;
+
+            results.add(oreCellEvaluator.evaluate(descriptor, definition, position, contribution));
+        }
+
+        results.sort(RESULT_ORDER);
+        return List.copyOf(results);
+    }
+
+    private static @NotNull OreVeinResolvedCellResolver.ResolvedCell resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, BlockState originalHostState, List<OreVeinOreCellEvaluator.OreCellResult> results) {
+        List<OreVeinOreCellEvaluator.OreCellResult> compatibleOreResults = compatibleOreResults(results, originalHostMaterial);
 
         if (compatibleOreResults.isEmpty()) return hostResult(position, originalHostMaterial, originalHostState, null, false, false, List.of());
 
-        OreVeinOreCellResult winner = pickWinner(worldSeed, dimension, position, compatibleOreResults);
+        OreVeinOreCellEvaluator.OreCellResult winner = pickWinner(worldSeed, dimension, position, compatibleOreResults);
         List<Long> participatingGapIds = eligibleGapInstanceIds(results, originalHostMaterial, winner.instanceId());
         boolean overlapGapEvaluated = !participatingGapIds.isEmpty();
         boolean overlapGapWon = overlapGapEvaluated && overlapGapWins(worldSeed, dimension, position, winner.instanceId(), participatingGapIds);
@@ -88,10 +150,10 @@ public final class OreVeinResolvedCellResolver {
         return new ResolvedCell(position, originalHostMaterial, originalHostState, winner, resolvedBlockState, true, overlapGapEvaluated, false, participatingGapIds);
     }
 
-    private static @NotNull List<OreVeinOreCellResult> compatibleOreResults(@NotNull List<OreVeinOreCellResult> results, Material originalHostMaterial) {
-        List<OreVeinOreCellResult> compatible = new ArrayList<>();
+    private static @NotNull List<OreVeinOreCellEvaluator.OreCellResult> compatibleOreResults(@NotNull List<OreVeinOreCellEvaluator.OreCellResult> results, Material originalHostMaterial) {
+        List<OreVeinOreCellEvaluator.OreCellResult> compatible = new ArrayList<>();
 
-        for (OreVeinOreCellResult result : results) {
+        for (OreVeinOreCellEvaluator.OreCellResult result : results) {
             if (result.finalDensity() <= 0) continue;
 
             if (OreVeinDefinitions.isOreCompatibleWithHost(result.selectedMaterial(), originalHostMaterial)) compatible.add(result);
@@ -100,7 +162,7 @@ public final class OreVeinResolvedCellResolver {
         return compatible;
     }
 
-    private static @NotNull OreVeinOreCellResult pickWinner(long worldSeed, ResourceKey<Level> dimension, BlockPos position, @NotNull List<OreVeinOreCellResult> compatibleOreResults) {
+    private static @NotNull OreVeinOreCellEvaluator.OreCellResult pickWinner(long worldSeed, ResourceKey<Level> dimension, BlockPos position, @NotNull List<OreVeinOreCellEvaluator.OreCellResult> compatibleOreResults) {
         return compatibleOreResults.stream().min((left, right) -> {
                     int byVariant = Integer.compare(variantRank(right.variant()), variantRank(left.variant()));
 
@@ -143,14 +205,14 @@ public final class OreVeinResolvedCellResolver {
     }
 
 
-    private static @NotNull @Unmodifiable List<Long> eligibleGapInstanceIds(@NotNull List<OreVeinOreCellResult> results, Material originalHostMaterial, long winningInstanceId) {
+    private static @NotNull @Unmodifiable List<Long> eligibleGapInstanceIds(@NotNull List<OreVeinOreCellEvaluator.OreCellResult> results, Material originalHostMaterial, long winningInstanceId) {
         Set<Long> gapIds = new LinkedHashSet<>();
 
-        for (OreVeinOreCellResult result : results) {
+        for (OreVeinOreCellEvaluator.OreCellResult result : results) {
             if (result.instanceId() == winningInstanceId) continue;
 
 
-            if (result.variant() != OreVeinOreCellResult.OreVariant.HOST_ROCK) continue;
+            if (result.variant() != OreVeinOreCellEvaluator.OreCellResult.OreVariant.HOST_ROCK) continue;
 
 
             if (result.shapeContribution().signedBoundaryDistanceBlocks() > 0.0D) continue;
@@ -165,7 +227,7 @@ public final class OreVeinResolvedCellResolver {
     }
 
     private static boolean overlapGapWins(long worldSeed, ResourceKey<Level> dimension, BlockPos position, long winningInstanceId, List<Long> participatingGapIds) {
-        OreVeinOverlapSettings settings = OreVeinDefinitions.getOverlapSettings(dimension);
+        OreVeinDefinitions.OverlapSettings settings = OreVeinDefinitions.getOverlapSettings(dimension);
 
         if (settings == null) throw new IllegalStateException("Missing ore vein overlap settings for dimension " + dimension.location());
 
@@ -177,7 +239,7 @@ public final class OreVeinResolvedCellResolver {
         return Math.floorMod(hash, settings.denominator()) < settings.mainBodyGapNumerator();
     }
 
-    private static BlockState resolveOreState(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellResult winner) {
+    private static BlockState resolveOreState(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellEvaluator.OreCellResult winner) {
         Supplier<Block> supplier = switch (winner.variant()) {
             case REGULAR_ORE -> supplierFor(winner.selectedMaterial().ore.getOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
             case DENSE_ORE -> supplierFor(winner.selectedMaterial().ore.getDenseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
@@ -200,7 +262,7 @@ public final class OreVeinResolvedCellResolver {
         return state.setValue(DenseOre.DENSITY, winner.finalDensity());
     }
 
-    private static @NotNull Supplier<Block> supplierFor(@NotNull Map<String, Supplier<Block>> blocks, String hostName, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellResult winner) {
+    private static @NotNull Supplier<Block> supplierFor(@NotNull Map<String, Supplier<Block>> blocks, String hostName, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellEvaluator.OreCellResult winner) {
         if (!blocks.containsKey(hostName)) throw invalidReplacement("missing block mapping for host key '" + hostName + "'", dimension, position, originalHostMaterial, winner);
 
         Supplier<Block> supplier = blocks.get(hostName);
@@ -211,7 +273,7 @@ public final class OreVeinResolvedCellResolver {
     }
 
     @Contract("_, _, _, _, _ -> new")
-    private static @NotNull IllegalStateException invalidReplacement(String reason, @NotNull ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellResult winner) {
+    private static @NotNull IllegalStateException invalidReplacement(String reason, @NotNull ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellEvaluator.OreCellResult winner) {
         return new IllegalStateException("Invalid resolved ore replacement:"
                 + " dimension=" + dimension.location()
                 + ", position=" + position
@@ -224,12 +286,12 @@ public final class OreVeinResolvedCellResolver {
     }
 
     @Contract("_, _, _, _, _, _, _ -> new")
-    private static @NotNull OreVeinResolvedCellResolver.ResolvedCell hostResult(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellResult winner, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingGapIds) {
+    private static @NotNull OreVeinResolvedCellResolver.ResolvedCell hostResult(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellEvaluator.OreCellResult winner, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingGapIds) {
         return new ResolvedCell(position, originalHostMaterial, originalHostState, winner, originalHostState, false, overlapGapEvaluated, overlapGapWon, participatingGapIds);
     }
 
     @Contract(pure = true)
-    static int variantRank(OreVeinOreCellResult.@NotNull OreVariant variant) {
+    static int variantRank(OreVeinOreCellEvaluator.OreCellResult.@NotNull OreVariant variant) {
         return switch (variant) {
             case DENSE_ORE -> 3;
             case REGULAR_ORE -> 2;
@@ -240,6 +302,11 @@ public final class OreVeinResolvedCellResolver {
 
     private static String materialName(Material material) {
         return material == null ? "null" : material.name;
+    }
+
+    @FunctionalInterface
+    private interface OreCellEvaluator {
+        OreVeinOreCellEvaluator.OreCellResult evaluate(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, OreVeinShapeEvaluator.ShapeContribution contribution);
     }
 
     private record OriginalHost(Material material, BlockState state) {
@@ -270,7 +337,7 @@ public final class OreVeinResolvedCellResolver {
         return new OriginalHost(material, state);
     }
 
-    public record ResolvedCell(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellResult winningOreCellResult, BlockState resolvedBlockState, boolean replacement, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingMainBodyGapInstanceIds) {
+    public record ResolvedCell(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellEvaluator.OreCellResult winningOreCellResult, BlockState resolvedBlockState, boolean replacement, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingMainBodyGapInstanceIds) {
         public ResolvedCell {
             Objects.requireNonNull(position, "position");
             Objects.requireNonNull(originalHostMaterial, "originalHostMaterial");

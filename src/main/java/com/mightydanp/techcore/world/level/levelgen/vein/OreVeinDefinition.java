@@ -9,8 +9,9 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, OreVeinDensitySettings densitySettings, OreVeinHaloSettings haloSettings, List<VeinOreEntry> oreEntries) {
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
     private static final int DEFAULT_SPARSE_REACH_BLOCKS = 32;
     private static final double DEFAULT_MAX_PITCH_DEGREES = 12.0D;
     private static final double DEFAULT_MAX_ROLL_DEGREES = 12.0D;
@@ -18,7 +19,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     //private Double maxPitchDegrees;
     //private Double maxRollDegrees;
     
-    private static final OreVeinDensitySettings DEFAULT_DENSITY_SETTINGS = new OreVeinDensitySettings(
+    private static final DensitySettings DEFAULT_DENSITY_SETTINGS = new DensitySettings(
             704,
             960,
             1024,
@@ -34,8 +35,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             2,
             4
     );
-    private static final OreVeinHaloSettings DEFAULT_HALO_SETTINGS =
-            new OreVeinHaloSettings(
+    private static final HaloSettings DEFAULT_HALO_SETTINGS =
+            new HaloSettings(
                     4.0D
             );
 
@@ -56,7 +57,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         validateTotalDistributionWeight(oreEntries);
     }
 
-    public OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, double maxPitchDegrees, double maxRollDegrees, OreVeinDensitySettings densitySettings, OreVeinHaloSettings haloSettings, List<VeinOreEntry> oreEntries) {
+    public OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
         this(id, dimensions, generationWeight, minCenterY, maxCenterYExclusive, minSizeX, maxSizeX, minSizeY, maxSizeY, minSizeZ, maxSizeZ, DEFAULT_SPARSE_REACH_BLOCKS, maxPitchDegrees, maxRollDegrees, densitySettings, haloSettings, oreEntries);
     }
 
@@ -106,25 +107,22 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         if (sparseReachBlocks < 0) throw new IllegalArgumentException("sparseReachBlocks must be at least 0");
     }
 
-    private static void validateTotalDistributionWeight(List<VeinOreEntry> oreEntries) {
+    private static void validateTotalDistributionWeight(List<OreEntry> oreEntries) {
         if (calculateTotalDistributionWeight(oreEntries) <= 0L)
             throw new IllegalArgumentException("total distribution weight must be positive");
     }
 
-    private static long calculateTotalDistributionWeight(@NotNull List<VeinOreEntry> oreEntries) {
+    private static long calculateTotalDistributionWeight(@NotNull List<OreEntry> oreEntries) {
         long totalWeight = 0L;
 
-        for (VeinOreEntry entry : oreEntries) totalWeight = addDistributionWeight(totalWeight, entry);
+        for (OreEntry entry : oreEntries)
+            try {
+                totalWeight = Math.addExact(totalWeight, entry.distributionWeight());
+            } catch (ArithmeticException exception) {
+                throw new IllegalArgumentException("total distribution weight is too large", exception);
+            }
 
         return totalWeight;
-    }
-
-    private static long addDistributionWeight(long totalWeight, @NotNull VeinOreEntry entry) {
-        try {
-            return Math.addExact(totalWeight, entry.distributionWeight());
-        } catch (ArithmeticException exception) {
-            throw new IllegalArgumentException("total distribution weight is too large", exception);
-        }
     }
 
     public long totalDistributionWeight() {
@@ -145,7 +143,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private Integer minSizeZ;
         private Integer maxSizeZ;
         private Integer sparseReachBlocks;
-        private List<VeinOreEntry> oreEntries;
+        private List<OreEntry> oreEntries;
 
         private Builder(ResourceLocation id) {
             this.id = Objects.requireNonNull(id, "id");
@@ -195,11 +193,11 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
-        public Builder ores(VeinOreEntry... oreEntries) {
+        public Builder ores(OreEntry... oreEntries) {
             return ores(List.of(oreEntries));
         }
 
-        public Builder ores(List<VeinOreEntry> oreEntries) {
+        public Builder ores(List<OreEntry> oreEntries) {
             this.oreEntries = List.copyOf(oreEntries);
             return this;
         }
@@ -225,6 +223,37 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
                     DEFAULT_HALO_SETTINGS,
                     oreEntries
             );
+        }
+    }
+
+    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator, long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX, double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY, double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity, int maxPeakDensity) {
+        public DensitySettings {
+            if (fillDenominator <= 0) throw new IllegalArgumentException("fillDenominator must be positive");
+            if (regularFillNumerator < 0 || regularFillNumerator > fillDenominator) throw new IllegalArgumentException("regularFillNumerator must be in [0, fillDenominator]");
+            if (maximumFillNumerator < regularFillNumerator || maximumFillNumerator > fillDenominator) throw new IllegalArgumentException("maximumFillNumerator must be in [regularFillNumerator, fillDenominator]");
+            if (blocksPerDenseNode <= 0L) throw new IllegalArgumentException("blocksPerDenseNode must be positive");
+            if (minNodeCount < 0 || maxNodeCount < minNodeCount) throw new IllegalArgumentException("node-count range is invalid");
+            validateRadiusRange(minNodeRadiusX, maxNodeRadiusX, "X");
+            validateRadiusRange(minNodeRadiusY, maxNodeRadiusY, "Y");
+            validateRadiusRange(minNodeRadiusZ, maxNodeRadiusZ, "Z");
+            if (minPeakDensity < 1 || maxPeakDensity < minPeakDensity) throw new IllegalArgumentException("peak-density range is invalid");
+        }
+
+        private static void validateRadiusRange(double minRadius, double maxRadius, String axis) {
+            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius) throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
+        }
+    }
+
+    public record HaloSettings(double transitionWidthBlocks) {
+        public HaloSettings {
+            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D) throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
+        }
+    }
+
+    public record OreEntry(Supplier<com.mightydanp.techcore.materials.Material> oreMaterial, int distributionWeight) {
+        public OreEntry {
+            Objects.requireNonNull(oreMaterial, "oreMaterial");
+            if (distributionWeight <= 0) throw new IllegalArgumentException("distributionWeight must be positive");
         }
     }
 }

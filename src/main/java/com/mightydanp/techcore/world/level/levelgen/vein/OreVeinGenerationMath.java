@@ -3,7 +3,6 @@ package com.mightydanp.techcore.world.level.levelgen.vein;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
@@ -33,7 +32,7 @@ public final class OreVeinGenerationMath {
     private static final long SALT_PITCH = 0x629a292a367cd507L;
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
 
-    public static BigInteger budgetQ16(OreVeinDimensionGenerationSettings settings) {
+    public static BigInteger budgetQ16(OreVeinDefinitions.DimensionGenerationSettings settings) {
         return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
     }
 
@@ -127,50 +126,6 @@ public final class OreVeinGenerationMath {
         return minInclusive + randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_CENTER_Y, maxExclusive - minInclusive);
     }
 
-    @Contract("_, _, _, _, _, _ -> new")
-    public static @NotNull HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
-        double hx = (sizeX - 1) / 2.0D;
-        double hy = (sizeY - 1) / 2.0D;
-        double hz = (sizeZ - 1) / 2.0D;
-        double yaw = Math.toRadians(yawDegrees);
-        double pitch = Math.toRadians(pitchDegrees);
-        double roll = Math.toRadians(rollDegrees);
-        double cy = Math.cos(yaw);
-        double sy = Math.sin(yaw);
-        double cp = Math.cos(pitch);
-        double sp = Math.sin(pitch);
-        double cr = Math.cos(roll);
-        double sr = Math.sin(roll);
-
-        double r00 = cy * cr + sy * sp * sr;
-        double r01 = -cy * sr + sy * sp * cr;
-        double r02 = sy * cp;
-        double r10 = cp * sr;
-        double r11 = cp * cr;
-        double r12 = -sp;
-        double r20 = -sy * cr + cy * sp * sr;
-        double r21 = sy * sr + cy * sp * cr;
-        double r22 = cy * cp;
-
-        return new HalfExtents(
-                ceilExtent(r00, hx, r01, hy, r02, hz),
-                ceilExtent(r10, hx, r11, hy, r12, hz),
-                ceilExtent(r20, hx, r21, hy, r22, hz)
-        );
-    }
-
-    @Contract("_, _, _, _ -> new")
-    public static @NotNull OreVeinBounds bounds(int centerX, int centerY, int centerZ, @NotNull HalfExtents halfExtents) {
-        return new OreVeinBounds(
-                centerX - halfExtents.x(),
-                centerY - halfExtents.y(),
-                centerZ - halfExtents.z(),
-                centerX + halfExtents.x(),
-                centerY + halfExtents.y(),
-                centerZ + halfExtents.z()
-        );
-    }
-
     public static int regionCoordinateForBlock(int blockCoordinate) {
         return Math.floorDiv(blockCoordinate, REGION_BLOCKS);
     }
@@ -189,7 +144,6 @@ public final class OreVeinGenerationMath {
         return divided[1].signum() == 0 ? divided[0] : divided[0].add(BigInteger.ONE);
     }
 
-    @Contract(pure = true)
     public static BigInteger sqrtFloor(@NotNull BigInteger value) {
         return value.sqrt();
     }
@@ -253,16 +207,10 @@ public final class OreVeinGenerationMath {
         return value;
     }
 
-    private static int ceilExtent(double r0, double h0, double r1, double h1, double r2, double h2) {
-        return (int) Math.ceil(Math.abs(r0) * h0 + Math.abs(r1) * h1 + Math.abs(r2) * h2);
-    }
-
     private static void writeLong(byte[] bytes, int offset, long value) {
         for (int i = 7; i >= 0; i--) {
             bytes[offset + i] = (byte) value;
             value >>>= 8;
         }
     }
-
-    public record HalfExtents(int x, int y, int z) {}
 }

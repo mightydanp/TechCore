@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinContribution.ContributionState.INSIDE_MAIN_BODY;
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinContribution.ContributionState.OUTSIDE;
+import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator.ShapeContribution.ContributionState.INSIDE_MAIN_BODY;
+import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator.ShapeContribution.ContributionState.OUTSIDE;
 
 public final class OreVeinShapeEvaluator {
     private static final double COARSE_FREQUENCY = 1.0D / 32.0D;
@@ -22,7 +22,7 @@ public final class OreVeinShapeEvaluator {
     private static final long MEDIUM_SALT = 0xBB67AE8584CAA73BL;
     private static final long DETAIL_SALT = 0x3C6EF372FE94F82BL;
 
-    public static @NotNull OreVeinContribution evaluate(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position) {
+    public static @NotNull ShapeContribution evaluate(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position) {
         double worldX = position.getX() + 0.5D;
         double worldY = position.getY() + 0.5D;
         double worldZ = position.getZ() + 0.5D;
@@ -41,14 +41,14 @@ public final class OreVeinShapeEvaluator {
     }
 
     @Contract("_, _, _, _ -> new")
-    public static @NotNull OreVeinContribution evaluateLocalPoint(@NotNull OreVeinInstanceDescriptor descriptor, double localX, double localY, double localZ) {
+    public static @NotNull ShapeContribution evaluateLocalPoint(@NotNull OreVeinInstanceDescriptor descriptor, double localX, double localY, double localZ) {
         double halfX = descriptor.sizeX() / 2.0D;
         double halfY = descriptor.sizeY() / 2.0D;
         double halfZ = descriptor.sizeZ() / 2.0D;
         double radialDistance = length(localX, localY, localZ);
 
         if (radialDistance == 0.0D) {
-            return new OreVeinContribution(
+            return new ShapeContribution(
                     descriptor.instanceId(),
                     descriptor.definitionId(),
                     0.0D,
@@ -66,7 +66,7 @@ public final class OreVeinShapeEvaluator {
         double distortionBlocks = distortionBlocks(descriptor.shapeSeed(), localX, localY, localZ);
         double signedBoundaryDistanceBlocks = baseDistanceBlocks - distortionBlocks;
 
-        return new OreVeinContribution(
+        return new ShapeContribution(
                 descriptor.instanceId(),
                 descriptor.definitionId(),
                 localX,
@@ -277,6 +277,21 @@ public final class OreVeinShapeEvaluator {
     }
 
     public record HalfExtents(int x, int y, int z) {
+    }
+
+    public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId, double localX, double localY, double localZ, double normalizedRadius, double distortionBlocks, double signedBoundaryDistanceBlocks, ContributionState state) {
+        public ShapeContribution {
+            java.util.Objects.requireNonNull(definitionId, "definitionId");
+            java.util.Objects.requireNonNull(state, "state");
+
+            if (!Double.isFinite(localX) || !Double.isFinite(localY) || !Double.isFinite(localZ) || !Double.isFinite(normalizedRadius) || !Double.isFinite(distortionBlocks) || !Double.isFinite(signedBoundaryDistanceBlocks))
+                throw new IllegalArgumentException("contribution values must be finite");
+        }
+
+        public enum ContributionState {
+            OUTSIDE,
+            INSIDE_MAIN_BODY
+        }
     }
 
     private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22) {

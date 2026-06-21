@@ -22,8 +22,8 @@ public final class OreVeinDefinitions {
     public static final double MAX_BOUNDARY_DISTORTION_BLOCKS = 7.0D;
 
     private static final Map<ResourceLocation, OreVeinDefinition> DEFINITIONS = new LinkedHashMap<>();
-    private static final Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> GENERATION_SETTINGS = new LinkedHashMap<>();
-    private static final Map<ResourceKey<Level>, OreVeinOverlapSettings> OVERLAP_SETTINGS = new LinkedHashMap<>();
+    private static final Map<ResourceKey<Level>, DimensionGenerationSettings> GENERATION_SETTINGS = new LinkedHashMap<>();
+    private static final Map<ResourceKey<Level>, OverlapSettings> OVERLAP_SETTINGS = new LinkedHashMap<>();
 
     @Contract("_, _, _, _ -> param3")
     private static <K, V> V registerUnique(@NotNull Map<K, V> registry, K key, V value, Function<K, String> duplicateMessage) {
@@ -51,7 +51,7 @@ public final class OreVeinDefinitions {
         );
     }
 
-    public static OreVeinDimensionGenerationSettings registerGenerationSettings(OreVeinDimensionGenerationSettings settings) {
+    public static DimensionGenerationSettings registerGenerationSettings(DimensionGenerationSettings settings) {
         Objects.requireNonNull(settings, "settings");
 
         return registerUnique(
@@ -70,15 +70,15 @@ public final class OreVeinDefinitions {
         return DEFINITIONS.get(id);
     }
 
-    public static @NotNull @Unmodifiable List<OreVeinDimensionGenerationSettings> getGenerationSettings() {
+    public static @NotNull @Unmodifiable List<DimensionGenerationSettings> getGenerationSettings() {
         return List.copyOf(GENERATION_SETTINGS.values());
     }
 
-    public static OreVeinDimensionGenerationSettings getGenerationSettings(ResourceKey<Level> dimension) {
+    public static DimensionGenerationSettings getGenerationSettings(ResourceKey<Level> dimension) {
         return GENERATION_SETTINGS.get(dimension);
     }
 
-    public static OreVeinOverlapSettings registerOverlapSettings(ResourceKey<Level> dimension, OreVeinOverlapSettings settings) {
+    public static OverlapSettings registerOverlapSettings(ResourceKey<Level> dimension, OverlapSettings settings) {
         return registerUnique(
                 OVERLAP_SETTINGS,
                 dimension,
@@ -87,7 +87,7 @@ public final class OreVeinDefinitions {
         );
     }
 
-    public static OreVeinOverlapSettings getOverlapSettings(ResourceKey<Level> dimension) {
+    public static OverlapSettings getOverlapSettings(ResourceKey<Level> dimension) {
         return OVERLAP_SETTINGS.get(dimension);
     }
 
@@ -105,12 +105,12 @@ public final class OreVeinDefinitions {
         validate(definitions, getGenerationSettings());
     }
 
-    public static void validate(Collection<OreVeinDefinition> definitions, Collection<OreVeinDimensionGenerationSettings> settings) {
+    public static void validate(Collection<OreVeinDefinition> definitions, Collection<DimensionGenerationSettings> settings) {
         Objects.requireNonNull(definitions, "definitions");
         Objects.requireNonNull(settings, "settings");
 
         List<String> problems = new ArrayList<>();
-        Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> settingsByDimension = validateSettings(settings, problems);
+        Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension = validateSettings(settings, problems);
 
         for (OreVeinDefinition definition : definitions) {
             if (definition == null) {
@@ -161,10 +161,10 @@ public final class OreVeinDefinitions {
         return null;
     }
 
-    private static @NotNull Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> validateSettings(@NotNull Collection<OreVeinDimensionGenerationSettings> settings, List<String> problems) {
-        Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> settingsByDimension = new LinkedHashMap<>();
+    private static @NotNull Map<ResourceKey<Level>, DimensionGenerationSettings> validateSettings(@NotNull Collection<DimensionGenerationSettings> settings, List<String> problems) {
+        Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension = new LinkedHashMap<>();
 
-        for (OreVeinDimensionGenerationSettings setting : settings) {
+        for (DimensionGenerationSettings setting : settings) {
             if (setting == null) {
                 problems.add("unknown\n  reason: null ore vein dimension generation settings");
                 continue;
@@ -174,7 +174,7 @@ public final class OreVeinDefinitions {
                 problems.add(setting.dimension().location() + "\n  originWeightBudget: " + setting.originWeightBudget() + "\n  reason: originWeightBudget must be positive");
             }
 
-            OreVeinDimensionGenerationSettings previous = settingsByDimension.putIfAbsent(setting.dimension(), setting);
+            DimensionGenerationSettings previous = settingsByDimension.putIfAbsent(setting.dimension(), setting);
 
             if (previous != null) problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
         }
@@ -182,7 +182,7 @@ public final class OreVeinDefinitions {
         return settingsByDimension;
     }
 
-    private static void validateDefinition(OreVeinDefinition definition, Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> settingsByDimension, List<String> problems) {
+    private static void validateDefinition(OreVeinDefinition definition, Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
         validateGenerationFields(definition, problems);
 
         List<ResolvedOreEntry> oreEntries = resolveOreEntries(definition, problems);
@@ -222,14 +222,14 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateHaloSettings(@NotNull OreVeinDefinition definition, List<String> problems) {
-        OreVeinHaloSettings haloSettings = definition.haloSettings();
+        OreVeinDefinition.HaloSettings haloSettings = definition.haloSettings();
 
         if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() < 0.0D) problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and non-negative"));
     }
 
 
     private static void validateDensitySettings(@NotNull OreVeinDefinition definition, List<String> problems) {
-        OreVeinDensitySettings settings = definition.densitySettings();
+        OreVeinDefinition.DensitySettings settings = definition.densitySettings();
 
         validateNodeRadius(definition, settings.maxNodeRadiusX(), definition.minSizeX(), "X", problems);
         validateNodeRadius(definition, settings.maxNodeRadiusY(), definition.minSizeY(), "Y", problems);
@@ -316,8 +316,8 @@ public final class OreVeinDefinitions {
         }
     }
 
-    private static void validateDimensionBudgets(Collection<OreVeinDefinition> definitions, @NotNull Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> settingsByDimension, List<String> problems) {
-        for (OreVeinDimensionGenerationSettings settings : settingsByDimension.values()) {
+    private static void validateDimensionBudgets(Collection<OreVeinDefinition> definitions, @NotNull Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
+        for (DimensionGenerationSettings settings : settingsByDimension.values()) {
             List<OreVeinDefinition> eligibleDefinitions = definitions.stream()
                     .filter(Objects::nonNull)
                     .filter(definition -> definition.dimensions().contains(settings.dimension()))
@@ -336,9 +336,9 @@ public final class OreVeinDefinitions {
         }
     }
 
-    private static void validateOverlapSettings(Collection<OreVeinDefinition> definitions, Map<ResourceKey<Level>, OreVeinDimensionGenerationSettings> settingsByDimension, List<String> problems) {
-        for (Map.Entry<ResourceKey<Level>, OreVeinOverlapSettings> entry : OVERLAP_SETTINGS.entrySet()) {
-            OreVeinOverlapSettings settings = entry.getValue();
+    private static void validateOverlapSettings(Collection<OreVeinDefinition> definitions, Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
+        for (Map.Entry<ResourceKey<Level>, OverlapSettings> entry : OVERLAP_SETTINGS.entrySet()) {
+            OverlapSettings settings = entry.getValue();
 
             if (settings.denominator() <= 0) problems.add(entry.getKey().location() + "\n  reason: overlap denominator must be positive");
             if (settings.mainBodyGapNumerator() < 0 || settings.mainBodyGapNumerator() > settings.denominator()) problems.add(entry.getKey().location() + "\n  reason: overlap mainBodyGapNumerator must be in [0, denominator]");
@@ -355,7 +355,7 @@ public final class OreVeinDefinitions {
     private static void validateDistributionWeights(@NotNull OreVeinDefinition definition, List<String> problems) {
         long totalWeight = 0L;
 
-        for (VeinOreEntry entry : definition.oreEntries()) {
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) {
             if (entry.distributionWeight() <= 0) {
                 problems.add(problem(definition, null, entry, null, null, null, null, "distribution weight must be positive"));
                 continue;
@@ -387,14 +387,14 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateDuplicateOreMaterials(OreVeinDefinition definition, @NotNull List<ResolvedOreEntry> oreEntries, List<String> problems) {
-        Map<Material, VeinOreEntry> seen = new IdentityHashMap<>();
+        Map<Material, OreVeinDefinition.OreEntry> seen = new IdentityHashMap<>();
 
         for (ResolvedOreEntry resolvedOreEntry : oreEntries) {
             Material oreMaterial = resolvedOreEntry.material();
 
             if (oreMaterial == null) continue;
 
-            VeinOreEntry previous = seen.putIfAbsent(oreMaterial, resolvedOreEntry.entry());
+            OreVeinDefinition.OreEntry previous = seen.putIfAbsent(oreMaterial, resolvedOreEntry.entry());
 
             if (previous != null) problems.add(problem(definition, null, resolvedOreEntry.entry(), oreMaterial, null, null, null, "duplicate ore material"));
         }
@@ -429,7 +429,7 @@ public final class OreVeinDefinitions {
     }
 
 
-    private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, VeinOreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
         if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial)) problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockType"));
 
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), commonRockTypes, problems);
@@ -446,7 +446,7 @@ public final class OreVeinDefinitions {
         );
     }
 
-    private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, VeinOreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
         Supplier<Block> block = blocks.get(hostRockMaterial.name);
 
         if (block == null) problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, requiredMap, commonRockTypes, "missing " + requiredMap + " mapping"));
@@ -455,12 +455,12 @@ public final class OreVeinDefinitions {
     private static @NotNull List<ResolvedOreEntry> resolveOreEntries(@NotNull OreVeinDefinition definition, List<String> problems) {
         List<ResolvedOreEntry> entries = new ArrayList<>();
 
-        for (VeinOreEntry entry : definition.oreEntries()) entries.add(new ResolvedOreEntry(entry, resolveOreMaterial(definition, entry, problems)));
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) entries.add(new ResolvedOreEntry(entry, resolveOreMaterial(definition, entry, problems)));
 
         return entries;
     }
 
-    private static @Nullable Material resolveOreMaterial(OreVeinDefinition definition, VeinOreEntry entry, List<String> problems) {
+    private static @Nullable Material resolveOreMaterial(OreVeinDefinition definition, OreVeinDefinition.OreEntry entry, List<String> problems) {
         try {
             Material material = entry.oreMaterial().get();
 
@@ -481,7 +481,7 @@ public final class OreVeinDefinitions {
         return material == null || material.ore == null || material.ore.getOreType() == null || material.ore.getRockTypes().isEmpty();
     }
 
-    private static @NotNull String problem(@NotNull OreVeinDefinition definition, ResourceKey<Level> dimension, VeinOreEntry entry, Material oreMaterial, Material hostRockMaterial, String requiredMap, Set<RockTypes.RockType> commonRockTypes, String reason) {
+    private static @NotNull String problem(@NotNull OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, String requiredMap, Set<RockTypes.RockType> commonRockTypes, String reason) {
         StringBuilder message = new StringBuilder();
         message.append(definition.id()).append("\n");
         message.append("  dimension: ").append(dimension == null ? "unknown" : dimension.location()).append("\n");
@@ -538,7 +538,7 @@ public final class OreVeinDefinitions {
     private static String veinOreRockTypes(@NotNull OreVeinDefinition definition) {
         List<String> values = new ArrayList<>();
 
-        for (VeinOreEntry entry : definition.oreEntries()) {
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) {
             Material oreMaterial;
 
             try {
@@ -567,6 +567,20 @@ public final class OreVeinDefinitions {
     public record DimensionHeight(int minY, int maxYExclusive) {
     }
 
-    private record ResolvedOreEntry(VeinOreEntry entry, Material material) {
+    public record DimensionGenerationSettings(ResourceKey<Level> dimension, int originWeightBudget) {
+        public DimensionGenerationSettings {
+            Objects.requireNonNull(dimension, "dimension");
+            if (originWeightBudget <= 0) throw new IllegalArgumentException("originWeightBudget must be positive");
+        }
+    }
+
+    public record OverlapSettings(int mainBodyGapNumerator, int denominator) {
+        public OverlapSettings {
+            if (denominator <= 0) throw new IllegalArgumentException("denominator must be positive");
+            if (mainBodyGapNumerator < 0 || mainBodyGapNumerator > denominator) throw new IllegalArgumentException("mainBodyGapNumerator must be in [0, denominator]");
+        }
+    }
+
+    private record ResolvedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {
     }
 }

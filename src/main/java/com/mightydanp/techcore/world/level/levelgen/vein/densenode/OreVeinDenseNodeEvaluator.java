@@ -38,8 +38,16 @@ public final class OreVeinDenseNodeEvaluator {
 
         if (finalDensity <= 0)
             return results.create(candidateDensity, finalDensity, HOST_ROCK, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
-        if (denseNodeOutcome.nodeId() != 0L)
-            return results.create(candidateDensity, finalDensity, DENSE_ORE, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
+        if (denseNodeOutcome.nodeId() != 0L) {
+            OreVeinOreCellEvaluator.OreCellResult.OreVariant variant = finalDensity >= 2 ? DENSE_ORE : REGULAR_ORE;
+            return results.create(
+                    candidateDensity,
+                    finalDensity,
+                    variant,
+                    denseNodeOutcome.nodeId(),
+                    denseNodeOutcome.influence()
+            );
+        }
 
         if (OreVeinSparseTransitionEvaluator.isInsideTransitionHalf(contribution.signedBoundaryDistanceBlocks(), definition.haloSettings().transitionWidthBlocks())) {
             OreVeinOreCellEvaluator.OreCellResult.OreVariant transitionVariant = OreVeinSparseTransitionEvaluator.insideTransitionVariant(

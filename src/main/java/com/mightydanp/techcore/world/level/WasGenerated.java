@@ -15,15 +15,25 @@ import org.jetbrains.annotations.NotNull;
 public final class WasGenerated {
     private static final String DATA_ID = "techcore_changed_after_generation";
 
-    private WasGenerated() {
-    }
+    private static final ThreadLocal<Integer> CHANGE_TRACKING_SUPPRESSION_DEPTH = ThreadLocal.withInitial(() -> 0);
 
     public static boolean wasGenerated(ServerLevel level, BlockPos pos) {
         return !ChangedAfterGenerationData.get(level).wasChanged(pos);
     }
 
     public static void markChanged(ServerLevel level, BlockPos pos) {
+        if (isChangeTrackingSuppressed()) return;
         ChangedAfterGenerationData.get(level).markChanged(pos);
+    }
+
+
+    public static @NotNull Suppression suppressChangeTracking() {
+        CHANGE_TRACKING_SUPPRESSION_DEPTH.set(CHANGE_TRACKING_SUPPRESSION_DEPTH.get() + 1);
+        return new Suppression();
+    }
+
+    public static boolean isChangeTrackingSuppressed() {
+        return CHANGE_TRACKING_SUPPRESSION_DEPTH.get() > 0;
     }
 
     private static final class ChangedAfterGenerationData extends SavedData {
@@ -80,6 +90,24 @@ public final class WasGenerated {
 
             tag.put("chunks", chunks);
             return tag;
+        }
+    }
+
+    public static final class Suppression implements AutoCloseable {
+        private final Thread ownerThread = Thread.currentThread();
+        private boolean closed;
+
+        @Override
+        public void close() {
+            if (closed) return;
+            if (Thread.currentThread() != ownerThread) throw new IllegalStateException("WasGenerated suppression must close on its owning thread");
+
+            closed = true;
+
+            int remainingDepth = CHANGE_TRACKING_SUPPRESSION_DEPTH.get() - 1;
+
+            if (remainingDepth <= 0) CHANGE_TRACKING_SUPPRESSION_DEPTH.remove();
+            else CHANGE_TRACKING_SUPPRESSION_DEPTH.set(remainingDepth);
         }
     }
 }

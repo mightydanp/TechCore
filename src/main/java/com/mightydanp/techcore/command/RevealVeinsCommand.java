@@ -4,6 +4,7 @@ import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.components.OreComponent;
+import com.mightydanp.techcore.world.level.WasGenerated;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -31,17 +32,13 @@ public final class RevealVeinsCommand {
     static final int MIN_RADIUS = 0;
     static final int MAX_RADIUS = 9;
 
-    private RevealVeinsCommand() {
-    }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         register(dispatcher, !FMLEnvironment.production);
     }
 
     static void register(CommandDispatcher<CommandSourceStack> dispatcher, boolean developmentMode) {
-        if (!developmentMode) {
-            return;
-        }
+        if (!developmentMode) return;
 
         LiteralArgumentBuilder<CommandSourceStack> reveal = Commands.literal("revealveins")
                 .requires(source -> source.hasPermission(4))
@@ -111,9 +108,7 @@ public final class RevealVeinsCommand {
         LinkedHashSet<Block> sparseBlocks = new LinkedHashSet<>();
 
         for (Material material : materials) {
-            if (material == null || material.ore == null) {
-                continue;
-            }
+            if (material == null || material.ore == null) continue;
 
             OreComponent<Material> ore = material.ore;
             addOreBlocks(regularBlocks, material, "oreBlocks", ore.getOreBlocks());
@@ -133,9 +128,7 @@ public final class RevealVeinsCommand {
             String hostKey = entry.getKey();
             Supplier<Block> supplier = entry.getValue();
 
-            if (supplier == null) {
-                throw invalidOreBlock(material.name, mapName, hostKey, "null supplier");
-            }
+            if (supplier == null) throw invalidOreBlock(material.name, mapName, hostKey, "null supplier");
 
             final Block block;
             try {
@@ -144,9 +137,7 @@ public final class RevealVeinsCommand {
                 throw invalidOreBlock(material.name, mapName, hostKey, "supplier threw " + exception.getClass().getSimpleName() + ": " + exception.getMessage(), exception);
             }
 
-            if (block == null) {
-                throw invalidOreBlock(material.name, mapName, hostKey, "supplier returned null block");
-            }
+            if (block == null) throw invalidOreBlock(material.name, mapName, hostKey, "supplier returned null block");
 
             blocks.add(block);
         }
@@ -165,55 +156,85 @@ public final class RevealVeinsCommand {
         int sparseFormMembershipsPreserved = 0;
         int oreBlocksRemovedByFiltering = 0;
         int otherNonOreBlocksReplaced = 0;
+
         int minY = level.getMinBuildHeight();
         int maxYExclusive = level.getMaxBuildHeight();
+
         ServerChunkCache chunkSource = level.getChunkSource();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
-        for (int chunkZ = sourceChunk.z - radius; chunkZ <= sourceChunk.z + radius; chunkZ++) {
-            for (int chunkX = sourceChunk.x - radius; chunkX <= sourceChunk.x + radius; chunkX++) {
-                LevelChunk chunk = chunkSource.getChunkNow(chunkX, chunkZ);
+        try (WasGenerated.Suppression ignored = WasGenerated.suppressChangeTracking()) {
+            for (int chunkZ = sourceChunk.z - radius;
+                 chunkZ <= sourceChunk.z + radius;
+                 chunkZ++) {
 
-                if (chunk == null) {
-                    unloadedChunksSkipped++;
-                    continue;
-                }
+                for (int chunkX = sourceChunk.x - radius;
+                     chunkX <= sourceChunk.x + radius;
+                     chunkX++) {
 
-                loadedChunksProcessed++;
-                int minX = chunk.getPos().getMinBlockX();
-                int minZ = chunk.getPos().getMinBlockZ();
+                    LevelChunk chunk = chunkSource.getChunkNow(chunkX, chunkZ);
 
-                for (int y = minY; y < maxYExclusive; y++) {
-                    for (int z = minZ; z <= minZ + 15; z++) {
-                        for (int x = minX; x <= minX + 15; x++) {
-                            cursor.set(x, y, z);
-                            BlockState state = level.getBlockState(cursor);
-                            Block block = state.getBlock();
-                            boolean regularMember = membershipSets.regularBlocks().contains(block);
-                            boolean denseMember = membershipSets.denseBlocks().contains(block);
-                            boolean sparseMember = membershipSets.sparseBlocks().contains(block);
-                            boolean preserve = (regularMember && mode.preserveRegular())
-                                    || (denseMember && mode.preserveDense())
-                                    || (sparseMember && mode.preserveSparse());
+                    if (chunk == null) {
+                        unloadedChunksSkipped++;
+                        continue;
+                    }
 
-                            if (preserve) {
-                                if (regularMember) {
-                                    regularFormMembershipsPreserved++;
+                    loadedChunksProcessed++;
+
+                    int minX = chunk.getPos().getMinBlockX();
+                    int minZ = chunk.getPos().getMinBlockZ();
+
+                    for (int y = minY; y < maxYExclusive; y++) {
+                        for (int z = minZ; z <= minZ + 15; z++) {
+                            for (int x = minX; x <= minX + 15; x++) {
+                                cursor.set(x, y, z);
+
+                                BlockState state = level.getBlockState(cursor);
+
+                                Block block = state.getBlock();
+
+                                boolean regularMember = membershipSets.regularBlocks()
+                                        .contains(block);
+
+                                boolean denseMember = membershipSets.denseBlocks()
+                                        .contains(block);
+
+                                boolean sparseMember = membershipSets.sparseBlocks()
+                                        .contains(block);
+
+                                boolean oreMember = regularMember
+                                        || denseMember
+                                        || sparseMember;
+
+                                boolean preserve =
+                                        (regularMember && mode.preserveRegular())
+                                                || (denseMember
+                                                && mode.preserveDense())
+                                                || (sparseMember
+                                                && mode.preserveSparse());
+
+                                if (preserve) {
+                                    if (regularMember) regularFormMembershipsPreserved++;
+                                    if (denseMember) denseFormMembershipsPreserved++;
+                                    if (sparseMember) sparseFormMembershipsPreserved++;
+
+                                    continue;
                                 }
-                                if (denseMember) {
-                                    denseFormMembershipsPreserved++;
-                                }
-                                if (sparseMember) {
-                                    sparseFormMembershipsPreserved++;
-                                }
-                            } else if (!state.isAir()) {
-                                level.setBlock(cursor, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 
-                                if (regularMember || denseMember || sparseMember) {
-                                    oreBlocksRemovedByFiltering++;
-                                } else {
-                                    otherNonOreBlocksReplaced++;
-                                }
+                                if (state.isAir()) continue;
+
+                                BlockPos changedPos = cursor.immutable();
+
+                                boolean removed = level.setBlock(
+                                        changedPos,
+                                        Blocks.AIR.defaultBlockState(),
+                                        Block.UPDATE_CLIENTS
+                                );
+
+                                if (!removed) continue;
+
+                                if (oreMember) oreBlocksRemovedByFiltering++;
+                                else otherNonOreBlocksReplaced++;
                             }
                         }
                     }
@@ -233,6 +254,7 @@ public final class RevealVeinsCommand {
                 otherNonOreBlocksReplaced
         );
     }
+
 
     private static IllegalStateException invalidOreBlock(String materialName, String mapName, String hostKey, String reason) {
         return invalidOreBlock(materialName, mapName, hostKey, reason, null);
@@ -284,23 +306,7 @@ public final class RevealVeinsCommand {
         }
     }
 
-    record OreFormMembershipSets(
-            Set<Block> regularBlocks,
-            Set<Block> denseBlocks,
-            Set<Block> sparseBlocks
-    ) {
-    }
+    record OreFormMembershipSets(Set<Block> regularBlocks, Set<Block> denseBlocks, Set<Block> sparseBlocks) {}
 
-    record RevealResult(
-            RevealMode mode,
-            int radius,
-            int loadedChunksProcessed,
-            int unloadedChunksSkipped,
-            int regularFormMembershipsPreserved,
-            int denseFormMembershipsPreserved,
-            int sparseFormMembershipsPreserved,
-            int oreBlocksRemovedByFiltering,
-            int otherNonOreBlocksReplaced
-    ) {
-    }
+    record RevealResult(RevealMode mode, int radius, int loadedChunksProcessed, int unloadedChunksSkipped, int regularFormMembershipsPreserved, int denseFormMembershipsPreserved, int sparseFormMembershipsPreserved, int oreBlocksRemovedByFiltering, int otherNonOreBlocksReplaced) {}
 }

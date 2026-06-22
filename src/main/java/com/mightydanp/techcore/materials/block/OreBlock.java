@@ -71,9 +71,7 @@ public class OreBlock extends MaterialBlock {
             removed = super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
             return removed;
         } finally {
-            if ((!removed || operation == null) && ACTIVE_HARVEST.get() == operation) {
-                ACTIVE_HARVEST.remove();
-            }
+            if ((!removed || operation == null) && ACTIVE_HARVEST.get() == operation) ACTIVE_HARVEST.remove();
         }
     }
 
@@ -99,9 +97,7 @@ public class OreBlock extends MaterialBlock {
             failHarvest(operation);
             throw exception;
         } finally {
-            if (ACTIVE_HARVEST.get() == operation) {
-                ACTIVE_HARVEST.remove();
-            }
+            if (ACTIVE_HARVEST.get() == operation) ACTIVE_HARVEST.remove();
         }
     }
 
@@ -173,9 +169,24 @@ public class OreBlock extends MaterialBlock {
         Purity.stack(stack).set(purityValue);
 
         Map<ResourceLocation, Double> impurities = new TreeMap<>();
-        composition.nonPrimaryOreMasses().forEach((material, mass) -> {
+        double totalMass = composition.totalMass();
+
+        // Include the primary host rock after its variant multiplier was applied.
+        if (composition.primaryRockMass() > 0.0D) impurities.merge(
+                materialId(hostMaterial),
+                100.0D * composition.primaryRockMass() / totalMass,
+                Double::sum
+        );
+
+       // Include secondary ore materials and any foreign rock layers.
+        composition.impurityMasses().forEach((material, mass) -> {
             if (mass <= 0.0D) return;
-            impurities.put(materialId(material), 100.0D * mass / composition.totalMass());
+
+            impurities.merge(
+                    materialId(material),
+                    100.0D * mass / totalMass,
+                    Double::sum
+            );
         });
 
         if (impurities.isEmpty()) Impurities.stack(stack).remove();
@@ -186,31 +197,72 @@ public class OreBlock extends MaterialBlock {
 
     protected @NotNull Composition scanComposition(ServerLevel level, BlockPos center, double baseRockMultiplier) {
         double primaryOreMass = 0.0D;
-        double baseRockMass = 0.0D;
-        Map<Material, Double> nonPrimaryOreMasses = new TreeMap<>(Comparator.comparing(left -> left.name));
+        double primaryRockMass = 0.0D;
+
+        Map<Material, Double> impurityMasses = new TreeMap<>(Comparator.comparing(material -> material.name));
 
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
-            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-                BlockPos scanPos = center.offset(offsetX, 0, offsetZ);
-                OreVeinResolvedCellResolver.ResolvedCell resolved = OreVeinResolvedCellResolver.resolve(level.getSeed(), level.dimension(), scanPos).orElse(null);
-                if (resolved == null) continue;
+            for (int offsetY = -1; offsetY <= 1; offsetY++) {
+                for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                    BlockPos scanPos = center.offset(offsetX, offsetY, offsetZ);
 
-                if (!resolved.replacement()) {
-                    baseRockMass += 1.0D;
-                    continue;
+                    OreVeinResolvedCellResolver.ResolvedCell resolved =
+                            OreVeinResolvedCellResolver.resolve(
+                                    level.getSeed(),
+                                    level.dimension(),
+                                    scanPos
+                            ).orElse(null);
+
+                    if (resolved == null) continue;
+
+                    Material scannedRock = resolved.originalHostMaterial();
+
+                    if (hostMaterial.equals(scannedRock)) primaryRockMass += 1.0D;
+                    else impurityMasses.merge(
+                            scannedRock,
+                            1.0D,
+                            Double::sum
+                    );
+
+                    if (!resolved.replacement()) continue;
+
+                    OreVeinOreCellEvaluator.OreCellResult winner =
+                            resolved.winningOreCellResult();
+
+                    if (winner == null) continue;
+
+                    Material selectedOre = winner.selectedMaterial();
+
+                    if (oreMaterial.equals(selectedOre)) primaryOreMass += 1.0D;
+                    else impurityMasses.merge(
+                            selectedOre,
+                            1.0D,
+                            Double::sum
+                    );
                 }
-
-                Material selectedMaterial = resolved.winningOreCellResult().selectedMaterial();
-                if (oreMaterial.equals(selectedMaterial)) primaryOreMass += 1.0D;
-                else nonPrimaryOreMasses.merge(selectedMaterial, 1.0D, Double::sum);
             }
         }
+        double adjustedPrimaryRockMass =
+                primaryRockMass * baseRockMultiplier;
 
-        double adjustedBaseRockMass = baseRockMass * baseRockMultiplier;
-        double secondaryOreMass = nonPrimaryOreMasses.values().stream().mapToDouble(Double::doubleValue).sum();
-        double totalMass = primaryOreMass + secondaryOreMass + adjustedBaseRockMass;
-        return new Composition(primaryOreMass, Map.copyOf(nonPrimaryOreMasses), adjustedBaseRockMass, totalMass);
+        double impurityMass = impurityMasses.values()
+                .stream()
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        double totalMass = primaryOreMass
+                        + adjustedPrimaryRockMass
+                        + impurityMass;
+
+        return new Composition(
+                primaryOreMass,
+                Map.copyOf(impurityMasses),
+                adjustedPrimaryRockMass,
+                totalMass
+        );
     }
+
+
 
     protected static void suppressRestoration(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState) {
         operation.restorationAttempted = true;
@@ -353,15 +405,28 @@ public class OreBlock extends MaterialBlock {
         return !state.equals(resolved.resolvedBlockState());
     }
 
+    private static boolean matchesMiningTool(@NotNull ItemStack expected, @NotNull ItemStack actual) {
+        return !expected.isEmpty()
+                && !actual.isEmpty()
+                && ItemStack.isSameItem(expected, actual)
+                && isSupportedMiningTool(actual);
+    }
+
     private boolean matchesLootContext(@Nullable PendingHarvestOperation operation, @NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull OriginContext originContext) {
         if (operation == null || operation.level != params.getLevel()) return false;
+
         if (!operation.pos.equals(originContext.pos())) return false;
+
         if (!operation.originalState.equals(state)) return false;
 
+
         ItemStack lootTool = params.getOptionalParameter(LootContextParams.TOOL);
-        if (lootTool == null || !ItemStack.isSameItemSameTags(operation.toolSnapshot, lootTool)) return false;
+
+        if (lootTool == null || !matchesMiningTool(operation.toolSnapshot, lootTool)) return false;
+
 
         Entity entity = params.getOptionalParameter(LootContextParams.THIS_ENTITY);
+
         return entity instanceof ServerPlayer serverPlayer && serverPlayer.getUUID().equals(operation.player.getUUID());
     }
 
@@ -371,7 +436,7 @@ public class OreBlock extends MaterialBlock {
                 && operation.player == player
                 && operation.pos.equals(pos)
                 && operation.originalState.equals(state)
-                && ItemStack.isSameItemSameTags(operation.toolSnapshot, tool);
+                && matchesMiningTool(operation.toolSnapshot, tool);
     }
 
     private boolean removalObserved(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState originalState) {
@@ -460,9 +525,9 @@ public class OreBlock extends MaterialBlock {
         }
     }
 
-    private record OriginContext(BlockPos pos) { }
+    private record OriginContext(BlockPos pos) {}
 
-    private record ExplosionContext(BlockPos pos, float radius) { }
+    private record ExplosionContext(BlockPos pos, float radius) {}
 
     private record SuppressedGeneratedChange(UUID token, ServerLevel level, BlockPos pos, BlockState oldState, BlockState newState, TransitionKind kind) {
         private boolean matches(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState oldState, @NotNull BlockState newState) {
@@ -479,5 +544,6 @@ public class OreBlock extends MaterialBlock {
         AIR_TO_DENSE_DECREMENT
     }
 
-    protected record Composition(double primaryOreMass, Map<Material, Double> nonPrimaryOreMasses, double baseRockMass, double totalMass) { }
+    protected record Composition(double primaryOreMass, Map<Material, Double> impurityMasses, double primaryRockMass, double totalMass) {}
+
 }

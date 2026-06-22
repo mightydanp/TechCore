@@ -3,16 +3,14 @@ package com.mightydanp.techcore.materials.block;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.storage.loot.LootParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -40,22 +38,28 @@ public class DenseOre extends OreBlock {
     }
 
     @Override
-    protected void afterSuccessfulHarvest(@NotNull Level level, BlockPos pos, BlockState state, Player player, ItemStack tool) {
-        if (level.isClientSide()) return;
-
+    protected void afterSuccessfulHarvest(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ServerPlayer player, @NotNull ItemStack tool, @NotNull PendingHarvestOperation operation) {
         int density = state.getValue(DENSITY);
-        if (density > 1) level.setBlock(pos, state.setValue(DENSITY, density - 1), 2);
-        else level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
-    }
+        if (density <= 1) {
+            finishPermanentHarvest(operation);
+            return;
+        }
 
-    @Override
-    protected int explosionCandidateCount(@NotNull BlockState state, LootParams.Builder params) {
-        return params.getLevel().random.nextInt(state.getValue(DENSITY) + 1);
+        BlockState restoredState = state.setValue(DENSITY, density - 1);
+        suppressRestoration(operation, restoredState);
+
+        boolean restored;
+        try {
+            restored = level.setBlock(pos, restoredState, 2);
+        } catch (RuntimeException | Error exception) {
+            failHarvest(operation);
+            throw exception;
+        }
+
+        finishDenseHarvest(operation, restoredState, restored);
     }
 
     public int getMaxDensity() {
         return maxDensity;
     }
 }
-
-

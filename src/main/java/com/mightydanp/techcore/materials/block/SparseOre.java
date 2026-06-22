@@ -1,18 +1,18 @@
 package com.mightydanp.techcore.materials.block;
 
+import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.Item;
 
-public class SparseOre extends MaterialBlock {
-    public SparseOre(MaterialBlockProperties properties) {
-        super(properties);
+import java.util.function.Supplier;
+
+public class SparseOre extends OreBlock {
+    public SparseOre(MaterialBlockProperties properties, Material oreMaterial, Material hostMaterial, Supplier<Item> rawOreItem) {
+        super(properties, oreMaterial, hostMaterial, rawOreItem);
     }
 
     @Override
-    public void destroy(@NotNull LevelAccessor worldIn, @NotNull BlockPos pos, @NotNull BlockState state) {
-        super.destroy(worldIn, pos, state);
+    protected double baseRockMultiplier() {
+        return 1.5D;
     }
 }

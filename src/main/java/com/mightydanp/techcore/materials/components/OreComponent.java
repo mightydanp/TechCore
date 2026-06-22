@@ -14,6 +14,7 @@ import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.block.BedrockOre;
 import com.mightydanp.techcore.materials.block.DenseOre;
 import com.mightydanp.techcore.materials.block.OreBlock;
+import com.mightydanp.techcore.materials.block.SparseOre;
 import com.mightydanp.techcore.materials.item.GemItem;
 import com.mightydanp.techcore.materials.item.OreBlockItem;
 import com.mightydanp.techcore.materials.item.OreItem;
@@ -97,9 +98,9 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
                 crushedOreItems.put(stoneName, registerOreItem("crushed_" + name));
                 purifiedOreItems.put(stoneName, registerOreItem("purified_" + name));
 
-                registerSparseOreBlock(stoneName, name);
-                registerOreBlock(stoneName, name);
-                registerDenseOreBlock(stoneName, name);
+                registerSparseOreBlock(stoneLayer, name);
+                registerOreBlock(stoneLayer, name);
+                registerDenseOreBlock(stoneLayer, name);
             }
         }
 
@@ -108,35 +109,50 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
 
     /// Register
 
-    private void registerSparseOreBlock(String stoneName, String baseName) {
+    private void registerSparseOreBlock(Material stoneLayer, String baseName) {
+        String stoneName = stoneLayer.name;
         String blockName = "sparse_" + baseName;
-        Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new OreBlock(
+        Supplier<Item> rawOreItem = Objects.requireNonNull(rawOreItems.get(stoneName), "Missing raw ore item for " + stoneName);
+        Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new SparseOre(
                 MaterialBlockProperties.of()
                         .strength(3.0f, 3.0f)
-                        .requiresCorrectToolForDrops()
+                        .requiresCorrectToolForDrops(),
+                material,
+                stoneLayer,
+                rawOreItem
         ));
 
         sparseOreBlocks.put(stoneName, block);
         sparseOreBlockItems.put(stoneName, registerOreBlockItem(blockName, block));
     }
 
-    private void registerOreBlock(String stoneName, String baseName) {
+    private void registerOreBlock(Material stoneLayer, String baseName) {
+        String stoneName = stoneLayer.name;
+        Supplier<Item> rawOreItem = Objects.requireNonNull(rawOreItems.get(stoneName), "Missing raw ore item for " + stoneName);
         Supplier<Block> block = RegistriesHandler.BLOCKS.register(baseName, () -> new OreBlock(
                 MaterialBlockProperties.of()
                         .strength(3.0f, 3.0f)
-                        .requiresCorrectToolForDrops()
+                        .requiresCorrectToolForDrops(),
+                material,
+                stoneLayer,
+                rawOreItem
         ));
 
         oreBlocks.put(stoneName, block);
         oreBlockItems.put(stoneName, registerOreBlockItem(baseName, block));
     }
 
-    private void registerDenseOreBlock(String stoneName, String baseName) {
+    private void registerDenseOreBlock(Material stoneLayer, String baseName) {
+        String stoneName = stoneLayer.name;
         String blockName = "dense_" + baseName;
+        Supplier<Item> rawOreItem = Objects.requireNonNull(rawOreItems.get(stoneName), "Missing raw ore item for " + stoneName);
         Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new DenseOre(
                 MaterialBlockProperties.of()
                         .strength(3.0f, 3.0f)
                         .requiresCorrectToolForDrops(),
+                material,
+                stoneLayer,
+                rawOreItem,
                 maxDensity
         ));
 
@@ -149,12 +165,14 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
         Supplier<Block> block = RegistriesHandler.BLOCKS.register(blockName, () -> new BedrockOre(
                 MaterialBlockProperties.of()
                         .strength(3.0f, 3.0f)
-                        .requiresCorrectToolForDrops()
+                        .requiresCorrectToolForDrops(),
+                material
         ));
 
         bedrockOreBlocks.put(BEDROCK_ORE_KEY, block);
         bedrockOreBlockItems.put(BEDROCK_ORE_KEY, registerOreBlockItem(blockName, block));
     }
+
 
     private Supplier<Item> registerOreBlockItem(String itemName, Supplier<Block> block) {
         return RegistriesHandler.BLOCK_ITEMS.register(itemName, () -> new OreBlockItem(block.get(), new MaterialItemProperties()

@@ -1,19 +1,17 @@
 package com.mightydanp.techcore.materials.block;
 
+import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 
 public class BedrockOre extends MaterialBlock {
-    public BedrockOre(MaterialBlockProperties properties) {
+    private final Material oreMaterial;
+
+    public BedrockOre(MaterialBlockProperties properties, Material oreMaterial) {
         super(properties);
+        this.oreMaterial = oreMaterial;
     }
 
-    @Override
-    public void destroy(@NotNull LevelAccessor worldIn, @NotNull BlockPos pos, @NotNull BlockState state) {
-        super.destroy(worldIn, pos, state);
+    public Material getOreMaterial() {
+        return oreMaterial;
     }
-
 }

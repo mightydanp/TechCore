@@ -17,6 +17,7 @@ public class MaterialRef {
     public static final String processed_stage = "process_stage";
     public static final String melting_point = "melting_point";
     public static final String boiling_point = "boiling_point";
+    public static final String impurities = "impurities";
     public static final String gem_state = "gem_state";
     public static final String chipped = "chipped";
     public static final String flawed = "flawed";
@@ -30,6 +31,7 @@ public class MaterialRef {
     public static final String processed_stage_translatable = LanguageContent.grabTranslatable(folder, processed_stage);
     public static final String melting_point_translatable = LanguageContent.grabTranslatable(folder, melting_point);
     public static final String boiling_point_translatable = LanguageContent.grabTranslatable(folder, boiling_point);
+    public static final String impurities_translatable = LanguageContent.grabTranslatable(folder, impurities);
     public static final String gem_state_translatable = LanguageContent.grabTranslatable(folder, gem_state);
     public static final String chipped_translatable = LanguageContent.grabTranslatable(folder, chipped);
     public static final String flawed_translatable = LanguageContent.grabTranslatable(folder, flawed);
@@ -37,7 +39,7 @@ public class MaterialRef {
     public static final String flawless_translatable = LanguageContent.grabTranslatable(folder, flawless);
     public static final String legendary_translatable = LanguageContent.grabTranslatable(folder, legendary);
     private static final List<String> english_Translations = List.of(
-            temperature, quantity, quality, purity, processed_stage, melting_point, boiling_point, gem_state, chipped, flawed, gem, flawless, legendary
+            temperature, quantity, quality, purity, processed_stage, melting_point, boiling_point, impurities, gem_state, chipped, flawed, gem, flawless, legendary
     );
 
     public static void initLanguages() {

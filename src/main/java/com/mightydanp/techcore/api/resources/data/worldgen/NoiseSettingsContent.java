@@ -1,5 +1,6 @@
 package com.mightydanp.techcore.api.resources.data.worldgen;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.HolderGetter;
@@ -7,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.block.Blocks;
@@ -59,13 +61,17 @@ public final class NoiseSettingsContent {
     public JsonObject json() {
         if (settings == null) {
             throw new IllegalStateException(
-                    "Noise generator settings have not been set: " +
-                            id()
+                    "Noise generator settings have not been set: " + id()
             );
         }
 
+        RegistryOps<JsonElement> registryOps = RegistryOps.create(
+                JsonOps.INSTANCE,
+                VanillaLookups.PROVIDER
+        );
+
         return NoiseGeneratorSettings.DIRECT_CODEC
-                .encodeStart(JsonOps.INSTANCE, settings)
+                .encodeStart(registryOps, settings)
                 .getOrThrow(false, error -> {
                     throw new IllegalStateException(
                             "Failed to encode noise generator settings '" +

@@ -9,6 +9,8 @@ import com.mightydanp.techcore.api.resources.assets.content.model.block.BlockMod
 import com.mightydanp.techcore.api.resources.assets.content.model.block.component.OreBlockModelContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.ItemModelContent;
 import com.mightydanp.techcore.api.resources.assets.content.model.item.component.OreItemModelContent;
+import com.mightydanp.techcore.api.resources.data.DataPackRegistries;
+import com.mightydanp.techcore.api.resources.data.tag.TagContent;
 import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.block.BedrockOre;
@@ -323,6 +325,20 @@ public class OreComponent<A extends Material> extends Component<A, OreComponent<
         }
 
         return ResourceLocation.fromNamespaceAndPath(modid, BlockModelContent.BLOCK_FOLDER + "/stones/" + stoneLayer.name + "/" + textureVariant);
+    }
+
+    ///
+    @Override
+    public OreComponent<A> initTags() {
+        TagContent<Block> pickaxeTag = DataPackRegistries.getBlockMineableTag("minecraft", "pickaxe");
+
+        sparseOreBlocks.values().forEach(block -> pickaxeTag.add(block.get()));
+        oreBlocks.values().forEach(block -> pickaxeTag.add(block.get()));
+        denseOreBlocks.values().forEach(block -> pickaxeTag.add(block.get()));
+
+        DataPackRegistries.saveBlockMineableTag(pickaxeTag, true);
+
+        return this;
     }
 
     ///

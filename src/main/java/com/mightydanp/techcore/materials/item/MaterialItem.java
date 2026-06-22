@@ -1,6 +1,7 @@
 package com.mightydanp.techcore.materials.item;
 
 import com.mightydanp.techcore.materials.lib.MaterialRef;
+import com.mightydanp.techcore.materials.properties.Impurities;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
 import com.mightydanp.techcore.world.item.properties.Purity;
 import com.mightydanp.techcore.world.item.properties.Quality;
@@ -110,7 +111,13 @@ public class MaterialItem extends Item {
         }
 
         if (getBoilingPoint() != null) {
-            tooltip.add(Component.translatable(MaterialRef.boiling_point_translatable).append("  : §5" + boilingPoint));
+            tooltip.add(Component.translatable(MaterialRef.boiling_point_translatable).append(" : §5" + boilingPoint));
+        }
+
+        Impurities impurities = Impurities.stack(itemStack).get();
+        if(impurities != null){
+            tooltip.add(Component.translatable(MaterialRef.impurities).append(" :"));
+            impurities.impurities().forEach((resourceLocation, percentage) -> tooltip.add(Component.nullToEmpty(resourceLocation.toString() + " : " + percentage + " %")));
         }
 
         super.appendHoverText(itemStack, level, tooltip, tooltipFlag);

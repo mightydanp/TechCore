@@ -5,12 +5,14 @@ import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -36,6 +38,12 @@ public class DenseOre extends OreBlock {
     protected double baseRockMultiplier() {
         return 0.95D;
     }
+
+    @Override
+    protected int explosionCandidateCount(@NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull RandomSource random) {
+        return random.nextInt(state.getValue(DENSITY) + 1);
+    }
+
 
     @Override
     protected void afterSuccessfulHarvest(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ServerPlayer player, @NotNull ItemStack tool, @NotNull PendingHarvestOperation operation) {

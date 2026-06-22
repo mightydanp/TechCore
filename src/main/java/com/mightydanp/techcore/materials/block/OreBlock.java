@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -30,16 +31,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -137,23 +129,31 @@ public class OreBlock extends MaterialBlock {
         finishPermanentHarvest(operation);
     }
 
-    protected int explosionCandidateCount(BlockState state, LootParams.Builder params) {
+    protected int explosionCandidateCount(@NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull RandomSource random) {
         return 1;
     }
 
-    protected List<ItemStack> buildExplosionDrops(BlockState state, LootParams.Builder params, ServerLevel level, BlockPos pos) {
-        int candidateCount = explosionCandidateCount(state, params);
+    private static @NotNull RandomSource explosionRandom(LootParams.@NotNull Builder params) {
+        return params.getLevel().getRandom();
+    }
+
+    @SuppressWarnings("deprecation")
+    protected @NotNull List<ItemStack> buildExplosionDrops(@NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull ServerLevel level, @NotNull BlockPos pos) {
+        ExplosionContext explosionContext = validateExplosionContext(state, params, level, pos);
+        if (explosionContext == null) return super.getDrops(state, params);
+
+        RandomSource random = explosionRandom(params);
+        int candidateCount = explosionCandidateCount(state, params, random);
         if (candidateCount <= 0) return List.of();
 
-        Float explosionRadius = params.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
-        if (explosionRadius == null || explosionRadius <= 0.0F) explosionRadius = 1.0F;
-
-        ItemStack prototype = buildResolvedStack(level, pos, baseRockMultiplier());
+        ItemStack prototype = buildResolvedStack(level, explosionContext.pos(), baseRockMultiplier());
         if (prototype.isEmpty()) return List.of();
 
-        List<ItemStack> drops = new ArrayList<>();
+        float survivalChance = Math.min(1.0F, 1.0F / explosionContext.radius());
+
+        List<ItemStack> drops = new ArrayList<>(candidateCount);
         for (int i = 0; i < candidateCount; i++) {
-            if (level.random.nextFloat() <= (1.0F / explosionRadius)) drops.add(prototype.copy());
+            if (random.nextFloat() <= survivalChance) drops.add(prototype.copy());
         }
 
         return List.copyOf(drops);
@@ -161,7 +161,7 @@ public class OreBlock extends MaterialBlock {
 
     protected @NotNull ItemStack buildResolvedStack(ServerLevel level, BlockPos center, double baseRockMultiplier) {
         Composition composition = scanComposition(level, center, baseRockMultiplier);
-        if (composition.totalMass() <= 0.0D || composition.primaryMass() <= 0.0D) return ItemStack.EMPTY;
+        if (composition.totalMass() <= 0.0D || composition.primaryOreMass() <= 0.0D) return ItemStack.EMPTY;
 
         Item item = rawOreItem.get();
         if (item == null) return ItemStack.EMPTY;
@@ -169,12 +169,12 @@ public class OreBlock extends MaterialBlock {
         ItemStack stack = new ItemStack(item);
         Quantity.stack(stack).set(Quantity.DEFAULT_MAX, Quantity.DEFAULT_MAX);
 
-        double purityValue = 100.0D * composition.primaryMass() / composition.totalMass();
+        double purityValue = 100.0D * composition.primaryOreMass() / composition.totalMass();
         Purity.stack(stack).set(purityValue);
 
         Map<ResourceLocation, Double> impurities = new TreeMap<>();
-        composition.materialMasses().forEach((material, mass) -> {
-            if (material == oreMaterial || mass <= 0.0D) return;
+        composition.nonPrimaryOreMasses().forEach((material, mass) -> {
+            if (mass <= 0.0D) return;
             impurities.put(materialId(material), 100.0D * mass / composition.totalMass());
         });
 
@@ -185,7 +185,9 @@ public class OreBlock extends MaterialBlock {
     }
 
     protected @NotNull Composition scanComposition(ServerLevel level, BlockPos center, double baseRockMultiplier) {
-        Map<Material, Double> materialMasses = new TreeMap<>(Comparator.comparing(left -> left.name));
+        double primaryOreMass = 0.0D;
+        double baseRockMass = 0.0D;
+        Map<Material, Double> nonPrimaryOreMasses = new TreeMap<>(Comparator.comparing(left -> left.name));
 
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
             for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
@@ -193,18 +195,21 @@ public class OreBlock extends MaterialBlock {
                 OreVeinResolvedCellResolver.ResolvedCell resolved = OreVeinResolvedCellResolver.resolve(level.getSeed(), level.dimension(), scanPos).orElse(null);
                 if (resolved == null) continue;
 
-                Material contributing = resolved.replacement()
-                        ? resolved.winningOreCellResult().selectedMaterial()
-                        : resolved.originalHostMaterial();
-                materialMasses.merge(contributing, 1.0D, Double::sum);
+                if (!resolved.replacement()) {
+                    baseRockMass += 1.0D;
+                    continue;
+                }
+
+                Material selectedMaterial = resolved.winningOreCellResult().selectedMaterial();
+                if (oreMaterial.equals(selectedMaterial)) primaryOreMass += 1.0D;
+                else nonPrimaryOreMasses.merge(selectedMaterial, 1.0D, Double::sum);
             }
         }
 
-        if (baseRockMultiplier != 1.0D) materialMasses.replaceAll((material, mass) -> material == oreMaterial ? mass : mass * baseRockMultiplier);
-
-        double primaryMass = materialMasses.getOrDefault(oreMaterial, 0.0D);
-        double totalMass = materialMasses.values().stream().mapToDouble(Double::doubleValue).sum();
-        return new Composition(materialMasses, primaryMass, totalMass);
+        double adjustedBaseRockMass = baseRockMass * baseRockMultiplier;
+        double secondaryOreMass = nonPrimaryOreMasses.values().stream().mapToDouble(Double::doubleValue).sum();
+        double totalMass = primaryOreMass + secondaryOreMass + adjustedBaseRockMass;
+        return new Composition(primaryOreMass, Map.copyOf(nonPrimaryOreMasses), adjustedBaseRockMass, totalMass);
     }
 
     protected static void suppressRestoration(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState) {
@@ -314,7 +319,7 @@ public class OreBlock extends MaterialBlock {
         if (!WasGenerated.wasGenerated(serverLevel, pos)) return null;
 
         OreVeinResolvedCellResolver.ResolvedCell resolved = OreVeinResolvedCellResolver.resolve(serverLevel.getSeed(), serverLevel.dimension(), pos).orElse(null);
-        if (!matchesResolvedCenter(state, resolved)) return null;
+        if (hasInvalidResolvedCenter(state, resolved)) return null;
 
         PendingHarvestOperation operation = new PendingHarvestOperation(
                 UUID.randomUUID(),
@@ -332,17 +337,20 @@ public class OreBlock extends MaterialBlock {
         return operation;
     }
 
-    private boolean matchesResolvedCenter(@NotNull BlockState state, @Nullable OreVeinResolvedCellResolver.ResolvedCell resolved) {
-        if (resolved == null || !resolved.replacement() || resolved.overlapGapWon()) return false;
-        if (!hostMaterial.equals(resolved.originalHostMaterial())) return false;
-        if (!state.equals(resolved.resolvedBlockState())) return false;
+    private boolean hasInvalidResolvedCenter(@NotNull BlockState state, @Nullable OreVeinResolvedCellResolver.ResolvedCell resolved) {
+        if (resolved == null || !resolved.replacement() || resolved.overlapGapWon()) return true;
+        if (!hostMaterial.equals(resolved.originalHostMaterial())) return true;
 
         OreVeinOreCellEvaluator.OreCellResult winner = resolved.winningOreCellResult();
-        if (winner == null) return false;
-        if (!oreMaterial.equals(winner.selectedMaterial())) return false;
-        if (winner.variant() != expectedVariant()) return false;
-        return winner.variant() != OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE
-                || state.hasProperty(DenseOre.DENSITY) && state.getValue(DenseOre.DENSITY) == winner.finalDensity();
+        if (winner == null) return true;
+        if (!oreMaterial.equals(winner.selectedMaterial())) return true;
+        if (winner.variant() != expectedVariant()) return true;
+        if (winner.variant() == OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE) {
+            return state.getBlock() != resolved.resolvedBlockState().getBlock()
+                    || !state.hasProperty(DenseOre.DENSITY);
+        }
+
+        return !state.equals(resolved.resolvedBlockState());
     }
 
     private boolean matchesLootContext(@Nullable PendingHarvestOperation operation, @NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull OriginContext originContext) {
@@ -378,6 +386,19 @@ public class OreBlock extends MaterialBlock {
 
     private boolean isExplosionContext(LootParams.@NotNull Builder params) {
         return params.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS) != null;
+    }
+
+    private @Nullable ExplosionContext validateExplosionContext(@NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull ServerLevel level, @NotNull BlockPos pos) {
+        if (state.getBlock() != this) return null;
+
+        Float explosionRadius = params.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
+        if (explosionRadius == null || !Float.isFinite(explosionRadius) || explosionRadius <= 0.0F) return null;
+        if (!WasGenerated.wasGenerated(level, pos)) return null;
+
+        OreVeinResolvedCellResolver.ResolvedCell resolved = OreVeinResolvedCellResolver.resolve(level.getSeed(), level.dimension(), pos).orElse(null);
+        if (hasInvalidResolvedCenter(state, resolved)) return null;
+
+        return new ExplosionContext(pos, explosionRadius);
     }
 
     private static boolean isSupportedMiningTool(@NotNull ItemStack tool) {
@@ -441,6 +462,8 @@ public class OreBlock extends MaterialBlock {
 
     private record OriginContext(BlockPos pos) { }
 
+    private record ExplosionContext(BlockPos pos, float radius) { }
+
     private record SuppressedGeneratedChange(UUID token, ServerLevel level, BlockPos pos, BlockState oldState, BlockState newState, TransitionKind kind) {
         private boolean matches(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState oldState, @NotNull BlockState newState) {
             return this.level == level
@@ -456,6 +479,5 @@ public class OreBlock extends MaterialBlock {
         AIR_TO_DENSE_DECREMENT
     }
 
-    protected record Composition(Map<Material, Double> materialMasses, double primaryMass, double totalMass) { }
+    protected record Composition(double primaryOreMass, Map<Material, Double> nonPrimaryOreMasses, double baseRockMass, double totalMass) { }
 }
-

@@ -22,12 +22,8 @@ public final class OreVeinOreCellEvaluator {
         Objects.requireNonNull(position, "position");
         Objects.requireNonNull(contribution, "contribution");
 
-        OreVeinDefinition definition = Objects.requireNonNull(
-                OreVeinDefinitions.getDefinition(descriptor.definitionId()),
-                "Missing ore vein definition: " + descriptor.definitionId()
-        );
-
-        return evaluateCell(descriptor, definition, position, contribution);
+        // Resolve the definition once, then evaluate the cell with the full overload.
+        return evaluateCell(descriptor, OreVeinDefinitions.requireDefinition(descriptor), position, contribution);
     }
 
     public static OreCellResult evaluateCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
@@ -36,8 +32,10 @@ public final class OreVeinOreCellEvaluator {
         Objects.requireNonNull(position, "position");
         Objects.requireNonNull(contribution, "contribution");
 
+        // Pick the ore entry for this position before deciding between main-body and halo logic.
         SelectedOreEntry selectedOreEntry = selectOreEntry(descriptor, definition, position);
 
+        // If the position is inside the main body use dense node logic, otherwise use sparse halo logic
         if (contribution.signedBoundaryDistanceBlocks() <= 0.0D)
             return OreVeinDenseNodeEvaluator.evaluateMainBodyCell(descriptor, definition, position, contribution, selectedOreEntry);
 
@@ -46,6 +44,7 @@ public final class OreVeinOreCellEvaluator {
 
     @Contract("_, _, _ -> new")
     public static @NotNull SelectedOreEntry selectOreEntry(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, @NotNull BlockPos position) {
+        // Hash the world position and use it to pick an ore entry from the weighted list
         long hash = descriptor.instanceId() ^ MATERIAL_SELECTION_SALT;
         hash ^= (long) position.getX() * X_HASH_MULTIPLIER;
         hash ^= (long) position.getY() * Y_HASH_MULTIPLIER;
@@ -69,6 +68,7 @@ public final class OreVeinOreCellEvaluator {
     }
 
     public static int occupancyRoll(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position, long salt, int fillDenominator) {
+        // Hash the instance and block position into one bounded occupancy roll.
         long hash = descriptor.instanceSeed() ^ salt;
         hash ^= (long) position.getX() * X_HASH_MULTIPLIER;
         hash ^= (long) position.getY() * Y_HASH_MULTIPLIER;
@@ -78,12 +78,14 @@ public final class OreVeinOreCellEvaluator {
     }
 
     public static double sampleDouble(long hash, double minValue, double maxValue) {
+        // Return the exact value when the sampled range has no width.
         if (minValue == maxValue) return minValue;
 
         return minValue + unit(hash) * (maxValue - minValue);
     }
 
     public static int sampleIntInclusive(long hash, int minValue, int maxValue) {
+        // Return the exact value when the sampled inclusive range has no width.
         if (minValue == maxValue) return minValue;
 
         return minValue + Math.floorMod(hash, maxValue - minValue + 1);
@@ -100,6 +102,7 @@ public final class OreVeinOreCellEvaluator {
     }
 
     public static long occupancySalt() {
+        // Expose the main-body occupancy salt for shared deterministic tests and helpers.
         return OCCUPANCY_SALT;
     }
 
@@ -111,61 +114,51 @@ public final class OreVeinOreCellEvaluator {
         return Y_HASH_MULTIPLIER;
     }
 
+    @Contract("_, _, _, _, _, _, _, _ -> new")
+    public static @NotNull OreCellResult createResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int candidateDensity, int finalDensity, OreCellResult.OreVariant variant, long nodeId, double nodeInfluence) {
+        Objects.requireNonNull(descriptor, "descriptor");
+        Objects.requireNonNull(selectedOreEntry, "selectedOreEntry");
+        Objects.requireNonNull(contribution, "contribution");
+
+        return new OreCellResult(
+                descriptor.instanceId(),
+                descriptor.definitionId(),
+                selectedOreEntry.material(),
+                selectedOreEntry.entry().distributionWeight(),
+                contribution,
+                candidateDensity,
+                finalDensity,
+                variant,
+                nodeId,
+                nodeInfluence
+        );
+    }
+
+    @Contract("_, _, _ -> new")
+    public static @NotNull OreCellResult hostRockResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
+        return createResult(descriptor, selectedOreEntry, contribution, 1, 0, OreCellResult.OreVariant.HOST_ROCK, 0L, 0.0D);
+    }
+
+    @Contract("_, _, _ -> new")
+    public static @NotNull OreCellResult sparseOreResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
+        return createResult(descriptor, selectedOreEntry, contribution, 1, 1, OreCellResult.OreVariant.SPARSE_ORE, 0L, 0.0D);
+    }
+
     private static double unit(long hash) {
         return (OreVeinShapeEvaluator.hashToSignedUnit(hash) + 1.0D) * 0.5D;
     }
 
-    public record CellResultFactory(OreVeinInstanceDescriptor descriptor, SelectedOreEntry selectedOreEntry,
-                                    OreVeinShapeEvaluator.ShapeContribution contribution) {
-        public CellResultFactory {
-            Objects.requireNonNull(descriptor, "descriptor");
-            Objects.requireNonNull(selectedOreEntry, "selectedOreEntry");
-            Objects.requireNonNull(contribution, "contribution");
-        }
-
-        @Contract("_, _, _, _, _ -> new")
-        public @NotNull OreCellResult create(int candidateDensity, int finalDensity, OreCellResult.OreVariant variant, long nodeId, double nodeInfluence) {
-            return new OreCellResult(
-                    descriptor.instanceId(),
-                    descriptor.definitionId(),
-                    selectedOreEntry.material(),
-                    selectedOreEntry.entry().distributionWeight(),
-                    contribution,
-                    candidateDensity,
-                    finalDensity,
-                    variant,
-                    nodeId,
-                    nodeInfluence
-            );
-        }
-
-        @Contract(" -> new")
-        public @NotNull OreCellResult hostRock() {
-            return create(1, 0, OreCellResult.OreVariant.HOST_ROCK, 0L, 0.0D);
-        }
-
-        @Contract(" -> new")
-        public @NotNull OreCellResult sparseOre() {
-            return create(1, 1, OreCellResult.OreVariant.SPARSE_ORE, 0L, 0.0D);
-        }
-    }
-
-    public record OreCellResult(long instanceId, net.minecraft.resources.ResourceLocation definitionId,
-                                Material selectedMaterial, int selectedDistributionWeight,
-                                OreVeinShapeEvaluator.ShapeContribution shapeContribution, int candidateDensity,
-                                int finalDensity, OreVariant variant, long winningNodeId, double winningNodeInfluence) {
+    public record OreCellResult(long instanceId, net.minecraft.resources.ResourceLocation definitionId, Material selectedMaterial, int selectedDistributionWeight, OreVeinShapeEvaluator.ShapeContribution shapeContribution, int candidateDensity, int finalDensity, OreVariant variant, long winningNodeId, double winningNodeInfluence) {
         public OreCellResult {
             Objects.requireNonNull(definitionId, "definitionId");
             Objects.requireNonNull(selectedMaterial, "selectedMaterial");
             Objects.requireNonNull(shapeContribution, "shapeContribution");
             Objects.requireNonNull(variant, "variant");
 
-            if (selectedDistributionWeight <= 0)
-                throw new IllegalArgumentException("selectedDistributionWeight must be positive");
+            if (selectedDistributionWeight <= 0) throw new IllegalArgumentException("selectedDistributionWeight must be positive");
             if (candidateDensity < 1) throw new IllegalArgumentException("candidateDensity must be at least 1");
             if (finalDensity < 0) throw new IllegalArgumentException("finalDensity must be non-negative");
-            if (!Double.isFinite(winningNodeInfluence))
-                throw new IllegalArgumentException("winningNodeInfluence must be finite");
+            if (!Double.isFinite(winningNodeInfluence)) throw new IllegalArgumentException("winningNodeInfluence must be finite");
         }
 
         public enum OreVariant {
@@ -176,6 +169,5 @@ public final class OreVeinOreCellEvaluator {
         }
     }
 
-    public record SelectedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {
-    }
+    public record SelectedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {}
 }

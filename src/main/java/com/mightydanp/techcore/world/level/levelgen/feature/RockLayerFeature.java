@@ -30,6 +30,7 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static List<Material> getAllowedMaterials(ResourceKey<Level> dimension) {
+        // Get the registered material suppliers for this dimension first.
         List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
         if (materialSuppliers == null || materialSuppliers.isEmpty()) {
@@ -66,6 +67,7 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static void setAllowedMaterials(ResourceKey<Level> dimension, List<Material> materials) {
+        // Wrap the current materials as suppliers so the internal map keeps one storage shape.
         List<Supplier<Material>> materialSuppliers = new ArrayList<>();
 
         for (Material material : materials) {
@@ -76,6 +78,7 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static void setAllowedMaterialSuppliers(ResourceKey<Level> dimension, List<Supplier<Material>> materials) {
+        // Store a defensive copy so later caller changes do not mutate the registry.
         ALLOWED_MATERIALS_BY_DIMENSION.put(dimension, new ArrayList<>(materials));
     }
 
@@ -84,10 +87,12 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static void addAllowedMaterial(ResourceKey<Level> dimension, Supplier<Material> material) {
+        // Create the dimension list on demand and append the new supplier.
         ALLOWED_MATERIALS_BY_DIMENSION.computeIfAbsent(dimension, key -> new ArrayList<>()).add(material);
     }
 
     public static void removeAllowedMaterial(ResourceKey<Level> dimension, Material material) {
+        // Get the registered suppliers before trying to remove this material.
         List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
         if (materialSuppliers == null) {

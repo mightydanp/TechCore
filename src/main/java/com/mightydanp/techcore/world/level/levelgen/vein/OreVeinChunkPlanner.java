@@ -6,42 +6,52 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public final class OreVeinChunkPlanner {
-    private static final PlanningDependencies PRODUCTION_DEPENDENCIES = new PlanningDependencies(OreVeinCandidateLookup::candidatesForChunk, OreVeinCandidateLookup::evaluationBounds, OreVeinResolvedCellResolver::resolve);
-    private static final Comparator<ChunkPlan.PlannedReplacement> REPLACEMENT_ORDER = Comparator.comparingInt((ChunkPlan.PlannedReplacement replacement) -> replacement.position().getY())
-            .thenComparingInt(replacement -> replacement.position().getZ())
-            .thenComparingInt(replacement -> replacement.position().getX());
+    // Use the normal planner dependencies by default
+    private static final CandidateProvider PRODUCTION_CANDIDATE_PROVIDER = OreVeinCandidateLookup::candidatesForChunk;
+    private static final EvaluationBoundsProvider PRODUCTION_BOUNDS_PROVIDER = OreVeinCandidateLookup::evaluationBounds;
+    private static final ResolvedCellProvider PRODUCTION_RESOLVED_CELL_PROVIDER = OreVeinResolvedCellResolver::resolve;
+    private static final Comparator<ChunkPlan.PlannedReplacement> REPLACEMENT_ORDER = Comparator.comparingInt((ChunkPlan.PlannedReplacement replacement) -> replacement.position().getY()).thenComparingInt(replacement -> replacement.position().getZ()).thenComparingInt(replacement -> replacement.position().getX());
 
     public static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive) {
-        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, PRODUCTION_DEPENDENCIES);
+        // Plan this chunk with the normal production lookup and resolution providers.
+        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, PRODUCTION_CANDIDATE_PROVIDER, PRODUCTION_BOUNDS_PROVIDER, PRODUCTION_RESOLVED_CELL_PROVIDER);
     }
 
-    private static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive, PlanningDependencies dependencies) {
+    private static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive, CandidateProvider candidateProvider, EvaluationBoundsProvider boundsProvider, ResolvedCellProvider resolvedCellProvider) {
         Objects.requireNonNull(dimension, "dimension");
         Objects.requireNonNull(chunkPos, "chunkPos");
-        Objects.requireNonNull(dependencies, "dependencies");
+        Objects.requireNonNull(candidateProvider, "candidateProvider");
+        Objects.requireNonNull(boundsProvider, "boundsProvider");
+        Objects.requireNonNull(resolvedCellProvider, "resolvedCellProvider");
 
-        List<OreVeinInstanceDescriptor> candidates = dependencies.candidateProvider().candidatesForChunk(worldSeed, dimension, chunkPos, minY, maxYExclusive);
-        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, candidates, dependencies);
+        // Get the candidate veins for this chunk
+        List<OreVeinInstanceDescriptor> candidates = candidateProvider.candidatesForChunk(worldSeed, dimension, chunkPos, minY, maxYExclusive);
+        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, candidates, boundsProvider, resolvedCellProvider);
     }
 
     @Contract("_, _, _, _, _, _ -> new")
     public static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive, List<OreVeinInstanceDescriptor> candidates) {
-        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, candidates, PRODUCTION_DEPENDENCIES);
+        // Reuse the same planning pipeline when the caller already has candidate veins.
+        return plan(worldSeed, dimension, chunkPos, minY, maxYExclusive, candidates, PRODUCTION_BOUNDS_PROVIDER, PRODUCTION_RESOLVED_CELL_PROVIDER);
     }
 
-    @Contract("_, _, _, _, _, _, _ -> new")
-    private static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive, List<OreVeinInstanceDescriptor> candidates, PlanningDependencies dependencies) {
+    @Contract("_, _, _, _, _, _, _, _ -> new")
+    private static @NotNull ChunkPlan plan(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive, List<OreVeinInstanceDescriptor> candidates, EvaluationBoundsProvider boundsProvider, ResolvedCellProvider resolvedCellProvider) {
         Objects.requireNonNull(dimension, "dimension");
         Objects.requireNonNull(chunkPos, "chunkPos");
         Objects.requireNonNull(candidates, "candidates");
-        Objects.requireNonNull(dependencies, "dependencies");
+        Objects.requireNonNull(boundsProvider, "boundsProvider");
+        Objects.requireNonNull(resolvedCellProvider, "resolvedCellProvider");
 
+        // Get the amount of visited bits needed for this chunk height
         int bitCount = logicalBitCount(minY, maxYExclusive);
 
+        // If there are no candidates return an empty plan
         if (candidates.isEmpty()) return new ChunkPlan(chunkPos, dimension, List.of());
 
         BitSet visited = new BitSet(bitCount);
@@ -50,15 +60,51 @@ public final class OreVeinChunkPlanner {
         int chunkMinZ = chunkPos.getMinBlockZ();
         int chunkMaxZ = chunkPos.getMaxBlockZ();
         OreVeinBounds chunkBounds = new OreVeinBounds(chunkMinX, minY, chunkMinZ, chunkMaxX, maxYExclusive - 1, chunkMaxZ);
-        List<ChunkPlan.PlannedReplacement> replacements = new ArrayList<>();
+        List<OreVeinBounds> evaluationBounds = collectEvaluationBounds(candidates, boundsProvider);
+        List<ChunkPlan.PlannedReplacement> replacements = collectReplacements(
+                worldSeed,
+                dimension,
+                candidates,
+                collectClippedRegions(evaluationBounds, chunkBounds),
+                resolvedCellProvider,
+                visited,
+                chunkMinX,
+                chunkMinZ,
+                minY
+        );
+
+        replacements.sort(REPLACEMENT_ORDER);
+
+        // Return the chunk plan with all replacements in sorted order
+        return new ChunkPlan(chunkPos, dimension, replacements);
+    }
+
+    private static @NotNull List<OreVeinBounds> collectEvaluationBounds(List<OreVeinInstanceDescriptor> candidates, EvaluationBoundsProvider boundsProvider) {
         List<OreVeinBounds> evaluationBounds = new ArrayList<>(candidates.size());
 
+        // Get the evaluation bounds for each candidate first
         for (OreVeinInstanceDescriptor candidate : candidates)
-            evaluationBounds.add(dependencies.boundsProvider().evaluationBounds(candidate));
+            evaluationBounds.add(boundsProvider.evaluationBounds(candidate));
 
+        return evaluationBounds;
+    }
 
+    private static @NotNull List<@Nullable OreVeinBounds> collectClippedRegions(List<OreVeinBounds> evaluationBounds, OreVeinBounds chunkBounds) {
+        List<@Nullable OreVeinBounds> clippedRegions = new ArrayList<>(evaluationBounds.size());
+
+        // Clip every evaluation area down to the current chunk bounds.
+        for (OreVeinBounds evaluationBound : evaluationBounds)
+            clippedRegions.add(evaluationBound.intersect(chunkBounds));
+
+        return clippedRegions;
+    }
+
+    private static @NotNull List<ChunkPlan.PlannedReplacement> collectReplacements(long worldSeed, ResourceKey<Level> dimension, List<OreVeinInstanceDescriptor> candidates, List<@Nullable OreVeinBounds> clippedRegions, ResolvedCellProvider resolvedCellProvider, BitSet visited, int chunkMinX, int chunkMinZ, int minY) {
+        List<ChunkPlan.PlannedReplacement> replacements = new ArrayList<>();
+
+        // Loop through each candidate veins clipped area
         for (int i = 0; i < candidates.size(); i++) {
-            OreVeinBounds clipped = evaluationBounds.get(i).intersect(chunkBounds);
+            OreVeinBounds clipped = clippedRegions.get(i);
 
             if (clipped == null) continue;
 
@@ -69,12 +115,12 @@ public final class OreVeinChunkPlanner {
 
                         if (visited.get(index)) continue;
 
+                        // If this block position was already checked skip it
                         visited.set(index);
 
                         BlockPos position = new BlockPos(x, y, z);
 
-                        dependencies.resolvedCellProvider()
-                                .resolve(worldSeed, dimension, position, candidates)
+                        resolvedCellProvider.resolve(worldSeed, dimension, position, candidates)
                                 .filter(OreVeinResolvedCellResolver.ResolvedCell::replacement)
                                 .ifPresent(resolvedCell -> replacements.add(new ChunkPlan.PlannedReplacement(position, resolvedCell)));
                     }
@@ -82,12 +128,11 @@ public final class OreVeinChunkPlanner {
             }
         }
 
-        replacements.sort(REPLACEMENT_ORDER);
-
-        return new ChunkPlan(chunkPos, dimension, replacements);
+        return replacements;
     }
 
     private static int logicalBitCount(int minY, int maxYExclusive) {
+        // Convert the chunk height into one visited bit per block position.
         int height = Math.subtractExact(maxYExclusive, minY);
 
         if (height <= 0) throw new IllegalArgumentException("maxYExclusive must be greater than minY");
@@ -96,6 +141,7 @@ public final class OreVeinChunkPlanner {
     }
 
     private static int bitIndex(int x, int y, int z, int chunkMinX, int chunkMinZ, int minY) {
+        // Convert the local chunk position into one visited-bit index
         return Math.addExact(
                 Math.multiplyExact(
                         Math.addExact(
@@ -121,15 +167,6 @@ public final class OreVeinChunkPlanner {
     @FunctionalInterface
     private interface ResolvedCellProvider {
         Optional<OreVeinResolvedCellResolver.ResolvedCell> resolve(long worldSeed, ResourceKey<Level> dimension, BlockPos position, List<OreVeinInstanceDescriptor> candidates);
-    }
-
-    private record PlanningDependencies(CandidateProvider candidateProvider, EvaluationBoundsProvider boundsProvider,
-                                        ResolvedCellProvider resolvedCellProvider) {
-        PlanningDependencies {
-            Objects.requireNonNull(candidateProvider, "candidateProvider");
-            Objects.requireNonNull(boundsProvider, "boundsProvider");
-            Objects.requireNonNull(resolvedCellProvider, "resolvedCellProvider");
-        }
     }
 
     public record ChunkPlan(ChunkPos chunkPos, ResourceKey<Level> dimension, List<PlannedReplacement> replacements) {

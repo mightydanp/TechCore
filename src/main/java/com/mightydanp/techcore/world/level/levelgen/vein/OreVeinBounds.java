@@ -9,8 +9,8 @@ import java.util.Objects;
 
 public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
     public OreVeinBounds {
-        if (minX > maxX || minY > maxY || minZ > maxZ)
-            throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
+        // If the minimum bounds are greater than the maximum bounds return an error
+        if (minX > maxX || minY > maxY || minZ > maxZ) throw new IllegalArgumentException("minimum bounds must not exceed maximum bounds");
     }
 
     @Contract("_, _ -> new")
@@ -28,6 +28,7 @@ public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, in
     public boolean intersects(OreVeinBounds other) {
         Objects.requireNonNull(other, "other");
 
+        // Check whether these two inclusive bounding boxes overlap on every axis.
         return maxX >= other.minX
                 && minX <= other.maxX
                 && maxY >= other.minY
@@ -37,8 +38,10 @@ public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, in
     }
 
     public @Nullable OreVeinBounds intersect(OreVeinBounds other) {
+        // Return nothing when the two bounds do not overlap.
         if (!intersects(other)) return null;
 
+        // Build the shared overlapping bounds from the tightest min/max values.
         return new OreVeinBounds(
                 Math.max(minX, other.minX),
                 Math.max(minY, other.minY),
@@ -52,6 +55,7 @@ public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, in
     public boolean contains(BlockPos position) {
         Objects.requireNonNull(position, "position");
 
+        // Check whether the block position stays inside these inclusive bounds.
         return position.getX() >= minX && position.getX() <= maxX
                 && position.getY() >= minY && position.getY() <= maxY
                 && position.getZ() >= minZ && position.getZ() <= maxZ;
@@ -59,6 +63,7 @@ public record OreVeinBounds(int minX, int minY, int minZ, int maxX, int maxY, in
 
     @Contract("_ -> new")
     public @NotNull OreVeinBounds inflate(int amount) {
+        // Expand these bounds outward by the same amount on every axis.
         return new OreVeinBounds(
                 Math.subtractExact(minX, amount),
                 Math.subtractExact(minY, amount),

@@ -33,10 +33,12 @@ public final class OreVeinGenerationMath {
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
 
     public static @NotNull BigInteger budgetQ16(OreVeinDefinitions.@NotNull DimensionGenerationSettings settings) {
+        // Convert the integer origin budget into the shared Q16 fixed-point scale.
         return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
     }
 
     public static @NotNull BigInteger effectiveWeightQ16(OreVeinDefinition definition) {
+        // Scale the generation weight down for larger veins
         BigInteger expectedVolume8 = expectedVolume8(definition);
         BigInteger volumeScaleQ16 = ceilDiv(expectedVolume8.multiply(Q16), REFERENCE_VOLUME_8);
         BigInteger penaltyQ16 = sqrtFloor(volumeScaleQ16.multiply(Q16)).max(Q16);
@@ -48,12 +50,14 @@ public final class OreVeinGenerationMath {
     public static BigInteger totalEffectiveWeightQ16(@NotNull List<OreVeinDefinition> definitions) {
         BigInteger total = BigInteger.ZERO;
 
+        // Sum the effective weights for every eligible definition.
         for (OreVeinDefinition definition : definitions) total = total.add(effectiveWeightQ16(definition));
 
         return total;
     }
 
     public static @NotNull BigInteger rollQ16(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, BigInteger budgetQ16) {
+        // Build a 128-bit deterministic roll and clamp it into the dimension budget.
         long low = hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_DEFINITION_SELECTION);
         long high = hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_DEFINITION_SELECTION ^ 0x9e3779b97f4a7c15L);
         byte[] bytes = new byte[16];
@@ -89,6 +93,7 @@ public final class OreVeinGenerationMath {
     }
 
     private static int centerCoordinate(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, int axisRegionCoordinate, long salt) {
+        // Pick one block position inside the origin region along this axis.
         int regionStart = Math.multiplyExact(axisRegionCoordinate, REGION_BLOCKS);
         int regionOffset = randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, REGION_BLOCKS);
         return Math.addExact(regionStart, regionOffset);
@@ -131,6 +136,7 @@ public final class OreVeinGenerationMath {
     }
 
     public static @NotNull BigInteger expectedVolume8(@NotNull OreVeinDefinition definition) {
+        // Multiply the midpoint sums so the expected volume stays exact in integer space.
         BigInteger mid2X = BigInteger.valueOf((long) definition.minSizeX() + definition.maxSizeX());
         BigInteger mid2Y = BigInteger.valueOf((long) definition.minSizeY() + definition.maxSizeY());
         BigInteger mid2Z = BigInteger.valueOf((long) definition.minSizeZ() + definition.maxSizeZ());
@@ -149,6 +155,7 @@ public final class OreVeinGenerationMath {
     }
 
     public static long hashSeedAndDimension(long worldSeed, ResourceKey<Level> dimension, long salt) {
+        // Fold the world seed, generator version, salt, and dimension identity into one hash seed.
         long value = 0xcbf29ce484222325L;
         value = mix64(value ^ worldSeed);
         value = mix64(value ^ GENERATOR_VERSION);
@@ -171,12 +178,14 @@ public final class OreVeinGenerationMath {
     }
 
     private static int randomRangeInclusive(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, int minInclusive, int maxInclusive) {
+        // Convert the inclusive bounds into the exclusive-size form used by randomInt.
         return minInclusive + randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, maxInclusive - minInclusive + 1);
     }
 
     private static int randomInt(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, int bound) {
         if (bound <= 0) throw new IllegalArgumentException("bound must be positive");
 
+        // Use floorMod so every bound works correctly with signed long hashes.
         return Math.floorMod(hash(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt), bound);
     }
 

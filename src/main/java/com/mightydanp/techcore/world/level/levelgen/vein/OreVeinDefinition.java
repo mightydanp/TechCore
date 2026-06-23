@@ -11,11 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight,
-                                int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY,
-                                int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees,
-                                double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings,
-                                List<OreEntry> oreEntries) {
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
     private static final int DEFAULT_SPARSE_REACH_BLOCKS = 32;
     private static final double DEFAULT_MAX_PITCH_DEGREES = 12.0D;
     private static final double DEFAULT_MAX_ROLL_DEGREES = 12.0D;
@@ -39,12 +35,10 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             2,
             4
     );
-    private static final HaloSettings DEFAULT_HALO_SETTINGS =
-            new HaloSettings(
-                    4.0D
-            );
+    private static final HaloSettings DEFAULT_HALO_SETTINGS = new HaloSettings(4.0D);
 
     public OreVeinDefinition {
+        // Validate the full definition data before storing it
         Objects.requireNonNull(id, "id");
         dimensions = copyNonEmptyList(dimensions, "dimensions");
         validateGenerationWeight(generationWeight);
@@ -62,6 +56,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
 
     public OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
+        // Use the default sparse reach when the shorter constructor is used.
         this(id, dimensions, generationWeight, minCenterY, maxCenterYExclusive, minSizeX, maxSizeX, minSizeY, maxSizeY, minSizeZ, maxSizeZ, DEFAULT_SPARSE_REACH_BLOCKS, maxPitchDegrees, maxRollDegrees, densitySettings, haloSettings, oreEntries);
     }
 
@@ -79,12 +74,14 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Builder builder(ResourceLocation id) {
+        // Return a builder for this vein definition id
         return new Builder(id);
     }
 
     private static <T> @Unmodifiable @NotNull List<T> copyNonEmptyList(List<T> values, String name) {
         Objects.requireNonNull(values, name);
 
+        // Empty lists are not valid for required definition fields.
         if (values.isEmpty()) throw new IllegalArgumentException(name + " cannot be empty");
 
         return List.copyOf(values);
@@ -132,6 +129,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
 
     public long totalDistributionWeight() {
+        // Recalculate the total weight from the current immutable ore-entry list.
         return calculateTotalDistributionWeight(oreEntries);
     }
 
@@ -152,6 +150,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private List<OreEntry> oreEntries;
 
         private Builder(ResourceLocation id) {
+            // Store the definition id now so every later builder step can reuse it.
             this.id = Objects.requireNonNull(id, "id");
         }
 
@@ -210,6 +209,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
 
         @Contract(" -> new")
         public @NotNull OreVeinDefinition build() {
+            // Build the final definition and fill in default values where needed
             return new OreVeinDefinition(
                     id,
                     dimensions,
@@ -232,11 +232,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         }
     }
 
-    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator,
-                                  long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX,
-                                  double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY,
-                                  double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity,
-                                  int maxPeakDensity) {
+    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator, long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX, double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY, double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity, int maxPeakDensity) {
         public DensitySettings {
             if (fillDenominator <= 0) throw new IllegalArgumentException("fillDenominator must be positive");
             if (regularFillNumerator < 0 || regularFillNumerator > fillDenominator)
@@ -254,15 +250,13 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         }
 
         private static void validateRadiusRange(double minRadius, double maxRadius, String axis) {
-            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius)
-                throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
+            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius) throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
         }
     }
 
     public record HaloSettings(double transitionWidthBlocks) {
         public HaloSettings {
-            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D)
-                throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
+            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D) throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
         }
     }
 

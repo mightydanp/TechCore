@@ -11,6 +11,7 @@ import java.util.List;
 
 public final class OreVeinDenseNodeLayout {
     public static List<OreVeinInstanceDescriptor.DenseNode> generate(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition) {
+        // Try to generate the requested amount of dense nodes
         int requestedNodeCount = OreVeinDenseNodeEvaluator.nodeCount(descriptor, definition.densitySettings());
 
         if (requestedNodeCount == 0) return List.of();
@@ -27,6 +28,7 @@ public final class OreVeinDenseNodeLayout {
     }
 
     private static OreVeinInstanceDescriptor.@Nullable DenseNode candidateNode(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, int nodeIndex, List<OreVeinInstanceDescriptor.DenseNode> acceptedNodes) {
+        // Sample one dense-node shape first, then keep retrying only its center point.
         OreVeinDefinition.DensitySettings settings = definition.densitySettings();
         long nodeTerm = (long) nodeIndex * OreVeinOreCellEvaluator.xHashMultiplier();
 
@@ -65,6 +67,7 @@ public final class OreVeinDenseNodeLayout {
     }
 
     private static OreVeinInstanceDescriptor.@Nullable DenseNode candidateAt(@NotNull OreVeinInstanceDescriptor descriptor, int nodeIndex, int attemptIndex, double radiusX, double radiusY, double radiusZ, int configuredPeakDensity) {
+        // Shrink the available center range so the node radii stay inside the base size.
         double halfX = descriptor.sizeX() / 2.0D;
         double halfY = descriptor.sizeY() / 2.0D;
         double halfZ = descriptor.sizeZ() / 2.0D;
@@ -100,6 +103,7 @@ public final class OreVeinDenseNodeLayout {
     }
 
     private static boolean fullyContained(OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.DenseNode node) {
+        // Check every block in the node bounds to make sure the node stays inside the main body.
         OreVeinBounds bounds = worldBounds(descriptor, node);
         BlockPos.MutableBlockPos position = new BlockPos.MutableBlockPos();
 
@@ -126,6 +130,7 @@ public final class OreVeinDenseNodeLayout {
     }
 
     private static boolean overlapExists(OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.DenseNode first, OreVeinInstanceDescriptor.DenseNode second) {
+        // Scan the shared bounds to see whether both dense nodes occupy any same block space.
         OreVeinBounds overlapBounds = worldBounds(descriptor, first).intersect(worldBounds(descriptor, second));
 
         if (overlapBounds == null) return false;
@@ -151,6 +156,7 @@ public final class OreVeinDenseNodeLayout {
     }
 
     private static @NotNull OreVeinBounds worldBounds(@NotNull OreVeinInstanceDescriptor descriptor, OreVeinInstanceDescriptor.@NotNull DenseNode node) {
+        // Rotate the node center and radii into world space before building inclusive bounds.
         double yaw = descriptor.yaw();
         double pitch = descriptor.pitch();
         double roll = descriptor.roll();

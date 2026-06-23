@@ -23,6 +23,7 @@ public final class OreVeinShapeEvaluator {
     private static final long DETAIL_SALT = 0x3C6EF372FE94F82BL;
 
     public static @NotNull ShapeContribution evaluate(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position) {
+        // Convert the world position into the veins local rotated position
         double worldX = position.getX() + 0.5D;
         double worldY = position.getY() + 0.5D;
         double worldZ = position.getZ() + 0.5D;
@@ -42,6 +43,7 @@ public final class OreVeinShapeEvaluator {
 
     @Contract("_, _, _, _ -> new")
     public static @NotNull ShapeContribution evaluateLocalPoint(@NotNull OreVeinInstanceDescriptor descriptor, double localX, double localY, double localZ) {
+        // Check the local point against the base shape and then apply boundary distortion
         double halfX = descriptor.sizeX() / 2.0D;
         double halfY = descriptor.sizeY() / 2.0D;
         double halfZ = descriptor.sizeZ() / 2.0D;
@@ -80,6 +82,7 @@ public final class OreVeinShapeEvaluator {
     }
 
     public static @NotNull HalfExtents rotatedHalfExtents(int sizeX, int sizeY, int sizeZ, double yawDegrees, double pitchDegrees, double rollDegrees) {
+        // Rotate the axis-aligned half sizes to find the full world-space extents.
         double halfX = sizeX / 2.0D;
         double halfY = sizeY / 2.0D;
         double halfZ = sizeZ / 2.0D;
@@ -94,6 +97,7 @@ public final class OreVeinShapeEvaluator {
 
     @Contract("_, _, _, _ -> new")
     public static @NotNull OreVeinBounds bounds(int centerX, int centerY, int centerZ, @NotNull HalfExtents halfExtents) {
+        // Convert the center point and half extents into inclusive world bounds.
         return new OreVeinBounds(
                 centerX - halfExtents.x(),
                 centerY - halfExtents.y(),
@@ -105,6 +109,7 @@ public final class OreVeinShapeEvaluator {
     }
 
     private static double normalizedRadius(double localX, double localY, double localZ, double halfX, double halfY, double halfZ) {
+        // Measure how far the local point is from the ellipsoid center in normalized space.
         return Math.sqrt(square(localX / halfX) + square(localY / halfY) + square(localZ / halfZ));
     }
 
@@ -127,6 +132,7 @@ public final class OreVeinShapeEvaluator {
     }
 
     private static double distortionBlocks(long shapeSeed, double localX, double localY, double localZ) {
+        // Blend coarse, medium, and detail noise to distort the boundary shell.
         double coarse = noiseLayer(shapeSeed, COARSE_SALT, localX, localY, localZ, COARSE_FREQUENCY, COARSE_AMPLITUDE_BLOCKS);
         double medium = noiseLayer(shapeSeed, MEDIUM_SALT, localX, localY, localZ, MEDIUM_FREQUENCY, MEDIUM_AMPLITUDE_BLOCKS);
         double detail = noiseLayer(shapeSeed, DETAIL_SALT, localX, localY, localZ, DETAIL_FREQUENCY, DETAIL_AMPLITUDE_BLOCKS);
@@ -164,6 +170,7 @@ public final class OreVeinShapeEvaluator {
     }
 
     private static @NotNull RotatedVector inverseRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
+        // Transform a world-space offset back into the vein's local rotated space.
         RotationMatrix matrix = inverseRotation(yawDegrees, pitchDegrees, rollDegrees);
         return matrix.apply(x, y, z);
     }
@@ -203,6 +210,7 @@ public final class OreVeinShapeEvaluator {
     }
 
     public static @NotNull RotatedVector forwardRotate(double x, double y, double z, double yawDegrees, double pitchDegrees, double rollDegrees) {
+        // Transform a local-space offset into the vein's world-space rotation.
         RotationMatrix matrix = forwardRotation(
                 yawDegrees,
                 pitchDegrees,
@@ -279,10 +287,7 @@ public final class OreVeinShapeEvaluator {
     public record HalfExtents(int x, int y, int z) {
     }
 
-    public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId,
-                                    double localX, double localY, double localZ, double normalizedRadius,
-                                    double distortionBlocks, double signedBoundaryDistanceBlocks,
-                                    ContributionState state) {
+    public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId, double localX, double localY, double localZ, double normalizedRadius, double distortionBlocks, double signedBoundaryDistanceBlocks, ContributionState state) {
         public ShapeContribution {
             java.util.Objects.requireNonNull(definitionId, "definitionId");
             java.util.Objects.requireNonNull(state, "state");
@@ -297,8 +302,7 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20,
-                                  double m21, double m22) {
+    private record RotationMatrix(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22) {
         @Contract("_, _, _ -> new")
         @NotNull RotatedVector apply(double x, double y, double z) {
             return new RotatedVector(
@@ -309,6 +313,5 @@ public final class OreVeinShapeEvaluator {
         }
     }
 
-    public record RotatedVector(double x, double y, double z) {
-    }
+    public record RotatedVector(double x, double y, double z) {}
 }

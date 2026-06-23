@@ -33,9 +33,7 @@ public final class OreVeinDefinitions {
 
         V previous = registry.putIfAbsent(key, value);
 
-        if (previous != null) throw new IllegalArgumentException(
-                duplicateMessage.apply(key)
-        );
+        if (previous != null) throw new IllegalArgumentException(duplicateMessage.apply(key));
 
         return value;
     }
@@ -43,10 +41,8 @@ public final class OreVeinDefinitions {
     public static OreVeinDefinition register(OreVeinDefinition definition) {
         Objects.requireNonNull(definition, "definition");
 
-        return registerUnique(
-                DEFINITIONS,
-                definition.id(),
-                definition,
+        // Register the definition only if its ID has not already been used.
+        return registerUnique(DEFINITIONS, definition.id(), definition,
                 id -> "Duplicate ore vein definition ID: " + id
         );
     }
@@ -54,10 +50,8 @@ public final class OreVeinDefinitions {
     public static DimensionGenerationSettings registerGenerationSettings(DimensionGenerationSettings settings) {
         Objects.requireNonNull(settings, "settings");
 
-        return registerUnique(
-                GENERATION_SETTINGS,
-                settings.dimension(),
-                settings,
+        // Register one generation-settings entry per dimension.
+        return registerUnique(GENERATION_SETTINGS, settings.dimension(), settings,
                 dimension -> "Duplicate ore vein dimension generation settings: " + dimension.location()
         );
     }
@@ -70,6 +64,14 @@ public final class OreVeinDefinitions {
         return DEFINITIONS.get(id);
     }
 
+    public static @NotNull OreVeinDefinition requireDefinition(@NotNull OreVeinInstanceDescriptor descriptor) {
+        Objects.requireNonNull(descriptor, "descriptor");
+
+        return Objects.requireNonNull(getDefinition(descriptor.definitionId()),
+                "Missing ore vein definition: " + descriptor.definitionId()
+        );
+    }
+
     public static @NotNull @Unmodifiable List<DimensionGenerationSettings> getGenerationSettings() {
         return List.copyOf(GENERATION_SETTINGS.values());
     }
@@ -79,10 +81,8 @@ public final class OreVeinDefinitions {
     }
 
     public static OverlapSettings registerOverlapSettings(ResourceKey<Level> dimension, OverlapSettings settings) {
-        return registerUnique(
-                OVERLAP_SETTINGS,
-                dimension,
-                settings,
+        // Register one overlap-settings entry per dimension.
+        return registerUnique(OVERLAP_SETTINGS, dimension, settings,
                 key -> "Duplicate ore vein overlap settings: " + key.location()
         );
     }
@@ -94,10 +94,12 @@ public final class OreVeinDefinitions {
     public static boolean isUnsupportedDimension(ResourceKey<Level> dimension) {
         Objects.requireNonNull(dimension, "dimension");
 
+        // A supported dimension needs generation settings, overlap settings, and at least one definition.
         return !GENERATION_SETTINGS.containsKey(dimension) || !OVERLAP_SETTINGS.containsKey(dimension) || DEFINITIONS.values().stream().noneMatch(definition -> definition.dimensions().contains(dimension));
     }
 
     public static void validateAll() {
+        // Validate the full currently registered definition and settings sets.
         validate(getDefinitions(), getGenerationSettings());
     }
 
@@ -109,9 +111,11 @@ public final class OreVeinDefinitions {
         Objects.requireNonNull(definitions, "definitions");
         Objects.requireNonNull(settings, "settings");
 
+        // Get all problems first so every invalid definition is reported at once
         List<String> problems = new ArrayList<>();
         Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension = validateSettings(settings, problems);
 
+        // Validate each registered definition
         for (OreVeinDefinition definition : definitions) {
             if (definition == null) {
                 problems.add("unknown\n  reason: null ore vein definition");
@@ -124,15 +128,14 @@ public final class OreVeinDefinitions {
         validateDimensionBudgets(definitions, settingsByDimension, problems);
         validateOverlapSettings(definitions, settingsByDimension, problems);
 
-        if (!problems.isEmpty()) {
-            throw new IllegalStateException("Invalid ore vein definitions:\n\n" + String.join("\n\n", problems));
-        }
+        if (!problems.isEmpty()) throw new IllegalStateException("Invalid ore vein definitions:\n\n" + String.join("\n\n", problems));
     }
 
     public static boolean isOreCompatibleWithHost(Material oreMaterial, Material hostRockMaterial) {
         Objects.requireNonNull(oreMaterial, "oreMaterial");
         Objects.requireNonNull(hostRockMaterial, "hostRockMaterial");
 
+        // Compare the ore's allowed rock types against the host rock type.
         return oreMaterial.ore.getRockTypes().contains(hostRockMaterial.rockLayer.rockType);
     }
 
@@ -153,11 +156,11 @@ public final class OreVeinDefinitions {
     }
 
     public static @Nullable DimensionHeight dimensionHeight(@NotNull ResourceKey<Level> dimension) {
+        // Return the fixed vanilla build-height limits for supported dimensions.
         ResourceLocation location = dimension.location();
 
         if (ResourceLocation.withDefaultNamespace("overworld").equals(location)) return new DimensionHeight(-64, 320);
-        if (ResourceLocation.withDefaultNamespace("the_nether").equals(location) || ResourceLocation.withDefaultNamespace("the_end").equals(location))
-            return new DimensionHeight(0, 256);
+        if (ResourceLocation.withDefaultNamespace("the_nether").equals(location) || ResourceLocation.withDefaultNamespace("the_end").equals(location)) return new DimensionHeight(0, 256);
 
         return null;
     }
@@ -171,14 +174,11 @@ public final class OreVeinDefinitions {
                 continue;
             }
 
-            if (setting.originWeightBudget() <= 0) {
-                problems.add(setting.dimension().location() + "\n  originWeightBudget: " + setting.originWeightBudget() + "\n  reason: originWeightBudget must be positive");
-            }
+            if (setting.originWeightBudget() <= 0) problems.add(setting.dimension().location() + "\n  originWeightBudget: " + setting.originWeightBudget() + "\n  reason: originWeightBudget must be positive");
 
             DimensionGenerationSettings previous = settingsByDimension.putIfAbsent(setting.dimension(), setting);
 
-            if (previous != null)
-                problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
+            if (previous != null) problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
         }
 
         return settingsByDimension;
@@ -247,8 +247,7 @@ public final class OreVeinDefinitions {
 
     private static void validateNodeRadius(OreVeinDefinition definition, double maxRadius, int minSize, String axis, List<String> problems) {
         if (maxRadius > minSize / 2.0D) problems.add(
-                problem(
-                        definition,
+                problem(definition,
                         null,
                         null,
                         null,
@@ -270,7 +269,6 @@ public final class OreVeinDefinitions {
     private static void validateTilt(OreVeinDefinition definition, double value, String name, List<String> problems) {
         if (!Double.isFinite(value) || value < 0.0D || value > 90.0D)
             problems.add(problem(definition, null, null, null, null, null, null, name + " must be finite and in [0, 90]"));
-
     }
 
     private static void validateLegalCenterRange(OreVeinDefinition definition, ResourceKey<Level> dimension, @NotNull DimensionHeight height, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
@@ -330,6 +328,7 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateDimensionBudgets(Collection<OreVeinDefinition> definitions, @NotNull Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
+        // Check if the total effective weight is greater than the dimensions budget
         for (DimensionGenerationSettings settings : settingsByDimension.values()) {
             List<OreVeinDefinition> eligibleDefinitions = definitions.stream()
                     .filter(Objects::nonNull)
@@ -513,24 +512,20 @@ public final class OreVeinDefinitions {
         message.append("  centerY range: [").append(definition.minCenterY()).append(", ").append(definition.maxCenterYExclusive()).append(")\n");
         message.append("  size ranges: X[").append(definition.minSizeX()).append(", ").append(definition.maxSizeX()).append("] Y[").append(definition.minSizeY()).append(", ").append(definition.maxSizeY()).append("] Z[").append(definition.minSizeZ()).append(", ").append(definition.maxSizeZ()).append("]\n");
 
-        if (entry != null)
-            message.append("  ore distribution weight: ").append(entry.distributionWeight()).append("\n");
+        if (entry != null) message.append("  ore distribution weight: ").append(entry.distributionWeight()).append("\n");
 
-        if (oreMaterial != null || entry != null)
-            message.append("  ore: ").append(materialName(oreMaterial)).append("\n");
+        if (oreMaterial != null || entry != null) message.append("  ore: ").append(materialName(oreMaterial)).append("\n");
 
         message.append("  vein ore RockTypes: ").append(veinOreRockTypes(definition)).append("\n");
 
-        if (commonRockTypes != null)
-            message.append("  common RockTypes: ").append(rockTypes(commonRockTypes)).append("\n");
+        if (commonRockTypes != null) message.append("  common RockTypes: ").append(rockTypes(commonRockTypes)).append("\n");
 
         if (hostRockMaterial != null) {
             message.append("  host rock: ").append(materialName(hostRockMaterial)).append("\n");
             message.append("  host RockType: ").append(rockTypeName(hostRockMaterial)).append("\n");
         }
 
-        if (oreMaterial != null)
-            message.append("  allowed ore RockTypes: ").append(rockTypes(oreMaterial)).append("\n");
+        if (oreMaterial != null) message.append("  allowed ore RockTypes: ").append(rockTypes(oreMaterial)).append("\n");
 
 
         if (requiredMap != null) message.append("  required map: ").append(requiredMap).append("\n");
@@ -583,6 +578,7 @@ public final class OreVeinDefinitions {
     }
 
     public static int checkedCeilToInt(double value, String name) {
+        // Convert a finite ceiling value to int while rejecting overflow.
         if (!Double.isFinite(value)) throw new IllegalArgumentException(name + " must be finite");
 
         double ceil = Math.ceil(value);

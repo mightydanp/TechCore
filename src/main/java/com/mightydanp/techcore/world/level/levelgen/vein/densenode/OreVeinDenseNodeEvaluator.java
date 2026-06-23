@@ -28,26 +28,18 @@ public final class OreVeinDenseNodeEvaluator {
     private static final int NODE_CENTER_MAX_ATTEMPTS = 32;
 
     public static OreVeinOreCellEvaluator.OreCellResult evaluateMainBodyCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, OreVeinShapeEvaluator.ShapeContribution contribution, @NotNull OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry) {
+        // Dense nodes increase the density and fill chance for blocks in the main body
         DenseNodeOutcome denseNodeOutcome = denseNodeOutcome(descriptor, definition, contribution, selectedOreEntry.material());
         int candidateDensity = candidateDensity(definition, denseNodeOutcome, selectedOreEntry.material());
         int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedOreEntry.material());
         int fillNumerator = fillNumerator(definition.densitySettings(), candidateDensity, maxReachableDensity);
         int occupancyRoll = OreVeinOreCellEvaluator.occupancyRoll(descriptor, position, OreVeinOreCellEvaluator.occupancySalt(), definition.densitySettings().fillDenominator());
         int finalDensity = occupancyRoll < fillNumerator ? candidateDensity : 0;
-        OreVeinOreCellEvaluator.CellResultFactory results = new OreVeinOreCellEvaluator.CellResultFactory(descriptor, selectedOreEntry, contribution);
 
         if (finalDensity <= 0)
-            return results.create(candidateDensity, finalDensity, HOST_ROCK, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
-        if (denseNodeOutcome.nodeId() != 0L) {
-            OreVeinOreCellEvaluator.OreCellResult.OreVariant variant = finalDensity >= 2 ? DENSE_ORE : REGULAR_ORE;
-            return results.create(
-                    candidateDensity,
-                    finalDensity,
-                    variant,
-                    denseNodeOutcome.nodeId(),
-                    denseNodeOutcome.influence()
-            );
-        }
+            return OreVeinOreCellEvaluator.createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, HOST_ROCK, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
+        if (denseNodeOutcome.nodeId() != 0L)
+            return OreVeinOreCellEvaluator.createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, DENSE_ORE, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
 
         if (OreVeinSparseTransitionEvaluator.isInsideTransitionHalf(contribution.signedBoundaryDistanceBlocks(), definition.haloSettings().transitionWidthBlocks())) {
             OreVeinOreCellEvaluator.OreCellResult.OreVariant transitionVariant = OreVeinSparseTransitionEvaluator.insideTransitionVariant(
@@ -57,13 +49,23 @@ public final class OreVeinDenseNodeEvaluator {
                     definition.haloSettings().transitionWidthBlocks()
             );
 
-            if (transitionVariant == SPARSE_ORE) return results.sparseOre();
+            if (transitionVariant == SPARSE_ORE) return OreVeinOreCellEvaluator.sparseOreResult(descriptor, selectedOreEntry, contribution);
         }
 
-        return results.create(candidateDensity, finalDensity, finalDensity == 1 ? OreVeinOreCellEvaluator.OreCellResult.OreVariant.REGULAR_ORE : DENSE_ORE, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
+        return OreVeinOreCellEvaluator.createResult(
+                descriptor,
+                selectedOreEntry,
+                contribution,
+                candidateDensity,
+                finalDensity,
+                finalDensity == 1 ? OreVeinOreCellEvaluator.OreCellResult.OreVariant.REGULAR_ORE : DENSE_ORE,
+                denseNodeOutcome.nodeId(),
+                denseNodeOutcome.influence()
+        );
     }
 
     public static int nodeCount(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition.DensitySettings densitySettings) {
+        // Convert the descriptor volume into a clamped dense-node count.
         BigInteger volume = BigInteger.valueOf(descriptor.sizeX()).multiply(BigInteger.valueOf(descriptor.sizeY())).multiply(BigInteger.valueOf(descriptor.sizeZ()));
         BigInteger count = getBigInteger(descriptor, densitySettings, volume);
         BigInteger min = BigInteger.valueOf(densitySettings.minNodeCount());
@@ -85,8 +87,8 @@ public final class OreVeinDenseNodeEvaluator {
     }
 
     public static @NotNull DenseNodeOutcome denseNodeOutcome(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, Material selectedMaterial) {
-        if (contribution.state() != INSIDE_MAIN_BODY || contribution.signedBoundaryDistanceBlocks() > 0.0D)
-            return DenseNodeOutcome.NONE;
+        // Dense nodes only matter for cells that are still inside the main body.
+        if (contribution.state() != INSIDE_MAIN_BODY || contribution.signedBoundaryDistanceBlocks() > 0.0D) return DenseNodeOutcome.NONE;
 
         int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedMaterial);
 
@@ -108,6 +110,7 @@ public final class OreVeinDenseNodeEvaluator {
     }
 
     public static int candidateDensity(@NotNull OreVeinDefinition definition, @NotNull DenseNodeOutcome denseNodeOutcome, Material selectedMaterial) {
+        // Convert the strongest dense-node influence into a valid density tier.
         int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedMaterial);
         int candidateDensity = 1 + (int) Math.round(denseNodeOutcome.influence());
         return Math.max(1, Math.min(maxReachableDensity, candidateDensity));
@@ -126,6 +129,7 @@ public final class OreVeinDenseNodeEvaluator {
     }
 
     public static boolean isInsideDenseNodeVolume(OreVeinInstanceDescriptor.@NotNull DenseNode node, double localX, double localY, double localZ) {
+        // Check whether the local point falls inside the node's ellipsoid volume.
         double dx = localX - node.localCenterX();
         double dy = localY - node.localCenterY();
         double dz = localZ - node.localCenterZ();

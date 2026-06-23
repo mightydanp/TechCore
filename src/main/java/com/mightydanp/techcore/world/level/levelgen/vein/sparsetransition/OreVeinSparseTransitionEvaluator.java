@@ -13,6 +13,7 @@ public final class OreVeinSparseTransitionEvaluator {
     private static final long TRANSITION_VARIANT_SALT = 0xC6A4A7935BD1E995L;
 
     public static boolean isInsideTransitionHalf(double signedBoundaryDistanceBlocks, double transitionWidthBlocks) {
+        // Check if the position is in the inner half of the transition shell
         if (transitionWidthBlocks <= 0.0D) return false;
 
         double halfTransitionWidth = transitionWidthBlocks * 0.5D;
@@ -21,6 +22,7 @@ public final class OreVeinSparseTransitionEvaluator {
     }
 
     public static OreVeinOreCellEvaluator.OreCellResult.OreVariant insideTransitionVariant(OreVeinInstanceDescriptor descriptor, BlockPos position, double signedBoundaryDistanceBlocks, double transitionWidthBlocks) {
+        // Blend between regular ore and sparse ore as the cell approaches the boundary.
         double halfTransitionWidth = transitionWidthBlocks * 0.5D;
         double insideTransitionProgress = Mth.clamp((signedBoundaryDistanceBlocks + halfTransitionWidth) / halfTransitionWidth, 0.0D, 1.0D);
         int sparseFormThreshold = Mth.floor(insideTransitionProgress * OreVeinSparseHaloEvaluator.sparseOccupancyDenominator());
@@ -30,6 +32,7 @@ public final class OreVeinSparseTransitionEvaluator {
     }
 
     public static int transitionShellThreshold(double signedBoundaryDistanceBlocks, double transitionWidthBlocks) {
+        // Fade the sparse shell threshold between the outer shell and the boundary edge.
         if (transitionWidthBlocks <= 0.0D) return sparseOccupancyThreshold(signedBoundaryDistanceBlocks);
 
         double halfTransitionWidth = transitionWidthBlocks * 0.5D;

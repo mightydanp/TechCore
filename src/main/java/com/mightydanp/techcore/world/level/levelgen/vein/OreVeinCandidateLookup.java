@@ -12,20 +12,20 @@ import java.math.BigInteger;
 import java.util.*;
 
 public final class OreVeinCandidateLookup {
+    private static final Comparator<OreVeinInstanceDescriptor> CANDIDATE_ORDER = Comparator.comparingInt(OreVeinInstanceDescriptor::originRegionX).thenComparingInt(OreVeinInstanceDescriptor::originRegionZ).thenComparingInt(OreVeinInstanceDescriptor::originIndex).thenComparing(descriptor -> descriptor.definitionId().toString());
 
     public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForBlock(long worldSeed, ResourceKey<Level> dimension, BlockPos position) {
         Objects.requireNonNull(position, "position");
 
+        // Reuse the area lookup with the same block position as both corners.
         return candidatesForArea(worldSeed, dimension, position, position);
     }
 
     public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunk) {
         Objects.requireNonNull(chunk, "chunk");
 
-        return candidatesForChunk(
-                worldSeed,
-                dimension,
-                chunk,
+        // Use an effectively unbounded Y range when the caller wants the full chunk.
+        return candidatesForChunk(worldSeed, dimension, chunk,
                 Integer.MIN_VALUE / 4,
                 Integer.MAX_VALUE / 4 + 1
         );
@@ -34,13 +34,10 @@ public final class OreVeinCandidateLookup {
     public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForChunk(long worldSeed, ResourceKey<Level> dimension, ChunkPos chunkPos, int minY, int maxYExclusive) {
         Objects.requireNonNull(chunkPos, "chunkPos");
 
-        if (maxYExclusive <= minY) {
-            throw new IllegalArgumentException("maxYExclusive must be greater than minY");
-        }
+        if (maxYExclusive <= minY) throw new IllegalArgumentException("maxYExclusive must be greater than minY");
 
-        return candidatesForArea(
-                worldSeed,
-                dimension,
+        // Convert the chunk and vertical range into one inclusive block-area query.
+        return candidatesForArea(worldSeed, dimension,
                 new BlockPos(chunkPos.getMinBlockX(), minY, chunkPos.getMinBlockZ()),
                 new BlockPos(chunkPos.getMaxBlockX(), maxYExclusive - 1, chunkPos.getMaxBlockZ())
         );
@@ -49,6 +46,7 @@ public final class OreVeinCandidateLookup {
     public static @NotNull @Unmodifiable List<OreVeinInstanceDescriptor> candidatesForArea(long worldSeed, ResourceKey<Level> dimension, BlockPos minInclusive, BlockPos maxInclusive) {
         Objects.requireNonNull(dimension, "dimension");
 
+        // Expand the area by the maximum vein reach so nearby origins are not missed
         OreVeinBounds area = OreVeinBounds.from(minInclusive, maxInclusive);
         int reach = maxCandidateReach(dimension);
         OreVeinBounds expanded = area.inflate(reach);
@@ -66,11 +64,7 @@ public final class OreVeinCandidateLookup {
             }
         }
 
-        candidates.sort(Comparator
-                .comparingInt(OreVeinInstanceDescriptor::originRegionX)
-                .thenComparingInt(OreVeinInstanceDescriptor::originRegionZ)
-                .thenComparingInt(OreVeinInstanceDescriptor::originIndex)
-                .thenComparing(descriptor -> descriptor.definitionId().toString()));
+        candidates.sort(CANDIDATE_ORDER);
 
         return List.copyOf(candidates);
     }
@@ -78,32 +72,29 @@ public final class OreVeinCandidateLookup {
     public static Optional<OreVeinInstanceDescriptor> descriptorForOrigin(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
         Objects.requireNonNull(dimension, "dimension");
 
+        // Get the generation settings for this dimension before rolling a definition.
         OreVeinDefinitions.DimensionGenerationSettings settings = OreVeinDefinitions.getGenerationSettings(dimension);
 
-        if (settings == null) {
-            return Optional.empty();
-        }
+        if (settings == null) return Optional.empty();
 
         BigInteger budgetQ16 = OreVeinGenerationMath.budgetQ16(settings);
         BigInteger roll = OreVeinGenerationMath.rollQ16(worldSeed, dimension, originRegionX, originRegionZ, originIndex, budgetQ16);
         BigInteger cursor = BigInteger.ZERO;
 
+        // Loop through the weighted definitions until the roll selects one
         for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
-            if (!definition.dimensions().contains(dimension)) {
-                continue;
-            }
+            if (!definition.dimensions().contains(dimension)) continue;
 
             cursor = cursor.add(OreVeinGenerationMath.effectiveWeightQ16(definition));
 
-            if (roll.compareTo(cursor) < 0) {
-                return createDescriptor(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
-            }
+            if (roll.compareTo(cursor) < 0) return createDescriptor(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         }
 
         return Optional.empty();
     }
 
     private static Optional<OreVeinInstanceDescriptor> createDescriptor(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
+        // Sample the final size and rotation values for this origin and definition.
         int sizeX = OreVeinGenerationMath.sizeX(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeY = OreVeinGenerationMath.sizeY(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeZ = OreVeinGenerationMath.sizeZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
@@ -113,22 +104,20 @@ public final class OreVeinCandidateLookup {
         OreVeinShapeEvaluator.HalfExtents halfExtents = OreVeinShapeEvaluator.rotatedHalfExtents(sizeX, sizeY, sizeZ, yaw, pitch, roll);
         OreVeinDefinitions.DimensionHeight height = OreVeinDefinitions.dimensionHeight(dimension);
 
-        if (height == null) {
-            return Optional.empty();
-        }
+        if (height == null) return Optional.empty();
 
+        // Clamp the legal center Y range so the rotated shape stays inside the dimension.
         int minLegalCenterY = Math.max(definition.minCenterY(), height.minY() + halfExtents.y());
         int maxLegalCenterYExclusive = Math.min(definition.maxCenterYExclusive(), height.maxYExclusive() - halfExtents.y());
 
-        if (minLegalCenterY >= maxLegalCenterYExclusive) {
-            return Optional.empty();
-        }
+        if (minLegalCenterY >= maxLegalCenterYExclusive) return Optional.empty();
 
         int centerX = OreVeinGenerationMath.centerX(worldSeed, dimension, originRegionX, originRegionZ, originIndex);
         int centerY = OreVeinGenerationMath.randomCenterY(worldSeed, dimension, originRegionX, originRegionZ, originIndex, minLegalCenterY, maxLegalCenterYExclusive);
         int centerZ = OreVeinGenerationMath.centerZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex);
         OreVeinBounds bounds = OreVeinShapeEvaluator.bounds(centerX, centerY, centerZ, halfExtents);
 
+        // Create the descriptor first, then attach any generated dense nodes.
         OreVeinInstanceDescriptor provisional = new OreVeinInstanceDescriptor(
                 OreVeinGenerationMath.instanceId(worldSeed, dimension, originRegionX, originRegionZ, originIndex),
                 OreVeinGenerationMath.instanceSeed(worldSeed, dimension, originRegionX, originRegionZ, originIndex),
@@ -155,10 +144,8 @@ public final class OreVeinCandidateLookup {
     public static @NotNull OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor) {
         Objects.requireNonNull(descriptor, "descriptor");
 
-        OreVeinDefinition definition = Objects.requireNonNull(
-                OreVeinDefinitions.getDefinition(descriptor.definitionId()),
-                "Missing ore vein definition: " + descriptor.definitionId()
-        );
+        // Expand the core bounds by distortion and sparse reach so evaluation can include halo cells.
+        OreVeinDefinition definition = OreVeinDefinitions.requireDefinition(descriptor);
         int distortionReach = OreVeinDefinitions.checkedCeilToInt(
                 OreVeinDefinitions.MAX_BOUNDARY_DISTORTION_BLOCKS,
                 "MAX_BOUNDARY_DISTORTION_BLOCKS"
@@ -172,6 +159,7 @@ public final class OreVeinCandidateLookup {
         int shapeReach = 0;
         int sparseReach = 0;
 
+        // Track the largest shape and sparse reach used by any definition in this dimension.
         for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
             if (!definition.dimensions().contains(dimension)) continue;
 
@@ -190,6 +178,7 @@ public final class OreVeinCandidateLookup {
     private static int maxReach(@NotNull OreVeinDefinition definition) {
         int maxReach = 0;
 
+        // Test the extreme pitch and roll combinations to find the farthest horizontal extent.
         for (double pitch : List.of(-definition.maxPitchDegrees(), definition.maxPitchDegrees())) {
             for (double roll : List.of(-definition.maxRollDegrees(), definition.maxRollDegrees())) {
                 OreVeinShapeEvaluator.HalfExtents halfExtents = OreVeinShapeEvaluator.rotatedHalfExtents(

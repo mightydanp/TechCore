@@ -41,7 +41,7 @@ public final class OreVeinDenseNodeEvaluator {
         if (denseNodeOutcome.nodeId() != 0L)
             return OreVeinOreCellEvaluator.createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, DENSE_ORE, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
 
-        if (OreVeinSparseTransitionEvaluator.isInsideTransitionHalf(contribution.signedBoundaryDistanceBlocks(), definition.haloSettings().transitionWidthBlocks())) {
+        if (definition.hasSparseTransition() && OreVeinSparseTransitionEvaluator.isInsideTransitionHalf(contribution.signedBoundaryDistanceBlocks(), definition.haloSettings().transitionWidthBlocks())) {
             OreVeinOreCellEvaluator.OreCellResult.OreVariant transitionVariant = OreVeinSparseTransitionEvaluator.insideTransitionVariant(
                     descriptor,
                     position,
@@ -86,7 +86,9 @@ public final class OreVeinDenseNodeEvaluator {
         return baseCount.add(extra);
     }
 
-    public static @NotNull DenseNodeOutcome denseNodeOutcome(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, Material selectedMaterial) {
+    public static @NotNull DenseNodeOutcome denseNodeOutcome(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, Material selectedMaterial) {
+        if (!definition.denseNodeEnabled()) return DenseNodeOutcome.NONE;
+
         // Dense nodes only matter for cells that are still inside the main body.
         if (contribution.state() != INSIDE_MAIN_BODY || contribution.signedBoundaryDistanceBlocks() > 0.0D) return DenseNodeOutcome.NONE;
 

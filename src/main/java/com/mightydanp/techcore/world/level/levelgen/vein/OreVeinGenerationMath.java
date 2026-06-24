@@ -16,7 +16,9 @@ public final class OreVeinGenerationMath {
     public static final int ORIGIN_INDEX = 0;
     public static final int FUTURE_BOUNDARY_MARGIN = 0;
     public static final BigInteger Q16 = BigInteger.ONE.shiftLeft(16);
-    public static final BigInteger REFERENCE_VOLUME_8 = BigInteger.valueOf(32L * 32L * 32L);
+    public static final int LARGE_VEIN_THRESHOLD_BLOCKS = 48;
+    public static final BigInteger REFERENCE_VOLUME_8 =
+            BigInteger.valueOf(2L * LARGE_VEIN_THRESHOLD_BLOCKS).pow(3);
 
     private static final long SALT_DEFINITION_SELECTION = 0x4d7f4a7c15d9e377L;
     private static final long SALT_INSTANCE_ID = 0x1f123bb5a9f04731L;
@@ -115,15 +117,21 @@ public final class OreVeinGenerationMath {
         return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, minSize, maxSize);
     }
 
-    public static double yaw(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
+    public static double yaw(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        if (!definition.rotationEnabled()) return 0.0D;
+
         return randomUnit(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_YAW) * 360.0D;
     }
 
     public static double pitch(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        if (!definition.rotationEnabled()) return 0.0D;
+
         return randomSigned(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_PITCH, definition.maxPitchDegrees());
     }
 
     public static double roll(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+        if (!definition.rotationEnabled()) return 0.0D;
+
         return randomSigned(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_ROLL, definition.maxRollDegrees());
     }
 

@@ -230,14 +230,16 @@ public final class OreVeinDefinitions {
     }
 
     private static void validateHaloSettings(@NotNull OreVeinDefinition definition, List<String> problems) {
-        OreVeinDefinition.HaloSettings haloSettings = definition.haloSettings();
+        double transitionWidth = definition.haloSettings().transitionWidthBlocks();
 
-        if (!Double.isFinite(haloSettings.transitionWidthBlocks()) || haloSettings.transitionWidthBlocks() < 0.0D)
+        if (!Double.isFinite(transitionWidth) || transitionWidth < 0.0D)
             problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and non-negative"));
     }
 
 
     private static void validateDensitySettings(@NotNull OreVeinDefinition definition, List<String> problems) {
+        if (!definition.denseNodeEnabled()) return;
+
         OreVeinDefinition.DensitySettings settings = definition.densitySettings();
 
         validateNodeRadius(definition, settings.maxNodeRadiusX(), definition.minSizeX(), "X", problems);
@@ -281,6 +283,19 @@ public final class OreVeinDefinitions {
     }
 
     private static int maxAllowedHalfY(@NotNull OreVeinDefinition definition) {
+        if (!definition.rotationEnabled()) {
+            OreVeinShapeEvaluator.HalfExtents halfExtents = OreVeinShapeEvaluator.rotatedHalfExtents(
+                    definition.maxSizeX(),
+                    definition.maxSizeY(),
+                    definition.maxSizeZ(),
+                    0.0D,
+                    0.0D,
+                    0.0D
+            );
+
+            return halfExtents.y() + (int) Math.ceil(MAX_BOUNDARY_DISTORTION_BLOCKS);
+        }
+
         int maxHalfY = 0;
 
         for (double pitch : List.of(-definition.maxPitchDegrees(), definition.maxPitchDegrees())) {
@@ -452,9 +467,11 @@ public final class OreVeinDefinitions {
             problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockType"));
 
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), commonRockTypes, problems);
-        validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), commonRockTypes, problems);
 
-        if (maxReachableDensity(definition, oreMaterial) >= 2)
+        if (definition.canGenerateSparseOre())
+            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), commonRockTypes, problems);
+
+        if (definition.denseNodeEnabled() && maxReachableDensity(definition, oreMaterial) >= 2)
             validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), commonRockTypes, problems);
 
     }

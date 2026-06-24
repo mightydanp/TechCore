@@ -11,14 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
-    private static final int DEFAULT_SPARSE_REACH_BLOCKS = 32;
-    private static final double DEFAULT_MAX_PITCH_DEGREES = 12.0D;
-    private static final double DEFAULT_MAX_ROLL_DEGREES = 12.0D;
-
-    //private Double maxPitchDegrees;
-    //private Double maxRollDegrees;
-
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, boolean sparseHaloEnabled, boolean sparseTransitionEnabled, boolean denseNodeEnabled, boolean rotationEnabled, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
     private static final DensitySettings DEFAULT_DENSITY_SETTINGS = new DensitySettings(
             704,
             960,
@@ -53,11 +46,6 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         Objects.requireNonNull(haloSettings, "haloSettings");
         oreEntries = copyNonEmptyList(oreEntries, "oreEntries");
         validateTotalDistributionWeight(oreEntries);
-    }
-
-    public OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
-        // Use the default sparse reach when the shorter constructor is used.
-        this(id, dimensions, generationWeight, minCenterY, maxCenterYExclusive, minSizeX, maxSizeX, minSizeY, maxSizeY, minSizeZ, maxSizeZ, DEFAULT_SPARSE_REACH_BLOCKS, maxPitchDegrees, maxRollDegrees, densitySettings, haloSettings, oreEntries);
     }
 
     /*
@@ -133,20 +121,40 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         return calculateTotalDistributionWeight(oreEntries);
     }
 
+    public int effectiveSparseHaloReachBlocks() {
+        return sparseHaloEnabled ? sparseReachBlocks : 0;
+    }
+
+    public boolean hasSparseTransition() {
+        return sparseTransitionEnabled
+                && haloSettings.transitionWidthBlocks() > 0.0D;
+    }
+
+    public boolean canGenerateSparseOre() {
+        return effectiveSparseHaloReachBlocks() > 0
+                || hasSparseTransition();
+    }
+
 
     public static final class Builder {
         private final ResourceLocation id;
         private List<ResourceKey<Level>> dimensions;
         private Integer generationWeight;
         private Integer minCenterY;
-        private Integer maxCenterYExclusive;
-        private Integer minSizeX;
+        private Integer maxCenterY;
+        private Integer minSizeX = 8;
         private Integer maxSizeX;
-        private Integer minSizeY;
+        private Integer minSizeY = 8;
         private Integer maxSizeY;
         private Integer minSizeZ;
         private Integer maxSizeZ;
-        private Integer sparseReachBlocks;
+        private Double maxPitchDegrees = 12.0D;
+        private Double maxRollDegrees = 12.0D;
+        private Integer sparseReachBlocks = 32;
+        private boolean sparseHaloEnabled = true;
+        private boolean sparseTransitionEnabled = true;
+        private boolean denseNodeEnabled = true;
+        private boolean rotationEnabled = true;
         private List<OreEntry> oreEntries;
 
         private Builder(ResourceLocation id) {
@@ -171,12 +179,17 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
 
         public Builder centerY(int minCenterY, int maxCenterYExclusive) {
             this.minCenterY = minCenterY;
-            this.maxCenterYExclusive = maxCenterYExclusive;
+            this.maxCenterY = maxCenterYExclusive;
             return this;
         }
 
         public Builder sizeX(int minSizeX, int maxSizeX) {
             this.minSizeX = minSizeX;
+            this.maxSizeX = maxSizeX;
+            return this;
+        }
+
+        public Builder maxSizeX(int maxSizeX) {
             this.maxSizeX = maxSizeX;
             return this;
         }
@@ -187,14 +200,49 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
+        public Builder maxSizeY(int maxSizeY) {
+            this.maxSizeY = maxSizeY;
+            return this;
+        }
+
         public Builder sizeZ(int minSizeZ, int maxSizeZ) {
             this.minSizeZ = minSizeZ;
             this.maxSizeZ = maxSizeZ;
             return this;
         }
 
+        public Builder maxPitchDegrees(double maxPitchDegrees) {
+            this.maxPitchDegrees = maxPitchDegrees;
+            return this;
+        }
+
+        public Builder maxRollDegrees(double maxRollDegrees) {
+            this.maxRollDegrees = maxRollDegrees;
+            return this;
+        }
+
         public Builder sparseReachBlocks(int sparseReachBlocks) {
             this.sparseReachBlocks = sparseReachBlocks;
+            return this;
+        }
+
+        public Builder disableSparseFade() {
+            this.sparseHaloEnabled = false;
+            return this;
+        }
+
+        public Builder disableSparseTransition() {
+            this.sparseTransitionEnabled = false;
+            return this;
+        }
+
+        public Builder disableDenseNode() {
+            this.denseNodeEnabled = false;
+            return this;
+        }
+
+        public Builder disableRotation() {
+            this.rotationEnabled = false;
             return this;
         }
 
@@ -215,16 +263,20 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
                     dimensions,
                     generationWeight,
                     minCenterY,
-                    maxCenterYExclusive,
+                    maxCenterY,
                     minSizeX,
                     maxSizeX,
                     minSizeY,
                     maxSizeY,
                     minSizeZ,
                     maxSizeZ,
-                    sparseReachBlocks != null ? sparseReachBlocks : DEFAULT_SPARSE_REACH_BLOCKS,
-                    DEFAULT_MAX_PITCH_DEGREES,//maxPitchDegrees != null ? maxPitchDegrees : DEFAULT_MAX_PITCH_DEGREES,
-                    DEFAULT_MAX_ROLL_DEGREES,//maxRollDegrees != null ? maxRollDegrees : DEFAULT_MAX_ROLL_DEGREES,
+                    sparseReachBlocks,
+                    sparseHaloEnabled,
+                    sparseTransitionEnabled,
+                    denseNodeEnabled,
+                    rotationEnabled,
+                    maxPitchDegrees,
+                    maxRollDegrees,
                     DEFAULT_DENSITY_SETTINGS,
                     DEFAULT_HALO_SETTINGS,
                     oreEntries

@@ -98,7 +98,7 @@ public final class OreVeinCandidateLookup {
         int sizeX = OreVeinGenerationMath.sizeX(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeY = OreVeinGenerationMath.sizeY(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         int sizeZ = OreVeinGenerationMath.sizeZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
-        double yaw = OreVeinGenerationMath.yaw(worldSeed, dimension, originRegionX, originRegionZ, originIndex);
+        double yaw = OreVeinGenerationMath.yaw(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         double pitch = OreVeinGenerationMath.pitch(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         double roll = OreVeinGenerationMath.roll(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         OreVeinShapeEvaluator.HalfExtents halfExtents = OreVeinShapeEvaluator.rotatedHalfExtents(sizeX, sizeY, sizeZ, yaw, pitch, roll);
@@ -137,6 +137,8 @@ public final class OreVeinCandidateLookup {
                 List.of()
         );
 
+        if (!definition.denseNodeEnabled()) return Optional.of(provisional);
+
         return Optional.of(provisional.withDenseNodes(OreVeinDenseNodeLayout.generate(provisional, definition)));
 
     }
@@ -150,9 +152,23 @@ public final class OreVeinCandidateLookup {
                 OreVeinDefinitions.MAX_BOUNDARY_DISTORTION_BLOCKS,
                 "MAX_BOUNDARY_DISTORTION_BLOCKS"
         );
-        int sparseReach = definition.sparseReachBlocks();
+        int sparseReach = exteriorSparseReach(definition);
 
-        return descriptor.bounds().inflate(Math.addExact(distortionReach, sparseReach));
+        return descriptor.bounds().inflate(
+                Math.addExact(distortionReach, sparseReach)
+        );
+    }
+
+    private static int exteriorSparseReach(@NotNull OreVeinDefinition definition) {
+        int fadeReach = definition.effectiveSparseHaloReachBlocks();
+
+        int transitionReach = definition.hasSparseTransition() ?
+                OreVeinDefinitions.checkedCeilToInt(
+                        definition.haloSettings().transitionWidthBlocks() * 0.5D,
+                        "sparse transition exterior reach")
+                : 0;
+
+        return Math.max(fadeReach, transitionReach);
     }
 
     private static int maxCandidateReach(ResourceKey<Level> dimension) {
@@ -176,6 +192,20 @@ public final class OreVeinCandidateLookup {
     }
 
     private static int maxReach(@NotNull OreVeinDefinition definition) {
+        if (!definition.rotationEnabled()) {
+            OreVeinShapeEvaluator.HalfExtents halfExtents =
+                    OreVeinShapeEvaluator.rotatedHalfExtents(
+                            definition.maxSizeX(),
+                            definition.maxSizeY(),
+                            definition.maxSizeZ(),
+                            0.0D,
+                            0.0D,
+                            0.0D
+                    );
+
+            return Math.max(halfExtents.x(), halfExtents.z());
+        }
+
         int maxReach = 0;
 
         // Test the extreme pitch and roll combinations to find the farthest horizontal extent.

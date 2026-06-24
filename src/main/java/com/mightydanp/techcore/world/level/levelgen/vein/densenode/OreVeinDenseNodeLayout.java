@@ -30,22 +30,40 @@ public final class OreVeinDenseNodeLayout {
     private static OreVeinInstanceDescriptor.@Nullable DenseNode candidateNode(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, int nodeIndex, List<OreVeinInstanceDescriptor.DenseNode> acceptedNodes) {
         // Sample one dense-node shape first, then keep retrying only its center point.
         OreVeinDefinition.DensitySettings settings = definition.densitySettings();
+
+        double allowedMaxRadiusX = Math.min(
+                settings.maxNodeRadiusX(),
+                descriptor.sizeX() / 2.0D
+        );
+
+        double allowedMaxRadiusY = Math.min(
+                settings.maxNodeRadiusY(),
+                descriptor.sizeY() / 2.0D
+        );
+
+        double allowedMaxRadiusZ = Math.min(
+                settings.maxNodeRadiusZ(),
+                descriptor.sizeZ() / 2.0D
+        );
+
+        if (allowedMaxRadiusX < settings.minNodeRadiusX() || allowedMaxRadiusY < settings.minNodeRadiusY() || allowedMaxRadiusZ < settings.minNodeRadiusZ()) return null;
+
         long nodeTerm = (long) nodeIndex * OreVeinOreCellEvaluator.xHashMultiplier();
 
         double radiusX = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinDenseNodeEvaluator.nodeRadiusXSalt() ^ nodeTerm),
                 settings.minNodeRadiusX(),
-                settings.maxNodeRadiusX()
+                allowedMaxRadiusX
         );
         double radiusY = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinDenseNodeEvaluator.nodeRadiusYSalt() ^ nodeTerm),
                 settings.minNodeRadiusY(),
-                settings.maxNodeRadiusY()
+                allowedMaxRadiusY
         );
         double radiusZ = OreVeinOreCellEvaluator.sampleDouble(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinDenseNodeEvaluator.nodeRadiusZSalt() ^ nodeTerm),
                 settings.minNodeRadiusZ(),
-                settings.maxNodeRadiusZ()
+                allowedMaxRadiusZ
         );
         int configuredPeakDensity = OreVeinOreCellEvaluator.sampleIntInclusive(
                 OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ OreVeinDenseNodeEvaluator.nodePeakSalt() ^ nodeTerm),
@@ -76,6 +94,8 @@ public final class OreVeinDenseNodeLayout {
         double availableZ = halfZ - radiusZ;
 
         if (availableX < 0.0D || availableY < 0.0D || availableZ < 0.0D) return null;
+
+
 
         long nodeTerm = (long) nodeIndex * OreVeinOreCellEvaluator.xHashMultiplier();
         long attemptTerm = (long) attemptIndex * OreVeinOreCellEvaluator.yHashMultiplier();

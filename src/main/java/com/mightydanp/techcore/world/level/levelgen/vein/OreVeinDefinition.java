@@ -142,11 +142,11 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private Integer generationWeight;
         private Integer minCenterY;
         private Integer maxCenterY;
-        private Integer minSizeX = 8;
+        private Integer minSizeX = 16;
         private Integer maxSizeX;
         private Integer minSizeY;
         private Integer maxSizeY;
-        private Integer minSizeZ = 8;
+        private Integer minSizeZ = 16;
         private Integer maxSizeZ;
         private Double maxPitchDegrees = 12.0D;
         private Double maxRollDegrees = 12.0D;

@@ -242,9 +242,9 @@ public final class OreVeinDefinitions {
 
         OreVeinDefinition.DensitySettings settings = definition.densitySettings();
 
-        validateNodeRadius(definition, settings.maxNodeRadiusX(), definition.minSizeX(), "X", problems);
-        validateNodeRadius(definition, settings.maxNodeRadiusY(), definition.minSizeY(), "Y", problems);
-        validateNodeRadius(definition, settings.maxNodeRadiusZ(), definition.minSizeZ(), "Z", problems);
+        validateNodeRadius(definition, settings.minNodeRadiusX(), definition.minSizeX(), "X", problems);
+        validateNodeRadius(definition, settings.minNodeRadiusY(), definition.minSizeY(), "Y", problems);
+        validateNodeRadius(definition, settings.minNodeRadiusZ(), definition.minSizeZ(), "Z", problems);
     }
 
     private static void validateNodeRadius(OreVeinDefinition definition, double maxRadius, int minSize, String axis, List<String> problems) {
@@ -256,7 +256,7 @@ public final class OreVeinDefinitions {
                         null,
                         null,
                         null,
-                        "maxNodeRadius" + axis + " exceeds minSize" + axis + " / 2.0")
+                        "minNodeRadius" + axis + " exceeds minSize" + axis + " / 2.0")
         );
     }
 

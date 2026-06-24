@@ -17,8 +17,8 @@ public final class OreVeinGenerationMath {
     public static final int FUTURE_BOUNDARY_MARGIN = 0;
     public static final BigInteger Q16 = BigInteger.ONE.shiftLeft(16);
     public static final int LARGE_VEIN_THRESHOLD_BLOCKS = 48;
-    public static final BigInteger REFERENCE_VOLUME_8 =
-            BigInteger.valueOf(2L * LARGE_VEIN_THRESHOLD_BLOCKS).pow(3);
+    public static final int MAX_ACCEPTED_VEIN_SIZE_BLOCKS = 96;
+    private static final int SIZE_CHANCE_SCALE = 10_000;
 
     private static final long SALT_DEFINITION_SELECTION = 0x4d7f4a7c15d9e377L;
     private static final long SALT_INSTANCE_ID = 0x1f123bb5a9f04731L;
@@ -30,6 +30,8 @@ public final class OreVeinGenerationMath {
     private static final long SALT_SIZE_X = 0x9b05688c2b3e6c1fL;
     private static final long SALT_SIZE_Y = 0x1f83d9abfb41bd6bL;
     private static final long SALT_SIZE_Z = 0x5be0cd19137e2179L;
+    private static final long SALT_SIZE_ACCEPTANCE = 0xd1b54a32d192ed03L;
+    private static final long SIZE_ATTEMPT_STEP = 0x9e3779b97f4a7c15L;
     private static final long SALT_YAW = 0xcbbb9d5dc1059ed8L;
     private static final long SALT_PITCH = 0x629a292a367cd507L;
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
@@ -39,14 +41,9 @@ public final class OreVeinGenerationMath {
         return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
     }
 
-    public static @NotNull BigInteger effectiveWeightQ16(OreVeinDefinition definition) {
-        // Scale the generation weight down for larger veins
-        BigInteger expectedVolume8 = expectedVolume8(definition);
-        BigInteger volumeScaleQ16 = ceilDiv(expectedVolume8.multiply(Q16), REFERENCE_VOLUME_8);
-        BigInteger penaltyQ16 = sqrtFloor(volumeScaleQ16.multiply(Q16)).max(Q16);
-        BigInteger numerator = BigInteger.valueOf(definition.generationWeight()).multiply(Q16).multiply(Q16);
-
-        return numerator.divide(penaltyQ16).max(BigInteger.ONE);
+    public static @NotNull BigInteger effectiveWeightQ16(@NotNull OreVeinDefinition definition) {
+        // Vein size does not affect whether this definition is selected.
+        return BigInteger.valueOf(definition.generationWeight()).multiply(Q16);
     }
 
     public static BigInteger totalEffectiveWeightQ16(@NotNull List<OreVeinDefinition> definitions) {
@@ -101,20 +98,92 @@ public final class OreVeinGenerationMath {
         return Math.addExact(regionStart, regionOffset);
     }
 
-    public static int sizeX(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
-        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_X, definition.minSizeX(), definition.maxSizeX());
+    public static @NotNull SampledSize sampledSize(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
+         // Every attempt is derived from the world seed, dimension, origin coordinates, origin index, and attempt number.
+         // The same world seed therefore produces the same rejected candidates and the same final accepted size.
+        for (long attempt = 0L; ; attempt++) {
+            long attemptSalt = mix64(SIZE_ATTEMPT_STEP * (attempt + 1L));
+
+            int sizeX = randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex,
+                    SALT_SIZE_X ^ attemptSalt,
+                    definition.minSizeX(),
+                    definition.maxSizeX()
+            );
+
+            int sizeY = randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex,
+                    SALT_SIZE_Y ^ attemptSalt,
+                    definition.minSizeY(),
+                    definition.maxSizeY()
+            );
+
+            int sizeZ = randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ,
+                    originIndex,
+                    SALT_SIZE_Z ^ attemptSalt,
+                    definition.minSizeZ(),
+                    definition.maxSizeZ()
+            );
+
+            SampledSize candidate = new SampledSize(sizeX, sizeY, sizeZ);
+            int acceptanceChance = sizeAcceptanceChance(candidate);
+
+
+            //Sizes above the accepted limit have a zero chance. Immediately move to the next deterministic attempt.
+            if (acceptanceChance <= 0) continue;
+
+            // A chance of 100% does not need an additional roll.
+            if (acceptanceChance >= SIZE_CHANCE_SCALE) return candidate;
+
+            int acceptanceRoll = randomInt(worldSeed, dimension, originRegionX, originRegionZ, originIndex,
+                    SALT_SIZE_ACCEPTANCE ^ attemptSalt,
+                    SIZE_CHANCE_SCALE
+            );
+            if (acceptanceRoll < acceptanceChance) return candidate;
+
+        }
+    }
+    private static int sizeAcceptanceChance(@NotNull SampledSize size) {
+        int largestSize = Math.max(
+                size.x(),
+
+                Math.max(size.y(), size.z())
+        );
+
+        if (largestSize <= 48) return 10_000;
+
+        if (largestSize <= 64) return interpolateChance(largestSize,
+                48,
+                64,
+                10_000,
+                5_000
+        );
+
+        if (largestSize <= 80) return interpolateChance(largestSize,
+                64,
+                80,
+                5_000,
+                1_000
+        );
+
+        if (largestSize <= 96) return interpolateChance(largestSize,
+                80,
+                96,
+                1_000,
+                500
+        );
+
+        return 0;
     }
 
-    public static int sizeY(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
-        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Y, definition.minSizeY(), definition.maxSizeY());
-    }
+    private static int interpolateChance(int size, int startSize, int endSize, int startChance, int endChance) {
+        int sizeOffset = size - startSize;
 
-    public static int sizeZ(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
-        return size(worldSeed, dimension, originRegionX, originRegionZ, originIndex, SALT_SIZE_Z, definition.minSizeZ(), definition.maxSizeZ());
-    }
-
-    private static int size(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, long salt, int minSize, int maxSize) {
-        return randomRangeInclusive(worldSeed, dimension, originRegionX, originRegionZ, originIndex, salt, minSize, maxSize);
+        int sizeSpan = endSize - startSize;
+        int chanceDrop = startChance - endChance;
+        long roundedDrop =
+                ((long) chanceDrop * sizeOffset
+                        + sizeSpan / 2L)
+                        / sizeSpan;
+        return startChance - (int) roundedDrop;
     }
 
     public static double yaw(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, @NotNull OreVeinDefinition definition) {
@@ -141,25 +210,6 @@ public final class OreVeinGenerationMath {
 
     public static int regionCoordinateForBlock(int blockCoordinate) {
         return Math.floorDiv(blockCoordinate, REGION_BLOCKS);
-    }
-
-    public static @NotNull BigInteger expectedVolume8(@NotNull OreVeinDefinition definition) {
-        // Multiply the midpoint sums so the expected volume stays exact in integer space.
-        BigInteger mid2X = BigInteger.valueOf((long) definition.minSizeX() + definition.maxSizeX());
-        BigInteger mid2Y = BigInteger.valueOf((long) definition.minSizeY() + definition.maxSizeY());
-        BigInteger mid2Z = BigInteger.valueOf((long) definition.minSizeZ() + definition.maxSizeZ());
-
-        return mid2X.multiply(mid2Y).multiply(mid2Z);
-    }
-
-    public static BigInteger ceilDiv(@NotNull BigInteger value, BigInteger divisor) {
-        BigInteger[] divided = value.divideAndRemainder(divisor);
-
-        return divided[1].signum() == 0 ? divided[0] : divided[0].add(BigInteger.ONE);
-    }
-
-    public static BigInteger sqrtFloor(@NotNull BigInteger value) {
-        return value.sqrt();
     }
 
     public static long hashSeedAndDimension(long worldSeed, ResourceKey<Level> dimension, long salt) {
@@ -223,6 +273,8 @@ public final class OreVeinGenerationMath {
         value ^= value >>> 31;
         return value;
     }
+
+    public record SampledSize(int x, int y, int z) {}
 
     private static void writeLong(byte[] bytes, int offset, long value) {
         for (int i = 7; i >= 0; i--) {

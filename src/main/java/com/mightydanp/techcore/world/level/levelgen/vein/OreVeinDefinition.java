@@ -39,6 +39,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         validateSizeRange(minSizeX, maxSizeX, "sizeX");
         validateSizeRange(minSizeY, maxSizeY, "sizeY");
         validateSizeRange(minSizeZ, maxSizeZ, "sizeZ");
+        validateSizeAcceptanceRange(minSizeX, minSizeY, minSizeZ);
         validateSparseReachBlocks(sparseReachBlocks);
         validateTilt(maxPitchDegrees, "maxPitchDegrees");
         validateTilt(maxRollDegrees, "maxRollDegrees");
@@ -87,6 +88,13 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     private static void validateSizeRange(int minSize, int maxSize, String name) {
         if (minSize < 6) throw new IllegalArgumentException("min" + name + " must be at least 6");
         if (maxSize < minSize) throw new IllegalArgumentException("max" + name + " must be at least min" + name);
+    }
+
+    private static void validateSizeAcceptanceRange(int minSizeX, int minSizeY, int minSizeZ) {
+        int smallestPossibleLargestSize = Math.max(minSizeX, Math.max(minSizeY, minSizeZ));
+
+        if (smallestPossibleLargestSize > OreVeinGenerationMath.MAX_ACCEPTED_VEIN_SIZE_BLOCKS)
+            throw new IllegalArgumentException("vein size range has no size with a positive acceptance chance; at least one possible size must be 96 blocks or smaller");
     }
 
     private static void validateTilt(double maxTiltDegrees, String name) {

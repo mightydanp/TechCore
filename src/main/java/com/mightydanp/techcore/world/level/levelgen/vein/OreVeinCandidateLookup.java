@@ -94,10 +94,12 @@ public final class OreVeinCandidateLookup {
     }
 
     private static Optional<OreVeinInstanceDescriptor> createDescriptor(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {
-        // Sample the final size and rotation values for this origin and definition.
-        int sizeX = OreVeinGenerationMath.sizeX(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
-        int sizeY = OreVeinGenerationMath.sizeY(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
-        int sizeZ = OreVeinGenerationMath.sizeZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
+        // Deterministically reroll size candidates until one is accepted.
+        OreVeinGenerationMath.SampledSize sampledSize = OreVeinGenerationMath.sampledSize(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
+        int sizeX = sampledSize.x();
+        int sizeY = sampledSize.y();
+        int sizeZ = sampledSize.z();
+
         double yaw = OreVeinGenerationMath.yaw(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         double pitch = OreVeinGenerationMath.pitch(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         double roll = OreVeinGenerationMath.roll(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);

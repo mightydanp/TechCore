@@ -144,9 +144,9 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private Integer maxCenterY;
         private Integer minSizeX = 8;
         private Integer maxSizeX;
-        private Integer minSizeY = 8;
+        private Integer minSizeY;
         private Integer maxSizeY;
-        private Integer minSizeZ;
+        private Integer minSizeZ = 8;
         private Integer maxSizeZ;
         private Double maxPitchDegrees = 12.0D;
         private Double maxRollDegrees = 12.0D;
@@ -200,13 +200,13 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
-        public Builder maxSizeY(int maxSizeY) {
-            this.maxSizeY = maxSizeY;
+        public Builder sizeZ(int minSizeZ, int maxSizeZ) {
+            this.minSizeZ = minSizeZ;
+            this.maxSizeZ = maxSizeZ;
             return this;
         }
 
-        public Builder sizeZ(int minSizeZ, int maxSizeZ) {
-            this.minSizeZ = minSizeZ;
+        public Builder maxSizeZ(int maxSizeZ) {
             this.maxSizeZ = maxSizeZ;
             return this;
         }

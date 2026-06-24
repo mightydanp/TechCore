@@ -22,18 +22,38 @@ public final class OreVeinShapeEvaluator {
     private static final long MEDIUM_SALT = 0xBB67AE8584CAA73BL;
     private static final long DETAIL_SALT = 0x3C6EF372FE94F82BL;
 
+    private static double localCenterOffset(int size) {
+        return (size & 1) == 0 ? 0.5D : 0.0D;
+    }
+
+    public static @NotNull RotatedVector geometricCenter(@NotNull OreVeinInstanceDescriptor descriptor) {
+        RotatedVector rotatedOffset = forwardRotate(
+                localCenterOffset(descriptor.sizeX()),
+                localCenterOffset(descriptor.sizeY()),
+                localCenterOffset(descriptor.sizeZ()),
+                descriptor.yaw(),
+                descriptor.pitch(),
+                descriptor.roll()
+        );
+
+        return new RotatedVector(
+                descriptor.center().getX() + 0.5D + rotatedOffset.x(),
+                descriptor.center().getY() + 0.5D + rotatedOffset.y(),
+                descriptor.center().getZ() + 0.5D + rotatedOffset.z()
+        );
+    }
+
     public static @NotNull ShapeContribution evaluate(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position) {
         // Convert the world position into the veins local rotated position
         double worldX = position.getX() + 0.5D;
         double worldY = position.getY() + 0.5D;
         double worldZ = position.getZ() + 0.5D;
-        double centerX = descriptor.center().getX() + 0.5D;
-        double centerY = descriptor.center().getY() + 0.5D;
-        double centerZ = descriptor.center().getZ() + 0.5D;
+        RotatedVector center = geometricCenter(descriptor);
+
         RotatedVector local = inverseRotate(
-                worldX - centerX,
-                worldY - centerY,
-                worldZ - centerZ,
+                worldX - center.x(),
+                worldY - center.y(),
+                worldZ - center.z(),
                 descriptor.yaw(),
                 descriptor.pitch(),
                 descriptor.roll()
@@ -86,12 +106,19 @@ public final class OreVeinShapeEvaluator {
         double halfX = sizeX / 2.0D;
         double halfY = sizeY / 2.0D;
         double halfZ = sizeZ / 2.0D;
+
         RotationMatrix matrix = forwardRotation(yawDegrees, pitchDegrees, rollDegrees);
+        RotatedVector centerOffset = matrix.apply(localCenterOffset(sizeX), localCenterOffset(sizeY), localCenterOffset(sizeZ));
+
+        double extentX = Math.abs(centerOffset.x()) + Math.abs(matrix.m00()) * halfX + Math.abs(matrix.m01()) * halfY + Math.abs(matrix.m02()) * halfZ;
+        double extentY = Math.abs(centerOffset.y()) + Math.abs(matrix.m10()) * halfX + Math.abs(matrix.m11()) * halfY + Math.abs(matrix.m12()) * halfZ;
+
+        double extentZ = Math.abs(centerOffset.z()) + Math.abs(matrix.m20()) * halfX + Math.abs(matrix.m21()) * halfY + Math.abs(matrix.m22()) * halfZ;
 
         return new HalfExtents(
-                ceilExtent(matrix.m00(), halfX, matrix.m01(), halfY, matrix.m02(), halfZ),
-                ceilExtent(matrix.m10(), halfX, matrix.m11(), halfY, matrix.m12(), halfZ),
-                ceilExtent(matrix.m20(), halfX, matrix.m21(), halfY, matrix.m22(), halfZ)
+                (int) Math.ceil(extentX),
+                (int) Math.ceil(extentY),
+                (int) Math.ceil(extentZ)
         );
     }
 
@@ -266,10 +293,6 @@ public final class OreVeinShapeEvaluator {
     private static long fastFloor(double value) {
         long floor = (long) value;
         return value < floor ? floor - 1L : floor;
-    }
-
-    private static int ceilExtent(double r0, double h0, double r1, double h1, double r2, double h2) {
-        return (int) Math.ceil(Math.abs(r0) * h0 + Math.abs(r1) * h1 + Math.abs(r2) * h2);
     }
 
     private static double lerp(double start, double end, double t) {

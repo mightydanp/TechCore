@@ -162,9 +162,11 @@ public final class OreVeinDenseNodeLayout {
         double roll = descriptor.roll();
 
         OreVeinShapeEvaluator.RotatedVector centerOffset = OreVeinShapeEvaluator.forwardRotate(node.localCenterX(), node.localCenterY(), node.localCenterZ(), yaw, pitch, roll);
-        double worldCenterX = descriptor.center().getX() + 0.5D + centerOffset.x();
-        double worldCenterY = descriptor.center().getY() + 0.5D + centerOffset.y();
-        double worldCenterZ = descriptor.center().getZ() + 0.5D + centerOffset.z();
+        OreVeinShapeEvaluator.RotatedVector veinCenter = OreVeinShapeEvaluator.geometricCenter(descriptor);
+
+        double worldCenterX = veinCenter.x() + centerOffset.x();
+        double worldCenterY = veinCenter.y() + centerOffset.y();
+        double worldCenterZ = veinCenter.z() + centerOffset.z();
 
         OreVeinShapeEvaluator.RotatedVector xAxis = OreVeinShapeEvaluator.forwardRotate(node.radiusX(), 0.0D, 0.0D, yaw, pitch, roll);
         OreVeinShapeEvaluator.RotatedVector yAxis = OreVeinShapeEvaluator.forwardRotate(0.0D, node.radiusY(), 0.0D, yaw, pitch, roll);

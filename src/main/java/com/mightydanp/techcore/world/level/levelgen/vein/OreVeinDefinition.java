@@ -151,14 +151,14 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private Integer minCenterY;
         private Integer maxCenterY;
         private Integer minSizeX = 16;
-        private Integer maxSizeX;
+        private Integer maxSizeX = 96;
         private Integer minSizeY;
         private Integer maxSizeY;
         private Integer minSizeZ = 16;
-        private Integer maxSizeZ;
+        private Integer maxSizeZ = 96;
         private Double maxPitchDegrees = 12.0D;
         private Double maxRollDegrees = 12.0D;
-        private Integer sparseReachBlocks = 32;
+        private Integer sparseReachBlocks = 24;
         private boolean sparseHaloEnabled = true;
         private boolean sparseTransitionEnabled = true;
         private boolean denseNodeEnabled = true;
@@ -197,6 +197,11 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
+        public Builder minSizeX(int minSizeX) {
+            this.minSizeX = minSizeX;
+            return this;
+        }
+
         public Builder maxSizeX(int maxSizeX) {
             this.maxSizeX = maxSizeX;
             return this;
@@ -211,6 +216,11 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         public Builder sizeZ(int minSizeZ, int maxSizeZ) {
             this.minSizeZ = minSizeZ;
             this.maxSizeZ = maxSizeZ;
+            return this;
+        }
+
+        public Builder minSizeZ(int minSizeZ) {
+            this.minSizeZ = minSizeZ;
             return this;
         }
 

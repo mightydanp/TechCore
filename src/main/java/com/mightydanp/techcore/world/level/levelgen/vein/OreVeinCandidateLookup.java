@@ -72,25 +72,23 @@ public final class OreVeinCandidateLookup {
     public static Optional<OreVeinInstanceDescriptor> descriptorForOrigin(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex) {
         Objects.requireNonNull(dimension, "dimension");
 
-        // Get the generation settings for this dimension before rolling a definition.
-        OreVeinDefinitions.DimensionGenerationSettings settings = OreVeinDefinitions.getGenerationSettings(dimension);
+        List<OreVeinDefinition> eligibleDefinitions = OreVeinDefinitions.getDefinitionsForDimension(dimension);
 
-        if (settings == null) return Optional.empty();
+        if (eligibleDefinitions.isEmpty()) return Optional.empty();
 
-        BigInteger budgetQ16 = OreVeinGenerationMath.budgetQ16(settings);
-        BigInteger roll = OreVeinGenerationMath.rollQ16(worldSeed, dimension, originRegionX, originRegionZ, originIndex, budgetQ16);
+        BigInteger totalWeightQ16 = OreVeinGenerationMath.totalEffectiveWeightQ16(eligibleDefinitions);
+        if (totalWeightQ16.signum() <= 0) return Optional.empty();
+
+        BigInteger roll = OreVeinGenerationMath.rollQ16(worldSeed, dimension, originRegionX, originRegionZ, originIndex, totalWeightQ16);
         BigInteger cursor = BigInteger.ZERO;
 
-        // Loop through the weighted definitions until the roll selects one
-        for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
-            if (!definition.dimensions().contains(dimension)) continue;
+        for (OreVeinDefinition definition : eligibleDefinitions) {
+            cursor = cursor.add( OreVeinGenerationMath.effectiveWeightQ16(definition));
 
-            cursor = cursor.add(OreVeinGenerationMath.effectiveWeightQ16(definition));
-
-            if (roll.compareTo(cursor) < 0) return createDescriptor(worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
+            if (roll.compareTo(cursor) < 0) return createDescriptor( worldSeed, dimension, originRegionX, originRegionZ, originIndex, definition);
         }
 
-        return Optional.empty();
+        throw new IllegalStateException( "Failed to select an ore vein definition for dimension " + dimension.location() + "; roll=" + roll + ", totalWeightQ16=" + totalWeightQ16);
     }
 
     private static Optional<OreVeinInstanceDescriptor> createDescriptor(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, OreVeinDefinition definition) {

@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,7 +21,6 @@ public final class OreVeinDefinitions {
     public static final double MAX_BOUNDARY_DISTORTION_BLOCKS = 7.0D;
 
     private static final Map<ResourceLocation, OreVeinDefinition> DEFINITIONS = new LinkedHashMap<>();
-    private static final Map<ResourceKey<Level>, DimensionGenerationSettings> GENERATION_SETTINGS = new LinkedHashMap<>();
     private static final Map<ResourceKey<Level>, OverlapSettings> OVERLAP_SETTINGS = new LinkedHashMap<>();
 
     @Contract("_, _, _, _ -> param3")
@@ -47,15 +45,6 @@ public final class OreVeinDefinitions {
         );
     }
 
-    public static DimensionGenerationSettings registerGenerationSettings(DimensionGenerationSettings settings) {
-        Objects.requireNonNull(settings, "settings");
-
-        // Register one generation-settings entry per dimension.
-        return registerUnique(GENERATION_SETTINGS, settings.dimension(), settings,
-                dimension -> "Duplicate ore vein dimension generation settings: " + dimension.location()
-        );
-    }
-
     public static @NotNull @Unmodifiable List<OreVeinDefinition> getDefinitions() {
         return List.copyOf(DEFINITIONS.values());
     }
@@ -72,14 +61,6 @@ public final class OreVeinDefinitions {
         );
     }
 
-    public static @NotNull @Unmodifiable List<DimensionGenerationSettings> getGenerationSettings() {
-        return List.copyOf(GENERATION_SETTINGS.values());
-    }
-
-    public static DimensionGenerationSettings getGenerationSettings(ResourceKey<Level> dimension) {
-        return GENERATION_SETTINGS.get(dimension);
-    }
-
     public static OverlapSettings registerOverlapSettings(ResourceKey<Level> dimension, OverlapSettings settings) {
         // Register one overlap-settings entry per dimension.
         return registerUnique(OVERLAP_SETTINGS, dimension, settings,
@@ -87,6 +68,11 @@ public final class OreVeinDefinitions {
         );
     }
 
+    public static @NotNull @Unmodifiable List<OreVeinDefinition> getDefinitionsForDimension( ResourceKey<Level> dimension ) {
+        Objects.requireNonNull(dimension, "dimension");
+
+        return DEFINITIONS.values().stream().filter(definition -> definition.dimensions().contains(dimension)).toList();
+    }
     public static OverlapSettings getOverlapSettings(ResourceKey<Level> dimension) {
         return OVERLAP_SETTINGS.get(dimension);
     }
@@ -95,25 +81,19 @@ public final class OreVeinDefinitions {
         Objects.requireNonNull(dimension, "dimension");
 
         // A supported dimension needs generation settings, overlap settings, and at least one definition.
-        return !GENERATION_SETTINGS.containsKey(dimension) || !OVERLAP_SETTINGS.containsKey(dimension) || DEFINITIONS.values().stream().noneMatch(definition -> definition.dimensions().contains(dimension));
+        return !OVERLAP_SETTINGS.containsKey(dimension) || DEFINITIONS.values().stream().noneMatch(definition -> definition.dimensions().contains(dimension));
     }
 
     public static void validateAll() {
         // Validate the full currently registered definition and settings sets.
-        validate(getDefinitions(), getGenerationSettings());
+        validate(getDefinitions());
     }
 
     public static void validate(Collection<OreVeinDefinition> definitions) {
-        validate(definitions, getGenerationSettings());
-    }
-
-    public static void validate(Collection<OreVeinDefinition> definitions, Collection<DimensionGenerationSettings> settings) {
         Objects.requireNonNull(definitions, "definitions");
-        Objects.requireNonNull(settings, "settings");
 
         // Get all problems first so every invalid definition is reported at once
         List<String> problems = new ArrayList<>();
-        Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension = validateSettings(settings, problems);
 
         // Validate each registered definition
         for (OreVeinDefinition definition : definitions) {
@@ -122,11 +102,10 @@ public final class OreVeinDefinitions {
                 continue;
             }
 
-            validateDefinition(definition, settingsByDimension, problems);
+            validateDefinition(definition, problems);
         }
 
-        validateDimensionBudgets(definitions, settingsByDimension, problems);
-        validateOverlapSettings(definitions, settingsByDimension, problems);
+        validateOverlapSettings(definitions, problems);
 
         if (!problems.isEmpty()) throw new IllegalStateException("Invalid ore vein definitions:\n\n" + String.join("\n\n", problems));
     }
@@ -165,26 +144,7 @@ public final class OreVeinDefinitions {
         return null;
     }
 
-    private static @NotNull Map<ResourceKey<Level>, DimensionGenerationSettings> validateSettings(@NotNull Collection<DimensionGenerationSettings> settings, List<String> problems) {
-        Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension = new LinkedHashMap<>();
-
-        for (DimensionGenerationSettings setting : settings) {
-            if (setting == null) {
-                problems.add("unknown\n  reason: null ore vein dimension generation settings");
-                continue;
-            }
-
-            if (setting.originWeightBudget() <= 0) problems.add(setting.dimension().location() + "\n  originWeightBudget: " + setting.originWeightBudget() + "\n  reason: originWeightBudget must be positive");
-
-            DimensionGenerationSettings previous = settingsByDimension.putIfAbsent(setting.dimension(), setting);
-
-            if (previous != null) problems.add(setting.dimension().location() + "\n  reason: duplicate dimension generation settings");
-        }
-
-        return settingsByDimension;
-    }
-
-    private static void validateDefinition(OreVeinDefinition definition, Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
+    private static void validateDefinition(OreVeinDefinition definition, List<String> problems) {
         validateGenerationFields(definition, problems);
 
         List<ResolvedOreEntry> oreEntries = resolveOreEntries(definition, problems);
@@ -200,9 +160,6 @@ public final class OreVeinDefinitions {
             problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockType across vein ores"));
 
         for (ResourceKey<Level> dimension : definition.dimensions()) {
-            if (!settingsByDimension.containsKey(dimension))
-                problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension generation settings"));
-
             DimensionHeight height = dimensionHeight(dimension);
 
             if (height == null)
@@ -342,28 +299,7 @@ public final class OreVeinDefinitions {
         }
     }
 
-    private static void validateDimensionBudgets(Collection<OreVeinDefinition> definitions, @NotNull Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
-        // Check if the total effective weight is greater than the dimensions budget
-        for (DimensionGenerationSettings settings : settingsByDimension.values()) {
-            List<OreVeinDefinition> eligibleDefinitions = definitions.stream()
-                    .filter(Objects::nonNull)
-                    .filter(definition -> definition.dimensions().contains(settings.dimension()))
-                    .toList();
-
-            BigInteger totalQ16 = OreVeinGenerationMath.totalEffectiveWeightQ16(eligibleDefinitions);
-            BigInteger budgetQ16 = OreVeinGenerationMath.budgetQ16(settings);
-
-            if (totalQ16.compareTo(budgetQ16) > 0) {
-                problems.add(settings.dimension().location() + "\n"
-                        + "  originWeightBudget: " + settings.originWeightBudget() + "\n"
-                        + "  total effective weight Q16: " + totalQ16 + "\n"
-                        + "  budget Q16: " + budgetQ16 + "\n"
-                        + "  reason: total effective generation weight exceeds dimension budget");
-            }
-        }
-    }
-
-    private static void validateOverlapSettings(Collection<OreVeinDefinition> definitions, Map<ResourceKey<Level>, DimensionGenerationSettings> settingsByDimension, List<String> problems) {
+    private static void validateOverlapSettings(Collection<OreVeinDefinition> definitions, List<String> problems) {
         for (Map.Entry<ResourceKey<Level>, OverlapSettings> entry : OVERLAP_SETTINGS.entrySet()) {
             OverlapSettings settings = entry.getValue();
 
@@ -377,7 +313,7 @@ public final class OreVeinDefinitions {
             if (definition == null) continue;
 
             for (ResourceKey<Level> dimension : definition.dimensions())
-                if (settingsByDimension.containsKey(dimension) && !OVERLAP_SETTINGS.containsKey(dimension))
+                if (!OVERLAP_SETTINGS.containsKey(dimension))
                     problems.add(problem(definition, dimension, null, null, null, null, null, "missing dimension overlap settings"));
         }
     }
@@ -605,15 +541,7 @@ public final class OreVeinDefinitions {
         return Math.toIntExact((long) ceil);
     }
 
-    public record DimensionHeight(int minY, int maxYExclusive) {
-    }
-
-    public record DimensionGenerationSettings(ResourceKey<Level> dimension, int originWeightBudget) {
-        public DimensionGenerationSettings {
-            Objects.requireNonNull(dimension, "dimension");
-            if (originWeightBudget <= 0) throw new IllegalArgumentException("originWeightBudget must be positive");
-        }
-    }
+    public record DimensionHeight(int minY, int maxYExclusive) {}
 
     public record OverlapSettings(int mainBodyGapNumerator, int denominator) {
         public OverlapSettings {
@@ -623,6 +551,5 @@ public final class OreVeinDefinitions {
         }
     }
 
-    private record ResolvedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {
-    }
+    private record ResolvedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {}
 }

@@ -8,12 +8,16 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 public final class OreVeinGenerationMath {
-    public static final int GENERATOR_VERSION = 1;
-    public static final int REGION_CHUNKS = 3;
+    public static final int GENERATOR_VERSION = 2;
+    public static final int REGION_CHUNKS = 1;
     public static final int REGION_BLOCKS = REGION_CHUNKS * 16;
-    public static final int ORIGIN_INDEX = 0;
+    public static final int AVERAGE_CHUNKS_PER_VEIN_ORIGIN = 9;
+    public static final int ORIGIN_WEIGHT_SCALE = 9360;
+    public static final int MAX_ORIGINS_PER_CHUNK = 64;
+    private static final double MAX_SUPPORTED_ORIGIN_LAMBDA = 16.0D;
     public static final int FUTURE_BOUNDARY_MARGIN = 0;
     public static final BigInteger Q16 = BigInteger.ONE.shiftLeft(16);
     public static final int LARGE_VEIN_THRESHOLD_BLOCKS = 48;
@@ -23,6 +27,7 @@ public final class OreVeinGenerationMath {
     private static final long SALT_DEFINITION_SELECTION = 0x4d7f4a7c15d9e377L;
     private static final long SALT_INSTANCE_ID = 0x1f123bb5a9f04731L;
     private static final long SALT_INSTANCE_SEED = 0x6a09e667f3bcc909L;
+    private static final long SALT_ORIGIN_COUNT = 0x6e624eb7f5a2d9c3L;
     private static final long SALT_SHAPE_SEED = 0xbb67ae8584caa73bL;
     private static final long SALT_CENTER_X = 0x3c6ef372fe94f82bL;
     private static final long SALT_CENTER_Y = 0xa54ff53a5f1d36f1L;
@@ -36,11 +41,6 @@ public final class OreVeinGenerationMath {
     private static final long SALT_PITCH = 0x629a292a367cd507L;
     private static final long SALT_ROLL = 0x9159015a3070dd17L;
 
-    public static @NotNull BigInteger budgetQ16(OreVeinDefinitions.@NotNull DimensionGenerationSettings settings) {
-        // Convert the integer origin budget into the shared Q16 fixed-point scale.
-        return BigInteger.valueOf(settings.originWeightBudget()).multiply(Q16);
-    }
-
     public static @NotNull BigInteger effectiveWeightQ16(@NotNull OreVeinDefinition definition) {
         // Vein size does not affect whether this definition is selected.
         return BigInteger.valueOf(definition.generationWeight()).multiply(Q16);
@@ -53,6 +53,31 @@ public final class OreVeinGenerationMath {
         for (OreVeinDefinition definition : definitions) total = total.add(effectiveWeightQ16(definition));
 
         return total;
+    }
+
+    public static int originCount( long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, @NotNull BigInteger totalWeightQ16 ) {
+        Objects.requireNonNull(dimension, "dimension");
+        Objects.requireNonNull(totalWeightQ16, "totalWeightQ16");
+
+        if (totalWeightQ16.signum() <= 0) return 0;
+
+        double lambda = totalWeightQ16.doubleValue() / Q16.doubleValue() / ORIGIN_WEIGHT_SCALE;
+
+        if (!Double.isFinite(lambda) || lambda > MAX_SUPPORTED_ORIGIN_LAMBDA) throw new IllegalStateException( "Ore vein origin rate is too large: " + lambda + "; totalWeightQ16=" + totalWeightQ16 );
+
+        double countRoll = randomUnit( worldSeed, dimension, originRegionX, originRegionZ, 0, SALT_ORIGIN_COUNT );
+        int count = 0;
+        double probability = Math.exp(-lambda);
+        double cumulativeProbability = probability;
+
+        while (countRoll >= cumulativeProbability) {
+            count++;
+            if (count >= MAX_ORIGINS_PER_CHUNK) return MAX_ORIGINS_PER_CHUNK;
+
+            probability *= lambda / count; cumulativeProbability += probability;
+        }
+
+        return count;
     }
 
     public static @NotNull BigInteger rollQ16(long worldSeed, ResourceKey<Level> dimension, int originRegionX, int originRegionZ, int originIndex, BigInteger budgetQ16) {

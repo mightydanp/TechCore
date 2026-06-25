@@ -17,6 +17,7 @@ import com.mightydanp.techcore.materials.block.RockLayerBlock;
 import com.mightydanp.techcore.materials.item.RockLayerItemBlock;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
 import com.mightydanp.techcore.materials.properties.MaterialItemProperties;
+import com.mightydanp.techcore.materials.properties.RockSubTypes;
 import com.mightydanp.techcore.materials.properties.RockTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -38,7 +39,9 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
     public boolean canContainOre = true;
 
     public RockTypes.RockType rockType;
+    public RockSubTypes.RockSubType rockSubType;
     public List<RockTypes.RockType> rockTypesFoundIn;
+    public List<RockSubTypes.RockSubType> rockSubTypesFoundIn;
 
     public boolean useExistingRockLayerTexture = false;
 
@@ -69,8 +72,9 @@ public class RockLayerComponent<A extends Material> extends Component<A, RockLay
                 .toList();
     }
 
-    public RockLayerComponent<A> rockLayer(RockTypes.RockType rockType) {
+    public RockLayerComponent<A> rockLayer(RockTypes.RockType rockType, RockSubTypes.RockSubType rockSubType) {
         this.rockType = rockType;
+        this.rockSubType = rockSubType;
         isRockLayer = true;
         return this;
     }

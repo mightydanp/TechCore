@@ -129,9 +129,9 @@ public final class OreVeinDefinitions {
                 + "  vein definition: " + (veinDefinitionId == null ? "unknown" : veinDefinitionId) + "\n"
                 + "  ore: " + materialName(oreMaterial) + "\n"
                 + "  host rock: " + materialName(hostRockMaterial) + "\n"
-                + "  host RockType: " + rockTypeName(hostRockMaterial) + "\n"
+                + "  host RockSubType: " + rockTypeName(hostRockMaterial) + "\n"
                 + "  allowed ore RockTypes: " + rockTypes(oreMaterial) + "\n"
-                + "  reason: incompatible RockType");
+                + "  reason: incompatible RockSubType");
     }
 
     public static @Nullable DimensionHeight dimensionHeight(@NotNull ResourceKey<Level> dimension) {
@@ -157,7 +157,7 @@ public final class OreVeinDefinitions {
         if (!hasResolvedOreMaterial(oreEntries))
             problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no resolved ore materials"));
         if (commonRockTypes.isEmpty())
-            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockType across vein ores"));
+            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockSubType across vein ores"));
 
         for (ResourceKey<Level> dimension : definition.dimensions()) {
             DimensionHeight height = dimensionHeight(dimension);
@@ -400,7 +400,7 @@ public final class OreVeinDefinitions {
 
     private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
         if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial))
-            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockType"));
+            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockSubType"));
 
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), commonRockTypes, problems);
 
@@ -475,7 +475,7 @@ public final class OreVeinDefinitions {
 
         if (hostRockMaterial != null) {
             message.append("  host rock: ").append(materialName(hostRockMaterial)).append("\n");
-            message.append("  host RockType: ").append(rockTypeName(hostRockMaterial)).append("\n");
+            message.append("  host RockSubType: ").append(rockTypeName(hostRockMaterial)).append("\n");
         }
 
         if (oreMaterial != null) message.append("  allowed ore RockTypes: ").append(rockTypes(oreMaterial)).append("\n");

@@ -42,6 +42,27 @@ public final class OreVeinOreCellEvaluator {
         return OreVeinSparseHaloEvaluator.evaluateHaloCell(descriptor, definition, position, contribution, selectedOreEntry);
     }
 
+    public static OreCellResult evaluateCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, @NotNull Material hostRockMaterial) {
+        Objects.requireNonNull(hostRockMaterial, "hostRockMaterial");
+
+        SelectedOreEntry selectedOreEntry = selectOreEntry(descriptor, definition, position, hostRockMaterial);
+
+        if (contribution.signedBoundaryDistanceBlocks() <= 0.0D)
+            return OreVeinDenseNodeEvaluator.evaluateMainBodyCell(descriptor, definition, position, contribution, selectedOreEntry);
+
+        return OreVeinSparseHaloEvaluator.evaluateHaloCell(descriptor, definition, position, contribution, selectedOreEntry);
+    }
+
+    public static boolean hasCompatibleOreEntry(@NotNull OreVeinDefinition definition, @NotNull Material hostRockMaterial) {
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) {
+            Material material = Objects.requireNonNull(entry.oreMaterial().get(), "oreMaterial supplier returned null");
+
+            if (OreVeinDefinitions.isOreCompatibleWithHost(material, hostRockMaterial)) return true;
+        }
+
+        return false;
+    }
+
     @Contract("_, _, _ -> new")
     public static @NotNull SelectedOreEntry selectOreEntry(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, @NotNull BlockPos position) {
         // Hash the world position and use it to pick an ore entry from the weighted list
@@ -65,6 +86,42 @@ public final class OreVeinOreCellEvaluator {
         }
 
         throw new IllegalStateException("Failed to select ore entry for " + definition.id());
+    }
+
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull SelectedOreEntry selectOreEntry(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, @NotNull BlockPos position, @NotNull Material hostRockMaterial) {
+        long hash = descriptor.instanceId() ^ MATERIAL_SELECTION_SALT;
+        hash ^= (long) position.getX() * X_HASH_MULTIPLIER;
+        hash ^= (long) position.getY() * Y_HASH_MULTIPLIER;
+        hash ^= (long) position.getZ() * Z_HASH_MULTIPLIER;
+        hash = mix64(hash);
+
+        long totalWeight = 0L;
+
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) {
+            Material material = Objects.requireNonNull(entry.oreMaterial().get(), "oreMaterial supplier returned null");
+
+            if (OreVeinDefinitions.isOreCompatibleWithHost(material, hostRockMaterial))
+                totalWeight = Math.addExact(totalWeight, entry.distributionWeight());
+        }
+
+        if (totalWeight <= 0L)
+            throw new IllegalStateException("No compatible ore entries for " + definition.id() + " and host " + hostRockMaterial.name);
+
+        long roll = Math.floorMod(hash, totalWeight);
+        long cursor = 0L;
+
+        for (OreVeinDefinition.OreEntry entry : definition.oreEntries()) {
+            Material material = Objects.requireNonNull(entry.oreMaterial().get(), "oreMaterial supplier returned null");
+
+            if (!OreVeinDefinitions.isOreCompatibleWithHost(material, hostRockMaterial)) continue;
+
+            cursor += entry.distributionWeight();
+
+            if (roll < cursor) return new SelectedOreEntry(entry, material);
+        }
+
+        throw new IllegalStateException("Failed to select compatible ore entry for " + definition.id());
     }
 
     public static int occupancyRoll(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position, long salt, int fillDenominator) {

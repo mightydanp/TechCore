@@ -152,21 +152,21 @@ public final class OreVeinDefinitions {
         validateOreMaterials(definition, oreEntries, problems);
         validateDuplicateOreMaterials(definition, oreEntries, problems);
 
-        Set<RockTypes.RockType> commonRockTypes = commonRockTypes(oreEntries);
+        Set<RockTypes.RockType> veinRockTypes = veinRockTypes(oreEntries);
 
         if (!hasResolvedOreMaterial(oreEntries))
-            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no resolved ore materials"));
-        if (commonRockTypes.isEmpty())
-            problems.add(problem(definition, null, null, null, null, null, commonRockTypes, "no common RockSubType across vein ores"));
+            problems.add(problem(definition, null, null, null, null, null, veinRockTypes, "no resolved ore materials"));
+        if (veinRockTypes.isEmpty())
+            problems.add(problem(definition, null, null, null, null, null, veinRockTypes, "no usable RockTypes across vein ores"));
 
         for (ResourceKey<Level> dimension : definition.dimensions()) {
             DimensionHeight height = dimensionHeight(dimension);
 
             if (height == null)
-                problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "missing dimension height limits"));
-            else validateLegalCenterRange(definition, dimension, height, commonRockTypes, problems);
+                problems.add(problem(definition, dimension, null, null, null, null, veinRockTypes, "missing dimension height limits"));
+            else validateLegalCenterRange(definition, dimension, height, veinRockTypes, problems);
 
-            validateDimensionHosts(definition, dimension, oreEntries, commonRockTypes, problems);
+            validateDimensionHosts(definition, dimension, oreEntries, veinRockTypes, problems);
         }
     }
 
@@ -230,13 +230,13 @@ public final class OreVeinDefinitions {
             problems.add(problem(definition, null, null, null, null, null, null, name + " must be finite and in [0, 90]"));
     }
 
-    private static void validateLegalCenterRange(OreVeinDefinition definition, ResourceKey<Level> dimension, @NotNull DimensionHeight height, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateLegalCenterRange(OreVeinDefinition definition, ResourceKey<Level> dimension, @NotNull DimensionHeight height, Set<RockTypes.RockType> veinRockTypes, List<String> problems) {
         int maxHalfY = maxAllowedHalfY(definition);
         int minLegalCenterY = Math.max(definition.minCenterY(), height.minY() + maxHalfY);
         int maxLegalCenterYExclusive = Math.min(definition.maxCenterYExclusive(), height.maxYExclusive() - maxHalfY);
 
         if (minLegalCenterY >= maxLegalCenterYExclusive)
-            problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "no legal center Y can keep rotated bounds inside dimension"));
+            problems.add(problem(definition, dimension, null, null, null, null, veinRockTypes, "no legal center Y can keep rotated bounds inside dimension"));
     }
 
     private static int maxAllowedHalfY(@NotNull OreVeinDefinition definition) {
@@ -273,18 +273,18 @@ public final class OreVeinDefinitions {
         return maxHalfY + (int) Math.ceil(MAX_BOUNDARY_DISTORTION_BLOCKS);
     }
 
-    private static void validateDimensionHosts(OreVeinDefinition definition, ResourceKey<Level> dimension, List<ResolvedOreEntry> oreEntries, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateDimensionHosts(OreVeinDefinition definition, ResourceKey<Level> dimension, List<ResolvedOreEntry> oreEntries, Set<RockTypes.RockType> veinRockTypes, List<String> problems) {
         List<Material> dimensionHosts = RockLayerFeature.getAllowedMaterials(dimension);
 
         if (dimensionHosts.isEmpty()) {
-            problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "dimension has no rock layers"));
+            problems.add(problem(definition, dimension, null, null, null, null, veinRockTypes, "dimension has no rock layers"));
             return;
         }
 
-        List<Material> eligibleHosts = eligibleHosts(dimensionHosts, commonRockTypes);
+        List<Material> eligibleHosts = eligibleHosts(dimensionHosts, veinRockTypes);
 
         if (eligibleHosts.isEmpty()) {
-            problems.add(problem(definition, dimension, null, null, null, null, commonRockTypes, "no rock layer in the dimension matches the common RockTypes"));
+            problems.add(problem(definition, dimension, null, null, null, null, veinRockTypes, "no rock layer in the dimension matches any vein ore RockType"));
             return;
         }
 
@@ -293,8 +293,9 @@ public final class OreVeinDefinitions {
                 Material oreMaterial = resolvedOreEntry.material();
 
                 if (isInvalidOre(oreMaterial)) continue;
+                if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial)) continue;
 
-                validateOreEntry(definition, dimension, resolvedOreEntry.entry(), oreMaterial, hostRockMaterial, commonRockTypes, problems);
+                validateOreEntry(definition, dimension, resolvedOreEntry.entry(), oreMaterial, hostRockMaterial, veinRockTypes, problems);
             }
         }
     }
@@ -369,46 +370,43 @@ public final class OreVeinDefinitions {
         }
     }
 
-    private static Set<RockTypes.RockType> commonRockTypes(@NotNull List<ResolvedOreEntry> oreEntries) {
-        LinkedHashSet<RockTypes.RockType> commonRockTypes = null;
+    private static Set<RockTypes.RockType> veinRockTypes(@NotNull List<ResolvedOreEntry> oreEntries) {
+        LinkedHashSet<RockTypes.RockType> veinRockTypes = new LinkedHashSet<>();
 
         for (ResolvedOreEntry resolvedOreEntry : oreEntries) {
             Material oreMaterial = resolvedOreEntry.material();
 
             if (isInvalidOre(oreMaterial)) continue;
 
-            LinkedHashSet<RockTypes.RockType> oreRockTypes = new LinkedHashSet<>(oreMaterial.ore.getRockTypes());
-
-            if (commonRockTypes == null) commonRockTypes = oreRockTypes;
-            else commonRockTypes.retainAll(oreRockTypes);
+            veinRockTypes.addAll(oreMaterial.ore.getRockTypes());
         }
 
-        return commonRockTypes == null ? Set.of() : Collections.unmodifiableSet(commonRockTypes);
+        return veinRockTypes.isEmpty() ? Set.of() : Collections.unmodifiableSet(veinRockTypes);
     }
 
     private static boolean hasResolvedOreMaterial(@NotNull List<ResolvedOreEntry> oreEntries) {
         return oreEntries.stream().anyMatch(entry -> entry.material() != null);
     }
 
-    private static @NotNull @Unmodifiable List<Material> eligibleHosts(@NotNull List<Material> dimensionHosts, Set<RockTypes.RockType> commonRockTypes) {
+    private static @NotNull @Unmodifiable List<Material> eligibleHosts(@NotNull List<Material> dimensionHosts, Set<RockTypes.RockType> veinRockTypes) {
         return dimensionHosts.stream()
                 .filter(OreVeinDefinitions::isConfiguredHostRock)
-                .filter(material -> commonRockTypes.contains(material.rockLayer.rockType))
+                .filter(material -> veinRockTypes.contains(material.rockLayer.rockType))
                 .toList();
     }
 
 
-    private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateOreEntry(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, Set<RockTypes.RockType> veinRockTypes, List<String> problems) {
         if (!isOreCompatibleWithHost(oreMaterial, hostRockMaterial))
-            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, commonRockTypes, "internal validation inconsistency: incompatible RockSubType"));
+            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, null, veinRockTypes, "internal validation inconsistency: incompatible RockSubType"));
 
-        validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), commonRockTypes, problems);
+        validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), veinRockTypes, problems);
 
         if (definition.canGenerateSparseOre())
-            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), commonRockTypes, problems);
+            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), veinRockTypes, problems);
 
         if (definition.denseNodeEnabled() && maxReachableDensity(definition, oreMaterial) >= 2)
-            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), commonRockTypes, problems);
+            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), veinRockTypes, problems);
 
     }
 
@@ -419,11 +417,11 @@ public final class OreVeinDefinitions {
         );
     }
 
-    private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> commonRockTypes, List<String> problems) {
+    private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> veinRockTypes, List<String> problems) {
         Supplier<Block> block = blocks.get(hostRockMaterial.name);
 
         if (block == null)
-            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, requiredMap, commonRockTypes, "missing " + requiredMap + " mapping"));
+            problems.add(problem(definition, dimension, entry, oreMaterial, hostRockMaterial, requiredMap, veinRockTypes, "missing " + requiredMap + " mapping"));
     }
 
     private static @NotNull List<ResolvedOreEntry> resolveOreEntries(@NotNull OreVeinDefinition definition, List<String> problems) {
@@ -457,7 +455,7 @@ public final class OreVeinDefinitions {
         return material == null || material.ore == null || material.ore.getOreType() == null || material.ore.getRockTypes().isEmpty();
     }
 
-    private static @NotNull String problem(@NotNull OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, String requiredMap, Set<RockTypes.RockType> commonRockTypes, String reason) {
+    private static @NotNull String problem(@NotNull OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, Material hostRockMaterial, String requiredMap, Set<RockTypes.RockType> veinRockTypes, String reason) {
         StringBuilder message = new StringBuilder();
         message.append(definition.id()).append("\n");
         message.append("  dimension: ").append(dimension == null ? "unknown" : dimension.location()).append("\n");
@@ -471,7 +469,7 @@ public final class OreVeinDefinitions {
 
         message.append("  vein ore RockTypes: ").append(veinOreRockTypes(definition)).append("\n");
 
-        if (commonRockTypes != null) message.append("  common RockTypes: ").append(rockTypes(commonRockTypes)).append("\n");
+        if (veinRockTypes != null) message.append("  vein RockTypes: ").append(rockTypes(veinRockTypes)).append("\n");
 
         if (hostRockMaterial != null) {
             message.append("  host rock: ").append(materialName(hostRockMaterial)).append("\n");

@@ -80,7 +80,19 @@ public final class OreVeinResolvedCellResolver {
 
         for (OreVeinInstanceDescriptor candidate : candidates) evaluationBounds.add(OreVeinCandidateLookup.evaluationBounds(candidate));
 
-        return oreCellResultsForPosition(position, candidates, evaluationBounds, OreVeinOreCellEvaluator::evaluateCell);
+        Material originalHostMaterial = requireOriginalHostMaterial(worldSeed, dimension, position);
+
+        return oreCellResultsForPosition(position, candidates, evaluationBounds, new OreCellEvaluator() {
+            @Override
+            public OreVeinOreCellEvaluator.OreCellResult evaluate(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos evaluatedPosition, OreVeinShapeEvaluator.ShapeContribution contribution) {
+                return OreVeinOreCellEvaluator.evaluateCell(descriptor, definition, evaluatedPosition, contribution, originalHostMaterial);
+            }
+
+            @Override
+            public boolean canEvaluate(OreVeinDefinition definition) {
+                return OreVeinOreCellEvaluator.hasCompatibleOreEntry(definition, originalHostMaterial);
+            }
+        });
     }
 
     private static @NotNull @Unmodifiable List<OreVeinOreCellEvaluator.OreCellResult> oreCellResultsForPosition(BlockPos position, List<OreVeinInstanceDescriptor> candidates, List<OreVeinBounds> evaluationBounds, OreCellEvaluator oreCellEvaluator) {
@@ -102,6 +114,7 @@ public final class OreVeinResolvedCellResolver {
             OreVeinDefinition definition = OreVeinDefinitions.requireDefinition(descriptor);
 
             if (contribution.signedBoundaryDistanceBlocks() > definition.sparseReachBlocks()) continue;
+            if (!oreCellEvaluator.canEvaluate(definition)) continue;
 
             results.add(oreCellEvaluator.evaluate(descriptor, definition, position, contribution));
         }
@@ -333,6 +346,10 @@ public final class OreVeinResolvedCellResolver {
     @FunctionalInterface
     private interface OreCellEvaluator {
         OreVeinOreCellEvaluator.OreCellResult evaluate(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, OreVeinShapeEvaluator.ShapeContribution contribution);
+
+        default boolean canEvaluate(OreVeinDefinition definition) {
+            return true;
+        }
     }
 
     public record ResolvedCell(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellEvaluator.OreCellResult winningOreCellResult, BlockState resolvedBlockState, boolean replacement, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingMainBodyGapInstanceIds) {

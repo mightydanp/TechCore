@@ -2,17 +2,18 @@ package com.mightydanp.techcore.world.level.levelgen.vein.densenode;
 
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.materials.block.DenseOre;
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinDefinition;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinInstanceDescriptor;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator;
-import com.mightydanp.techcore.world.level.levelgen.vein.sparsetransition.OreVeinSparseTransitionEvaluator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
-
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator.OreCellResult.OreVariant.*;
+import java.util.List;
+import java.util.function.Supplier;
 import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator.ShapeContribution.ContributionState.INSIDE_MAIN_BODY;
 
 public final class OreVeinDenseNodeEvaluator {
@@ -26,80 +27,38 @@ public final class OreVeinDenseNodeEvaluator {
     private static final long NODE_RADIUS_Z_SALT = 0x8D7F6E5D4C3B2A51L;
     private static final long NODE_PEAK_SALT = 0x9E807F6E5D4C3B61L;
     private static final int NODE_CENTER_MAX_ATTEMPTS = 32;
+    private static final int DENSE_NODE_PRIORITY = 30;
 
-    public static OreVeinOreCellEvaluator.OreCellResult evaluateMainBodyCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, OreVeinShapeEvaluator.ShapeContribution contribution, @NotNull OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry) {
-        // Dense nodes increase the density and fill chance for blocks in the main body
-        DenseNodeOutcome denseNodeOutcome = denseNodeOutcome(descriptor, definition, contribution, selectedOreEntry.material());
-        int candidateDensity = candidateDensity(definition, denseNodeOutcome, selectedOreEntry.material());
-        int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedOreEntry.material());
-        int fillNumerator = fillNumerator(definition.densitySettings(), candidateDensity, maxReachableDensity);
-        int occupancyRoll = OreVeinOreCellEvaluator.occupancyRoll(descriptor, position, OreVeinOreCellEvaluator.occupancySalt(), definition.densitySettings().fillDenominator());
-        int finalDensity = occupancyRoll < fillNumerator ? candidateDensity : 0;
+    public static OreVeinOreCellEvaluator.OreCellResult applyMainBodyCell(OreVeinInstanceDescriptor descriptor, BlockPos position, DenseNodeVeinFeature.Config config, DenseNodeVeinFeature.@NotNull State state, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, @NotNull OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry, OreVeinOreCellEvaluator.OreCellResult currentResult) {
+        DenseNodeOutcome denseNodeOutcome = denseNodeOutcome(state.nodes(), config, contribution, selectedOreEntry.material());
+        if (denseNodeOutcome.nodeId() == 0L) return currentResult;
 
-        if (finalDensity <= 0)
-            return OreVeinOreCellEvaluator.createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, HOST_ROCK, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
-        if (denseNodeOutcome.nodeId() != 0L)
-            return OreVeinOreCellEvaluator.createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, DENSE_ORE, denseNodeOutcome.nodeId(), denseNodeOutcome.influence());
+        int candidateDensity = candidateDensity(config, denseNodeOutcome, selectedOreEntry.material());
+        if (candidateDensity <= currentResult.finalDensity()) return currentResult;
 
-        if (definition.hasSparseTransition() && OreVeinSparseTransitionEvaluator.isInsideTransitionHalf(contribution.signedBoundaryDistanceBlocks(), definition.haloSettings().transitionWidthBlocks())) {
-            OreVeinOreCellEvaluator.OreCellResult.OreVariant transitionVariant = OreVeinSparseTransitionEvaluator.insideTransitionVariant(
-                    descriptor,
-                    position,
-                    contribution.signedBoundaryDistanceBlocks(),
-                    definition.haloSettings().transitionWidthBlocks()
-            );
-
-            if (transitionVariant == SPARSE_ORE) return OreVeinOreCellEvaluator.sparseOreResult(descriptor, selectedOreEntry, contribution);
-        }
+        if (currentResult.finalDensity() <= 0 && !denseFillPasses(descriptor, position, config)) return currentResult;
 
         return OreVeinOreCellEvaluator.createResult(
                 descriptor,
                 selectedOreEntry,
                 contribution,
                 candidateDensity,
-                finalDensity,
-                finalDensity == 1 ? OreVeinOreCellEvaluator.OreCellResult.OreVariant.REGULAR_ORE : DENSE_ORE,
-                denseNodeOutcome.nodeId(),
-                denseNodeOutcome.influence()
+                candidateDensity,
+                OreVeinOreCellEvaluator.OreCellResult.OreVariant.FEATURE_ORE,
+                new DenseNodeOreReplacement(denseNodeOutcome.nodeId(), denseNodeOutcome.influence())
         );
     }
 
-    public static int nodeCount(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition.DensitySettings densitySettings) {
-        // Convert the descriptor volume into a clamped dense-node count.
-        BigInteger volume = BigInteger.valueOf(descriptor.sizeX()).multiply(BigInteger.valueOf(descriptor.sizeY())).multiply(BigInteger.valueOf(descriptor.sizeZ()));
-        BigInteger count = getBigInteger(descriptor, densitySettings, volume);
-        BigInteger min = BigInteger.valueOf(densitySettings.minNodeCount());
-        BigInteger max = BigInteger.valueOf(densitySettings.maxNodeCount());
-
-        if (count.compareTo(min) < 0) count = min;
-        if (count.compareTo(max) > 0) count = max;
-
-        return count.intValueExact();
-    }
-
-    private static @NotNull BigInteger getBigInteger(@NotNull OreVeinInstanceDescriptor descriptor, OreVeinDefinition.@NotNull DensitySettings densitySettings, @NotNull BigInteger volume) {
-        BigInteger blocksPerDenseNode = BigInteger.valueOf(densitySettings.blocksPerDenseNode());
-        BigInteger baseCount = volume.divide(blocksPerDenseNode);
-        BigInteger remainder = volume.remainder(blocksPerDenseNode);
-        long roll = Math.floorMod(OreVeinOreCellEvaluator.mix64(descriptor.instanceSeed() ^ NODE_COUNT_SALT), densitySettings.blocksPerDenseNode());
-        BigInteger extra = BigInteger.valueOf(roll).compareTo(remainder) < 0 ? BigInteger.ONE : BigInteger.ZERO;
-        return baseCount.add(extra);
-    }
-
-    public static @NotNull DenseNodeOutcome denseNodeOutcome(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, Material selectedMaterial) {
-        if (!definition.denseNodeEnabled()) return DenseNodeOutcome.NONE;
-
-        // Dense nodes only matter for cells that are still inside the main body.
+    private static @NotNull DenseNodeOutcome denseNodeOutcome(List<DenseNodeVeinFeature.Node> nodes, DenseNodeVeinFeature.Config config, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, Material selectedMaterial) {
         if (contribution.state() != INSIDE_MAIN_BODY || contribution.signedBoundaryDistanceBlocks() > 0.0D) return DenseNodeOutcome.NONE;
 
-        int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedMaterial);
-
+        int maxReachableDensity = maxReachableDensity(config, selectedMaterial);
         if (maxReachableDensity <= 1) return DenseNodeOutcome.NONE;
 
         double bestInfluence = 0.0D;
         long bestNodeId = 0L;
 
-        for (OreVeinInstanceDescriptor.DenseNode node : descriptor.denseNodes()) {
+        for (DenseNodeVeinFeature.Node node : nodes) {
             double influence = nodeInfluence(node, contribution, maxReachableDensity);
 
             if (influence > bestInfluence) {
@@ -111,33 +70,29 @@ public final class OreVeinDenseNodeEvaluator {
         return bestInfluence > 0.0D ? new DenseNodeOutcome(bestNodeId, bestInfluence) : DenseNodeOutcome.NONE;
     }
 
-    public static int candidateDensity(@NotNull OreVeinDefinition definition, @NotNull DenseNodeOutcome denseNodeOutcome, Material selectedMaterial) {
-        // Convert the strongest dense-node influence into a valid density tier.
-        int maxReachableDensity = maxReachableDensity(definition.densitySettings(), selectedMaterial);
+    private static int candidateDensity(@NotNull DenseNodeVeinFeature.Config config, @NotNull DenseNodeOutcome denseNodeOutcome, Material selectedMaterial) {
+        int maxReachableDensity = maxReachableDensity(config, selectedMaterial);
         int candidateDensity = 1 + (int) Math.round(denseNodeOutcome.influence());
         return Math.max(1, Math.min(maxReachableDensity, candidateDensity));
     }
 
-    public static int maxReachableDensity(@NotNull OreVeinDefinition.DensitySettings densitySettings, @NotNull Material selectedMaterial) {
-        return Math.min(densitySettings.maxPeakDensity(), Math.min(DenseOre.MAX_DENSITY_PROPERTY, selectedMaterial.ore.getMaxDensity()));
+    private static boolean denseFillPasses(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull BlockPos position, @NotNull DenseNodeVeinFeature.Config config) {
+        if (config.maxFillNumerator() <= 0) return false;
+
+        return OreVeinOreCellEvaluator.occupancyRoll(
+                descriptor,
+                position,
+                OreVeinOreCellEvaluator.occupancySalt(),
+                OreVeinOreCellEvaluator.baseMainBodyFillDenominator()
+        ) < config.maxFillNumerator();
     }
 
-    public static int fillNumerator(@NotNull OreVeinDefinition.DensitySettings densitySettings, int candidateDensity, int maxReachableDensity) {
-        return densitySettings.regularFillNumerator()
-                + Math.floorDiv(
-                (candidateDensity - 1) * (densitySettings.maximumFillNumerator() - densitySettings.regularFillNumerator()),
-                Math.max(1, maxReachableDensity - 1)
-        );
+    private static int maxReachableDensity(@NotNull DenseNodeVeinFeature.Config config, @NotNull Material selectedMaterial) {
+        return Math.min(config.maxPeakDensity(), Math.min(DenseOre.MAX_DENSITY_PROPERTY, selectedMaterial.ore.getMaxDensity()));
     }
 
-    public static boolean isInsideDenseNodeVolume(OreVeinInstanceDescriptor.@NotNull DenseNode node, double localX, double localY, double localZ) {
-        // Check whether the local point falls inside the node's ellipsoid volume.
-        double dx = localX - node.localCenterX();
-        double dy = localY - node.localCenterY();
-        double dz = localZ - node.localCenterZ();
-        double normalizedDistanceSquared = square(dx / node.radiusX()) + square(dy / node.radiusY()) + square(dz / node.radiusZ());
-
-        return normalizedDistanceSquared < 1.0D;
+    public static long nodeCountSalt() {
+        return NODE_COUNT_SALT;
     }
 
     public static long nodeIdSalt() {
@@ -176,7 +131,7 @@ public final class OreVeinDenseNodeEvaluator {
         return NODE_CENTER_MAX_ATTEMPTS;
     }
 
-    private static double nodeInfluence(OreVeinInstanceDescriptor.@NotNull DenseNode node, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int maxReachableDensity) {
+    private static double nodeInfluence(DenseNodeVeinFeature.@NotNull Node node, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int maxReachableDensity) {
         double dx = contribution.localX() - node.localCenterX();
         double dy = contribution.localY() - node.localCenterY();
         double dz = contribution.localZ() - node.localCenterZ();
@@ -200,5 +155,34 @@ public final class OreVeinDenseNodeEvaluator {
 
     public record DenseNodeOutcome(long nodeId, double influence) {
         public static final DenseNodeOutcome NONE = new DenseNodeOutcome(0L, 0.0D);
+    }
+
+    public record DenseNodeOreReplacement(long nodeId, double influence) implements OreVeinOreCellEvaluator.OreReplacement {
+        public DenseNodeOreReplacement {
+            if (!Double.isFinite(influence)) throw new IllegalArgumentException("influence must be finite");
+        }
+
+        @Override
+        public int priority() {
+            return DENSE_NODE_PRIORITY;
+        }
+
+        @Override
+        public @NotNull BlockState resolve(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellEvaluator.OreCellResult winner) {
+            Supplier<Block> supplier = OreVeinOreCellEvaluator.supplierFor(winner.selectedMaterial().ore.getDenseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            Block block = supplier.get();
+
+            if (block == null) throw OreVeinOreCellEvaluator.invalidReplacement("null block supplier", dimension, position, originalHostMaterial, winner);
+
+            BlockState state = block.defaultBlockState();
+
+            if (!state.hasProperty(DenseOre.DENSITY))
+                throw OreVeinOreCellEvaluator.invalidReplacement("dense block missing DenseOre.DENSITY", dimension, position, originalHostMaterial, winner);
+
+            if (!DenseOre.DENSITY.getPossibleValues().contains(winner.finalDensity()))
+                throw OreVeinOreCellEvaluator.invalidReplacement("unsupported exact density value", dimension, position, originalHostMaterial, winner);
+
+            return state.setValue(DenseOre.DENSITY, winner.finalDensity());
+        }
     }
 }

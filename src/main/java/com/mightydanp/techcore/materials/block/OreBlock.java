@@ -1,14 +1,14 @@
 package com.mightydanp.techcore.materials.block;
 
-import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.materials.properties.Impurities;
 import com.mightydanp.techcore.materials.properties.MaterialBlockProperties;
-import com.mightydanp.techcore.world.item.properties.Purity;
-import com.mightydanp.techcore.world.item.properties.Quantity;
-import com.mightydanp.techcore.world.level.WasGenerated;
+import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinResolvedCellResolver;
+import com.mightydanp.techcore.world.level.WasGenerated;
+import com.mightydanp.techcore.materials.properties.Impurities;
+import com.mightydanp.techcore.world.item.properties.Purity;
+import com.mightydanp.techcore.world.item.properties.Quantity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -31,7 +31,16 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -61,8 +70,8 @@ public class OreBlock extends MaterialBlock {
         PendingHarvestOperation operation = beginHarvestOperation(state, level, pos, player, willHarvest);
         if (operation != null) {
             ACTIVE_HARVEST.set(operation);
-            TransitionKind transitionKind = operation.removalTransitionKind();
-            if (transitionKind != null) suppressGeneratedChange(operation, state, fluid.createLegacyBlock(), transitionKind);
+            SuppressedGeneratedChange suppressedChange = suppressGeneratedChangeForRemoval(operation, state, fluid.createLegacyBlock());
+            if (suppressedChange != null) suppressGeneratedChange(suppressedChange);
         }
 
         boolean removed = false;
@@ -121,6 +130,18 @@ public class OreBlock extends MaterialBlock {
         return 1.0D;
     }
 
+    protected int originalVariantValue(@NotNull BlockState state) {
+        return 0;
+    }
+
+    protected boolean isResolvedVariantStateValid(@NotNull BlockState state, @NotNull BlockState resolvedState) {
+        return state.equals(resolvedState);
+    }
+
+    protected @Nullable SuppressedGeneratedChange suppressGeneratedChangeForRemoval(@NotNull PendingHarvestOperation operation, @NotNull BlockState oldState, @NotNull BlockState replacementState) {
+        return new SuppressedGeneratedChange(operation.token, operation.level, operation.pos, oldState, replacementState);
+    }
+
     protected void afterSuccessfulHarvest(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ServerPlayer player, @NotNull ItemStack tool, @NotNull PendingHarvestOperation operation) {
         finishPermanentHarvest(operation);
     }
@@ -171,14 +192,12 @@ public class OreBlock extends MaterialBlock {
         Map<ResourceLocation, Double> impurities = new TreeMap<>();
         double totalMass = composition.totalMass();
 
-        // Include the primary host rock after its variant multiplier was applied.
         if (composition.primaryRockMass() > 0.0D) impurities.merge(
                 materialId(hostMaterial),
                 100.0D * composition.primaryRockMass() / totalMass,
                 Double::sum
         );
 
-       // Include secondary ore materials and any foreign rock layers.
         composition.impurityMasses().forEach((material, mass) -> {
             if (mass <= 0.0D) return;
 
@@ -262,16 +281,15 @@ public class OreBlock extends MaterialBlock {
         );
     }
 
-
-
-    protected static void suppressRestoration(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState) {
+    protected static void queueRestoration(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState) {
         operation.restorationAttempted = true;
-        suppressGeneratedChange(
-                operation,
+        suppressGeneratedChange(new SuppressedGeneratedChange(
+                operation.token,
+                operation.level,
+                operation.pos,
                 operation.level.getBlockState(operation.pos),
-                restoredState,
-                TransitionKind.AIR_TO_DENSE_DECREMENT
-        );
+                restoredState
+        ));
     }
 
     protected static void finishPermanentHarvest(@NotNull PendingHarvestOperation operation) {
@@ -284,7 +302,7 @@ public class OreBlock extends MaterialBlock {
         completeOperation(operation);
     }
 
-    protected static void finishDenseHarvest(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState, boolean restored) {
+    protected static void finishRestoredHarvest(@NotNull PendingHarvestOperation operation, @NotNull BlockState restoredState, boolean restored) {
         operation.restorationSucceeded = restored && restoredState.equals(operation.level.getBlockState(operation.pos));
         if (!operation.restorationSucceeded) {
             failHarvest(operation);
@@ -349,15 +367,8 @@ public class OreBlock extends MaterialBlock {
         return true;
     }
 
-    private static void suppressGeneratedChange(@NotNull PendingHarvestOperation operation, @NotNull BlockState oldState, @NotNull BlockState newState, @NotNull TransitionKind kind) {
-        SUPPRESSED_GENERATED_CHANGES.get().push(new SuppressedGeneratedChange(
-                operation.token,
-                operation.level,
-                operation.pos,
-                oldState,
-                newState,
-                kind
-        ));
+    protected static void suppressGeneratedChange(@NotNull SuppressedGeneratedChange suppressedChange) {
+        SUPPRESSED_GENERATED_CHANGES.get().push(suppressedChange);
     }
 
     private @Nullable PendingHarvestOperation beginHarvestOperation(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, boolean willHarvest) {
@@ -381,7 +392,7 @@ public class OreBlock extends MaterialBlock {
                 state,
                 tool.copy(),
                 resolved.winningOreCellResult(),
-                state.getBlock() instanceof DenseOre ? state.getValue(DenseOre.DENSITY) : 0,
+                originalVariantValue(state),
                 serverLevel.getGameTime()
         );
 
@@ -396,13 +407,8 @@ public class OreBlock extends MaterialBlock {
         OreVeinOreCellEvaluator.OreCellResult winner = resolved.winningOreCellResult();
         if (winner == null) return true;
         if (!oreMaterial.equals(winner.selectedMaterial())) return true;
-        if (winner.variant() != expectedVariant()) return true;
-        if (winner.variant() == OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE) {
-            return state.getBlock() != resolved.resolvedBlockState().getBlock()
-                    || !state.hasProperty(DenseOre.DENSITY);
-        }
 
-        return !state.equals(resolved.resolvedBlockState());
+        return !isResolvedVariantStateValid(state, resolved.resolvedBlockState());
     }
 
     private static boolean matchesMiningTool(@NotNull ItemStack expected, @NotNull ItemStack actual) {
@@ -419,11 +425,9 @@ public class OreBlock extends MaterialBlock {
 
         if (!operation.originalState.equals(state)) return false;
 
-
         ItemStack lootTool = params.getOptionalParameter(LootContextParams.TOOL);
 
         if (lootTool == null || !matchesMiningTool(operation.toolSnapshot, lootTool)) return false;
-
 
         Entity entity = params.getOptionalParameter(LootContextParams.THIS_ENTITY);
 
@@ -441,12 +445,6 @@ public class OreBlock extends MaterialBlock {
 
     private boolean removalObserved(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState originalState) {
         return !level.getBlockState(pos).equals(originalState);
-    }
-
-    private @NotNull OreVeinOreCellEvaluator.OreCellResult.OreVariant expectedVariant() {
-        if (this instanceof DenseOre) return OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE;
-        if (this instanceof SparseOre) return OreVeinOreCellEvaluator.OreCellResult.OreVariant.SPARSE_ORE;
-        return OreVeinOreCellEvaluator.OreCellResult.OreVariant.REGULAR_ORE;
     }
 
     private boolean isExplosionContext(LootParams.@NotNull Builder params) {
@@ -481,7 +479,7 @@ public class OreBlock extends MaterialBlock {
         operation.finalChangedMarkApplied = true;
     }
 
-    private static void completeOperation(@NotNull PendingHarvestOperation operation) {
+    protected static void completeOperation(@NotNull PendingHarvestOperation operation) {
         PENDING_HARVESTS.remove(operation.token);
     }
 
@@ -491,21 +489,21 @@ public class OreBlock extends MaterialBlock {
     }
 
     protected static final class PendingHarvestOperation {
-        private final UUID token;
-        private final ServerLevel level;
-        private final BlockPos pos;
-        private final ServerPlayer player;
-        private final BlockState originalState;
-        private final ItemStack toolSnapshot;
-        private final OreVeinOreCellEvaluator.OreCellResult winner;
-        private final int originalDenseDensity;
-        private final long createdGameTime;
-        private boolean expectedRemovalObserved;
-        private boolean restorationAttempted;
-        private boolean restorationSucceeded;
-        private boolean finalChangedMarkApplied;
+        final UUID token;
+        final ServerLevel level;
+        final BlockPos pos;
+        final ServerPlayer player;
+        final BlockState originalState;
+        final ItemStack toolSnapshot;
+        final OreVeinOreCellEvaluator.OreCellResult winner;
+        final int originalVariantValue;
+        final long createdGameTime;
+        boolean expectedRemovalObserved;
+        boolean restorationAttempted;
+        boolean restorationSucceeded;
+        boolean finalChangedMarkApplied;
 
-        private PendingHarvestOperation(UUID token, ServerLevel level, BlockPos pos, ServerPlayer player, BlockState originalState, ItemStack toolSnapshot, OreVeinOreCellEvaluator.OreCellResult winner, int originalDenseDensity, long createdGameTime) {
+        private PendingHarvestOperation(UUID token, ServerLevel level, BlockPos pos, ServerPlayer player, BlockState originalState, ItemStack toolSnapshot, OreVeinOreCellEvaluator.OreCellResult winner, int originalVariantValue, long createdGameTime) {
             this.token = Objects.requireNonNull(token, "token");
             this.level = Objects.requireNonNull(level, "level");
             this.pos = Objects.requireNonNull(pos, "pos");
@@ -513,23 +511,16 @@ public class OreBlock extends MaterialBlock {
             this.originalState = Objects.requireNonNull(originalState, "originalState");
             this.toolSnapshot = Objects.requireNonNull(toolSnapshot, "toolSnapshot");
             this.winner = Objects.requireNonNull(winner, "winner");
-            this.originalDenseDensity = originalDenseDensity;
+            this.originalVariantValue = originalVariantValue;
             this.createdGameTime = createdGameTime;
-        }
-
-        private @Nullable TransitionKind removalTransitionKind() {
-            if (winner.variant() == OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE && originalDenseDensity <= 1) return null;
-            return winner.variant() == OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE
-                    ? TransitionKind.DENSE_ORE_TO_AIR
-                    : TransitionKind.PERMANENT_ORE_TO_AIR;
         }
     }
 
-    private record OriginContext(BlockPos pos) {}
+    protected record OriginContext(BlockPos pos) {}
 
-    private record ExplosionContext(BlockPos pos, float radius) {}
+    protected record ExplosionContext(BlockPos pos, float radius) {}
 
-    private record SuppressedGeneratedChange(UUID token, ServerLevel level, BlockPos pos, BlockState oldState, BlockState newState, TransitionKind kind) {
+    protected record SuppressedGeneratedChange(UUID token, ServerLevel level, BlockPos pos, BlockState oldState, BlockState newState) {
         private boolean matches(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState oldState, @NotNull BlockState newState) {
             return this.level == level
                     && this.pos.equals(pos)
@@ -538,12 +529,5 @@ public class OreBlock extends MaterialBlock {
         }
     }
 
-    private enum TransitionKind {
-        PERMANENT_ORE_TO_AIR,
-        DENSE_ORE_TO_AIR,
-        AIR_TO_DENSE_DECREMENT
-    }
-
     protected record Composition(double primaryOreMass, Map<Material, Double> impurityMasses, double primaryRockMass, double totalMass) {}
-
 }

@@ -22,6 +22,8 @@ public final class VanillaWorldGenOverrides
         initialized = true;
 
         emitOverworldOreRemoval();
+        emitOverworldRockRemoval();
+        emitNetherRockRemoval();
         emitVanillaNoiseSettingsOverrides();
 
         // Optional: enable after TechCore/TechAscension has replacement Nether veins.
@@ -59,6 +61,36 @@ public final class VanillaWorldGenOverrides
                         ),
                         List.of("underground_ores")
                 ),
+                false
+        );
+    }
+
+    private static void emitOverworldRockRemoval() {
+        DataPackRegistries.saveBiomeModifier(
+                new BiomeModifierContent(
+                        CoreRef.MOD_ID,
+                        "remove_vanilla_rocks"
+                ).removeFeatures(
+                        "#minecraft:is_overworld",
+                        List.of(
+                                "minecraft:ore_granite_upper",
+                                "minecraft:ore_granite_lower",
+                                "minecraft:ore_diorite_upper",
+                                "minecraft:ore_diorite_lower",
+                                "minecraft:ore_andesite_upper",
+                                "minecraft:ore_andesite_lower",
+                                "minecraft:ore_tuff"
+                        ),
+                        List.of("underground_ores")
+                ),
+                false
+        );
+    }
+
+    private static void emitNetherRockRemoval() {
+        DataPackRegistries.saveBiomeModifier(
+                new BiomeModifierContent(CoreRef.MOD_ID, "remove_vanilla_basalt")
+                        .removeFeatures("#minecraft:is_nether", List.of("minecraft:basalt_blobs"), List.of("underground_decoration")),
                 false
         );
     }

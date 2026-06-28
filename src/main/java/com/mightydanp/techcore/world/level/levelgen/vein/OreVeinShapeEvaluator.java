@@ -307,8 +307,7 @@ public final class OreVeinShapeEvaluator {
         return Math.sqrt(square(x) + square(y) + square(z));
     }
 
-    public record HalfExtents(int x, int y, int z) {
-    }
+    public record HalfExtents(int x, int y, int z) {}
 
     public record ShapeContribution(long instanceId, net.minecraft.resources.ResourceLocation definitionId, double localX, double localY, double localZ, double normalizedRadius, double distortionBlocks, double signedBoundaryDistanceBlocks, ContributionState state) {
         public ShapeContribution {

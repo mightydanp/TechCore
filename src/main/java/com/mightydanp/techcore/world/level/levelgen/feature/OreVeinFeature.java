@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 public final class OreVeinFeature extends Feature<NoneFeatureConfiguration> {
     static final ChunkPlanProvider PRODUCTION_CHUNK_PLAN_PROVIDER = OreVeinChunkPlanner::plan;
@@ -28,7 +29,7 @@ public final class OreVeinFeature extends Feature<NoneFeatureConfiguration> {
         this.chunkPlanProvider = chunkPlanProvider;
     }
 
-    static boolean applyPlan(WorldGenLevel level, OreVeinChunkPlanner.ChunkPlan plan) {
+    static boolean applyPlan(WorldGenLevel level, OreVeinChunkPlanner.@NotNull ChunkPlan plan) {
         boolean changed = false;
 
         // Replace the block only if it still matches the original host state
@@ -47,7 +48,7 @@ public final class OreVeinFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+    public boolean place(@NotNull FeaturePlaceContext<NoneFeatureConfiguration> context) {
         // Get the current worldgen data needed to build this chunk's ore plan.
         WorldGenLevel level = context.level();
         ChunkPos chunkPos = new ChunkPos(context.origin());

@@ -1,7 +1,7 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
+import com.mightydanp.techcore.api.registries.RegistriesHandler;
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.materials.block.DenseOre;
 import com.mightydanp.techcore.materials.properties.RockTypes;
 import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
 import net.minecraft.resources.ResourceKey;
@@ -13,7 +13,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -61,6 +71,19 @@ public final class OreVeinDefinitions {
         );
     }
 
+    public static @NotNull @Unmodifiable List<ResolvedFeature> resolvedFeatures(@NotNull OreVeinDefinition definition) {
+        List<ResolvedFeature> resolved = new ArrayList<>(definition.features().size());
+
+        for (ConfiguredVeinFeature configuredFeature : definition.features())
+            resolved.add(new ResolvedFeature(configuredFeature, RegistriesHandler.requireVeinFeature(configuredFeature.featureId())));
+
+        resolved.sort(Comparator.comparingInt(resolvedFeature -> {
+            Integer loadOrder = resolvedFeature.configuredFeature().loadOrder();
+            return loadOrder != null ? loadOrder : resolvedFeature.feature().loadOrder();
+        }));
+        return List.copyOf(resolved);
+    }
+
     public static OverlapSettings registerOverlapSettings(ResourceKey<Level> dimension, OverlapSettings settings) {
         // Register one overlap-settings entry per dimension.
         return registerUnique(OVERLAP_SETTINGS, dimension, settings,
@@ -103,6 +126,9 @@ public final class OreVeinDefinitions {
             }
 
             validateDefinition(definition, problems);
+
+            for (ResolvedFeature resolvedFeature : resolvedFeatures(definition))
+                resolvedFeature.feature().validateDefinition(definition, resolvedFeature.configuredFeature(), problems);
         }
 
         validateOverlapSettings(definitions, problems);
@@ -182,39 +208,6 @@ public final class OreVeinDefinitions {
         validateSizeRange(definition, definition.minSizeZ(), definition.maxSizeZ(), "Z", problems);
         validateTilt(definition, definition.maxPitchDegrees(), "maxPitchDegrees", problems);
         validateTilt(definition, definition.maxRollDegrees(), "maxRollDegrees", problems);
-        validateDensitySettings(definition, problems);
-        validateHaloSettings(definition, problems);
-    }
-
-    private static void validateHaloSettings(@NotNull OreVeinDefinition definition, List<String> problems) {
-        double transitionWidth = definition.haloSettings().transitionWidthBlocks();
-
-        if (!Double.isFinite(transitionWidth) || transitionWidth < 0.0D)
-            problems.add(problem(definition, null, null, null, null, null, null, "transitionWidthBlocks must be finite and non-negative"));
-    }
-
-
-    private static void validateDensitySettings(@NotNull OreVeinDefinition definition, List<String> problems) {
-        if (!definition.denseNodeEnabled()) return;
-
-        OreVeinDefinition.DensitySettings settings = definition.densitySettings();
-
-        validateNodeRadius(definition, settings.minNodeRadiusX(), definition.minSizeX(), "X", problems);
-        validateNodeRadius(definition, settings.minNodeRadiusY(), definition.minSizeY(), "Y", problems);
-        validateNodeRadius(definition, settings.minNodeRadiusZ(), definition.minSizeZ(), "Z", problems);
-    }
-
-    private static void validateNodeRadius(OreVeinDefinition definition, double maxRadius, int minSize, String axis, List<String> problems) {
-        if (maxRadius > minSize / 2.0D) problems.add(
-                problem(definition,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "minNodeRadius" + axis + " exceeds minSize" + axis + " / 2.0")
-        );
     }
 
     private static void validateSizeRange(OreVeinDefinition definition, int minSize, int maxSize, String axis, List<String> problems) {
@@ -402,19 +395,6 @@ public final class OreVeinDefinitions {
 
         validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "oreBlocks", oreMaterial.ore.getOreBlocks(), veinRockTypes, problems);
 
-        if (definition.canGenerateSparseOre())
-            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "sparseOreBlocks", oreMaterial.ore.getSparseOreBlocks(), veinRockTypes, problems);
-
-        if (definition.denseNodeEnabled() && maxReachableDensity(definition, oreMaterial) >= 2)
-            validateRequiredBlock(definition, dimension, entry, oreMaterial, hostRockMaterial, "denseOreBlocks", oreMaterial.ore.getDenseOreBlocks(), veinRockTypes, problems);
-
-    }
-
-    private static int maxReachableDensity(@NotNull OreVeinDefinition definition, @NotNull Material oreMaterial) {
-        return Math.min(
-                definition.densitySettings().maxPeakDensity(),
-                Math.min(DenseOre.MAX_DENSITY_PROPERTY, oreMaterial.ore.getMaxDensity())
-        );
     }
 
     private static void validateRequiredBlock(OreVeinDefinition definition, ResourceKey<Level> dimension, OreVeinDefinition.OreEntry entry, Material oreMaterial, @NotNull Material hostRockMaterial, String requiredMap, @NotNull Map<String, Supplier<Block>> blocks, Set<RockTypes.RockType> veinRockTypes, List<String> problems) {
@@ -548,6 +528,8 @@ public final class OreVeinDefinitions {
                 throw new IllegalArgumentException("mainBodyGapNumerator must be in [0, denominator]");
         }
     }
+
+    public record ResolvedFeature(ConfiguredVeinFeature configuredFeature, VeinFeature feature) {}
 
     private record ResolvedOreEntry(OreVeinDefinition.OreEntry entry, Material material) {}
 }

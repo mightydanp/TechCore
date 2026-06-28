@@ -4,6 +4,7 @@ import com.mightydanp.techcore.client.ref.CoreRef;
 import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.world.level.levelgen.feature.OreVeinFeature;
 import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
+import com.mightydanp.techcore.world.level.levelgen.vein.VeinFeature;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +45,8 @@ public class RegistriesHandler {
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(net.minecraft.core.registries.Registries.RECIPE_SERIALIZER, CoreRef.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB, CoreRef.MOD_ID);
     public static final ResourceKey<Registry<Material>> MATERIAL_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "material"));
-    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(
-            ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
+    public static final ResourceKey<Registry<WoodType>> WOOD_TYPE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "wood_type"));
+    public static final ResourceKey<Registry<VeinFeature>> VEIN_FEATURE_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CoreRef.MOD_ID, "vein_feature"));
     //public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPE = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, CoreRef.MOD_ID);
     public static final DeferredRegister<WoodType> WOOD_TYPES = DeferredRegister.create(WOOD_TYPE_KEY, CoreRef.MOD_ID);
 
@@ -56,6 +57,8 @@ public class RegistriesHandler {
     private static final Map<ResourceLocation, FinalizedRegistryHolder> finalizedDeferredRegister = new HashMap<>();
     private static final DeferredRegister<Material> MATERIALS = DeferredRegister.create(MATERIAL_KEY, CoreRef.MOD_ID);
     private static final Supplier<IForgeRegistry<Material>> MATERIAL_REGISTRY = MATERIALS.makeRegistry(RegistryBuilder::new);
+    public static final DeferredRegister<VeinFeature> VEIN_FEATURES = DeferredRegister.create(VEIN_FEATURE_KEY, CoreRef.MOD_ID);
+    private static final Supplier<IForgeRegistry<VeinFeature>> VEIN_FEATURE_REGISTRY = VEIN_FEATURES.makeRegistry(RegistryBuilder::new);
     private static final List<Material> MATERIAL_LIST = new ArrayList<>();
     private static final List<Predicate<Material>> MATERIAL_INIT_STEPS = new ArrayList<>() {{
         add(material -> material.rockLayer.isRockLayer);
@@ -81,6 +84,7 @@ public class RegistriesHandler {
         //DATA_COMPONENT_TYPES.register(bus);
         MATERIALS.register(bus);
         WOOD_TYPES.register(bus);
+        VEIN_FEATURES.register(bus);
 
 
         // Snapshot to avoid ConcurrentModificationException while finalizing dynamic registries.
@@ -96,6 +100,12 @@ public class RegistriesHandler {
             finalizedDeferredRegister.put(name, new FinalizedRegistryHolder(key, register));
 
         });
+    }
+
+    public static VeinFeature requireVeinFeature(ResourceLocation id) {
+        VeinFeature feature = VEIN_FEATURE_REGISTRY.get().getValue(id);
+        if (feature == null) throw new IllegalStateException("Missing vein feature: " + id);
+        return feature;
     }
 
     public static Supplier<Material> registerMaterial(String name, @NotNull Supplier<Material> supplier) {

@@ -13,6 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -33,15 +35,13 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         // Get the registered material suppliers for this dimension first.
         List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
-        if (materialSuppliers == null || materialSuppliers.isEmpty()) {
-            return List.of();
-        }
+        if (materialSuppliers == null || materialSuppliers.isEmpty()) return List.of();
 
         List<Material> materials = new ArrayList<>();
 
-        for (Supplier<Material> materialSupplier : materialSuppliers) {
+        for (Supplier<Material> materialSupplier : materialSuppliers)
             materials.add(materialSupplier.get());
-        }
+
 
         return Collections.unmodifiableList(materials);
     }
@@ -55,10 +55,9 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         // Get the original rock material without checking the current live block.
         Material material = getOriginalRockMaterial(worldSeed, dimension, position);
 
-        if (material == null) {
-            //return nothing if the position has no original rock material
+        if (material == null)//return nothing if the position has no original rock material
             return null;
-        }
+
 
         // Return the normal stone variant because vanilla terrain state cannot be reconstructed here.
         RockLayer layer = RockLayer.fromMaterial(material);
@@ -66,13 +65,13 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         return layer == null ? null : layer.stone();
     }
 
-    public static void setAllowedMaterials(ResourceKey<Level> dimension, List<Material> materials) {
+    public static void setAllowedMaterials(ResourceKey<Level> dimension, @NotNull List<Material> materials) {
         // Wrap the current materials as suppliers so the internal map keeps one storage shape.
         List<Supplier<Material>> materialSuppliers = new ArrayList<>();
 
-        for (Material material : materials) {
+        for (Material material : materials)
             materialSuppliers.add(() -> material);
-        }
+
 
         ALLOWED_MATERIALS_BY_DIMENSION.put(dimension, materialSuppliers);
     }
@@ -95,25 +94,23 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         // Get the registered suppliers before trying to remove this material.
         List<Supplier<Material>> materialSuppliers = ALLOWED_MATERIALS_BY_DIMENSION.get(dimension);
 
-        if (materialSuppliers == null) {
-            return;
-        }
+        if (materialSuppliers == null) return;
+
 
         materialSuppliers.removeIf(materialSupplier -> Objects.equals(materialSupplier.get(), material));
 
-        if (materialSuppliers.isEmpty()) {
-            ALLOWED_MATERIALS_BY_DIMENSION.remove(dimension);
-        }
+        if (materialSuppliers.isEmpty()) ALLOWED_MATERIALS_BY_DIMENSION.remove(dimension);
+
     }
 
-    static @Nullable Material getOriginalRockMaterial(long worldSeed, List<Material> materials, BlockPos position) {
+    static @Nullable Material getOriginalRockMaterial(long worldSeed, @NotNull List<Material> materials, BlockPos position) {
         // Select from the supplied ordered material list using the same index as world generation.
         int index = getOriginalRockIndex(worldSeed, position, materials.size());
         //return nothing if no material can be selected, otherwise return the selected material
         return index < 0 ? null : materials.get(index);
     }
 
-    private static @Nullable RockLayer getOriginalRockLayer(long worldSeed, List<RockLayer> layers, BlockPos position) {
+    private static @Nullable RockLayer getOriginalRockLayer(long worldSeed, @NotNull List<RockLayer> layers, BlockPos position) {
         // Select from prebuilt rock layers using the same index exposed to material lookup callers.
         int index = getOriginalRockIndex(worldSeed, position, layers.size());
         //return nothing if no layer can be selected, otherwise return the selected layer
@@ -122,10 +119,9 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
 
     static int getOriginalRockIndex(long worldSeed, BlockPos position, int size) {
         // Empty layer lists have no original rock owner for this coordinate.
-        if (size <= 0) {
-            //return no layer index
+        if (size <= 0)//return no layer index
             return -1;
-        }
+
 
         // Use absolute block coordinates so chunk borders and negative positions stay deterministic.
         //return the selected original rock layer index
@@ -206,16 +202,15 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+    public boolean place(@NotNull FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
 
         // Get all rock layer materials that are allowed to generate in this dimension.
         List<RockLayer> layers = RockLayer.fromMaterials(getAllowedMaterials(level.getLevel().dimension()));
 
         // If there are no rock layers registered for this dimension, do not generate anything.
-        if (layers.isEmpty()) {
-            return false;
-        }
+        if (layers.isEmpty()) return false;
+
 
         ChunkPos chunk = new ChunkPos(context.origin());
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
@@ -242,15 +237,11 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
                     Replacement replacement = Replacement.forState(current);
 
                     // If this is not a replaceable block, leave it alone.
-                    if (replacement == Replacement.NONE) {
-                        continue;
-                    }
+                    if (replacement == Replacement.NONE) continue;
 
                     // Select the rock layer from absolute coordinates so regions cross chunk borders.
                     RockLayer layer = getOriginalRockLayer(level.getSeed(), layers, cursor);
-                    if (layer == null) {
-                        continue;
-                    }
+                    if (layer == null) continue;
 
                     BlockState target = layer.stateFor(replacement);
 
@@ -272,26 +263,23 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
         COBBLE,
         MOSSY_COBBLE;
 
-        private static Replacement forState(BlockState state) {
+        private static Replacement forState(@NotNull BlockState state) {
             // If this is vanilla cobblestone, use the current layer cobble variant.
-            if (state.is(Blocks.COBBLESTONE)) {
-                return COBBLE;
-            }
+            if (state.is(Blocks.COBBLESTONE)) return COBBLE;
+
 
             // If this is vanilla mossy cobblestone, use the current layer mossy cobble variant.
-            if (state.is(Blocks.MOSSY_COBBLESTONE)) {
-                return MOSSY_COBBLE;
-            }
+            if (state.is(Blocks.MOSSY_COBBLESTONE)) return MOSSY_COBBLE;
+
 
             // If this is natural stone or vanilla ore, use the current layer stone variant.
-            if (isReplaceableStone(state)) {
-                return STONE;
-            }
+            if (isReplaceableStone(state)) return STONE;
+
 
             return NONE;
         }
 
-        private static boolean isReplaceableStone(BlockState state) {
+        private static boolean isReplaceableStone(@NotNull BlockState state) {
             return state.is(Blocks.STONE)
                     || state.is(Blocks.DEEPSLATE)
                     || state.is(Blocks.GRANITE)
@@ -303,27 +291,24 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private record RockLayer(BlockState stone, BlockState cobble, BlockState mossyCobble) {
-        private static List<RockLayer> fromMaterials(List<Material> materials) {
+        private static @NotNull List<RockLayer> fromMaterials(@NotNull List<Material> materials) {
             List<RockLayer> layers = new ArrayList<>();
 
             // Convert material definitions into concrete block states usable during generation.
             for (Material material : materials) {
                 RockLayer layer = fromMaterial(material);
 
-                if (layer != null) {
-                    layers.add(layer);
-                }
+                if (layer != null) layers.add(layer);
+
             }
 
             return layers;
         }
 
-        private static RockLayer fromMaterial(Material material) {
+        private static @Nullable RockLayer fromMaterial(@NotNull Material material) {
             // Get the main stone block for this material, using existing vanilla/mod blocks when configured.
             Block stone = first(material.rockLayer.existingRocklayerBlock, material.rockLayer.stoneBlock, Blocks.STONE);
-            if (stone == null) {
-                return null;
-            }
+            if (stone == null) return null;
 
             // Get the cobble and mossy cobble variants, falling back like GT6 does.
             Block cobble = first(material.rockLayer.existingCobbleBlock, material.rockLayer.cobbleBlock, stone);
@@ -334,20 +319,17 @@ public class RockLayerFeature extends Feature<NoneFeatureConfiguration> {
 
         private static Block first(Block existingBlock, Supplier<Block> generatedBlock, Block fallback) {
             // Prefer an existing configured block.
-            if (existingBlock != null) {
-                return existingBlock;
-            }
+            if (existingBlock != null) return existingBlock;
 
             // Otherwise use the generated material block when it exists.
-            if (generatedBlock != null) {
-                return generatedBlock.get();
-            }
+            if (generatedBlock != null) return generatedBlock.get();
 
             // If no specific block exists, use the supplied fallback.
             return fallback;
         }
 
-        private BlockState stateFor(Replacement replacement) {
+        @Contract(pure = true)
+        private BlockState stateFor(@NotNull Replacement replacement) {
             // Select the correct variant for the vanilla block being replaced.
             return switch (replacement) {
                 case COBBLE -> cobble;

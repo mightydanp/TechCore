@@ -1,6 +1,5 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
-import com.mightydanp.techcore.world.level.levelgen.vein.densenode.OreVeinDenseNodeLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -9,7 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public final class OreVeinCandidateLookup {
     private static final Comparator<OreVeinInstanceDescriptor> CANDIDATE_ORDER = Comparator.comparingInt(OreVeinInstanceDescriptor::originRegionX).thenComparingInt(OreVeinInstanceDescriptor::originRegionZ).thenComparingInt(OreVeinInstanceDescriptor::originIndex).thenComparing(descriptor -> descriptor.definitionId().toString());
@@ -145,8 +148,7 @@ public final class OreVeinCandidateLookup {
         int centerZ = OreVeinGenerationMath.centerZ(worldSeed, dimension, originRegionX, originRegionZ, originIndex);
         OreVeinBounds bounds = OreVeinShapeEvaluator.bounds(centerX, centerY, centerZ, halfExtents);
 
-        // Create the descriptor first, then attach any generated dense nodes.
-        OreVeinInstanceDescriptor provisional = new OreVeinInstanceDescriptor(
+        OreVeinInstanceDescriptor descriptor = new OreVeinInstanceDescriptor(
                 OreVeinGenerationMath.instanceId(worldSeed, dimension, originRegionX, originRegionZ, originIndex),
                 OreVeinGenerationMath.instanceSeed(worldSeed, dimension, originRegionX, originRegionZ, originIndex),
                 OreVeinGenerationMath.shapeSeed(worldSeed, dimension, originRegionX, originRegionZ, originIndex),
@@ -165,50 +167,51 @@ public final class OreVeinCandidateLookup {
                 List.of()
         );
 
-        if (!definition.denseNodeEnabled()) return Optional.of(provisional);
+        for (OreVeinDefinitions.ResolvedFeature resolvedFeature : OreVeinDefinitions.resolvedFeatures(definition))
+            descriptor = resolvedFeature.feature().attachToDescriptor(descriptor, definition, resolvedFeature.configuredFeature());
 
-        return Optional.of(provisional.withDenseNodes(OreVeinDenseNodeLayout.generate(provisional, definition)));
+        return Optional.of(descriptor);
 
     }
 
     public static @NotNull OreVeinBounds evaluationBounds(OreVeinInstanceDescriptor descriptor) {
         Objects.requireNonNull(descriptor, "descriptor");
 
-        // Expand the core bounds by distortion and sparse reach so evaluation can include halo cells.
+        // Expand the core bounds by distortion and feature reach so evaluation can include exterior cells.
         OreVeinDefinition definition = OreVeinDefinitions.requireDefinition(descriptor);
         int distortionReach = OreVeinDefinitions.checkedCeilToInt(
                 OreVeinDefinitions.MAX_BOUNDARY_DISTORTION_BLOCKS,
                 "MAX_BOUNDARY_DISTORTION_BLOCKS"
         );
-        int sparseReach = exteriorSparseReach(definition);
+        int featureReach = exteriorFeatureReach(descriptor, definition);
 
         return descriptor.bounds().inflate(
-                Math.addExact(distortionReach, sparseReach)
+                Math.addExact(distortionReach, featureReach)
         );
     }
 
-    private static int exteriorSparseReach(@NotNull OreVeinDefinition definition) {
-        int fadeReach = definition.effectiveSparseHaloReachBlocks();
+    private static int exteriorFeatureReach(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition) {
+        int reach = 0;
 
-        int transitionReach = definition.hasSparseTransition() ?
-                OreVeinDefinitions.checkedCeilToInt(
-                        definition.haloSettings().transitionWidthBlocks() * 0.5D,
-                        "sparse transition exterior reach")
-                : 0;
+        for (OreVeinDefinitions.ResolvedFeature resolvedFeature : OreVeinDefinitions.resolvedFeatures(definition))
+            reach = Math.max(reach, resolvedFeature.feature().exteriorReachBlocks(descriptor, definition, resolvedFeature.configuredFeature()));
 
-        return Math.max(fadeReach, transitionReach);
+        return reach;
     }
 
     private static int maxCandidateReach(ResourceKey<Level> dimension) {
         int shapeReach = 0;
-        int sparseReach = 0;
+        int featureReach = 0;
 
-        // Track the largest shape and sparse reach used by any definition in this dimension.
+        // Track the largest shape and feature reach used by any definition in this dimension.
         for (OreVeinDefinition definition : OreVeinDefinitions.getDefinitions()) {
             if (!definition.dimensions().contains(dimension)) continue;
 
             shapeReach = Math.max(shapeReach, maxReach(definition));
-            sparseReach = Math.max(sparseReach, definition.sparseReachBlocks());
+            OreVeinInstanceDescriptor descriptor = provisionalDescriptor(definition);
+
+            for (OreVeinDefinitions.ResolvedFeature resolvedFeature : OreVeinDefinitions.resolvedFeatures(definition))
+                featureReach = Math.max(featureReach, resolvedFeature.feature().exteriorReachBlocks(descriptor, definition, resolvedFeature.configuredFeature()));
         }
 
         int distortionReach = OreVeinDefinitions.checkedCeilToInt(
@@ -216,7 +219,28 @@ public final class OreVeinCandidateLookup {
                 "MAX_BOUNDARY_DISTORTION_BLOCKS"
         );
 
-        return Math.addExact(shapeReach, Math.addExact(distortionReach, sparseReach));
+        return Math.addExact(shapeReach, Math.addExact(distortionReach, featureReach));
+    }
+
+    private static OreVeinInstanceDescriptor provisionalDescriptor(@NotNull OreVeinDefinition definition) {
+        return new OreVeinInstanceDescriptor(
+                0L,
+                0L,
+                0L,
+                definition.id(),
+                BlockPos.ZERO,
+                definition.maxSizeX(),
+                definition.maxSizeY(),
+                definition.maxSizeZ(),
+                0.0D,
+                0.0D,
+                0.0D,
+                0,
+                0,
+                0,
+                OreVeinBounds.from(BlockPos.ZERO, BlockPos.ZERO),
+                List.of()
+        );
     }
 
     private static int maxReach(@NotNull OreVeinDefinition definition) {

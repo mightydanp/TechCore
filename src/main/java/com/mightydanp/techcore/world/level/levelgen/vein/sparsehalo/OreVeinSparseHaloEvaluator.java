@@ -1,84 +1,61 @@
 package com.mightydanp.techcore.world.level.levelgen.vein.sparsehalo;
 
-import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinDefinition;
+import com.mightydanp.techcore.materials.Material;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinInstanceDescriptor;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator;
 import com.mightydanp.techcore.world.level.levelgen.vein.OreVeinShapeEvaluator;
-import com.mightydanp.techcore.world.level.levelgen.vein.sparsetransition.OreVeinSparseTransitionEvaluator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 public final class OreVeinSparseHaloEvaluator {
     private static final long HALO_OCCUPANCY_SALT = 0xDB4F0B9175AE2165L;
     private static final int SPARSE_OCCUPANCY_DENOMINATOR = 1024;
+    private static final int SPARSE_HALO_PRIORITY = 10;
 
-    public static OreVeinOreCellEvaluator.OreCellResult evaluateHaloCell(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry) {
-        // Use the normal halo occupancy roll unless another one is passed in
-        return evaluateHaloCell(descriptor, definition, position, contribution, selectedOreEntry, (rollDescriptor, rollPosition, fillDenominator) -> OreVeinOreCellEvaluator.occupancyRoll(rollDescriptor, rollPosition, HALO_OCCUPANCY_SALT, fillDenominator));
+    public static OreVeinOreCellEvaluator.OreCellResult evaluateHaloCell(OreVeinInstanceDescriptor descriptor, @NotNull SparseHaloVeinFeature.Config config, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry) {
+        double distanceFromMainBody = contribution.signedBoundaryDistanceBlocks();
+
+        if (distanceFromMainBody > config.reachBlocks()) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
+
+        int threshold = sparseOccupancyThreshold(distanceFromMainBody);
+
+        if (threshold == 0) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
+
+        int sparseOccupancyRoll = OreVeinOreCellEvaluator.occupancyRoll(
+                descriptor,
+                position,
+                HALO_OCCUPANCY_SALT,
+                SPARSE_OCCUPANCY_DENOMINATOR
+        );
+
+        if (sparseOccupancyRoll >= threshold) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
+
+        return sparseOreResult(descriptor, selectedOreEntry, contribution);
     }
 
     public static int sparseOccupancyDenominator() {
         return SPARSE_OCCUPANCY_DENOMINATOR;
     }
 
-    private static OreVeinOreCellEvaluator.OreCellResult evaluateHaloCell(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry, HaloOccupancyRollProvider occupancyRollProvider) {
-        // Use the transition shell rules near the boundary and the sparse halo rules farther out.
-        double signedBoundaryDistanceBlocks = contribution.signedBoundaryDistanceBlocks();
-
-        double transitionWidthBlocks = definition.haloSettings().transitionWidthBlocks();
-
-        double halfTransitionWidth = transitionWidthBlocks * 0.5D;
-
-        boolean insideTransition = definition.hasSparseTransition() && signedBoundaryDistanceBlocks <= halfTransitionWidth;
-
-        if (insideTransition) {
-            int threshold = OreVeinSparseTransitionEvaluator.transitionShellThreshold(
-                    signedBoundaryDistanceBlocks,
-                    transitionWidthBlocks
-            );
-
-            int sparseOccupancyRoll = occupancyRollProvider.roll(
-                    descriptor,
-                    position,
-                    SPARSE_OCCUPANCY_DENOMINATOR
-            );
-
-            if (sparseOccupancyRoll >= threshold) return OreVeinOreCellEvaluator.hostRockResult(
-                    descriptor,
-                    selectedOreEntry,
-                    contribution
-            );
-
-            return OreVeinOreCellEvaluator.sparseOreResult(descriptor, selectedOreEntry, contribution);
-        }
-
-        if (!definition.sparseHaloEnabled()) return OreVeinOreCellEvaluator.hostRockResult(
+    @Contract("_, _, _ -> new")
+    private static OreVeinOreCellEvaluator.@NotNull OreCellResult sparseOreResult(OreVeinInstanceDescriptor descriptor, OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry, OreVeinShapeEvaluator.ShapeContribution contribution) {
+        return OreVeinOreCellEvaluator.createResult(
                 descriptor,
                 selectedOreEntry,
-                contribution
+                contribution,
+                1,
+                1,
+                OreVeinOreCellEvaluator.OreCellResult.OreVariant.FEATURE_ORE,
+                SparseHaloOreReplacement.INSTANCE
         );
-
-        return sparseResult(descriptor, definition, position, contribution, selectedOreEntry, occupancyRollProvider
-        );
-    }
-
-    private static OreVeinOreCellEvaluator.OreCellResult sparseResult(OreVeinInstanceDescriptor descriptor, @NotNull OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, OreVeinOreCellEvaluator.SelectedOreEntry selectedOreEntry, HaloOccupancyRollProvider occupancyRollProvider) {
-        // Outside the transition shell, fall back to the normal sparse halo occupancy curve.
-        double distanceFromMainBody = contribution.signedBoundaryDistanceBlocks();
-        int sparseReachBlocks = definition.effectiveSparseHaloReachBlocks();
-
-        if (distanceFromMainBody > sparseReachBlocks) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
-
-        int threshold = sparseOccupancyThreshold(distanceFromMainBody);
-
-        if (threshold == 0) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
-
-        int sparseOccupancyRoll = occupancyRollProvider.roll(descriptor, position, SPARSE_OCCUPANCY_DENOMINATOR);
-
-        if (sparseOccupancyRoll >= threshold) return OreVeinOreCellEvaluator.hostRockResult(descriptor, selectedOreEntry, contribution);
-
-        return OreVeinOreCellEvaluator.sparseOreResult(descriptor, selectedOreEntry, contribution);
     }
 
     private static int sparseChanceDivisor(double distanceFromMainBody) {
@@ -90,6 +67,25 @@ public final class OreVeinSparseHaloEvaluator {
 
     private static int sparseOccupancyThreshold(double distanceFromMainBody) {
         return Math.floorDiv(SPARSE_OCCUPANCY_DENOMINATOR, sparseChanceDivisor(distanceFromMainBody));
+    }
+
+    private enum SparseHaloOreReplacement implements OreVeinOreCellEvaluator.OreReplacement {
+        INSTANCE;
+
+        @Override
+        public int priority() {
+            return SPARSE_HALO_PRIORITY;
+        }
+
+        @Override
+        public @NotNull BlockState resolve(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellEvaluator.OreCellResult winner) {
+            Supplier<Block> supplier = OreVeinOreCellEvaluator.supplierFor(winner.selectedMaterial().ore.getSparseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            Block block = supplier.get();
+
+            if (block == null) throw OreVeinOreCellEvaluator.invalidReplacement("null block supplier", dimension, position, originalHostMaterial, winner);
+
+            return block.defaultBlockState();
+        }
     }
 
     @FunctionalInterface

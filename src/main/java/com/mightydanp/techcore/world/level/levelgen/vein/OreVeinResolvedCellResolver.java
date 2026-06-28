@@ -1,21 +1,22 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.materials.block.DenseOre;
 import com.mightydanp.techcore.world.level.levelgen.feature.RockLayerFeature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
-import java.util.function.Supplier;
-
-import static com.mightydanp.techcore.world.level.levelgen.vein.OreVeinOreCellEvaluator.OreCellResult.OreVariant.DENSE_ORE;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public final class OreVeinResolvedCellResolver {
     private static final long WINNER_POSITION_SALT = 0xE9C56AF8D1B54A32L;
@@ -113,7 +114,6 @@ public final class OreVeinResolvedCellResolver {
             OreVeinShapeEvaluator.ShapeContribution contribution = OreVeinShapeEvaluator.evaluate(descriptor, position);
             OreVeinDefinition definition = OreVeinDefinitions.requireDefinition(descriptor);
 
-            if (contribution.signedBoundaryDistanceBlocks() > definition.sparseReachBlocks()) continue;
             if (!oreCellEvaluator.canEvaluate(definition)) continue;
 
             results.add(oreCellEvaluator.evaluate(descriptor, definition, position, contribution));
@@ -138,7 +138,7 @@ public final class OreVeinResolvedCellResolver {
         if (overlapGapWon)
             return hostResult(position, originalHostMaterial, originalHostState, winner, true, true, participatingGapIds);
 
-        BlockState resolvedBlockState = resolveOreState(dimension, position, originalHostMaterial, winner);
+        BlockState resolvedBlockState = winner.replacement().resolve(dimension, position, originalHostMaterial, winner);
 
         return new ResolvedCell(position, originalHostMaterial, originalHostState, winner, resolvedBlockState, true, overlapGapEvaluated, false, participatingGapIds);
     }
@@ -156,11 +156,11 @@ public final class OreVeinResolvedCellResolver {
     }
 
     private static @NotNull OreVeinOreCellEvaluator.OreCellResult pickWinner(long worldSeed, ResourceKey<Level> dimension, BlockPos position, @NotNull List<OreVeinOreCellEvaluator.OreCellResult> compatibleOreResults) {
-        // Rank compatible results by variant, density, distance, and deterministic tie breakers.
+        // Rank compatible results by replacement priority, density, distance, and deterministic tie breakers.
         return compatibleOreResults.stream().min((left, right) -> {
-            int byVariant = Integer.compare(variantRank(right.variant()), variantRank(left.variant()));
+            int byPriority = Integer.compare(right.replacement().priority(), left.replacement().priority());
 
-            if (byVariant != 0) return byVariant;
+            if (byPriority != 0) return byPriority;
 
             int byDensity = Integer.compare(right.finalDensity(), left.finalDensity());
 
@@ -239,74 +239,9 @@ public final class OreVeinResolvedCellResolver {
         return Math.floorMod(hash, settings.denominator()) < settings.mainBodyGapNumerator();
     }
 
-    private static BlockState resolveOreState(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellEvaluator.OreCellResult winner) {
-        // Select the correct replacement map for the winning ore variant.
-        Supplier<Block> supplier = switch (winner.variant()) {
-            case REGULAR_ORE ->
-                    supplierFor(winner.selectedMaterial().ore.getOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case DENSE_ORE ->
-                    supplierFor(winner.selectedMaterial().ore.getDenseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case SPARSE_ORE ->
-                    supplierFor(winner.selectedMaterial().ore.getSparseOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
-            case HOST_ROCK ->
-                    throw invalidReplacement("host-rock winner is not replaceable", dimension, position, originalHostMaterial, winner);
-        };
-
-        Block block = supplier.get();
-
-        if (block == null) throw invalidReplacement("null block supplier", dimension, position, originalHostMaterial, winner);
-
-        BlockState state = block.defaultBlockState();
-
-        if (winner.variant() != DENSE_ORE) return state;
-
-        if (!state.hasProperty(DenseOre.DENSITY))
-            throw invalidReplacement("dense block missing DenseOre.DENSITY", dimension, position, originalHostMaterial, winner);
-
-        if (!DenseOre.DENSITY.getPossibleValues().contains(winner.finalDensity()))
-            throw invalidReplacement("unsupported exact density value", dimension, position, originalHostMaterial, winner);
-
-        return state.setValue(DenseOre.DENSITY, winner.finalDensity());
-    }
-
-    private static @NotNull Supplier<Block> supplierFor(@NotNull Map<String, Supplier<Block>> blocks, String hostName, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreVeinOreCellEvaluator.OreCellResult winner) {
-        if (!blocks.containsKey(hostName))
-            throw invalidReplacement("missing block mapping for host key '" + hostName + "'", dimension, position, originalHostMaterial, winner);
-
-        Supplier<Block> supplier = blocks.get(hostName);
-
-        if (supplier == null)
-            throw invalidReplacement("null block supplier for host key '" + hostName + "'", dimension, position, originalHostMaterial, winner);
-
-        return supplier;
-    }
-
-    @Contract("_, _, _, _, _ -> new")
-    private static @NotNull IllegalStateException invalidReplacement(String reason, @NotNull ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreVeinOreCellEvaluator.OreCellResult winner) {
-        return new IllegalStateException("Invalid resolved ore replacement:"
-                + " dimension=" + dimension.location()
-                + ", position=" + position
-                + ", host=" + materialName(originalHostMaterial)
-                + ", veinId=" + winner.definitionId()
-                + ", oreMaterial=" + materialName(winner.selectedMaterial())
-                + ", variant=" + winner.variant()
-                + ", density=" + winner.finalDensity()
-                + ", reason=" + reason);
-    }
-
     @Contract("_, _, _, _, _, _, _ -> new")
     private static @NotNull OreVeinResolvedCellResolver.ResolvedCell hostResult(BlockPos position, Material originalHostMaterial, BlockState originalHostState, OreVeinOreCellEvaluator.OreCellResult winner, boolean overlapGapEvaluated, boolean overlapGapWon, List<Long> participatingGapIds) {
         return new ResolvedCell(position, originalHostMaterial, originalHostState, winner, originalHostState, false, overlapGapEvaluated, overlapGapWon, participatingGapIds);
-    }
-
-    @Contract(pure = true)
-    static int variantRank(OreVeinOreCellEvaluator.OreCellResult.@NotNull OreVariant variant) {
-        return switch (variant) {
-            case DENSE_ORE -> 3;
-            case REGULAR_ORE -> 2;
-            case SPARSE_ORE -> 1;
-            case HOST_ROCK -> 0;
-        };
     }
 
     private static String materialName(Material material) {

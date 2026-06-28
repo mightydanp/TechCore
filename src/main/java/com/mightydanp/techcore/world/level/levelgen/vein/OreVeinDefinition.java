@@ -7,28 +7,12 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, int sparseReachBlocks, boolean sparseHaloEnabled, boolean sparseTransitionEnabled, boolean denseNodeEnabled, boolean rotationEnabled, double maxPitchDegrees, double maxRollDegrees, DensitySettings densitySettings, HaloSettings haloSettings, List<OreEntry> oreEntries) {
-    private static final DensitySettings DEFAULT_DENSITY_SETTINGS = new DensitySettings(
-            704,
-            960,
-            1024,
-            8192L,
-            0,
-            5,
-            4.0D,
-            8.5D,
-            3.0D,
-            3.5D,
-            4.0D,
-            8.5D,
-            2,
-            4
-    );
-    private static final HaloSettings DEFAULT_HALO_SETTINGS = new HaloSettings(4.0D);
+public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> dimensions, int generationWeight, int minCenterY, int maxCenterYExclusive, int minSizeX, int maxSizeX, int minSizeY, int maxSizeY, int minSizeZ, int maxSizeZ, boolean rotationEnabled, double maxPitchDegrees, double maxRollDegrees, List<ConfiguredVeinFeature> features, List<OreEntry> oreEntries) {
 
     public OreVeinDefinition {
         // Validate the full definition data before storing it
@@ -40,26 +24,12 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         validateSizeRange(minSizeY, maxSizeY, "sizeY");
         validateSizeRange(minSizeZ, maxSizeZ, "sizeZ");
         validateSizeAcceptanceRange(minSizeX, minSizeY, minSizeZ);
-        validateSparseReachBlocks(sparseReachBlocks);
         validateTilt(maxPitchDegrees, "maxPitchDegrees");
         validateTilt(maxRollDegrees, "maxRollDegrees");
-        Objects.requireNonNull(densitySettings, "densitySettings");
-        Objects.requireNonNull(haloSettings, "haloSettings");
+        features = List.copyOf(Objects.requireNonNull(features, "features"));
         oreEntries = copyNonEmptyList(oreEntries, "oreEntries");
         validateTotalDistributionWeight(oreEntries);
     }
-
-    /*
-    public Builder maxPitchDegrees(double maxPitchDegrees) {
-        this.maxPitchDegrees = maxPitchDegrees;
-        return this;
-    }
-
-    public Builder maxRollDegrees(double maxRollDegrees) {
-        this.maxRollDegrees = maxRollDegrees;
-        return this;
-    }
-    */
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Builder builder(ResourceLocation id) {
@@ -81,8 +51,7 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
     }
 
     private static void validateCenterYRange(int minCenterY, int maxCenterYExclusive) {
-        if (minCenterY >= maxCenterYExclusive)
-            throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
+        if (minCenterY >= maxCenterYExclusive) throw new IllegalArgumentException("minCenterY must be less than maxCenterYExclusive");
     }
 
     private static void validateSizeRange(int minSize, int maxSize, String name) {
@@ -102,13 +71,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             throw new IllegalArgumentException(name + " must be finite and in [0, 90]");
     }
 
-    private static void validateSparseReachBlocks(int sparseReachBlocks) {
-        if (sparseReachBlocks < 0) throw new IllegalArgumentException("sparseReachBlocks must be at least 0");
-    }
-
     private static void validateTotalDistributionWeight(List<OreEntry> oreEntries) {
-        if (calculateTotalDistributionWeight(oreEntries) <= 0L)
-            throw new IllegalArgumentException("total distribution weight must be positive");
+        if (calculateTotalDistributionWeight(oreEntries) <= 0L) throw new IllegalArgumentException("total distribution weight must be positive");
     }
 
     private static long calculateTotalDistributionWeight(@NotNull List<OreEntry> oreEntries) {
@@ -129,21 +93,6 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         return calculateTotalDistributionWeight(oreEntries);
     }
 
-    public int effectiveSparseHaloReachBlocks() {
-        return sparseHaloEnabled ? sparseReachBlocks : 0;
-    }
-
-    public boolean hasSparseTransition() {
-        return sparseTransitionEnabled
-                && haloSettings.transitionWidthBlocks() > 0.0D;
-    }
-
-    public boolean canGenerateSparseOre() {
-        return effectiveSparseHaloReachBlocks() > 0
-                || hasSparseTransition();
-    }
-
-
     public static final class Builder {
         private final ResourceLocation id;
         private List<ResourceKey<Level>> dimensions;
@@ -158,11 +107,8 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
         private Integer maxSizeZ = 96;
         private Double maxPitchDegrees = 12.0D;
         private Double maxRollDegrees = 12.0D;
-        private Integer sparseReachBlocks = 24;
-        private boolean sparseHaloEnabled = true;
-        private boolean sparseTransitionEnabled = true;
-        private boolean denseNodeEnabled = true;
         private boolean rotationEnabled = true;
+        private final List<ConfiguredVeinFeature> features = new ArrayList<>();
         private List<OreEntry> oreEntries;
 
         private Builder(ResourceLocation id) {
@@ -239,28 +185,32 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
             return this;
         }
 
-        public Builder sparseReachBlocks(int sparseReachBlocks) {
-            this.sparseReachBlocks = sparseReachBlocks;
-            return this;
-        }
-
-        public Builder disableSparseFade() {
-            this.sparseHaloEnabled = false;
-            return this;
-        }
-
-        public Builder disableSparseTransition() {
-            this.sparseTransitionEnabled = false;
-            return this;
-        }
-
-        public Builder disableDenseNode() {
-            this.denseNodeEnabled = false;
-            return this;
-        }
-
         public Builder disableRotation() {
             this.rotationEnabled = false;
+            return this;
+        }
+
+        public Builder addVeinFeature(int loadOrder, ConfiguredVeinFeature veinFeature) {
+            Objects.requireNonNull(veinFeature, "veinFeature");
+            if (loadOrder < 0) throw new IllegalArgumentException("loadOrder cannot be negative: " + loadOrder);
+
+            int insertIndex = Math.min(loadOrder, features.size());
+            features.add(insertIndex, new ConfiguredVeinFeature(veinFeature.featureId(), loadOrder, veinFeature.configuration()));
+            return this;
+        }
+
+        public Builder addVeinFeature(ConfiguredVeinFeature veinFeature) {
+            features.add(Objects.requireNonNull(veinFeature, "veinFeature"));
+            return this;
+        }
+
+        public Builder features(ConfiguredVeinFeature... features) {
+            return features(List.of(features));
+        }
+
+        public Builder features(List<ConfiguredVeinFeature> features) {
+            this.features.clear();
+            for (ConfiguredVeinFeature feature : features) addVeinFeature(feature);
             return this;
         }
 
@@ -288,45 +238,12 @@ public record OreVeinDefinition(ResourceLocation id, List<ResourceKey<Level>> di
                     maxSizeY,
                     minSizeZ,
                     maxSizeZ,
-                    sparseReachBlocks,
-                    sparseHaloEnabled,
-                    sparseTransitionEnabled,
-                    denseNodeEnabled,
                     rotationEnabled,
                     maxPitchDegrees,
                     maxRollDegrees,
-                    DEFAULT_DENSITY_SETTINGS,
-                    DEFAULT_HALO_SETTINGS,
+                    features,
                     oreEntries
             );
-        }
-    }
-
-    public record DensitySettings(int regularFillNumerator, int maximumFillNumerator, int fillDenominator, long blocksPerDenseNode, int minNodeCount, int maxNodeCount, double minNodeRadiusX, double maxNodeRadiusX, double minNodeRadiusY, double maxNodeRadiusY, double minNodeRadiusZ, double maxNodeRadiusZ, int minPeakDensity, int maxPeakDensity) {
-        public DensitySettings {
-            if (fillDenominator <= 0) throw new IllegalArgumentException("fillDenominator must be positive");
-            if (regularFillNumerator < 0 || regularFillNumerator > fillDenominator)
-                throw new IllegalArgumentException("regularFillNumerator must be in [0, fillDenominator]");
-            if (maximumFillNumerator < regularFillNumerator || maximumFillNumerator > fillDenominator)
-                throw new IllegalArgumentException("maximumFillNumerator must be in [regularFillNumerator, fillDenominator]");
-            if (blocksPerDenseNode <= 0L) throw new IllegalArgumentException("blocksPerDenseNode must be positive");
-            if (minNodeCount < 0 || maxNodeCount < minNodeCount)
-                throw new IllegalArgumentException("node-count range is invalid");
-            validateRadiusRange(minNodeRadiusX, maxNodeRadiusX, "X");
-            validateRadiusRange(minNodeRadiusY, maxNodeRadiusY, "Y");
-            validateRadiusRange(minNodeRadiusZ, maxNodeRadiusZ, "Z");
-            if (minPeakDensity < 1 || maxPeakDensity < minPeakDensity)
-                throw new IllegalArgumentException("peak-density range is invalid");
-        }
-
-        private static void validateRadiusRange(double minRadius, double maxRadius, String axis) {
-            if (!Double.isFinite(minRadius) || !Double.isFinite(maxRadius) || minRadius <= 0.0D || maxRadius < minRadius) throw new IllegalArgumentException("node-radius " + axis + " range is invalid");
-        }
-    }
-
-    public record HaloSettings(double transitionWidthBlocks) {
-        public HaloSettings {
-            if (!Double.isFinite(transitionWidthBlocks) || transitionWidthBlocks < 0.0D) throw new IllegalArgumentException("transitionWidthBlocks must be finite and non-negative");
         }
     }
 

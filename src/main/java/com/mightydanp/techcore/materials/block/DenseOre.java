@@ -40,10 +40,25 @@ public class DenseOre extends OreBlock {
     }
 
     @Override
+    protected int originalVariantValue(@NotNull BlockState state) {
+        return state.getValue(DENSITY);
+    }
+
+    @Override
+    protected boolean isResolvedVariantStateValid(@NotNull BlockState state, @NotNull BlockState resolvedState) {
+        return state.getBlock() == resolvedState.getBlock() && state.hasProperty(DENSITY);
+    }
+
+    @Override
+    protected SuppressedGeneratedChange suppressGeneratedChangeForRemoval(@NotNull PendingHarvestOperation operation, @NotNull BlockState oldState, @NotNull BlockState replacementState) {
+        if (operation.originalVariantValue <= 1) return null;
+        return new SuppressedGeneratedChange(operation.token, operation.level, operation.pos, oldState, replacementState);
+    }
+
+    @Override
     protected int explosionCandidateCount(@NotNull BlockState state, LootParams.@NotNull Builder params, @NotNull RandomSource random) {
         return random.nextInt(state.getValue(DENSITY) + 1);
     }
-
 
     @Override
     protected void afterSuccessfulHarvest(@NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ServerPlayer player, @NotNull ItemStack tool, @NotNull PendingHarvestOperation operation) {
@@ -54,7 +69,7 @@ public class DenseOre extends OreBlock {
         }
 
         BlockState restoredState = state.setValue(DENSITY, density - 1);
-        suppressRestoration(operation, restoredState);
+        queueRestoration(operation, restoredState);
 
         boolean restored;
         try {
@@ -64,7 +79,7 @@ public class DenseOre extends OreBlock {
             throw exception;
         }
 
-        finishDenseHarvest(operation, restoredState, restored);
+        finishRestoredHarvest(operation, restoredState, restored);
     }
 
     public int getMaxDensity() {

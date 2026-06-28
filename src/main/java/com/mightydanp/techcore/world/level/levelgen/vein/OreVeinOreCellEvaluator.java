@@ -1,15 +1,24 @@
 package com.mightydanp.techcore.world.level.levelgen.vein;
 
 import com.mightydanp.techcore.materials.Material;
-import com.mightydanp.techcore.world.level.levelgen.vein.densenode.OreVeinDenseNodeEvaluator;
-import com.mightydanp.techcore.world.level.levelgen.vein.sparsehalo.OreVeinSparseHaloEvaluator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public final class OreVeinOreCellEvaluator {
+    private static final int BASE_MAIN_BODY_FILL_NUMERATOR = 704;
+    private static final int BASE_MAIN_BODY_FILL_DENOMINATOR = 1024;
+    private static final int HOST_ROCK_PRIORITY = 0;
+    private static final int REGULAR_ORE_PRIORITY = 20;
+
     private static final long MATERIAL_SELECTION_SALT = 0xD1B54A32D192ED03L;
     private static final long OCCUPANCY_SALT = 0x8CB92BA72F3D8DD7L;
 
@@ -32,25 +41,36 @@ public final class OreVeinOreCellEvaluator {
         Objects.requireNonNull(position, "position");
         Objects.requireNonNull(contribution, "contribution");
 
-        // Pick the ore entry for this position before deciding between main-body and halo logic.
         SelectedOreEntry selectedOreEntry = selectOreEntry(descriptor, definition, position);
-
-        // If the position is inside the main body use dense node logic, otherwise use sparse halo logic
-        if (contribution.signedBoundaryDistanceBlocks() <= 0.0D)
-            return OreVeinDenseNodeEvaluator.evaluateMainBodyCell(descriptor, definition, position, contribution, selectedOreEntry);
-
-        return OreVeinSparseHaloEvaluator.evaluateHaloCell(descriptor, definition, position, contribution, selectedOreEntry);
+        return evaluateCell(descriptor, definition, position, contribution, selectedOreEntry);
     }
 
     public static OreCellResult evaluateCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, @NotNull Material hostRockMaterial) {
         Objects.requireNonNull(hostRockMaterial, "hostRockMaterial");
 
         SelectedOreEntry selectedOreEntry = selectOreEntry(descriptor, definition, position, hostRockMaterial);
+        return evaluateCell(descriptor, definition, position, contribution, selectedOreEntry);
+    }
 
-        if (contribution.signedBoundaryDistanceBlocks() <= 0.0D)
-            return OreVeinDenseNodeEvaluator.evaluateMainBodyCell(descriptor, definition, position, contribution, selectedOreEntry);
+    private static OreCellResult evaluateCell(OreVeinInstanceDescriptor descriptor, OreVeinDefinition definition, BlockPos position, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, SelectedOreEntry selectedOreEntry) {
+        OreCellResult currentResult = contribution.signedBoundaryDistanceBlocks() <= 0.0D
+                ? baseMainBodyResult(descriptor, position, contribution, selectedOreEntry)
+                : hostRockResult(descriptor, selectedOreEntry, contribution);
 
-        return OreVeinSparseHaloEvaluator.evaluateHaloCell(descriptor, definition, position, contribution, selectedOreEntry);
+        for (OreVeinDefinitions.ResolvedFeature resolvedFeature : OreVeinDefinitions.resolvedFeatures(definition))
+            currentResult = contribution.signedBoundaryDistanceBlocks() <= 0.0D
+                    ? resolvedFeature.feature().applyMainBody(descriptor, definition, resolvedFeature.configuredFeature(), position, contribution, selectedOreEntry, currentResult)
+                    : resolvedFeature.feature().applyExterior(descriptor, definition, resolvedFeature.configuredFeature(), position, contribution, selectedOreEntry, currentResult);
+
+        return currentResult;
+    }
+
+    private static OreCellResult baseMainBodyResult(OreVeinInstanceDescriptor descriptor, BlockPos position, OreVeinShapeEvaluator.ShapeContribution contribution, SelectedOreEntry selectedOreEntry) {
+        int occupancyRoll = occupancyRoll(descriptor, position, OCCUPANCY_SALT, BASE_MAIN_BODY_FILL_DENOMINATOR);
+
+        if (occupancyRoll >= BASE_MAIN_BODY_FILL_NUMERATOR) return hostRockResult(descriptor, selectedOreEntry, contribution);
+
+        return createResult(descriptor, selectedOreEntry, contribution, 1, 1, OreCellResult.OreVariant.REGULAR_ORE, regularOreReplacement(), false);
     }
 
     public static boolean hasCompatibleOreEntry(@NotNull OreVeinDefinition definition, @NotNull Material hostRockMaterial) {
@@ -158,6 +178,10 @@ public final class OreVeinOreCellEvaluator {
         return mixed;
     }
 
+    public static int baseMainBodyFillDenominator() {
+        return BASE_MAIN_BODY_FILL_DENOMINATOR;
+    }
+
     public static long occupancySalt() {
         // Expose the main-body occupancy salt for shared deterministic tests and helpers.
         return OCCUPANCY_SALT;
@@ -171,8 +195,13 @@ public final class OreVeinOreCellEvaluator {
         return Y_HASH_MULTIPLIER;
     }
 
+    @Contract("_, _, _, _, _, _, _ -> new")
+    public static @NotNull OreCellResult createResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int candidateDensity, int finalDensity, OreCellResult.OreVariant variant, OreReplacement replacement) {
+        return createResult(descriptor, selectedOreEntry, contribution, candidateDensity, finalDensity, variant, replacement, false);
+    }
+
     @Contract("_, _, _, _, _, _, _, _ -> new")
-    public static @NotNull OreCellResult createResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int candidateDensity, int finalDensity, OreCellResult.OreVariant variant, long nodeId, double nodeInfluence) {
+    public static @NotNull OreCellResult createResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution, int candidateDensity, int finalDensity, OreCellResult.OreVariant variant, OreReplacement replacement, boolean terminalDecision) {
         Objects.requireNonNull(descriptor, "descriptor");
         Objects.requireNonNull(selectedOreEntry, "selectedOreEntry");
         Objects.requireNonNull(contribution, "contribution");
@@ -186,43 +215,114 @@ public final class OreVeinOreCellEvaluator {
                 candidateDensity,
                 finalDensity,
                 variant,
-                nodeId,
-                nodeInfluence
+                terminalDecision,
+                replacement
         );
     }
 
     @Contract("_, _, _ -> new")
     public static @NotNull OreCellResult hostRockResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
-        return createResult(descriptor, selectedOreEntry, contribution, 1, 0, OreCellResult.OreVariant.HOST_ROCK, 0L, 0.0D);
+        return createResult(descriptor, selectedOreEntry, contribution, 1, 0, OreCellResult.OreVariant.HOST_ROCK, NoOreReplacement.INSTANCE);
     }
 
     @Contract("_, _, _ -> new")
-    public static @NotNull OreCellResult sparseOreResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
-        return createResult(descriptor, selectedOreEntry, contribution, 1, 1, OreCellResult.OreVariant.SPARSE_ORE, 0L, 0.0D);
+    public static @NotNull OreCellResult terminalHostRockResult(@NotNull OreVeinInstanceDescriptor descriptor, @NotNull SelectedOreEntry selectedOreEntry, @NotNull OreVeinShapeEvaluator.ShapeContribution contribution) {
+        return createResult(descriptor, selectedOreEntry, contribution, 1, 0, OreCellResult.OreVariant.HOST_ROCK, NoOreReplacement.INSTANCE, true);
+    }
+
+    public static OreReplacement regularOreReplacement() {
+        return RegularOreReplacement.INSTANCE;
+    }
+
+    public static @NotNull Supplier<Block> supplierFor(@NotNull Map<String, Supplier<Block>> blocks, String hostName, ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreCellResult winner) {
+        if (!blocks.containsKey(hostName))
+            throw invalidReplacement("missing block mapping for host key '" + hostName + "'", dimension, position, originalHostMaterial, winner);
+
+        Supplier<Block> supplier = blocks.get(hostName);
+
+        if (supplier == null)
+            throw invalidReplacement("null block supplier for host key '" + hostName + "'", dimension, position, originalHostMaterial, winner);
+
+        return supplier;
+    }
+
+    @Contract("_, _, _, _, _ -> new")
+    public static @NotNull IllegalStateException invalidReplacement(String reason, @NotNull ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreCellResult winner) {
+        return new IllegalStateException("Invalid resolved ore replacement:"
+                + " dimension=" + dimension.location()
+                + ", position=" + position
+                + ", host=" + materialName(originalHostMaterial)
+                + ", veinId=" + winner.definitionId()
+                + ", oreMaterial=" + materialName(winner.selectedMaterial())
+                + ", variant=" + winner.variant()
+                + ", density=" + winner.finalDensity()
+                + ", reason=" + reason);
+    }
+
+    private static String materialName(Material material) {
+        return material == null ? "null" : material.name;
     }
 
     private static double unit(long hash) {
         return (OreVeinShapeEvaluator.hashToSignedUnit(hash) + 1.0D) * 0.5D;
     }
 
-    public record OreCellResult(long instanceId, net.minecraft.resources.ResourceLocation definitionId, Material selectedMaterial, int selectedDistributionWeight, OreVeinShapeEvaluator.ShapeContribution shapeContribution, int candidateDensity, int finalDensity, OreVariant variant, long winningNodeId, double winningNodeInfluence) {
+    public interface OreReplacement {
+        int priority();
+
+        BlockState resolve(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreCellResult winner);
+    }
+
+    private enum NoOreReplacement implements OreReplacement {
+        INSTANCE;
+
+        @Override
+        public int priority() {
+            return HOST_ROCK_PRIORITY;
+        }
+
+        @Override
+        public BlockState resolve(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, OreCellResult winner) {
+            throw invalidReplacement("host-rock winner is not replaceable", dimension, position, originalHostMaterial, winner);
+        }
+    }
+
+    private enum RegularOreReplacement implements OreReplacement {
+        INSTANCE;
+
+        @Override
+        public int priority() {
+            return REGULAR_ORE_PRIORITY;
+        }
+
+        @Override
+        public BlockState resolve(ResourceKey<Level> dimension, BlockPos position, Material originalHostMaterial, @NotNull OreCellResult winner) {
+            Supplier<Block> supplier = supplierFor(winner.selectedMaterial().ore.getOreBlocks(), originalHostMaterial.name, dimension, position, originalHostMaterial, winner);
+            Block block = supplier.get();
+
+            if (block == null) throw invalidReplacement("null block supplier", dimension, position, originalHostMaterial, winner);
+
+            return block.defaultBlockState();
+        }
+    }
+
+    public record OreCellResult(long instanceId, net.minecraft.resources.ResourceLocation definitionId, Material selectedMaterial, int selectedDistributionWeight, OreVeinShapeEvaluator.ShapeContribution shapeContribution, int candidateDensity, int finalDensity, OreVariant variant, boolean terminalDecision, OreReplacement replacement) {
         public OreCellResult {
             Objects.requireNonNull(definitionId, "definitionId");
             Objects.requireNonNull(selectedMaterial, "selectedMaterial");
             Objects.requireNonNull(shapeContribution, "shapeContribution");
             Objects.requireNonNull(variant, "variant");
+            Objects.requireNonNull(replacement, "replacement");
 
             if (selectedDistributionWeight <= 0) throw new IllegalArgumentException("selectedDistributionWeight must be positive");
             if (candidateDensity < 1) throw new IllegalArgumentException("candidateDensity must be at least 1");
             if (finalDensity < 0) throw new IllegalArgumentException("finalDensity must be non-negative");
-            if (!Double.isFinite(winningNodeInfluence)) throw new IllegalArgumentException("winningNodeInfluence must be finite");
         }
 
         public enum OreVariant {
             HOST_ROCK,
             REGULAR_ORE,
-            DENSE_ORE,
-            SPARSE_ORE
+            FEATURE_ORE
         }
     }
 
